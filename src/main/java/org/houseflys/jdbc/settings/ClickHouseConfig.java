@@ -40,4 +40,9 @@ public class ClickHouseConfig {
         Setting userPassword = settings.getSetting(SettingsKey.PASSWORD);
         return userPassword.value() == null ? "" : String.valueOf(userPassword.value());
     }
+
+    public int connectTimeout() {
+        Setting connectTimeout = settings.getSetting(SettingsKey.CONNECT_TIMEOUT);
+        return connectTimeout.value() == null ? 0 : Integer.valueOf(String.valueOf(connectTimeout.value()));
+    }
 }

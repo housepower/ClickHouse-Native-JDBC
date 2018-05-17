@@ -6,7 +6,6 @@ import static org.houseflys.jdbc.settings.ClickHouseDefines.DBMS_VERSION_MAJOR;
 import static org.houseflys.jdbc.settings.ClickHouseDefines.DBMS_VERSION_MINOR;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -47,6 +46,11 @@ public class ClickHouseConnection extends SQLConnection {
         return new ClickHouseStatement(this);
     }
 
+    @Override
+    public void close() throws SQLException {
+        physicalConnection.close();
+    }
+
     QueryResponse sendQueryRequest(String query) throws SQLException {
         try {
             return (QueryResponse) physicalConnection.sendRequest(new QueryRequest(
@@ -71,10 +75,9 @@ public class ClickHouseConnection extends SQLConnection {
     }
 
     private ClientInfo getOrCreateClientInfo() throws UnknownHostException {
-        //TODO: client hostname
-        InetAddress address = InetAddress.getLocalHost();
-        return new ClientInfo(ClientInfo.INITIAL_QUERY, "", "", address.getHostAddress() + ":0", "",
-            "localhost", DBMS_NAME + " " + CLIENT_NAME, DBMS_VERSION_MAJOR.longValue(),
+        return new ClientInfo(ClientInfo.INITIAL_QUERY, "", "",
+            physicalConnection.localAddress() + ":" + physicalConnection.localPort(), "",
+            physicalConnection.localAddress(), DBMS_NAME + " " + CLIENT_NAME, DBMS_VERSION_MAJOR.longValue(),
             DBMS_VERSION_MINOR.longValue(),
             DBMS_CLIENT_REVERSION.longValue(), "");
     }

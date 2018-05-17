@@ -33,6 +33,14 @@ public class BinarySerializer {
         }
     }
 
+    public void writeByte(byte x) throws IOException {
+        container.get().writeBinary(x);
+    }
+
+    public void writeBoolean(boolean x) throws IOException {
+        writeVarInt((byte) (x ? 1 : 0));
+    }
+
     public void writeShort(short i) throws IOException {
         container.get().writeBinary((byte) (i & 0xFF));
         container.get().writeBinary((byte) ((i >> 8) & 0xFF));
@@ -56,14 +64,6 @@ public class BinarySerializer {
         container.get().writeBinary((byte) ((i >> 56) & 0xFF));
     }
 
-    public void writeByte(byte x) throws IOException {
-        container.get().writeBinary(x);
-    }
-
-    public void writeBoolean(boolean compression) throws IOException {
-        writeVarInt((byte) (compression ? 1 : 0));
-    }
-
     public void writeStringBinary(String binary) throws IOException {
         writeVarInt(binary.length());
         container.get().writeBinary(binary.getBytes());
@@ -80,5 +80,29 @@ public class BinarySerializer {
     public void maybeDisenableCompressed() throws IOException {
         container.get().flushToTarget(true);
         container.select(false);
+    }
+
+    public void writeFloat(float datum) throws IOException {
+        int x = Float.floatToIntBits(datum);
+        container.get().writeBinary((byte) ((x >>> 24) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 16) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 8) & 0xFF));
+        container.get().writeBinary((byte) (x & 0xFF));
+    }
+
+    public void writeDouble(double datum) throws IOException {
+        long x = Double.doubleToLongBits(datum);
+        container.get().writeBinary((byte) ((x >>> 56) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 48) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 40) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 32) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 24) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 16) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 8) & 0xFF));
+        container.get().writeBinary((byte) (x & 0xFF));
+    }
+
+    public void writeBytes(byte[] bytes) throws IOException {
+        container.get().writeBinary(bytes);
     }
 }

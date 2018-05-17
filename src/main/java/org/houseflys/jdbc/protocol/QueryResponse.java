@@ -20,11 +20,11 @@ public class QueryResponse extends RequestOrResponse {
     // ProfileInfo
     // EndOfStream
 
-    QueryResponse(DataResponse header, List<DataResponse> data) {
+    QueryResponse(Block header, List<DataResponse> data) {
         super(ProtocolType.RESPONSE_QUERY);
 
         this.data = data;
-        this.header = header.block();
+        this.header = header;
     }
 
     @Override
@@ -34,25 +34,20 @@ public class QueryResponse extends RequestOrResponse {
 
 
     public static RequestOrResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
-        List<DataResponse> data = new ArrayList<DataResponse>();
+        List<DataResponse> resultSet = new ArrayList<DataResponse>();
 
         while (true) {
             RequestOrResponse response = RequestOrResponse.readFrom(null, deserializer);
 
-            switch (response.type()) {
-                case RESPONSE_Data:
-                    data.add((DataResponse) response);
-                    break;
-                case RESPONSE_Progress:
-                    break;
-                case RESPONSE_Totals:
-                    break;
-                case RESPONSE_Extremes:
-                    break;
-                case RESPONSE_ProfileInfo:
-                    break;
-                case RESPONSE_EndOfStream:
-                    return new QueryResponse(data.remove(0), data);
+            if (response.type() == ProtocolType.RESPONSE_Data) {
+                resultSet.add((DataResponse) response);
+            } else if (response.type() == ProtocolType.RESPONSE_EndOfStream) {
+
+                if (resultSet.isEmpty()) {
+                    return new QueryResponse(null, resultSet);
+                }
+
+                return new QueryResponse(resultSet.remove(0).block(), resultSet);
             }
         }
     }

@@ -1,10 +1,13 @@
 package org.houseflys.jdbc.type;
 
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
+import org.houseflys.jdbc.type.column.DoubleColumn;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public interface ColumnCreator {
 
-    Column create(int rows, BinaryDeserializer deserializer, String name, String type) throws IOException;
+    Column createColumn(int rows, String name, String type, BinaryDeserializer deserializer)
+        throws IOException, SQLException;
 }

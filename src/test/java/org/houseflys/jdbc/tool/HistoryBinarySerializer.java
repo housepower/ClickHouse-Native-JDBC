@@ -1,6 +1,7 @@
 package org.houseflys.jdbc.tool;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -8,13 +9,14 @@ import java.util.List;
 import org.junit.Assert;
 
 import org.houseflys.jdbc.serializer.BinarySerializer;
+import org.mockito.Mockito;
 
 public class HistoryBinarySerializer extends BinarySerializer {
 
     private final List<Object> receiveHistory = new ArrayList<Object>();
 
     public HistoryBinarySerializer() throws IOException {
-        super(null);
+        super(Mockito.mock(Socket.class));
     }
 
     @Override

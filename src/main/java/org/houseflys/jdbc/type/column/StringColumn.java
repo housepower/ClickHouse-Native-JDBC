@@ -1,6 +1,8 @@
 package org.houseflys.jdbc.type.column;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Types;
 
 import org.houseflys.jdbc.serializer.BinarySerializer;
 import org.houseflys.jdbc.type.Column;
@@ -14,12 +16,22 @@ public class StringColumn extends Column {
     }
 
     @Override
-    public Object data(int rows) {
+    public String[] data() {
+        return data;
+    }
+
+    @Override
+    public String data(int rows) {
         return data[rows];
     }
 
     @Override
-    protected void writeImpl(BinarySerializer serializer) throws IOException {
+    public int typeWithSQL() throws SQLException {
+        return Types.VARCHAR;
+    }
+
+    @Override
+    public void writeImpl(BinarySerializer serializer) throws IOException {
         for (String datum : data) {
             serializer.writeStringBinary(datum);
         }
