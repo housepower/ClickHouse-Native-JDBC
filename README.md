@@ -27,7 +27,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 * [x] Nullable(T)
 * [x] Tuple
 * [x] Nested
-* [x] [Array(T)
+* [x] Array(T)
 * [ ] Enum
 * [ ] UUID
 
