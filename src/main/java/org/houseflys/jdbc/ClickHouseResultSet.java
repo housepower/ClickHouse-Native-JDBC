@@ -1,7 +1,9 @@
 package org.houseflys.jdbc;
 
+import java.sql.Array;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import org.houseflys.jdbc.protocol.QueryResponse;
 import org.houseflys.jdbc.type.Block;
@@ -33,22 +35,22 @@ public class ClickHouseResultSet extends SQLResultSet {
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        return (Byte) block.getByPosition(columnIndex - 1).data(cursor);
+        return ((Number) block.getByPosition(columnIndex - 1).data(cursor)).byteValue();
     }
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        return (Short) block.getByPosition(columnIndex - 1).data(cursor);
+        return ((Number) block.getByPosition(columnIndex - 1).data(cursor)).shortValue();
     }
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        return (Integer) block.getByPosition(columnIndex - 1).data(cursor);
+        return ((Number) block.getByPosition(columnIndex - 1).data(cursor)).intValue();
     }
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
-        return (Long) block.getByPosition(columnIndex - 1).data(cursor);
+        return ((Number) block.getByPosition(columnIndex - 1).data(cursor)).longValue();
     }
 
     @Override
@@ -56,12 +58,37 @@ public class ClickHouseResultSet extends SQLResultSet {
         return (String) block.getByPosition(columnIndex - 1).data(cursor);
     }
 
-    private Block spliceHead() {
-        return queryResponse.data().isEmpty() ? null : queryResponse.data().remove(0).block();
+    @Override
+    public float getFloat(int columnIndex) throws SQLException {
+        return ((Number) block.getByPosition(columnIndex - 1).data(cursor)).floatValue();
+    }
+
+    @Override
+    public double getDouble(int columnIndex) throws SQLException {
+        return ((Number) block.getByPosition(columnIndex - 1).data(cursor)).doubleValue();
+    }
+
+    @Override
+    public Array getArray(int columnIndex) throws SQLException {
+        return (Array) block.getByPosition(columnIndex - 1).data(cursor);
+    }
+
+    @Override
+    public Timestamp getTimestamp(int columnIndex) throws SQLException {
+        return (Timestamp) block.getByPosition(columnIndex - 1).data(cursor);
+    }
+
+    @Override
+    public Object getObject(int columnIndex) throws SQLException {
+        return block.getByPosition(columnIndex - 1).data(cursor);
     }
 
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         return new ClickHouseResultSetMetaData(queryResponse.header());
+    }
+
+    private Block spliceHead() {
+        return queryResponse.data().isEmpty() ? null : queryResponse.data().remove(0).block();
     }
 }

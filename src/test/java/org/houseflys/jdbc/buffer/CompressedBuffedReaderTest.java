@@ -39,7 +39,7 @@ public class CompressedBuffedReaderTest {
 
         data[16] = (byte) (0x82 & 0xFF);
         System.arraycopy(compressData, 0, data, 9 + 16, compressData.length);
-        System.arraycopy(littleEndian(compressData.length), 0, data, 17, 4);
+        System.arraycopy(littleEndian(compressData.length + 9), 0, data, 17, 4);
         System.arraycopy(littleEndian(bytes.length), 0, data, 21, 4);
 
         return data;

@@ -7,31 +7,12 @@
     <groupId>org.houseflys</groupId>
     <artifactId>clickhouse-native-jdbc</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
         <dependency>
             <groupId>net.jpountz.lz4</groupId>
             <artifactId>lz4</artifactId>
             <version>1.3.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.16</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -49,5 +30,103 @@
         </dependency>
 
     </dependencies>
+    <properties>
+        <ClickHousePort>9000</ClickHousePort>
+    </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.17</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>run-integration-test</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <systemPropertyVariables>
+                                <CLICK_HOUSE_SERVER_PORT>${ClickHousePort}</CLICK_HOUSE_SERVER_PORT>
+                            </systemPropertyVariables>
+                            <includes>
+                                <include>**/*ITest*</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>run-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <excludes>
+                                <exclude>**/*ITest*</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.20.1</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <images>
+                        <image>
+                            <alias>ClickHouse-Server</alias>
+                            <name>yandex/clickhouse-server</name>
+                            <run>
+                                <ports>
+                                    <port>${ClickHousePort}:9000</port>
+                                </ports>
+                                <wait>
+                                    <tcp>
+                                        <host>127.0.0.1</host>
+                                        <ports>
+                                            <port>${ClickHousePort}</port>
+                                        </ports>
+                                    </tcp>
+                                    <time>20000</time>
+                                </wait>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>docker:start</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>docker:stop</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

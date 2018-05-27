@@ -32,34 +32,23 @@ public class BinaryDeserializer {
     }
 
     public short readShort() throws IOException {
-        int ch1 = container.get().readBinary();
-        int ch2 = container.get().readBinary();
-        return (short) ((ch1 << 8) + (ch2));
+        return (short) ((container.get().readBinary() & 0xFF) + ((container.get().readBinary() & 0xFF) << 8));
     }
 
     public int readInt() throws IOException {
-        int ch1 = container.get().readBinary();
-        int ch2 = container.get().readBinary();
-        int ch3 = container.get().readBinary();
-        int ch4 = container.get().readBinary();
-        return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4));
+        return (container.get().readBinary() & 0xFF) + ((container.get().readBinary() & 0xFF) << 8)
+            + ((container.get().readBinary() & 0xFF) << 16) + ((container.get().readBinary() & 0xFF) << 24);
     }
 
     public long readLong() throws IOException {
-        long ch1 = container.get().readBinary();
-        long ch2 = container.get().readBinary();
-        long ch3 = container.get().readBinary();
-        long ch4 = container.get().readBinary();
-        long ch5 = container.get().readBinary();
-        long ch6 = container.get().readBinary();
-        long ch7 = container.get().readBinary();
-        long ch8 = container.get().readBinary();
-        return ((ch1 << 56) + (ch2 << 48) + (ch3 << 40) + (ch4 << 32) + (ch5 << 24) + (ch6 << 16) + (ch7 << 8) + (ch8));
+        return (container.get().readBinary() & 0xFFL) + ((container.get().readBinary() & 0xFFL) << 8)
+            + ((container.get().readBinary() & 0xFFL) << 16) + ((container.get().readBinary() & 0xFFL) << 24)
+            + ((container.get().readBinary() & 0xFFL) << 32) + ((container.get().readBinary() & 0xFFL) << 40)
+            + ((container.get().readBinary() & 0xFFL) << 48) + ((container.get().readBinary() & 0xFFL) << 56);
     }
 
     public boolean readBoolean() throws IOException {
-        int ch = container.get().readBinary();
-        return (ch != 0);
+        return (container.get().readBinary() != 0);
     }
 
     public String readStringBinary() throws IOException {
@@ -77,5 +66,29 @@ public class BinaryDeserializer {
 
     public void maybeDisenableCompressed() {
         container.select(false);
+    }
+
+    public float readFloat() throws IOException {
+        return Float.intBitsToFloat((container.get().readBinary() & 0xFF) + ((container.get().readBinary() & 0xFF) << 8)
+            + ((container.get().readBinary() & 0xFF) << 16) + ((container.get().readBinary()) << 24));
+    }
+
+    public double readDouble() throws IOException {
+        return Double.longBitsToDouble(
+            (container.get().readBinary() & 0xFFL)
+                + ((container.get().readBinary() & 0xFFL) << 8)
+                + ((container.get().readBinary() & 0xFFL) << 16)
+                + ((container.get().readBinary() & 0xFFL) << 24)
+                + ((container.get().readBinary() & 0xFFL) << 32)
+                + ((container.get().readBinary() & 0xFFL) << 40)
+                + ((container.get().readBinary() & 0xFFL) << 48)
+                + ((container.get().readBinary() & 0xFFL) << 56)
+        );
+    }
+
+    public byte[] readBytes(int size) throws IOException {
+        byte[] bytes = new byte[size];
+        container.get().readBinary(bytes);
+        return bytes;
     }
 }

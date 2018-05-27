@@ -4,6 +4,7 @@ import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class Block {
     private final int rows;
@@ -36,7 +37,19 @@ public class Block {
         }
     }
 
-    public static Block readFrom(BinaryDeserializer deserializer) throws IOException {
+    public long rows() {
+        return rows;
+    }
+
+    public long columns() {
+        return columns.length;
+    }
+
+    public Column getByPosition(int column) {
+        return columns[column];
+    }
+
+    public static Block readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
         BlockInfo info = BlockInfo.readFrom(deserializer);
 
         int columns = (int) deserializer.readVarInt();
@@ -49,18 +62,5 @@ public class Block {
         }
 
         return new Block(rows, cols, info);
-    }
-
-
-    public long rows() {
-        return rows;
-    }
-
-    public long columns() {
-        return columns.length;
-    }
-
-    public Column getByPosition(int column) {
-        return columns[column];
     }
 }

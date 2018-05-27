@@ -10,12 +10,11 @@ import java.io.IOException;
 public class Int32ColumnCreator implements ColumnCreator {
 
     @Override
-    public Column create(int rows, BinaryDeserializer deserializer, String name, String type) throws IOException {
-        int[] data = new int[rows];
+    public Column createColumn(int rows, String name, String type, BinaryDeserializer deserializer) throws IOException {
+        Integer[] data = new Integer[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = deserializer.readInt();
         }
-
         return new IntegerColumn(name, type, data);
     }
 }

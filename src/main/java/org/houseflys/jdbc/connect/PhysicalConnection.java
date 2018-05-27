@@ -17,15 +17,18 @@ import org.houseflys.jdbc.serializer.BinarySerializer;
 public class PhysicalConnection {
 
     //    private final int timeout;
+    private final int timeout;
     private final InetSocketAddress endpoint;
     private final AtomicBoolean connected = new AtomicBoolean(false);
 
     private Socket socket;
     private BinarySerializer serializer;
     private BinaryDeserializer deserializer;
+    private String hostAddress;
+    private int localPort;
 
     public PhysicalConnection(ClickHouseConfig configure) throws Exception {
-        //        this.timeout = configure.intValue("connect_timeout");
+        timeout = configure.connectTimeout();
         this.endpoint = new InetSocketAddress(configure.address(), configure.port());
     }
 
@@ -34,16 +37,18 @@ public class PhysicalConnection {
             try {
                 socket = new Socket();
                 socket.setTcpNoDelay(true);
-                socket.connect(endpoint/*, timeout*/);
                 socket.setSendBufferSize(ClickHouseDefines.DBMS_DEFAULT_BUFFER_SIZE.intValue());
                 socket.setReceiveBufferSize(ClickHouseDefines.DBMS_DEFAULT_BUFFER_SIZE.intValue());
-                /// TODO: configure read timeout
-//                socket.setSoTimeout(timeout);
 
+                socket.connect(endpoint, timeout);
                 serializer = new BinarySerializer(socket);
                 deserializer = new BinaryDeserializer(socket);
+
+                localPort = socket.getLocalPort();
+                hostAddress = socket.getLocalAddress().getHostAddress();
             } catch (Exception ex) {
                 connected.set(false);
+                throw new RuntimeException(ex);
             }
         }
     }
@@ -54,10 +59,27 @@ public class PhysicalConnection {
         return RequestOrResponse.readFrom(request.type(), deserializer);
     }
 
-    public void close() throws IOException {
+    public RequestOrResponse sendRequest(RequestOrResponse request, int timeout) throws IOException, SQLException {
+        socket.setSoTimeout(timeout);
+        return sendRequest(request);
+    }
+
+    public void close() throws SQLException {
         if (!socket.isClosed() && connected.compareAndSet(false, true)) {
-            serializer.flushToTarget(true);
-            socket.close();
+            try {
+                serializer.flushToTarget(true);
+                socket.close();
+            } catch (Exception ex) {
+                throw new SQLException(ex.getMessage(), ex);
+            }
         }
+    }
+
+    public int localPort() {
+        return localPort;
+    }
+
+    public String localAddress() {
+        return hostAddress;
     }
 }

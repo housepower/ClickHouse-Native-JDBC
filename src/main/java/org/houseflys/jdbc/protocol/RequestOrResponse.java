@@ -28,7 +28,6 @@ public abstract class RequestOrResponse {
 
     public static RequestOrResponse readFrom(ProtocolType type, BinaryDeserializer deserializer)
         throws IOException, SQLException {
-
         if (!isResultPacket(type, deserializer)) {
             switch ((int) deserializer.readVarInt()) {
                 case 0:

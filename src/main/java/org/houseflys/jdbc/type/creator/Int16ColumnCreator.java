@@ -10,12 +10,11 @@ import java.io.IOException;
 public class Int16ColumnCreator implements ColumnCreator {
 
     @Override
-    public Column create(int rows, BinaryDeserializer deserializer, String name, String type) throws IOException {
-        short[] data = new short[rows];
+    public Column createColumn(int rows, String name, String type, BinaryDeserializer deserializer) throws IOException {
+        Short[] data = new Short[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = deserializer.readShort();
         }
-
         return new ShortColumn(name, type, data);
     }
 }

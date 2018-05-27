@@ -9,12 +9,11 @@ import java.io.IOException;
 
 public class StringColumnCreator implements ColumnCreator {
     @Override
-    public Column create(int rows, BinaryDeserializer deserializer, String name, String type) throws IOException {
+    public Column createColumn(int rows, String name, String type, BinaryDeserializer deserializer) throws IOException {
         String[] data = new String[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = deserializer.readStringBinary();
         }
-
         return new StringColumn(name, type, data);
     }
 }

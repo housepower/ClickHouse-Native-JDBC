@@ -3,6 +3,7 @@ package org.houseflys.jdbc.type;
 import org.houseflys.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public abstract class Column {
 
@@ -18,13 +19,17 @@ public abstract class Column {
         return this.name;
     }
 
-    public String typeName() {
+    public String type() {
         return this.type;
     }
 
+    public abstract Object[] data();
+
     public abstract Object data(int rows);
 
-    protected abstract void writeImpl(BinarySerializer serializer) throws IOException;
+    public abstract int typeWithSQL() throws SQLException;
+
+    public abstract void writeImpl(BinarySerializer serializer) throws IOException;
 
     public void writeTo(BinarySerializer serializer) throws IOException {
         serializer.writeStringBinary(name);
