@@ -14,7 +14,8 @@ public class NonRegisterDriver implements Driver {
     }
 
     public Connection connect(String url, Properties properties) throws SQLException {
-        return new ClickHouseConnection(url, properties);
+        ClickHouseURL clickHouseURL = new ClickHouseURL(url, properties);
+        return ClickHouseConnection.createClickHouseConnection(clickHouseURL.asConfig());
     }
 
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
