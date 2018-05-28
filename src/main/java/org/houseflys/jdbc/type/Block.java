@@ -2,6 +2,7 @@ package org.houseflys.jdbc.type;
 
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.serializer.BinarySerializer;
+import org.houseflys.jdbc.type.BlockSettings.Setting;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -9,7 +10,7 @@ import java.sql.SQLException;
 public class Block {
     private final int rows;
     private final Column[] columns;
-    private final BlockInfo blockInfo;
+    private final BlockSettings settings;
 
 
     public Block() {
@@ -17,17 +18,17 @@ public class Block {
     }
 
     public Block(int rows, Column[] columns) {
-        this(rows, columns, new BlockInfo(BlockInfo.Field.values()));
+        this(rows, columns, new BlockSettings(Setting.values()));
     }
 
-    public Block(int rows, Column[] columns, BlockInfo blockInfo) {
+    public Block(int rows, Column[] columns, BlockSettings settings) {
         this.rows = rows;
         this.columns = columns;
-        this.blockInfo = blockInfo;
+        this.settings = settings;
     }
 
     public void writeTo(BinarySerializer serializer) throws IOException {
-        blockInfo.writeTo(serializer);
+        settings.writeTo(serializer);
 
         serializer.writeVarInt(columns.length);
         serializer.writeVarInt(rows);
@@ -50,7 +51,7 @@ public class Block {
     }
 
     public static Block readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
-        BlockInfo info = BlockInfo.readFrom(deserializer);
+        BlockSettings info = BlockSettings.readFrom(deserializer);
 
         int columns = (int) deserializer.readVarInt();
         int rows = (int) deserializer.readVarInt();

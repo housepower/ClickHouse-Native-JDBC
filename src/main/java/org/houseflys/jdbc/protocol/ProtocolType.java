@@ -4,6 +4,7 @@ public enum ProtocolType {
     REQUEST_HELLO(0),
     REQUEST_QUERY(1),
     REQUEST_DATA(2),
+    REQUEST_PING(4),
 
     // There is not actual type
     RESPONSE_QUERY(Integer.MIN_VALUE),

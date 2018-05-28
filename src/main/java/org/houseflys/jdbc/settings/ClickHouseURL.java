@@ -2,6 +2,7 @@ package org.houseflys.jdbc.settings;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -27,18 +28,22 @@ public class ClickHouseURL {
         return url.startsWith(JDBC_CLICKHOUSE_PREFIX);
     }
 
-    public ClickHouseConfig asConfig() throws URISyntaxException {
-        if (!accept()) {
-            throw new URISyntaxException(url, "Expected '" + JDBC_CLICKHOUSE_PREFIX + "' prefix.");
+    public ClickHouseConfig asConfig() throws SQLException {
+        try {
+            if (!accept()) {
+                throw new SQLException(url, "Expected '" + JDBC_CLICKHOUSE_PREFIX + "' prefix.");
+            }
+
+            URI uri = new URI(url.substring(JDBC_PREFIX.length()));
+
+            Settings settings = Settings.fromProperties(queryPartAsProperties(uri.getQuery()));
+            return new ClickHouseConfig(uri.getHost(), uri.getPort(), uri.getPath(), settings);
+        } catch (URISyntaxException ex) {
+            throw new SQLException(ex.getMessage(), ex);
         }
-
-        URI uri = new URI(url.substring(JDBC_PREFIX.length()));
-
-        Settings settings = Settings.fromProperties(queryPartAsProperties(uri.getQuery()));
-        return new ClickHouseConfig(uri.getHost(), uri.getPort(), uri.getPath(), settings);
     }
 
-    private Properties queryPartAsProperties(String query) throws URISyntaxException {
+    private Properties queryPartAsProperties(String query) throws SQLException {
         Properties queryProperties = new Properties(properties);
 
         if (query != null) {
@@ -49,7 +54,7 @@ public class ClickHouseURL {
                 String[] argumentNameAndVal = argument.split("=", 2);
 
                 if (argumentNameAndVal.length != 2) {
-                    throw new URISyntaxException(argument, "Expected '='");
+                    throw new SQLException(argument, "Expected '='");
                 }
 
                 queryProperties.setProperty(argumentNameAndVal[0], argumentNameAndVal[1]);
