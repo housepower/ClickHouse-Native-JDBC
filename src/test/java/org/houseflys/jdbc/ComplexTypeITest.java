@@ -116,4 +116,34 @@ public class ComplexTypeITest extends AbstractITest {
             }
         });
     }
+
+    @Test
+    public void successfullyEnum() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+                statement.executeQuery("CREATE TABLE `_enum_test` ( a Enum8('a' = 1, 'b' = 2), b Enum16('c' = 32767, 'd' = 12345) ) ENGINE = Memory");
+                statement.executeQuery("INSERT INTO `_enum_test` SELECT number % 2 + 1 , if(number % 2 = 0, 32767, 12345) from numbers(100)");
+
+                ResultSet rs = statement.executeQuery("SELECT * FROM `_enum_test`");
+
+                int i = 0;
+                while(rs.next()){
+                    String name1 = rs.getString(1);
+                    String name2 = rs.getString(2);
+                    if(i % 2 == 0){
+                        Assert.assertEquals(name1, "a");
+                        Assert.assertEquals(name2, "c");
+                    }else{
+                        Assert.assertEquals(name1, "b");
+                        Assert.assertEquals(name2, "d");
+                    }
+                    i ++;
+                }
+                Assert.assertEquals(i, 100);
+                statement.executeQuery("DROP TABLE `_enum_test`");
+            }
+        });
+    }
 }
