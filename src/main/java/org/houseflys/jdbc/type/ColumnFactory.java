@@ -2,11 +2,18 @@ package org.houseflys.jdbc.type;
 
 import org.houseflys.jdbc.misc.Validate;
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
-import org.houseflys.jdbc.type.creator.*;
+import org.houseflys.jdbc.type.creator.DateColumnCreator;
+import org.houseflys.jdbc.type.creator.complex.EnumColumnCreator;
+import org.houseflys.jdbc.type.creator.Float32ColumnCreator;
+import org.houseflys.jdbc.type.creator.Float64ColumnCreator;
+import org.houseflys.jdbc.type.creator.Int16ColumnCreator;
+import org.houseflys.jdbc.type.creator.Int32ColumnCreator;
+import org.houseflys.jdbc.type.creator.Int64ColumnCreator;
+import org.houseflys.jdbc.type.creator.Int8ColumnCreator;
+import org.houseflys.jdbc.type.creator.StringColumnCreator;
 import org.houseflys.jdbc.type.creator.complex.ArrayColumnCreator;
 import org.houseflys.jdbc.type.creator.complex.DateTimeColumnCreator;
 import org.houseflys.jdbc.type.creator.complex.FixedStringColumnCreator;
-import org.houseflys.jdbc.type.creator.complex.NestedColumnCreator;
 import org.houseflys.jdbc.type.creator.complex.NullableColumnCreator;
 import org.houseflys.jdbc.type.creator.complex.TupleColumnCreator;
 
@@ -41,8 +48,8 @@ public class ColumnFactory {
     public static ParseResult parseTypeName(String type, int pos) throws SQLException {
         Matcher matcher = SIMPLE_TYPE_REGEX.matcher(type);
         return matcher.find(pos) && matcher.start() == pos &&
-            (matcher.end() == type.length() || type.charAt(matcher.end()) != '(') ?
-            parseSimpleTypeName(matcher.group(1), matcher.end()) : parseComplexTypeName(type, pos);
+                   (matcher.end() == type.length() || type.charAt(matcher.end()) != '(') ?
+                   parseSimpleTypeName(matcher.group(1), matcher.end()) : parseComplexTypeName(type, pos);
     }
 
     private static ParseResult parseSimpleTypeName(String type, int end) throws SQLException {
@@ -64,6 +71,8 @@ public class ColumnFactory {
             return NullableColumnCreator.parseNullableTypeName(type, pos);
         } else if (type.startsWith("FixedString", pos)) {
             return FixedStringColumnCreator.parseFixedStringTypeName(type, pos);
+        } else if (type.startsWith("Enum", pos)) {
+            return EnumColumnCreator.parseEnumTypeName(type, pos);
         }
         throw new SQLException("Unknown data type family:" + type);
     }
@@ -82,6 +91,8 @@ public class ColumnFactory {
         creators.put("UInt32", new Int32ColumnCreator());
         creators.put("UInt64", new Int64ColumnCreator());
         creators.put("String", new StringColumnCreator());
+        creators.put("Enum8", new StringColumnCreator());
+        creators.put("Enum16", new StringColumnCreator());
         creators.put("Float32", new Float32ColumnCreator());
         creators.put("Float64", new Float64ColumnCreator());
         creators.put("DateTime", new DateTimeColumnCreator(TimeZone.getDefault()));
