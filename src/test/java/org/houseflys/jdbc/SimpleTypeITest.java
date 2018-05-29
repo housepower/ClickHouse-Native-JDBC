@@ -105,4 +105,18 @@ public class SimpleTypeITest extends AbstractITest {
             }
         });
     }
+
+    @Test
+    public void successfullyUUIDColumn() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connect) throws Exception {
+                Statement statement = connect.createStatement();
+                ResultSet rs = statement.executeQuery("SELECT materialize('01234567-89ab-cdef-0123-456789abcdef')");
+
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getString(1), "01234567-89ab-cdef-0123-456789abcdef");
+            }
+        });
+    }
 }

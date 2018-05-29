@@ -16,6 +16,7 @@ import org.houseflys.jdbc.type.creator.complex.DateTimeColumnCreator;
 import org.houseflys.jdbc.type.creator.complex.FixedStringColumnCreator;
 import org.houseflys.jdbc.type.creator.complex.NullableColumnCreator;
 import org.houseflys.jdbc.type.creator.complex.TupleColumnCreator;
+import org.houseflys.jdbc.type.creator.UUIDColumnCreator;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -96,6 +97,7 @@ public class ColumnFactory {
         creators.put("Float32", new Float32ColumnCreator());
         creators.put("Float64", new Float64ColumnCreator());
         creators.put("DateTime", new DateTimeColumnCreator(TimeZone.getDefault()));
+        creators.put("UUID", new UUIDColumnCreator());
 
         return creators;
     }
