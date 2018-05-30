@@ -1,17 +1,14 @@
 package org.houseflys.jdbc.protocol;
 
-import org.houseflys.jdbc.serializer.BinaryDeserializer;
+import org.houseflys.jdbc.data.Block;
 import org.houseflys.jdbc.serializer.BinarySerializer;
-import org.houseflys.jdbc.type.Block;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryResponse extends RequestOrResponse {
-
-    // Sample Header
+public class QueryResponse {
+    
     private final Block header;
     private final List<DataResponse> data;
     // Progress
@@ -20,36 +17,29 @@ public class QueryResponse extends RequestOrResponse {
     // ProfileInfo
     // EndOfStream
 
-    QueryResponse(Block header, List<DataResponse> data) {
-        super(ProtocolType.RESPONSE_QUERY);
+    public QueryResponse(List<RequestOrResponse> responses) {
+        List<DataResponse> dataResponses = new ArrayList<DataResponse>(responses.size());
+        List<TotalsResponse> totalsResponses = new ArrayList<TotalsResponse>(responses.size());
+        List<ProgressResponse> progressResponses = new ArrayList<ProgressResponse>(responses.size());
+        List<ExtremesResponse> extremesResponses = new ArrayList<ExtremesResponse>(responses.size());
+        List<ProfileInfoResponse> profileInfoResponses = new ArrayList<ProfileInfoResponse>(responses.size());
 
-        this.data = data;
-        this.header = header;
-    }
-
-    @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
-        throw new UnsupportedOperationException("QueryResponse Cannot write to Server.");
-    }
-
-
-    public static RequestOrResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
-        List<DataResponse> resultSet = new ArrayList<DataResponse>();
-
-        while (true) {
-            RequestOrResponse response = RequestOrResponse.readFrom(null, deserializer);
-
-            if (response.type() == ProtocolType.RESPONSE_Data) {
-                resultSet.add((DataResponse) response);
-            } else if (response.type() == ProtocolType.RESPONSE_EndOfStream) {
-
-                if (resultSet.isEmpty()) {
-                    return new QueryResponse(null, resultSet);
-                }
-
-                return new QueryResponse(resultSet.remove(0).block(), resultSet);
+        for (RequestOrResponse response : responses) {
+            if (response instanceof DataResponse) {
+                dataResponses.add((DataResponse) response);
+            } else if (response instanceof TotalsResponse) {
+                totalsResponses.add((TotalsResponse) response);
+            } else if (response instanceof ProgressResponse) {
+                progressResponses.add((ProgressResponse) response);
+            } else if (response instanceof ExtremesResponse) {
+                extremesResponses.add((ExtremesResponse) response);
+            } else if (response instanceof ProfileInfoResponse) {
+                profileInfoResponses.add((ProfileInfoResponse) response);
             }
         }
+
+        data = dataResponses;
+        header = dataResponses.isEmpty() ? new Block() : dataResponses.remove(0).block();
     }
 
     public Block header() {

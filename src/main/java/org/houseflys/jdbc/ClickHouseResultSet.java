@@ -1,12 +1,9 @@
 package org.houseflys.jdbc;
 
-import java.sql.Array;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 
 import org.houseflys.jdbc.protocol.QueryResponse;
-import org.houseflys.jdbc.type.Block;
+import org.houseflys.jdbc.data.Block;
 import org.houseflys.jdbc.wrapper.SQLResultSet;
 
 public class ClickHouseResultSet extends SQLResultSet {
@@ -18,7 +15,7 @@ public class ClickHouseResultSet extends SQLResultSet {
 
     public ClickHouseResultSet(QueryResponse queryResponse) {
         this.queryResponse = queryResponse;
-        this.block = spliceHead();
+        this.block = queryResponse == null ? null : spliceHead();
     }
 
     @Override
@@ -71,6 +68,10 @@ public class ClickHouseResultSet extends SQLResultSet {
     @Override
     public Array getArray(int columnIndex) throws SQLException {
         return (Array) block.getByPosition(columnIndex - 1).data(cursor);
+    }
+
+    @Override public Date getDate(int columnIndex) throws SQLException {
+        return (Date) block.getByPosition(columnIndex - 1).data(cursor);
     }
 
     @Override

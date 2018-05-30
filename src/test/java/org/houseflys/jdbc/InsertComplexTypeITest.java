@@ -1,0 +1,115 @@
+package org.houseflys.jdbc;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Struct;
+
+public class InsertComplexTypeITest extends AbstractITest {
+
+    @Test
+    public void successfullyArrayDataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(test_Array Array(UInt8))ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES([1,2,3,4])");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                Assert.assertTrue(rs.next());
+                Assert.assertArrayEquals((Object[]) rs.getArray(1).getArray(), new Byte[] {1, 2, 3, 4});
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
+    }
+
+    @Test
+    public void successfullyFixedStringDataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(test_Array FixedString(3))ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES('abc')");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getString(1), "abc");
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
+    }
+
+    @Test
+    public void successfullyNullableDataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(test_nullable Nullable(UInt8))ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES(Null)(1)");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_nullable");
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getObject(1), (byte) 1);
+                Assert.assertTrue(rs.next());
+                Assert.assertNull(rs.getObject(1));
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
+    }
+
+    @Test
+    public void successfullyDateTimeDataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(test_datetime DateTime)ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES('2000-01-01 00:01:01')");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getTimestamp(1).getTime(), 946656061000L);
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
+    }
+
+    @Test
+    public void successfullyTupleDataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(test_tuple Tuple(String, UInt8))ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES(('test_string', 1))");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                Assert.assertTrue(rs.next());
+                Assert.assertArrayEquals(((Struct) rs.getObject(1)).getAttributes(), new Object[] {"test_string", (byte) 1});
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
+    }
+
+    @Test
+    public void testName() throws Exception {
+
+
+    }
+}

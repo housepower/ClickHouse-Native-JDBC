@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.serializer.BinarySerializer;
-import org.houseflys.jdbc.type.Block;
+import org.houseflys.jdbc.data.Block;
 
 public class TotalsResponse extends RequestOrResponse {
 

@@ -84,22 +84,22 @@ public class BinarySerializer {
 
     public void writeFloat(float datum) throws IOException {
         int x = Float.floatToIntBits(datum);
-        container.get().writeBinary((byte) ((x >>> 24) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 16) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 8) & 0xFF));
         container.get().writeBinary((byte) (x & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 8) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 16) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 24) & 0xFF));
     }
 
     public void writeDouble(double datum) throws IOException {
         long x = Double.doubleToLongBits(datum);
-        container.get().writeBinary((byte) ((x >>> 56) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 48) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 40) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 32) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 24) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 16) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 8) & 0xFF));
         container.get().writeBinary((byte) (x & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 8) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 16) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 24) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 32) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 40) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 48) & 0xFF));
+        container.get().writeBinary((byte) ((x >>> 56) & 0xFF));
     }
 
     public void writeBytes(byte[] bytes) throws IOException {
