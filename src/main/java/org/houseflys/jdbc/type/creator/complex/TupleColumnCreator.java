@@ -1,18 +1,18 @@
 package org.houseflys.jdbc.type.creator.complex;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Struct;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.houseflys.jdbc.misc.Validate;
+import org.houseflys.jdbc.misc.KeywordScanner;
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.type.Column;
 import org.houseflys.jdbc.type.ColumnCreator;
 import org.houseflys.jdbc.type.ColumnFactory;
 import org.houseflys.jdbc.type.ParseResult;
 import org.houseflys.jdbc.type.column.complex.TupleColumn;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Struct;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TupleColumnCreator implements ColumnCreator {
 
@@ -35,7 +35,8 @@ public class TupleColumnCreator implements ColumnCreator {
         return new TupleColumn(name, type, rowsData);
     }
 
-    private Object[][] getRowsWithElems(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
+    private Object[][] getRowsWithElems(int rows, BinaryDeserializer deserializer)
+        throws IOException, SQLException {
         Object[][] rowsWithElems = new Object[rows][creators.length];
         for (int index = 0; index < creators.length; index++) {
             Column eleColumn = creators[index].createColumn(rows, "tuple_ele", "", deserializer);
@@ -49,37 +50,27 @@ public class TupleColumnCreator implements ColumnCreator {
     public static ParseResult parseTupleTypeName(String type, int pos) throws SQLException {
         List<ColumnCreator> nestedCreators = new ArrayList<ColumnCreator>();
         for (int begin = pos + "Tuple(".length(), index = begin; index < type.length(); ) {
-            if (type.charAt(index) == ')') {
-                Validate.isTrue(index != begin, "Unknown data type family:" + type);
+
+            //Skip the spaces
+            index = KeywordScanner.skipSpace(index, type);
+            int next = KeywordScanner.scanTo(index, ',', type);
+            if (next != -1) {
+                ParseResult res = ColumnFactory.parseTypeName(type.substring(index, next), 0);
+                nestedCreators.add(res.creator());
+                index = next + 1;
+            } else {
+                next = KeywordScanner.scanTo(index, ')', type);
+                ParseResult res = ColumnFactory.parseTypeName(type.substring(index, next), 0);
+                nestedCreators.add(res.creator());
+
                 return new ParseResult(
-                    index + 1, type.substring(pos, index + 1),
-                    new TupleColumnCreator(nestedCreators.toArray(new ColumnCreator[nestedCreators.size()]))
+                    next + 1, type.substring(pos, next + 1),
+                    new TupleColumnCreator(
+                        nestedCreators.toArray(new ColumnCreator[nestedCreators.size()]))
                 );
             }
-
-            if (index != begin) {
-                boolean validated = false;
-                for (int i = index; i < type.length(); i++) {
-                    if (!isWhitespace(type.charAt(i))) {
-                        if (!validated) {
-                            Validate.isTrue(type.charAt(index) == ',', "Unknown data type family:" + type);
-                            validated = true;
-                        } else {
-                            index = i;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            ParseResult res = ColumnFactory.parseTypeName(type, index);
-            nestedCreators.add(res.creator());
-            index = res.pos();
         }
         throw new SQLException("Unknown data type family:" + type);
     }
 
-    private static boolean isWhitespace(char c) {
-        return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f';
-    }
 }

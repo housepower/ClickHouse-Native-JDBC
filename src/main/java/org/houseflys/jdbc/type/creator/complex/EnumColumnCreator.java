@@ -1,5 +1,6 @@
 package org.houseflys.jdbc.type.creator.complex;
 
+import org.houseflys.jdbc.misc.KeywordScanner;
 import org.houseflys.jdbc.misc.Validate;
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.type.Column;
@@ -21,18 +22,13 @@ public class EnumColumnCreator implements ColumnCreator {
 
     //Enum8('hello' = 1, 'world' = 2)
     private static final Pattern REGEX = Pattern.compile("(Enum\\d{1,2})\\((.*)\\)");
-    private static final Pattern KV_REGEX = Pattern.compile("'([^']+)' = (\\d+)");
 
     private Map<Integer, String> nameMap;
     private int enumSize;
 
-    public EnumColumnCreator(String type, String str) {
-        this.nameMap = new HashMap<Integer, String>();
+    public EnumColumnCreator(String type, Map<Integer, String> nameMap) {
         this.enumSize = Integer.parseInt(type.replace("Enum", ""));
-        Matcher matcher = KV_REGEX.matcher(str);
-        while (matcher.find()) {
-            nameMap.put(Integer.parseInt(matcher.group(2)), matcher.group(1));
-        }
+        this.nameMap = nameMap;
     }
 
     @Override
@@ -72,9 +68,34 @@ public class EnumColumnCreator implements ColumnCreator {
     public static ParseResult parseEnumTypeName(String type, int pos) throws SQLException {
         Matcher matcher = REGEX.matcher(type);
         Validate
-            .isTrue(matcher.find(pos) && matcher.start() == pos, "Unknown data type family:" + type);
+            .isTrue(matcher.find(pos) && matcher.start() == pos,
+                    "Unknown data type family:" + type);
+
+        Map<Integer, String> nameMap = new HashMap<Integer, String>();
+
+        int index = 0;
+        String str = matcher.group(2);
+        int keyStart, keyEnd, numStart, numEnd;
+        int number;
+        while (index < str.length()) {
+            keyStart = KeywordScanner.scanTo(index, '\'', str) + 1;
+            keyEnd = KeywordScanner.scanTo(keyStart + 1, '\'', str);
+
+            numStart = KeywordScanner.scanTo(keyEnd + 1, '=', str) + 1;
+            numEnd = KeywordScanner.scanTo(numStart + 1, ',', str);
+            if (numEnd == -1) {
+                numEnd = str.length();
+            }
+
+            Validate.isTrue(keyEnd > keyStart && numEnd > numStart && numStart > keyEnd,
+                            "Unknown data type family:" + type);
+
+            number = Integer.parseInt(str.substring(numStart, numEnd).trim());
+            nameMap.put(number, str.substring(keyStart, keyEnd));
+            index = numEnd + 1;
+        }
         return new ParseResult(matcher.end(), matcher.group(1),
-                                  new EnumColumnCreator(matcher.group(1), matcher.group(2)));
+                               new EnumColumnCreator(matcher.group(1), nameMap));
     }
 
 }

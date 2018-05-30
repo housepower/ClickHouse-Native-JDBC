@@ -92,8 +92,6 @@ public class ColumnFactory {
         creators.put("UInt32", new Int32ColumnCreator());
         creators.put("UInt64", new Int64ColumnCreator());
         creators.put("String", new StringColumnCreator());
-        creators.put("Enum8", new StringColumnCreator());
-        creators.put("Enum16", new StringColumnCreator());
         creators.put("Float32", new Float32ColumnCreator());
         creators.put("Float64", new Float64ColumnCreator());
         creators.put("DateTime", new DateTimeColumnCreator(TimeZone.getDefault()));
