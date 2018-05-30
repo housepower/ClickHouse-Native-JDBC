@@ -45,4 +45,8 @@ public class ClickHouseConfig {
         Setting connectTimeout = settings.getSetting(SettingsKey.CONNECT_TIMEOUT);
         return connectTimeout.value() == null ? 0 : Integer.valueOf(String.valueOf(connectTimeout.value()));
     }
+
+    public int soTimeout() {
+        return 0;
+    }
 }

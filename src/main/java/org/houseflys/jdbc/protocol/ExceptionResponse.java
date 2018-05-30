@@ -18,7 +18,7 @@ public class ExceptionResponse extends RequestOrResponse {
         throw new UnsupportedOperationException("ExceptionResponse Cannot write to Server.");
     }
 
-    public static SQLException readFrom(BinaryDeserializer deserializer) throws IOException {
+    public static SQLException readExceptionFrom(BinaryDeserializer deserializer) throws IOException {
         int code = deserializer.readInt();
         String name = deserializer.readStringBinary();
         String message = deserializer.readStringBinary();
@@ -26,7 +26,7 @@ public class ExceptionResponse extends RequestOrResponse {
 
         if (deserializer.readBoolean()) {
             return new ClickHouseSQLException(
-                code, name + message + ". Stack trace:\n\n" + stackTrace, readFrom(deserializer));
+                code, name + message + ". Stack trace:\n\n" + stackTrace, readExceptionFrom(deserializer));
         }
 
         return new ClickHouseSQLException(code, name + message + ". Stack trace:\n\n" + stackTrace);

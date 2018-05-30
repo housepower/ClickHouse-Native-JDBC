@@ -3,6 +3,11 @@ package org.houseflys.jdbc.protocol;
 import org.houseflys.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
+import java.sql.SQLException;
+
+import static org.houseflys.jdbc.settings.ClickHouseDefines.DBMS_CLIENT_REVERSION;
+import static org.houseflys.jdbc.settings.ClickHouseDefines.DBMS_VERSION_MAJOR;
+import static org.houseflys.jdbc.settings.ClickHouseDefines.DBMS_VERSION_MINOR;
 
 public class QueryRequest extends RequestOrResponse {
 
@@ -26,7 +31,7 @@ public class QueryRequest extends RequestOrResponse {
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
+    public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
         serializer.writeStringBinary(queryId);
         clientInfo.writeTo(serializer);
 
@@ -47,51 +52,31 @@ public class QueryRequest extends RequestOrResponse {
         public static final byte INITIAL_QUERY = 1;
         public static final byte SECONDARY_QUERY = 2;
 
-
-        private final byte queryKind;
-        private final String initialUser;
-        private final String initialQueryId;
+        private final String clientName;
+        private final String clientHostname;
         private final String initialAddress;
 
-        private final String osUser;
-        private final String clientHostname;
-        private final String clientName;
-        private final long clientMajorVersion;
-        private final long clientMinorVersion;
-        private final long clientReversion;
-        private final String quotaKey;
-
-        public ClientInfo(byte queryKind, String initialUser, String initialQueryId, String initialAddress,
-            String osUser, String clientHostname, String clientName, long clientMajorVersion,
-            long clientMinorVersion, long clientReversion, String quotaKey) {
-            this.queryKind = queryKind;
-            this.initialUser = initialUser;
-            this.initialQueryId = initialQueryId;
-            this.initialAddress = initialAddress;
-            this.osUser = osUser;
-            this.clientHostname = clientHostname;
+        public ClientInfo(String initialAddress, String clientHostname, String clientName) {
             this.clientName = clientName;
-            this.clientMajorVersion = clientMajorVersion;
-            this.clientMinorVersion = clientMinorVersion;
-            this.clientReversion = clientReversion;
-            this.quotaKey = quotaKey;
+            this.clientHostname = clientHostname;
+            this.initialAddress = initialAddress;
         }
 
         public void writeTo(BinarySerializer serializer) throws IOException {
-            serializer.writeVarInt(queryKind);
-            serializer.writeStringBinary(initialUser);
-            serializer.writeStringBinary(initialQueryId);
+            serializer.writeVarInt(ClientInfo.INITIAL_QUERY);
+            serializer.writeStringBinary("");
+            serializer.writeStringBinary("");
             serializer.writeStringBinary(initialAddress);
 
             // for TCP kind
             serializer.writeVarInt(TCP_KINE);
-            serializer.writeStringBinary(osUser);
+            serializer.writeStringBinary("");
             serializer.writeStringBinary(clientHostname);
             serializer.writeStringBinary(clientName);
-            serializer.writeVarInt(clientMajorVersion);
-            serializer.writeVarInt(clientMinorVersion);
-            serializer.writeVarInt(clientReversion);
-            serializer.writeStringBinary(quotaKey);
+            serializer.writeVarInt(DBMS_VERSION_MAJOR.longValue());
+            serializer.writeVarInt(DBMS_VERSION_MINOR.longValue());
+            serializer.writeVarInt(DBMS_CLIENT_REVERSION.longValue());
+            serializer.writeStringBinary("");
         }
     }
 }

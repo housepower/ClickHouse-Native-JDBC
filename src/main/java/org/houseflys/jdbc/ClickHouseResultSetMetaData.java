@@ -1,11 +1,10 @@
 package org.houseflys.jdbc;
 
 import java.sql.SQLException;
-import java.sql.SQLType;
 import java.sql.Types;
 
-import org.houseflys.jdbc.type.Block;
-import org.houseflys.jdbc.type.Column;
+import org.houseflys.jdbc.data.Block;
+import org.houseflys.jdbc.data.Column;
 import org.houseflys.jdbc.wrapper.SQLResultSetMetaData;
 
 public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {

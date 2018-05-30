@@ -1,9 +1,10 @@
 package org.houseflys.jdbc.protocol;
 
 import org.houseflys.jdbc.serializer.BinarySerializer;
-import org.houseflys.jdbc.type.Block;
+import org.houseflys.jdbc.data.Block;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class DataRequest extends RequestOrResponse {
     public static final DataRequest EMPTY = new DataRequest("");
@@ -22,7 +23,7 @@ public class DataRequest extends RequestOrResponse {
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
+    public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
         serializer.writeStringBinary(name);
 
         serializer.maybeEnableCompressed();

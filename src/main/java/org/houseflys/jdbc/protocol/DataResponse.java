@@ -2,7 +2,7 @@ package org.houseflys.jdbc.protocol;
 
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.serializer.BinarySerializer;
-import org.houseflys.jdbc.type.Block;
+import org.houseflys.jdbc.data.Block;
 
 import java.io.IOException;
 import java.sql.SQLException;
