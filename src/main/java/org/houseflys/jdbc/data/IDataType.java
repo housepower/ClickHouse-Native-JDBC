@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public interface IDataType {
+    String name();
+
+    int sqlTypeId();
+
     Object defaultValue();
 
     Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException;

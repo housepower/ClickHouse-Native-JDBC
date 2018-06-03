@@ -25,9 +25,9 @@ public class HelloRequest extends RequestOrResponse {
 
     @Override
     public void writeImpl(BinarySerializer serializer) throws IOException {
-        serializer.writeStringBinary(ClickHouseDefines.DBMS_NAME + " " + clientName);
-        serializer.writeVarInt(ClickHouseDefines.DBMS_VERSION_MAJOR.intValue());
-        serializer.writeVarInt(ClickHouseDefines.DBMS_VERSION_MINOR.intValue());
+        serializer.writeStringBinary(ClickHouseDefines.NAME + " " + clientName);
+        serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
+        serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
         serializer.writeVarInt(clientReversion);
         serializer.writeStringBinary(defaultDatabase);
         serializer.writeStringBinary(clientUsername);

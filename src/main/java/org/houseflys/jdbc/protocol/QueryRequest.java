@@ -1,13 +1,13 @@
 package org.houseflys.jdbc.protocol;
 
 import org.houseflys.jdbc.serializer.BinarySerializer;
+import org.houseflys.jdbc.settings.ClickHouseDefines;
+import org.houseflys.jdbc.settings.SettingKey;
 
 import java.io.IOException;
 import java.sql.SQLException;
-
-import static org.houseflys.jdbc.settings.ClickHouseDefines.DBMS_CLIENT_REVERSION;
-import static org.houseflys.jdbc.settings.ClickHouseDefines.DBMS_VERSION_MAJOR;
-import static org.houseflys.jdbc.settings.ClickHouseDefines.DBMS_VERSION_MINOR;
+import java.util.HashMap;
+import java.util.Map;
 
 public class QueryRequest extends RequestOrResponse {
 
@@ -18,13 +18,19 @@ public class QueryRequest extends RequestOrResponse {
     private final String queryString;
     private final boolean compression;
     private final ClientInfo clientInfo;
-
+    private final Map<SettingKey, Object> settings;
 
     public QueryRequest(String queryId, ClientInfo clientInfo, int stage, boolean compression, String queryString) {
+        this(queryId, clientInfo, stage, compression, queryString, new HashMap<SettingKey, Object>());
+    }
+
+    public QueryRequest(String queryId, ClientInfo clientInfo, int stage, boolean compression, String queryString,
+        Map<SettingKey, Object> settings) {
         super(ProtocolType.REQUEST_QUERY);
 
         this.stage = stage;
         this.queryId = queryId;
+        this.settings = settings;
         this.clientInfo = clientInfo;
         this.compression = compression;
         this.queryString = queryString;
@@ -35,7 +41,10 @@ public class QueryRequest extends RequestOrResponse {
         serializer.writeStringBinary(queryId);
         clientInfo.writeTo(serializer);
 
-        // empty settings
+        for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
+            serializer.writeStringBinary(entry.getKey().name());
+            entry.getKey().type().serializeSetting(serializer, entry.getValue());
+        }
         serializer.writeStringBinary("");
         serializer.writeVarInt(stage);
         serializer.writeBoolean(compression);
@@ -73,9 +82,9 @@ public class QueryRequest extends RequestOrResponse {
             serializer.writeStringBinary("");
             serializer.writeStringBinary(clientHostname);
             serializer.writeStringBinary(clientName);
-            serializer.writeVarInt(DBMS_VERSION_MAJOR.longValue());
-            serializer.writeVarInt(DBMS_VERSION_MINOR.longValue());
-            serializer.writeVarInt(DBMS_CLIENT_REVERSION.longValue());
+            serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
+            serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
+            serializer.writeVarInt(ClickHouseDefines.CLIENT_REVERSION);
             serializer.writeStringBinary("");
         }
     }

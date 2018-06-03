@@ -5,95 +5,143 @@ import org.houseflys.jdbc.connect.PhysicalInfo;
 import org.houseflys.jdbc.connect.PhysicalInfo.ServerInfo;
 import org.houseflys.jdbc.data.Block;
 import org.houseflys.jdbc.misc.Validate;
-import org.houseflys.jdbc.protocol.*;
+import org.houseflys.jdbc.protocol.EOFStreamResponse;
+import org.houseflys.jdbc.protocol.HelloResponse;
 import org.houseflys.jdbc.protocol.QueryRequest.ClientInfo;
+import org.houseflys.jdbc.protocol.QueryResponse;
+import org.houseflys.jdbc.protocol.RequestOrResponse;
 import org.houseflys.jdbc.settings.ClickHouseConfig;
+import org.houseflys.jdbc.settings.ClickHouseDefines;
+import org.houseflys.jdbc.statement.ClickHouseStatement;
+import org.houseflys.jdbc.statement.ClickHousePreparedInsertStatement;
+import org.houseflys.jdbc.statement.ClickHousePreparedQueryStatement;
 import org.houseflys.jdbc.stream.InputFormat;
 import org.houseflys.jdbc.wrapper.SQLConnection;
 
 import java.net.InetSocketAddress;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static org.houseflys.jdbc.settings.ClickHouseDefines.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ClickHouseConnection extends SQLConnection {
 
-    private final ClickHouseConfig configure;
+    private static final Pattern VALUES_REGEX = Pattern.compile("[V|v][A|a][L|l][U|u][E|e][S|s]\\s*\\(");
+
     // Just to be variable
+    private final AtomicBoolean isClosed;
+    private final ClickHouseConfig configure;
     private final AtomicReference<PhysicalInfo> atomicInfo;
 
     protected ClickHouseConnection(ClickHouseConfig configure, PhysicalInfo info) {
+        this.isClosed = new AtomicBoolean(false);
         this.configure = configure;
         this.atomicInfo = new AtomicReference<PhysicalInfo>(info);
     }
 
     @Override
+    public void close() throws SQLException {
+        if (!isClosed() && isClosed.compareAndSet(false, true)) {
+            PhysicalConnection connection = atomicInfo.get().connection();
+            connection.disPhysicalConnection();
+        }
+    }
+
+    @Override
+    public boolean isClosed() throws SQLException {
+        return isClosed.get();
+    }
+
+    @Override
     public Statement createStatement() throws SQLException {
+        Validate.isTrue(!isClosed(), "Unable to create Statement, Because the connection is closed.");
         return new ClickHouseStatement(this);
     }
 
     @Override
-    public void close() throws SQLException {
-        atomicInfo.get().connection().disPhysicalConnection();
+    public PreparedStatement prepareStatement(String query) throws SQLException {
+        Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, Because the connection is closed.");
+        Matcher matcher = VALUES_REGEX.matcher(query);
+        return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this) :
+            new ClickHousePreparedQueryStatement(this, query);
     }
 
-    QueryResponse sendQueryRequest(final String query) throws SQLException {
-        return withHealthyPhysicalConnection(new WithPhysicalConnection<QueryResponse>() {
-            @Override
-            public QueryResponse apply(PhysicalConnection physical) throws SQLException {
-                physical.sendQuery(query, atomicInfo.get().client());
-                List<RequestOrResponse> data = new ArrayList<RequestOrResponse>();
+    @Override
+    public void setClientInfo(Properties properties) throws SQLClientInfoException {
+        configure.parseJDBCProperties(properties);
+    }
 
-                while (true) {
-                    RequestOrResponse response = physical.receiveResponse(configure.soTimeout());
+    @Override
+    public void setClientInfo(String name, String value) throws SQLClientInfoException {
+        Properties properties = new Properties();
+        properties.put(name, value);
+        configure.parseJDBCProperties(properties);
+    }
 
-                    if (response instanceof EOFStreamResponse) {
-                        return new QueryResponse(data);
-                    }
+    @Override
+    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+        Validate.isTrue(!isClosed(), "Unable to create Array, Because the connection is closed.");
+        return new ClickHouseArray(elements);
+    }
 
-                    data.add(response);
-                }
+    @Override
+    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+        Validate.isTrue(!isClosed(), "Unable to create Struct, Because the connection is closed.");
+        return new ClickHouseStruct(typeName, attributes);
+    }
+
+    public QueryResponse sendQueryRequest(final String query) throws SQLException {
+        PhysicalConnection connection = getHealthyPhysicalConnection();
+
+        connection.sendQuery(query, atomicInfo.get().client(), configure.settings());
+        List<RequestOrResponse> data = new ArrayList<RequestOrResponse>();
+
+        while (true) {
+            RequestOrResponse response = connection.receiveResponse(configure.queryTimeout());
+
+            if (response instanceof EOFStreamResponse) {
+                return new QueryResponse(data);
             }
-        });
+
+            data.add(response);
+        }
     }
 
-    Integer sendInsertRequest(final String insertQuery, final InputFormat input) throws SQLException {
-        return withHealthyPhysicalConnection(new WithPhysicalConnection<Integer>() {
-            @Override
-            public Integer apply(PhysicalConnection physical) throws SQLException {
-                physical.sendQuery(insertQuery, atomicInfo.get().client());
-                Block header = physical.receiveSampleBlock(configure.soTimeout());
-                
-                for (int rows = 0; ; ) {
-                    Block block = input.next(header, 8192);
+    public Integer sendInsertRequest(final String insertQuery, final InputFormat input) throws SQLException {
+        PhysicalConnection connection = getHealthyPhysicalConnection();
 
-                    if (block.rows() == 0) {
-                        physical.sendData(new Block());
-                        physical.receiveEndOfStream(configure.soTimeout());
-                        return rows;
-                    }
+        int rows = 0;
+        connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
+        Block header = connection.receiveSampleBlock(configure.queryTimeout());
 
-                    physical.sendData(block);
-                    rows += block.rows();
-                }
+        while (true) {
+            Block block = input.next(header, 8192);
+
+            if (block.rows() == 0) {
+                connection.sendData(new Block());
+                connection.receiveEndOfStream(configure.queryTimeout());
+                return rows;
             }
-        });
+
+            connection.sendData(block);
+            rows += block.rows();
+        }
     }
 
-    private <T> T withHealthyPhysicalConnection(WithPhysicalConnection<T> with) throws SQLException {
+    private PhysicalConnection getHealthyPhysicalConnection() throws SQLException {
         PhysicalInfo oldInfo = atomicInfo.get();
-        if (!oldInfo.connection().ping(configure.soTimeout())) {
+        if (!oldInfo.connection().ping(configure.queryTimeout())) {
             PhysicalInfo newInfo = createPhysicalInfo(configure);
             PhysicalInfo closeableInfo = atomicInfo.compareAndSet(oldInfo, newInfo) ? oldInfo : newInfo;
             closeableInfo.connection().disPhysicalConnection();
         }
 
-        return with.apply(atomicInfo.get().connection());
+        return atomicInfo.get().connection();
     }
 
     public static ClickHouseConnection createClickHouseConnection(ClickHouseConfig configure) throws SQLException {
@@ -102,34 +150,28 @@ public class ClickHouseConnection extends SQLConnection {
 
     private static PhysicalInfo createPhysicalInfo(ClickHouseConfig configure) throws SQLException {
         PhysicalConnection physical = PhysicalConnection.openPhysicalConnection(configure);
-        ClientInfo client = clientInfo(physical, configure);
-        ServerInfo server = serverInfo(physical, configure);
-        return new PhysicalInfo(client, server, physical);
+        return new PhysicalInfo(clientInfo(physical, configure), serverInfo(physical, configure), physical);
     }
 
     private static ClientInfo clientInfo(PhysicalConnection physical, ClickHouseConfig configure) throws SQLException {
         Validate.isTrue(physical.address() instanceof InetSocketAddress);
         InetSocketAddress address = (InetSocketAddress) physical.address();
-        String clientName = String.format("%s %s", DBMS_NAME.stringValue(), "client");
+        String clientName = String.format("%s %s", ClickHouseDefines.NAME, "client");
         String initialAddress = String.format("%s:%d", address.getHostName(), address.getPort());
         return new ClientInfo(initialAddress, address.getHostName(), clientName);
     }
 
     private static ServerInfo serverInfo(PhysicalConnection physical, ClickHouseConfig configure) throws SQLException {
         try {
-            long reversion = DBMS_CLIENT_REVERSION.longValue();
+            long reversion = ClickHouseDefines.CLIENT_REVERSION;
             physical.sendHello("client", reversion, configure.database(), configure.username(), configure.password());
 
-            HelloResponse response = physical.receiveHello(configure.soTimeout());
+            HelloResponse response = physical.receiveHello(configure.queryTimeout());
             TimeZone timeZone = TimeZone.getTimeZone(response.serverTimeZone());
             return new ServerInfo(response.reversion(), timeZone, response.serverDisplayName());
         } catch (SQLException rethrows) {
             physical.disPhysicalConnection();
             throw rethrows;
         }
-    }
-
-    interface WithPhysicalConnection<T> {
-        T apply(PhysicalConnection physical) throws SQLException;
     }
 }

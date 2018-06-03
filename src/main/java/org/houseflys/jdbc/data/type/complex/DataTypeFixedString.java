@@ -4,28 +4,40 @@ import org.houseflys.jdbc.misc.Validate;
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.serializer.BinarySerializer;
 import org.houseflys.jdbc.data.IDataType;
-import org.houseflys.jdbc.data.ParseResult;
 import org.houseflys.jdbc.stream.QuotedLexer;
 import org.houseflys.jdbc.stream.QuotedToken;
 import org.houseflys.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.sql.Types;
 
 public class DataTypeFixedString implements IDataType {
 
     private final int n;
+    private final String name;
     private final String defaultValue;
 
-    public DataTypeFixedString(int n) {
+    public DataTypeFixedString(String name, int n) {
         this.n = n;
+        this.name = name;
+
         char[] data = new char[n];
         for (int i = 0; i < n; i++) {
             data[i] = '\u0000';
         }
         this.defaultValue = new String(data);
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public int sqlTypeId() {
+        return Types.VARCHAR;
     }
 
     @Override
@@ -36,14 +48,13 @@ public class DataTypeFixedString implements IDataType {
     @Override
     public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
         QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "");
+        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "Expected String Literal.");
         return token.data();
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof String,
-            "Can't serializer " + data.getClass().getSimpleName() + " With DateTimeDataTypeSerializer.");
+        Validate.isTrue(data instanceof String, "Expected String Parameter, but was " + data.getClass().getSimpleName());
         serializer.writeBytes(((String) data).getBytes());
     }
 
@@ -73,6 +84,7 @@ public class DataTypeFixedString implements IDataType {
         QuotedToken fixedStringN = lexer.next();
         Validate.isTrue(fixedStringN.type() == QuotedTokenType.Number);
         Validate.isTrue(lexer.next().type() == QuotedTokenType.ClosingRoundBracket);
-        return new DataTypeFixedString(Integer.valueOf(fixedStringN.data()));
+        Integer bytes = Integer.valueOf(fixedStringN.data());
+        return new DataTypeFixedString("FixedString(" + bytes + ")", bytes);
     }
 }

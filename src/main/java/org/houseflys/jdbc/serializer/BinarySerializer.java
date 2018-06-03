@@ -7,13 +7,15 @@ import org.houseflys.jdbc.buffer.BuffedWriter;
 import org.houseflys.jdbc.buffer.CompressedBuffedWriter;
 import org.houseflys.jdbc.buffer.SocketBuffedWriter;
 import org.houseflys.jdbc.misc.Container;
+import org.houseflys.jdbc.settings.ClickHouseDefines;
 
 public class BinarySerializer {
     private final Container<BuffedWriter> container;
 
     public BinarySerializer(Socket socket) throws IOException {
         SocketBuffedWriter socketWriter = new SocketBuffedWriter(socket);
-        container = new Container<BuffedWriter>(socketWriter, new CompressedBuffedWriter(1024, socketWriter));
+        container = new Container<BuffedWriter>(socketWriter,
+            new CompressedBuffedWriter(ClickHouseDefines.DEFAULT_BUFFER_SIZE, socketWriter));
     }
 
     public void writeVarInt(long x) throws IOException {

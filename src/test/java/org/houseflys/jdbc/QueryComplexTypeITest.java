@@ -39,7 +39,8 @@ public class QueryComplexTypeITest extends AbstractITest {
                 ResultSet rs = statement.executeQuery("SELECT arrayJoin([NULL,1])");
 
                 Assert.assertTrue(rs.next());
-                Assert.assertNull(rs.getObject(1));
+                Assert.assertEquals(rs.getByte(1), 0);
+                Assert.assertTrue(rs.wasNull());
                 Assert.assertTrue(rs.next());
                 Assert.assertNotNull(rs.getObject(1));
             }
@@ -58,10 +59,11 @@ public class QueryComplexTypeITest extends AbstractITest {
                     statement.executeQuery("SELECT arrayJoin([NULL,toFixedString('abc',3)])");
 
                 Assert.assertTrue(rs.next());
-                Assert.assertNull(rs.getObject(1));
+                Assert.assertEquals(rs.getString(1), "\u0000\u0000\u0000");
+                Assert.assertTrue(rs.wasNull());
                 Assert.assertTrue(rs.next());
-                Assert.assertNotNull(rs.getObject(1));
                 Assert.assertEquals(rs.getString(1), "abc");
+                Assert.assertFalse(rs.next());
             }
         });
     }

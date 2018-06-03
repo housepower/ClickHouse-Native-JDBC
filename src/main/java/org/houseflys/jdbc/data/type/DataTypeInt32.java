@@ -10,10 +10,26 @@ import org.houseflys.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public class DataTypeInt32 implements IDataType {
 
     private static final Integer DEFAULT_VALUE = 0;
+    private final String name;
+
+    public DataTypeInt32(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public int sqlTypeId() {
+        return Types.INTEGER;
+    }
 
     @Override
     public Object defaultValue() {
@@ -23,7 +39,7 @@ public class DataTypeInt32 implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         Validate.isTrue(data instanceof Byte || data instanceof Short || data instanceof Integer,
-            "Can't serializer " + data.getClass().getSimpleName() + " With IntegerDataTypeSerializer.");
+            "Expected Integer Parameter, but was " + data.getClass().getSimpleName());
         serializer.writeInt(((Number) data).intValue());
     }
 
@@ -51,7 +67,7 @@ public class DataTypeInt32 implements IDataType {
     @Override
     public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
         QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.Number, "");
+        Validate.isTrue(token.type() == QuotedTokenType.Number, "Expected Number Literal.");
         return Integer.valueOf(token.data());
     }
 

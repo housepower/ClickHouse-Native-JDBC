@@ -1,33 +1,52 @@
 package org.houseflys.jdbc;
 
+import org.houseflys.jdbc.settings.ClickHouseConfig;
 import org.houseflys.jdbc.settings.ClickHouseDefines;
-import org.houseflys.jdbc.settings.ClickHouseURL;
+import org.houseflys.jdbc.settings.SettingKey;
 
 import java.sql.*;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 public class NonRegisterDriver implements Driver {
 
+    private static final String JDBC_PREFIX = "jdbc:";
+    private static final String CLICK_HOUSE_JDBC_PREFIX = JDBC_PREFIX + "clickhouse:";
+
     public boolean acceptsURL(String url) throws SQLException {
-        return new ClickHouseURL(url).accept();
+        return url.startsWith(CLICK_HOUSE_JDBC_PREFIX);
     }
 
     public Connection connect(String url, Properties properties) throws SQLException {
-        ClickHouseURL clickHouseURL = new ClickHouseURL(url, properties);
-        return ClickHouseConnection.createClickHouseConnection(clickHouseURL.asConfig());
+        ClickHouseConfig configure = new ClickHouseConfig(url, properties);
+        return ClickHouseConnection.createClickHouseConnection(configure);
     }
 
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
-        return new DriverPropertyInfo[0];
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties properties) throws SQLException {
+        ClickHouseConfig configure = new ClickHouseConfig(url, properties);
+
+        int index = 0;
+        DriverPropertyInfo[] driverPropertiesInfo = new DriverPropertyInfo[configure.settings().size()];
+
+        for (Map.Entry<SettingKey, Object> entry : configure.settings().entrySet()) {
+            String value = String.valueOf(entry.getValue());
+
+            DriverPropertyInfo property = new DriverPropertyInfo(entry.getKey().name(), value);
+            property.description = entry.getKey().describe();
+
+            driverPropertiesInfo[index++] = property;
+        }
+
+        return driverPropertiesInfo;
     }
 
     public int getMajorVersion() {
-        return ClickHouseDefines.DBMS_VERSION_MAJOR.intValue();
+        return ClickHouseDefines.MAJOR_VERSION;
     }
 
     public int getMinorVersion() {
-        return ClickHouseDefines.DBMS_VERSION_MINOR.intValue();
+        return ClickHouseDefines.MINOR_VERSION;
     }
 
     public boolean jdbcCompliant() {

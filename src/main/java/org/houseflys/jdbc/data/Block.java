@@ -1,16 +1,20 @@
 package org.houseflys.jdbc.data;
 
+import org.houseflys.jdbc.misc.Validate;
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.serializer.BinarySerializer;
 import org.houseflys.jdbc.data.BlockSettings.Setting;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Block {
     private final int rows;
     private final Column[] columns;
     private final BlockSettings settings;
+    private final Map<String, Integer> nameWithPosition;
 
 
     public Block() {
@@ -25,6 +29,11 @@ public class Block {
         this.rows = rows;
         this.columns = columns;
         this.settings = settings;
+
+        nameWithPosition = new HashMap<String, Integer>();
+        for (int i = 0; i < columns.length; i++) {
+            nameWithPosition.put(columns[i].name(), i);
+        }
     }
 
     public void writeTo(BinarySerializer serializer) throws IOException, SQLException {
@@ -35,8 +44,8 @@ public class Block {
 
         for (Column column : columns) {
             serializer.writeStringBinary(column.name());
-            serializer.writeStringBinary(column.type());
-            DataTypeFactory.get(column.type()).serializeBinaryBulk(column.data(), serializer);
+            serializer.writeStringBinary(column.type().name());
+            column.type().serializeBinaryBulk(column.data(), serializer);
         }
     }
 
@@ -44,12 +53,19 @@ public class Block {
         return rows;
     }
 
-    public long columns() {
+    public int columns() {
         return columns.length;
     }
 
-    public Column getByPosition(int column) {
+    public Column getByPosition(int column) throws SQLException {
+        Validate.isTrue(column < columns.length,
+            "Position " + column + " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
         return columns[column];
+    }
+
+    public int getPositionByName(String name) throws SQLException {
+        Validate.isTrue(nameWithPosition.containsKey(name));
+        return nameWithPosition.get(name);
     }
 
     public static Block readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
@@ -65,7 +81,7 @@ public class Block {
             String type = deserializer.readStringBinary();
 
             IDataType dataType = DataTypeFactory.get(type);
-            cols[i] = new Column(name, type, dataType.deserializeBinaryBulk(rows, deserializer));
+            cols[i] = new Column(name, dataType, dataType.deserializeBinaryBulk(rows, deserializer));
         }
 
         return new Block(rows, cols, info);

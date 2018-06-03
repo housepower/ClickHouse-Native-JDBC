@@ -29,9 +29,7 @@ public class DataTypeFactory {
         return dataType;
     }
 
-    private static final Map<String, IDataType> dataTypes = dataTypes();
-    private static final Map<String, IDataType> dataTypesWithCaseInsensitive = ignoreCaseDataTypes();
-
+    private static final Map<String, IDataType> dataTypes = initialDataTypes();
 
     public static IDataType get(QuotedLexer lexer) throws SQLException {
         QuotedToken token = lexer.next();
@@ -53,57 +51,32 @@ public class DataTypeFactory {
             return DataTypeFixedString.createFixedStringType(lexer);
         } else {
             String typeName = token.data();
-            IDataType dataType = dataTypes.containsKey(typeName) ?
-                dataTypes.get(typeName) : dataTypesWithCaseInsensitive.get(typeName);
-
+            IDataType dataType = dataTypes.get(typeName);
             Validate.isTrue(dataType != null, "Unknown data type family:" + typeName);
             return dataType;
         }
     }
 
-    private static Map<String, IDataType> dataTypes() {
+    private static Map<String, IDataType> initialDataTypes() {
         Map<String, IDataType> creators = new HashMap<String, IDataType>();
 
         creators.put("Date", new DataTypeDate());
         creators.put("UUID", new DataTypeUUID());
-        creators.put("Int8", new DataTypeInt8());
-        creators.put("Int16", new DataTypeInt16());
-        creators.put("Int32", new DataTypeInt32());
-        creators.put("Int64", new DataTypeInt64());
-        creators.put("UInt8", new DataTypeInt8());
-        creators.put("UInt16", new DataTypeInt16());
-        creators.put("UInt32", new DataTypeInt32());
-        creators.put("UInt64", new DataTypeInt64());
         creators.put("String", new DataTypeString());
         creators.put("Float32", new DataTypeFloat32());
         creators.put("Float64", new DataTypeFloat64());
-        creators.put("DateTime", new DataTypeDateTime(TimeZone.getDefault()));
+
+        creators.put("Int8", new DataTypeInt8("Int8"));
+        creators.put("Int16", new DataTypeInt16("Int16"));
+        creators.put("Int32", new DataTypeInt32("Int32"));
+        creators.put("Int64", new DataTypeInt64("Int64"));
+        creators.put("UInt8", new DataTypeInt8("UInt8"));
+        creators.put("UInt16", new DataTypeInt16("UInt16"));
+        creators.put("UInt32", new DataTypeInt32("UInt32"));
+        creators.put("UInt64", new DataTypeInt64("UInt64"));
+        //TODO: server timezone
+        creators.put("DateTime", new DataTypeDateTime("DateTime", TimeZone.getDefault()));
 
         return creators;
-    }
-
-    private static Map<String, IDataType> ignoreCaseDataTypes() {
-        Map<String, IDataType> creatorsWithCaseInsensitive = new HashMap<String, IDataType>();
-
-        creatorsWithCaseInsensitive.put("CHAR", new DataTypeString());
-        creatorsWithCaseInsensitive.put("VARCHAR", new DataTypeString());
-        creatorsWithCaseInsensitive.put("TEXT", new DataTypeString());
-        creatorsWithCaseInsensitive.put("TINYTEXT", new DataTypeString());
-        creatorsWithCaseInsensitive.put("MEDIUMTEXT", new DataTypeString());
-        creatorsWithCaseInsensitive.put("LONGTEXT", new DataTypeString());
-        creatorsWithCaseInsensitive.put("BLOB", new DataTypeString());
-        creatorsWithCaseInsensitive.put("TINYBLOB", new DataTypeString());
-        creatorsWithCaseInsensitive.put("MEDIUMBLOB", new DataTypeString());
-        creatorsWithCaseInsensitive.put("LONGBLOB", new DataTypeString());
-
-        creatorsWithCaseInsensitive.put("TINYINT", new DataTypeInt8());
-        creatorsWithCaseInsensitive.put("SMALLINT", new DataTypeInt16());
-        creatorsWithCaseInsensitive.put("INT", new DataTypeInt32());
-        creatorsWithCaseInsensitive.put("INTEGER", new DataTypeInt32());
-        creatorsWithCaseInsensitive.put("BIGINT", new DataTypeInt64());
-        creatorsWithCaseInsensitive.put("FLOAT", new DataTypeFloat32());
-        creatorsWithCaseInsensitive.put("DOUBLE", new DataTypeFloat64());
-
-        return creatorsWithCaseInsensitive;
     }
 }

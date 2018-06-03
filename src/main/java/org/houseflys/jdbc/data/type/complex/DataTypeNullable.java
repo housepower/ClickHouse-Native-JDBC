@@ -8,7 +8,6 @@ import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.serializer.BinarySerializer;
 import org.houseflys.jdbc.data.IDataType;
 import org.houseflys.jdbc.data.DataTypeFactory;
-import org.houseflys.jdbc.data.ParseResult;
 import org.houseflys.jdbc.stream.QuotedLexer;
 import org.houseflys.jdbc.stream.QuotedToken;
 import org.houseflys.jdbc.stream.QuotedTokenType;
@@ -17,11 +16,23 @@ public class DataTypeNullable implements IDataType {
     private static final Byte IS_NULL = 1;
     private static final Byte NON_NULL = 0;
 
+    private final String name;
     private final IDataType nestedDataType;
     private final IDataType nullMapDataType = DataTypeFactory.get("UInt8");
 
-    public DataTypeNullable(IDataType nestedDataType) throws SQLException {
+    public DataTypeNullable(String name, IDataType nestedDataType) throws SQLException {
+        this.name = name;
         this.nestedDataType = nestedDataType;
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public int sqlTypeId() {
+        return nestedDataType.sqlTypeId();
     }
 
     @Override
@@ -83,6 +94,6 @@ public class DataTypeNullable implements IDataType {
         Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
         IDataType nullableNestedType = DataTypeFactory.get(lexer);
         Validate.isTrue(lexer.next().type() == QuotedTokenType.ClosingRoundBracket);
-        return new DataTypeNullable(nullableNestedType);
+        return new DataTypeNullable("Nullable(" + nullableNestedType.name() + ")", nullableNestedType);
     }
 }

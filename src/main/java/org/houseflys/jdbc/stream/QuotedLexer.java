@@ -38,6 +38,10 @@ public class QuotedLexer {
         return tokens.get(--tPos);
     }
 
+    public void reset() {
+        tPos = 0;
+    }
+
     private QuotedToken nextImpl() {
         if (pos >= in.length()) {
             return new QuotedToken(QuotedTokenType.EndOfStream);
@@ -47,7 +51,11 @@ public class QuotedLexer {
 
         switch (ch) {
             case '\'':
-                return newQuotedString(pos - 1);
+                return newQuotedString(pos - 1, '\'', QuotedTokenType.StringLiteral);
+            case '"':
+                return newQuotedString(pos - 1, '"', QuotedTokenType.BareWord);
+            case '`':
+                return newQuotedString(pos - 1, '`', QuotedTokenType.BareWord);
             case '(':
                 return new QuotedToken(QuotedTokenType.OpeningRoundBracket);
             case ')':
@@ -60,6 +68,24 @@ public class QuotedLexer {
                 return new QuotedToken(QuotedTokenType.Comma);
             case ';':
                 return new QuotedToken(QuotedTokenType.Semicolon);
+            case '.':
+                return new QuotedToken(QuotedTokenType.Dot);
+            case '*':
+                return new QuotedToken(QuotedTokenType.Asterisk);
+            case '/':
+                return new QuotedToken(QuotedTokenType.Slash);
+            case '%':
+                return new QuotedToken(QuotedTokenType.Percent);
+            case '!':
+                return new QuotedToken(QuotedTokenType.Not);
+            case '<':
+                return new QuotedToken(QuotedTokenType.Less);
+            case '>':
+                return new QuotedToken(QuotedTokenType.Greater);
+            case ':':
+                return new QuotedToken(QuotedTokenType.Colon);
+            case '|':
+                return new QuotedToken(QuotedTokenType.Concatenation);
             case '?':
                 return new QuotedToken(QuotedTokenType.QuestionMark);
             case '=':
@@ -74,24 +100,29 @@ public class QuotedLexer {
                             break;
                         }
                     }
-                    return new QuotedToken(QuotedTokenType.BareWord, in.substring(start, pos));
-                } else if (ch == '-' || ch == '+' || isNumericASCII(ch)) {
+                    return new QuotedToken(QuotedTokenType.BareWord, in, start, pos);
+                } else if (isNumericASCII(ch)) {
                     return newNumericToken(pos - 1);
+                } else if (ch == '-' || ch == '+') {
+                    if (isNumericASCII(in.charAt(pos))) {
+                        return newNumericToken(pos - 1);
+                    }
+                    return new QuotedToken(ch == '+' ? QuotedTokenType.Plus : QuotedTokenType.Minus);
                 }
         }
         return new QuotedToken(QuotedTokenType.Error);
     }
 
-    private QuotedToken newQuotedString(int start) {
+    private QuotedToken newQuotedString(int start, char quoted, QuotedTokenType type) {
         pos = start;
         int end = in.length();
 
         for (pos++; pos < end; pos++) {
             if (in.charAt(pos) == '\\') {
                 pos++;
-            } else if (in.charAt(pos) == '\'') {
+            } else if (in.charAt(pos) == quoted) {
                 pos++;
-                return new QuotedToken(QuotedTokenType.StringLiteral, in.substring(start + 1, pos - 1));
+                return new QuotedToken(type, in, start + 1, pos - 1);
             }
         }
         return new QuotedToken(QuotedTokenType.Error);
@@ -153,7 +184,7 @@ public class QuotedLexer {
 
         }
 
-        return new QuotedToken(QuotedTokenType.Number, in.substring(start, pos));
+        return new QuotedToken(QuotedTokenType.Number, in, start, pos);
     }
 
 
@@ -175,5 +206,9 @@ public class QuotedLexer {
 
     private boolean isWhitespace(char c) {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f';
+    }
+
+    public int pos() {
+        return pos;
     }
 }

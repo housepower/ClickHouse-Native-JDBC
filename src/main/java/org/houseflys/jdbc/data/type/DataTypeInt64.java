@@ -2,6 +2,7 @@ package org.houseflys.jdbc.data.type;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.houseflys.jdbc.misc.Validate;
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
@@ -14,6 +15,21 @@ import org.houseflys.jdbc.stream.QuotedTokenType;
 public class DataTypeInt64 implements IDataType {
 
     private static final Long DEFAULT_VALUE = 0L;
+    private final String name;
+
+    public DataTypeInt64(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public int sqlTypeId() {
+        return Types.BIGINT;
+    }
 
     @Override
     public Object defaultValue() {
@@ -22,9 +38,8 @@ public class DataTypeInt64 implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(
-            data instanceof Byte || data instanceof Short || data instanceof Integer || data instanceof Long,
-            "Can't serializer " + data.getClass().getSimpleName() + " With LongDataTypeSerializer.");
+        Validate.isTrue(data instanceof Byte || data instanceof Short || data instanceof Integer ||
+            data instanceof Long, "Expected Long Parameter, but was " + data.getClass().getSimpleName());
 
         serializer.writeLong(((Number) data).longValue());
     }
@@ -53,7 +68,7 @@ public class DataTypeInt64 implements IDataType {
     @Override
     public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
         QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.Number, "");
+        Validate.isTrue(token.type() == QuotedTokenType.Number, "Expected Number Literal.");
         return Long.valueOf(token.data());
     }
 

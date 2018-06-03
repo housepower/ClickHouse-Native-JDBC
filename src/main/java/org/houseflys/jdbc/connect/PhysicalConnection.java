@@ -8,12 +8,15 @@ import org.houseflys.jdbc.serializer.BinarySerializer;
 import org.houseflys.jdbc.settings.ClickHouseConfig;
 import org.houseflys.jdbc.settings.ClickHouseDefines;
 import org.houseflys.jdbc.protocol.QueryRequest.ClientInfo;
+import org.houseflys.jdbc.settings.SettingKey;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.houseflys.jdbc.protocol.QueryRequest.COMPLETE_STAGE;
@@ -36,8 +39,7 @@ public class PhysicalConnection {
             sendRequest(new PingRequest());
             for (; ; ) {
                 RequestOrResponse response = receiveResponse(soTimeout);
-                Validate.isTrue(response instanceof ProgressResponse || response instanceof PongResponse,
-                    "Expect Pong Response.");
+                Validate.isTrue(response instanceof ProgressResponse || response instanceof PongResponse, "Expect Pong Response.");
 
                 if (response instanceof PongResponse)
                     return true;
@@ -53,7 +55,11 @@ public class PhysicalConnection {
     }
 
     public void sendQuery(String query, ClientInfo info) throws SQLException {
-        sendQuery(UUID.randomUUID().toString(), COMPLETE_STAGE, info, query);
+        sendQuery(UUID.randomUUID().toString(), COMPLETE_STAGE, info, query, new HashMap<SettingKey, Object>());
+    }
+
+    public void sendQuery(String query, ClientInfo info, Map<SettingKey, Object> settings) throws SQLException {
+        sendQuery(UUID.randomUUID().toString(), COMPLETE_STAGE, info, query, settings);
     }
 
     public void sendHello(String client, long reversion, String db, String user, String password) throws SQLException {
@@ -105,8 +111,8 @@ public class PhysicalConnection {
         }
     }
 
-    private void sendQuery(String id, int stage, ClientInfo info, String query) throws SQLException {
-        sendRequest(new QueryRequest(id, info, stage, true, query));
+    private void sendQuery(String id, int stage, ClientInfo info, String query, Map<SettingKey, Object> settings) throws SQLException {
+        sendRequest(new QueryRequest(id, info, stage, true, query, settings));
     }
 
     private void sendRequest(RequestOrResponse request) throws SQLException {
@@ -124,8 +130,8 @@ public class PhysicalConnection {
 
             Socket socket = new Socket();
             socket.setTcpNoDelay(true);
-            socket.setSendBufferSize(ClickHouseDefines.DBMS_DEFAULT_BUFFER_SIZE.intValue());
-            socket.setReceiveBufferSize(ClickHouseDefines.DBMS_DEFAULT_BUFFER_SIZE.intValue());
+            socket.setSendBufferSize(ClickHouseDefines.DEFAULT_BUFFER_SIZE);
+            socket.setReceiveBufferSize(ClickHouseDefines.DEFAULT_BUFFER_SIZE);
             socket.connect(endpoint, configure.connectTimeout());
 
             return new PhysicalConnection(socket, new BinarySerializer(socket), new BinaryDeserializer(socket));
