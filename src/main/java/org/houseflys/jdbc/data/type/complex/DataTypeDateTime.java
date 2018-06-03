@@ -40,15 +40,15 @@ public class DataTypeDateTime implements IDataType {
 
         String[] dateAndTime = timestampString.split(" ", 2);
         String[] yearMonthDay = dateAndTime[0].split("-", 3);
-        String[] houseMinuteSecond = dateAndTime[1].split(":", 3);
+        String[] hourMinuteSecond = dateAndTime[1].split(":", 3);
 
         return new Timestamp(
             Integer.valueOf(yearMonthDay[0]) - 1900,
             Integer.valueOf(yearMonthDay[1]) - 1,
             Integer.valueOf(yearMonthDay[2]),
-            Integer.valueOf(houseMinuteSecond[0]),
-            Integer.valueOf(houseMinuteSecond[1]),
-            Integer.valueOf(houseMinuteSecond[2]),
+            Integer.valueOf(hourMinuteSecond[0]),
+            Integer.valueOf(hourMinuteSecond[1]),
+            Integer.valueOf(hourMinuteSecond[2]),
             0);
     }
 

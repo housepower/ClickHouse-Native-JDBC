@@ -19,7 +19,7 @@ public class InsertComplexTypeITest extends AbstractITest {
 
                 statement.executeQuery("DROP TABLE IF EXISTS test");
                 statement.executeQuery("CREATE TABLE test(test_Array Array(UInt8))ENGINE=Log");
-                statement.executeQuery("INSERT INTO test VALUES([1,2,3,4])");
+                statement.executeQuery("INSERT INTO test VALUES ([1, 2, 3, 4])");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test");
                 Assert.assertTrue(rs.next());
                 Assert.assertArrayEquals((Object[]) rs.getArray(1).getArray(), new Byte[] {1, 2, 3, 4});
