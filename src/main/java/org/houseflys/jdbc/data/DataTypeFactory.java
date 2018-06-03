@@ -65,6 +65,7 @@ public class DataTypeFactory {
         Map<String, IDataType> creators = new HashMap<String, IDataType>();
 
         creators.put("Date", new DataTypeDate());
+        creators.put("UUID", new DataTypeUUID());
         creators.put("Int8", new DataTypeInt8());
         creators.put("Int16", new DataTypeInt16());
         creators.put("Int32", new DataTypeInt32());
@@ -74,12 +75,9 @@ public class DataTypeFactory {
         creators.put("UInt32", new DataTypeInt32());
         creators.put("UInt64", new DataTypeInt64());
         creators.put("String", new DataTypeString());
-        creators.put("Enum8", new DataTypeString());
-        creators.put("Enum16", new DataTypeString());
         creators.put("Float32", new DataTypeFloat32());
         creators.put("Float64", new DataTypeFloat64());
         creators.put("DateTime", new DataTypeDateTime(TimeZone.getDefault()));
-        creators.put("UUID", new DataTypeUUID());
 
         return creators;
     }

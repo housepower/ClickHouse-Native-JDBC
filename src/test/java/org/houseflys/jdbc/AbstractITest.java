@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 
 public abstract class AbstractITest {
 
-    private static final int SERVER_PORT = 9000;//Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT"));
+    private static final int SERVER_PORT = Integer.valueOf(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
 
     protected void withNewConnection(WithConnection withConnection) throws Exception {
         Class.forName("org.houseflys.jdbc.ClickHouseDriver");

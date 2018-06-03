@@ -9,7 +9,7 @@ import org.houseflys.jdbc.stream.ValuesInputFormat;
 import org.houseflys.jdbc.wrapper.SQLStatement;
 
 public class ClickHouseStatement extends SQLStatement {
-    private static final Pattern VALUES_REGEX = Pattern.compile("[V|v][A|a][L|l][U|u][E|e][S|s]\\(");
+    private static final Pattern VALUES_REGEX = Pattern.compile("[V|v][A|a][L|l][U|u][E|e][S|s]\\s*\\(");
 
     private final ClickHouseConnection connection;
 
