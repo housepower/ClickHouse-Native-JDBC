@@ -10,7 +10,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 
 ## Supported queries
 * [x] SELECT
-* [ ] INSERT
+* [x] INSERT
 * [x] CREATE
 * [x] ALTER
 * [x] DROP
@@ -28,8 +28,8 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 * [x] Tuple
 * [x] Nested
 * [x] Array(T)
-* [ ] Enum
-* [ ] UUID
+* [x] Enum
+* [x] UUID
 
 
 ## Example
