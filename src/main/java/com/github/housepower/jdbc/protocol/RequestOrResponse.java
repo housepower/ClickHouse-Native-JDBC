@@ -37,13 +37,13 @@ public abstract class RequestOrResponse {
             case 3:
                 return ProgressResponse.readFrom(deserializer);
             case 4:
-                return readFrom(deserializer);
+                return PongResponse.readFrom(deserializer);
             case 5:
                 return EOFStreamResponse.readFrom(deserializer);
             case 6:
                 return ProfileInfoResponse.readFrom(deserializer);
             case 7:
-                return readFrom(deserializer);
+                return TotalsResponse.readFrom(deserializer);
             case 8:
                 return ExtremesResponse.readFrom(deserializer);
             default:
