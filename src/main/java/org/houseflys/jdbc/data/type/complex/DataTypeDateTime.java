@@ -1,30 +1,40 @@
 package org.houseflys.jdbc.data.type.complex;
 
-
 import org.houseflys.jdbc.misc.Validate;
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.serializer.BinarySerializer;
 import org.houseflys.jdbc.data.IDataType;
-import org.houseflys.jdbc.data.ParseResult;
 import org.houseflys.jdbc.stream.QuotedLexer;
 import org.houseflys.jdbc.stream.QuotedToken;
 import org.houseflys.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DataTypeDateTime implements IDataType {
 
     private static final Timestamp DEFAULT_VALUE = new Timestamp(0);
 
+    private final String name;
     private final TimeZone timeZone;
 
-    public DataTypeDateTime(TimeZone timeZone) {
+    public DataTypeDateTime(String name, TimeZone timeZone) {
+        this.name = name;
         this.timeZone = timeZone;
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public int sqlTypeId() {
+        return Types.TIMESTAMP;
     }
 
     @Override
@@ -35,7 +45,7 @@ public class DataTypeDateTime implements IDataType {
     @Override
     public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
         QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "");
+        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "Expected String Literal.");
         String timestampString = token.data();
 
         String[] dateAndTime = timestampString.split(" ", 2);
@@ -55,7 +65,7 @@ public class DataTypeDateTime implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         Validate.isTrue(data instanceof Timestamp,
-            "Can't serializer " + data.getClass().getSimpleName() + " With DateTimeDataTypeSerializer.");
+            "Expected Timestamp Parameter, but was " + data.getClass().getSimpleName());
         serializer.writeInt((int) (((Timestamp) data).getTime() / 1000));
     }
 
@@ -82,10 +92,11 @@ public class DataTypeDateTime implements IDataType {
 
     public static IDataType createDateTimeType(QuotedLexer lexer) throws SQLException {
         if (lexer.next().type() == QuotedTokenType.OpeningRoundBracket) {
-            QuotedToken timeZoneToken = lexer.next();
-            Validate.isTrue(timeZoneToken.type() == QuotedTokenType.StringLiteral);
-            return new DataTypeDateTime(TimeZone.getTimeZone(timeZoneToken.data()));
+            QuotedToken token;
+            Validate.isTrue((token = lexer.next()).type() == QuotedTokenType.StringLiteral);
+            String timeZoneData = token.data();
+            return new DataTypeDateTime("DateTime(" + timeZoneData + ")", TimeZone.getTimeZone(timeZoneData));
         }
-        return new DataTypeDateTime(TimeZone.getDefault());
+        return new DataTypeDateTime("DateTime", TimeZone.getDefault());
     }
 }

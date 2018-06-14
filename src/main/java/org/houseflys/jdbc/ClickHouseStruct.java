@@ -9,10 +9,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClickHouseStruct extends SQLStruct {
+    private static final Pattern REGEX = Pattern.compile("\\_(\\d+)");
+
+    private final String type;
     private final Object[] attributes;
 
-    public ClickHouseStruct(Object[] attributes) {
+    public ClickHouseStruct(String type, Object[] attributes) {
+        this.type = type;
         this.attributes = attributes;
+    }
+
+    @Override
+    public String getSQLTypeName() throws SQLException {
+        return type;
     }
 
     @Override
@@ -22,12 +31,11 @@ public class ClickHouseStruct extends SQLStruct {
 
     @Override
     public Object[] getAttributes(Map<String, Class<?>> map) throws SQLException {
-        Pattern regex = Pattern.compile("\\_(\\d+)");
         int i = 0;
         Object[] res = new Object[map.size()];
         for (String attrName : map.keySet()) {
             Class<?> clazz = map.get(attrName);
-            Matcher matcher = regex.matcher(attrName);
+            Matcher matcher = REGEX.matcher(attrName);
             Validate.isTrue(matcher.matches(), "Can't find " + attrName + ".");
 
             int attrIndex = Integer.parseInt(matcher.group(1)) - 1;

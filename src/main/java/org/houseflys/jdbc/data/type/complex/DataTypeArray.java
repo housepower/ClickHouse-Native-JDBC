@@ -3,7 +3,6 @@ package org.houseflys.jdbc.data.type.complex;
 import org.houseflys.jdbc.ClickHouseArray;
 import org.houseflys.jdbc.data.DataTypeFactory;
 import org.houseflys.jdbc.data.IDataType;
-import org.houseflys.jdbc.data.ParseResult;
 import org.houseflys.jdbc.misc.Validate;
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
 import org.houseflys.jdbc.serializer.BinarySerializer;
@@ -14,17 +13,30 @@ import org.houseflys.jdbc.stream.QuotedTokenType;
 import java.io.IOException;
 import java.sql.Array;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataTypeArray implements IDataType {
+    private final String name;
     private final Array defaultValue;
     private final IDataType elemDataType;
     private final IDataType offsetIDataType = DataTypeFactory.get("UInt64");
 
-    public DataTypeArray(IDataType elemDataType) throws SQLException {
+    public DataTypeArray(String name, IDataType elemDataType) throws SQLException {
+        this.name = name;
         this.elemDataType = elemDataType;
         this.defaultValue = new ClickHouseArray(new Object[] {elemDataType.defaultValue()});
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public int sqlTypeId() {
+        return Types.ARRAY;
     }
 
     @Override
@@ -41,7 +53,8 @@ public class DataTypeArray implements IDataType {
         for (; ; ) {
             elems.add(elemDataType.deserializeTextQuoted(lexer));
             token = lexer.next();
-            Validate.isTrue(token.type() == QuotedTokenType.Comma || token.type() == QuotedTokenType.ClosingSquareBracket);
+            Validate.isTrue(
+                token.type() == QuotedTokenType.Comma || token.type() == QuotedTokenType.ClosingSquareBracket);
 
             if (token.type() == QuotedTokenType.ClosingSquareBracket) {
                 return new ClickHouseArray(elems.toArray());
@@ -51,8 +64,7 @@ public class DataTypeArray implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Array,
-            "Can't serializer " + data.getClass().getSimpleName() + " With ArrayDataTypeSerializer.");
+        Validate.isTrue(data instanceof Array, "Expected Array Parameter, but was " + data.getClass().getSimpleName());
 
         offsetIDataType.serializeBinary(((Object[]) ((Array) data).getArray()).length, serializer);
         elemDataType.serializeBinaryBulk(((Object[]) ((Array) data).getArray()), serializer);
@@ -69,7 +81,7 @@ public class DataTypeArray implements IDataType {
 
         for (Object datum : data) {
             Validate.isTrue(datum instanceof Array,
-                "Can't serializer " + data.getClass().getSimpleName() + " With StringDataTypeSerializer.");
+                "Expected Array Parameter, but was " + datum.getClass().getSimpleName());
 
             Object[] arrayData = (Object[]) ((Array) datum).getArray();
             offsetIDataType.serializeBinary(arrayData.length, serializer);
@@ -77,7 +89,7 @@ public class DataTypeArray implements IDataType {
 
         for (Object datum : data) {
             Validate.isTrue(datum instanceof Array,
-                "Can't serializer " + data.getClass().getSimpleName() + " With StringDataTypeSerializer.");
+                "Expected Array Parameter, but was " + datum.getClass().getSimpleName());
 
             Object[] arrayData = (Object[]) ((Array) datum).getArray();
             elemDataType.serializeBinaryBulk(arrayData, serializer);
@@ -102,6 +114,6 @@ public class DataTypeArray implements IDataType {
         Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
         IDataType arrayNestedType = DataTypeFactory.get(lexer);
         Validate.isTrue(lexer.next().type() == QuotedTokenType.ClosingRoundBracket);
-        return new DataTypeArray(arrayNestedType);
+        return new DataTypeArray("Array(" + arrayNestedType.name() + ")", arrayNestedType);
     }
 }

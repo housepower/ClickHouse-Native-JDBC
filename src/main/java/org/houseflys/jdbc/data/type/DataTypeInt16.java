@@ -9,11 +9,28 @@ import org.houseflys.jdbc.stream.QuotedToken;
 import org.houseflys.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public class DataTypeInt16 implements IDataType {
 
     private static final Short DEFAULT_VALUE = 0;
+    private final String name;
+
+    public DataTypeInt16(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public int sqlTypeId() {
+        return Types.SMALLINT;
+    }
 
     @Override
     public Object defaultValue() {
@@ -23,7 +40,7 @@ public class DataTypeInt16 implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         Validate.isTrue(data instanceof Byte || data instanceof Short,
-            "Can't serializer " + data.getClass().getSimpleName() + " With ShortDataTypeSerializer.");
+            "Expected Short Parameter, but was " + data.getClass().getSimpleName());
 
         serializer.writeShort(((Number) data).shortValue());
     }
@@ -52,7 +69,7 @@ public class DataTypeInt16 implements IDataType {
     @Override
     public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
         QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.Number, "");
+        Validate.isTrue(token.type() == QuotedTokenType.Number, "Expected Number Literal.");
         return Short.valueOf(token.data());
     }
 

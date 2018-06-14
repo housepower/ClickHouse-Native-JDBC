@@ -10,9 +10,20 @@ import org.houseflys.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.UUID;
 
 public class DataTypeUUID implements IDataType {
+
+    @Override
+    public String name() {
+        return "UUID";
+    }
+
+    @Override
+    public int sqlTypeId() {
+        return Types.VARCHAR;
+    }
 
     @Override
     public Object defaultValue() {
@@ -22,14 +33,13 @@ public class DataTypeUUID implements IDataType {
     @Override
     public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
         QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "");
+        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "Expected String Literal.");
         return token.data();
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof String,
-            "Can't serializer " + data.getClass().getSimpleName() + " With UUIDDataTypeSerializer.");
+        Validate.isTrue(data instanceof String, "Expected String Parameter, but was " + data.getClass().getSimpleName());
 
         UUID uuid = UUID.fromString((String) data);
         serializer.writeLong(uuid.getMostSignificantBits());

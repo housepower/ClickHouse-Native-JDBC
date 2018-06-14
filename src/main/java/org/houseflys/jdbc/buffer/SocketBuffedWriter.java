@@ -16,7 +16,7 @@ public class SocketBuffedWriter implements BuffedWriter {
 
     public SocketBuffedWriter(Socket socket) throws IOException {
         this.position = 0;
-        this.capacity = ClickHouseDefines.DBMS_DEFAULT_BUFFER_SIZE.intValue();
+        this.capacity = ClickHouseDefines.DEFAULT_BUFFER_SIZE;
 
         this.buf = new byte[capacity];
         this.out = socket.getOutputStream();

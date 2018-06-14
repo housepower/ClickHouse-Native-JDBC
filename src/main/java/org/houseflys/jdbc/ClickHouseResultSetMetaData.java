@@ -1,10 +1,17 @@
 package org.houseflys.jdbc;
 
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
 import org.houseflys.jdbc.data.Block;
 import org.houseflys.jdbc.data.Column;
+import org.houseflys.jdbc.data.IDataType;
+import org.houseflys.jdbc.data.type.*;
+import org.houseflys.jdbc.data.type.complex.DataTypeArray;
+import org.houseflys.jdbc.data.type.complex.DataTypeDateTime;
+import org.houseflys.jdbc.data.type.complex.DataTypeNullable;
+import org.houseflys.jdbc.data.type.complex.DataTypeTuple;
 import org.houseflys.jdbc.wrapper.SQLResultSetMetaData;
 
 public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {
@@ -17,38 +24,51 @@ public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {
 
     @Override
     public int getColumnCount() throws SQLException {
-        return (int) this.header.columns();
+        return header.columns();
     }
 
     @Override
-    public String getColumnLabel(int column) throws SQLException {
-        return this.header.getByPosition(column - 1).name();
+    public int getColumnType(int index) throws SQLException {
+        IDataType type = header.getByPosition(index - 1).type();
+        return type.sqlTypeId();
     }
 
     @Override
-    public String getColumnName(int column) throws SQLException {
-        return this.header.getByPosition(column - 1).name();
+    public String getColumnName(int index) throws SQLException {
+        return getColumnLabel(index);
     }
 
     @Override
-    public int getColumnType(int idx) throws SQLException {
-        Column column = header.getByPosition(idx - 1);
-        return Types.NULL;
-        //        return super.getColumnType(column);
+    public String getColumnLabel(int index) throws SQLException {
+        return header.getByPosition(index - 1).name();
     }
 
     @Override
-    public boolean isAutoIncrement(int column) throws SQLException {
-        return false;
+    public int isNullable(int index) throws SQLException {
+        return (header.getByPosition(index - 1).type() instanceof DataTypeNullable) ?
+            ResultSetMetaData.columnNullable : ResultSetMetaData.columnNoNulls;
     }
 
     @Override
-    public boolean isReadOnly(int column) throws SQLException {
+    public boolean isSigned(int index) throws SQLException {
+        return header.getByPosition(index).name().startsWith("U");
+    }
+
+
+    /*=========================================================*/
+
+    @Override
+    public boolean isReadOnly(int index) throws SQLException {
         return true;
     }
 
     @Override
-    public boolean isWritable(int column) throws SQLException {
+    public boolean isWritable(int index) throws SQLException {
+        return false;
+    }
+
+    @Override
+    public boolean isAutoIncrement(int index) throws SQLException {
         return false;
     }
 }

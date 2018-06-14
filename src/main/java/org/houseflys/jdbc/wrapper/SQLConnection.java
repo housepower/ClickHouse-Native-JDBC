@@ -9,10 +9,12 @@ public abstract class SQLConnection implements Connection {
 
     @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
+        throw new SQLClientInfoException();
     }
 
     @Override
     public void setClientInfo(String name, String value) throws SQLClientInfoException {
+        throw new SQLClientInfoException();
     }
 
     @Override

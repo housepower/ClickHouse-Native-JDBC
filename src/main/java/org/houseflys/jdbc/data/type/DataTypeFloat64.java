@@ -1,8 +1,9 @@
 package org.houseflys.jdbc.data.type;
 
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.SQLException;
-import java.util.regex.Pattern;
+import java.sql.Types;
 
 import org.houseflys.jdbc.misc.Validate;
 import org.houseflys.jdbc.serializer.BinaryDeserializer;
@@ -15,7 +16,16 @@ import org.houseflys.jdbc.stream.QuotedTokenType;
 public class DataTypeFloat64 implements IDataType {
 
     private static final Double DEFAULT_VALUE = 0.0D;
-    private String doubleString;
+
+    @Override
+    public String name() {
+        return "Float64";
+    }
+
+    @Override
+    public int sqlTypeId() {
+        return Types.DOUBLE;
+    }
 
     @Override
     public Object defaultValue() {
@@ -25,9 +35,9 @@ public class DataTypeFloat64 implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         Validate.isTrue(data instanceof Double || data instanceof Float,
-            "Can't serializer " + data.getClass().getSimpleName() + " With DoubleDataTypeSerializer.");
+            "Expected Double Parameter, but was " + data.getClass().getSimpleName());
 
-        serializer.writeDouble((Double) data);
+        serializer.writeDouble(((Number) data).doubleValue());
     }
 
     @Override
@@ -54,7 +64,7 @@ public class DataTypeFloat64 implements IDataType {
     @Override
     public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
         QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.Number, "");
+        Validate.isTrue(token.type() == QuotedTokenType.Number, "Expected Number Literal.");
         return Double.valueOf(token.data());
     }
 

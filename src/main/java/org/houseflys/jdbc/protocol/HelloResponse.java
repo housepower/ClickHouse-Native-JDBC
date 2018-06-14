@@ -71,12 +71,12 @@ public class HelloResponse extends RequestOrResponse {
     }
 
     private static String getTimeZone(BinaryDeserializer deserializer, long serverReversion) throws IOException {
-        return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_TIMEZONE.intValue() ?
+        return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_TIMEZONE ?
             deserializer.readStringBinary() : TimeZone.getDefault().getID();
     }
 
     private static String getDisplayName(BinaryDeserializer deserializer, long serverReversion) throws IOException {
-        return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_DISPLAY_NAME.intValue() ?
+        return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_DISPLAY_NAME ?
             deserializer.readStringBinary() : "localhost";
     }
 }
