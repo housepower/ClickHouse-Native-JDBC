@@ -3,8 +3,6 @@ language: java
 services:
   - docker
 jdk:
-  - oraclejdk6
-  - oraclejdk7
   - oraclejdk8
 script:
   - mvn clean verify
