@@ -2,6 +2,7 @@ package com.github.housepower.jdbc.data.type.complex;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.TimeZone;
 
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
@@ -18,11 +19,12 @@ public class DataTypeNullable implements IDataType {
 
     private final String name;
     private final IDataType nestedDataType;
-    private final IDataType nullMapDataType = DataTypeFactory.get("UInt8");
+    private final IDataType nullMapDataType;
 
-    public DataTypeNullable(String name, IDataType nestedDataType) throws SQLException {
+    public DataTypeNullable(String name, IDataType nestedDataType, IDataType nullMapIDataType) throws SQLException {
         this.name = name;
         this.nestedDataType = nestedDataType;
+        this.nullMapDataType = nullMapIDataType;
     }
 
     @Override
@@ -90,10 +92,11 @@ public class DataTypeNullable implements IDataType {
         return data;
     }
 
-    public static IDataType createNullableType(QuotedLexer lexer) throws SQLException {
+    public static IDataType createNullableType(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
         Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
-        IDataType nullableNestedType = DataTypeFactory.get(lexer);
+        IDataType nullableNestedType = DataTypeFactory.get(lexer, serverZone);
         Validate.isTrue(lexer.next().type() == QuotedTokenType.ClosingRoundBracket);
-        return new DataTypeNullable("Nullable(" + nullableNestedType.name() + ")", nullableNestedType);
+        return new DataTypeNullable("Nullable(" + nullableNestedType.name() + ")", nullableNestedType
+            , DataTypeFactory.get("UInt8", serverZone));
     }
 }

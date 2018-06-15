@@ -3,6 +3,7 @@ package com.github.housepower.jdbc.protocol;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
@@ -23,7 +24,8 @@ public class ExtremesResponse extends RequestOrResponse {
         throw new UnsupportedOperationException("ExtremesResponse Cannot write to Server.");
     }
 
-    public static ExtremesResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
-        return new ExtremesResponse(deserializer.readStringBinary(), Block.readFrom(deserializer));
+    public static ExtremesResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
+        throws IOException, SQLException {
+        return new ExtremesResponse(deserializer.readStringBinary(), Block.readFrom(deserializer, info));
     }
 }

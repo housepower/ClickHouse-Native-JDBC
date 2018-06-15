@@ -1,5 +1,6 @@
 package com.github.housepower.jdbc.data;
 
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
@@ -68,7 +69,8 @@ public class Block {
         return nameWithPosition.get(name);
     }
 
-    public static Block readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
+    public static Block readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo serverInfo)
+        throws IOException, SQLException {
         BlockSettings info = BlockSettings.readFrom(deserializer);
 
         int columns = (int) deserializer.readVarInt();
@@ -80,7 +82,7 @@ public class Block {
             String name = deserializer.readStringBinary();
             String type = deserializer.readStringBinary();
 
-            IDataType dataType = DataTypeFactory.get(type);
+            IDataType dataType = DataTypeFactory.get(type, serverInfo.timeZone());
             cols[i] = new Column(name, dataType, dataType.deserializeBinaryBulk(rows, deserializer));
         }
 

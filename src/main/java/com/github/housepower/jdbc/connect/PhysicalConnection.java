@@ -31,28 +31,24 @@ public class PhysicalConnection {
         this.address = socket.getLocalSocketAddress();
     }
 
-    public boolean ping(int soTimeout) {
+    public boolean ping(int soTimeout, PhysicalInfo.ServerInfo info) {
         try {
             sendRequest(new PingRequest());
             for (; ; ) {
-                RequestOrResponse response = receiveResponse(soTimeout);
-                Validate.isTrue(response instanceof ProgressResponse || response instanceof PongResponse, "Expect Pong Response.");
+                RequestOrResponse response = receiveResponse(soTimeout, info);
+                Validate.isTrue(response instanceof ProgressResponse || response instanceof PongResponse,
+                    "Expect Pong Response.");
 
                 if (response instanceof PongResponse)
                     return true;
             }
         } catch (SQLException e) {
-            //TODO log
             return false;
         }
     }
 
     public void sendData(Block data) throws SQLException {
         sendRequest(new DataRequest("", data));
-    }
-
-    public void sendQuery(String query, QueryRequest.ClientInfo info) throws SQLException {
-        sendQuery(UUID.randomUUID().toString(), QueryRequest.COMPLETE_STAGE, info, query, new HashMap<SettingKey, Object>());
     }
 
     public void sendQuery(String query, QueryRequest.ClientInfo info, Map<SettingKey, Object> settings) throws SQLException {
@@ -63,31 +59,31 @@ public class PhysicalConnection {
         sendRequest(new HelloRequest(client, reversion, db, user, password));
     }
 
-    public Block receiveSampleBlock(int soTimeout) throws SQLException {
+    public Block receiveSampleBlock(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
         while (true) {
-            RequestOrResponse response = receiveResponse(soTimeout);
+            RequestOrResponse response = receiveResponse(soTimeout, info);
             if (response instanceof DataResponse) {
                 return ((DataResponse) response).block();
             }
         }
     }
 
-    public HelloResponse receiveHello(int soTimeout) throws SQLException {
-        RequestOrResponse response = receiveResponse(soTimeout);
+    public HelloResponse receiveHello(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
+        RequestOrResponse response = receiveResponse(soTimeout, info);
         Validate.isTrue(response instanceof HelloResponse, "Expect Hello Response.");
         return (HelloResponse) response;
     }
 
-    public EOFStreamResponse receiveEndOfStream(int soTimeout) throws SQLException {
-        RequestOrResponse response = receiveResponse(soTimeout);
+    public EOFStreamResponse receiveEndOfStream(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
+        RequestOrResponse response = receiveResponse(soTimeout, info);
         Validate.isTrue(response instanceof EOFStreamResponse, "Expect EOFStream Response.");
         return (EOFStreamResponse) response;
     }
 
-    public RequestOrResponse receiveResponse(int soTimeout) throws SQLException {
+    public RequestOrResponse receiveResponse(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
         try {
             socket.setSoTimeout(soTimeout);
-            return RequestOrResponse.readFrom(deserializer);
+            return RequestOrResponse.readFrom(deserializer, info);
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -108,7 +104,8 @@ public class PhysicalConnection {
         }
     }
 
-    private void sendQuery(String id, int stage, QueryRequest.ClientInfo info, String query, Map<SettingKey, Object> settings) throws SQLException {
+    private void sendQuery(String id, int stage, QueryRequest.ClientInfo info, String query,
+        Map<SettingKey, Object> settings) throws SQLException {
         sendRequest(new QueryRequest(id, info, stage, true, query, settings));
     }
 

@@ -1,16 +1,8 @@
 package com.github.housepower.jdbc.data;
 
-import com.github.housepower.jdbc.data.type.DataTypeDate;
-import com.github.housepower.jdbc.data.type.DataTypeFloat64;
-import com.github.housepower.jdbc.data.type.DataTypeInt16;
-import com.github.housepower.jdbc.data.type.DataTypeInt32;
+import com.github.housepower.jdbc.data.type.*;
 import com.github.housepower.jdbc.data.type.complex.*;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.data.type.DataTypeFloat32;
-import com.github.housepower.jdbc.data.type.DataTypeInt64;
-import com.github.housepower.jdbc.data.type.DataTypeInt8;
-import com.github.housepower.jdbc.data.type.DataTypeString;
-import com.github.housepower.jdbc.data.type.DataTypeUUID;
 import com.github.housepower.jdbc.stream.QuotedLexer;
 import com.github.housepower.jdbc.stream.QuotedToken;
 import com.github.housepower.jdbc.stream.QuotedTokenType;
@@ -22,33 +14,33 @@ import java.util.TimeZone;
 
 public class DataTypeFactory {
 
-    public static IDataType get(String type) throws SQLException {
+    public static IDataType get(String type, TimeZone serverZone) throws SQLException {
         QuotedLexer lexer = new QuotedLexer(type);
-        IDataType dataType = get(lexer);
+        IDataType dataType = get(lexer, serverZone);
         Validate.isTrue(lexer.next().type() == QuotedTokenType.EndOfStream);
         return dataType;
     }
 
     private static final Map<String, IDataType> dataTypes = initialDataTypes();
 
-    public static IDataType get(QuotedLexer lexer) throws SQLException {
+    public static IDataType get(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
         QuotedToken token = lexer.next();
         Validate.isTrue(token.type() == QuotedTokenType.BareWord);
 
         if ("Tuple".equals(token.data())) {
-            return DataTypeTuple.createTupleType(lexer);
+            return DataTypeTuple.createTupleType(lexer, serverZone);
         } else if ("Array".equals(token.data())) {
-            return DataTypeArray.createArrayType(lexer);
+            return DataTypeArray.createArrayType(lexer, serverZone);
         } else if ("Enum8".equals(token.data())) {
-            return DataTypeEnum8.createEnum8Type(lexer);
+            return DataTypeEnum8.createEnum8Type(lexer, serverZone);
         } else if ("Enum16".equals(token.data())) {
-            return DataTypeEnum16.createEnum16Type(lexer);
+            return DataTypeEnum16.createEnum16Type(lexer, serverZone);
         } else if ("DateTime".equals(token.data())) {
-            return DataTypeDateTime.createDateTimeType(lexer);
+            return DataTypeDateTime.createDateTimeType(lexer, serverZone);
         } else if ("Nullable".equals(token.data())) {
-            return DataTypeNullable.createNullableType(lexer);
+            return DataTypeNullable.createNullableType(lexer, serverZone);
         } else if ("FixedString".equals(token.data())) {
-            return DataTypeFixedString.createFixedStringType(lexer);
+            return DataTypeFixedString.createFixedStringType(lexer, serverZone);
         } else {
             String typeName = token.data();
             IDataType dataType = dataTypes.get(typeName);
@@ -74,8 +66,6 @@ public class DataTypeFactory {
         creators.put("UInt16", new DataTypeInt16("UInt16"));
         creators.put("UInt32", new DataTypeInt32("UInt32"));
         creators.put("UInt64", new DataTypeInt64("UInt64"));
-        //TODO: server timezone
-        creators.put("DateTime", new DataTypeDateTime("DateTime", TimeZone.getDefault()));
 
         return creators;
     }

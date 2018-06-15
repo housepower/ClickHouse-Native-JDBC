@@ -3,10 +3,8 @@ package com.github.housepower.jdbc;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.Struct;
+import java.sql.*;
+import java.util.TimeZone;
 
 public class InsertComplexTypeITest extends AbstractITest {
 
@@ -82,7 +80,9 @@ public class InsertComplexTypeITest extends AbstractITest {
                 statement.executeQuery("INSERT INTO test VALUES('2000-01-01 00:01:01')");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test");
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getTimestamp(1).getTime(), 946656061000L);
+
+                Assert.assertEquals(rs.getTimestamp(1).getTime(),
+                    new Timestamp(2000 - 1900, 0, 1, 0, 1, 1, 0).getTime());
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }

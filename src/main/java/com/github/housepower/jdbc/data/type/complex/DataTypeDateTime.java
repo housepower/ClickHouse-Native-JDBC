@@ -18,12 +18,13 @@ public class DataTypeDateTime implements IDataType {
 
     private static final Timestamp DEFAULT_VALUE = new Timestamp(0);
 
+    private final int offset;
     private final String name;
-    private final TimeZone timeZone;
 
     public DataTypeDateTime(String name, TimeZone timeZone) {
         this.name = name;
-        this.timeZone = timeZone;
+        long now = System.currentTimeMillis();
+        this.offset = TimeZone.getDefault().getOffset(now) - timeZone.getOffset(now);
     }
 
     @Override
@@ -65,12 +66,12 @@ public class DataTypeDateTime implements IDataType {
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         Validate.isTrue(data instanceof Timestamp,
             "Expected Timestamp Parameter, but was " + data.getClass().getSimpleName());
-        serializer.writeInt((int) (((Timestamp) data).getTime() / 1000));
+        serializer.writeInt((int) ((((Timestamp) data).getTime() + offset) / 1000));
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new Timestamp(deserializer.readInt() * 1000L);
+        return new Timestamp(deserializer.readInt() * 1000L - offset);
     }
 
     @Override
@@ -84,18 +85,18 @@ public class DataTypeDateTime implements IDataType {
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         Timestamp[] data = new Timestamp[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = new Timestamp(deserializer.readInt() * 1000L);
+            data[row] = new Timestamp(deserializer.readInt() * 1000L - offset);
         }
         return data;
     }
 
-    public static IDataType createDateTimeType(QuotedLexer lexer) throws SQLException {
+    public static IDataType createDateTimeType(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
         if (lexer.next().type() == QuotedTokenType.OpeningRoundBracket) {
             QuotedToken token;
             Validate.isTrue((token = lexer.next()).type() == QuotedTokenType.StringLiteral);
             String timeZoneData = token.data();
             return new DataTypeDateTime("DateTime(" + timeZoneData + ")", TimeZone.getTimeZone(timeZoneData));
         }
-        return new DataTypeDateTime("DateTime", TimeZone.getDefault());
+        return new DataTypeDateTime("DateTime", serverZone);
     }
 }

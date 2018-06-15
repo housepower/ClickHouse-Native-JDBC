@@ -6,6 +6,7 @@ import java.sql.Struct;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.jdbc.data.DataTypeFactory;
@@ -118,12 +119,12 @@ public class DataTypeTuple implements IDataType {
         return new ClickHouseStruct("Tuple", elems);
     }
 
-    public static DataTypeTuple createTupleType(QuotedLexer lexer) throws SQLException {
+    public static DataTypeTuple createTupleType(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
         Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
         List<IDataType> tupleNestedDataType = new ArrayList<IDataType>();
 
         for (; ; ) {
-            tupleNestedDataType.add(DataTypeFactory.get(lexer));
+            tupleNestedDataType.add(DataTypeFactory.get(lexer, serverZone));
             QuotedToken token = lexer.next();
             if (token.type() == QuotedTokenType.ClosingRoundBracket) {
                 StringBuilder builder = new StringBuilder("Tuple(");

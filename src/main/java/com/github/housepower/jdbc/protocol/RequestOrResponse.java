@@ -3,6 +3,7 @@ package com.github.housepower.jdbc.protocol;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 
@@ -26,12 +27,13 @@ public abstract class RequestOrResponse {
 
     public abstract void writeImpl(BinarySerializer serializer) throws IOException, SQLException;
 
-    public static RequestOrResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
+    public static RequestOrResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
+        throws IOException, SQLException {
         switch ((int) deserializer.readVarInt()) {
             case 0:
                 return HelloResponse.readFrom(deserializer);
             case 1:
-                return DataResponse.readFrom(deserializer);
+                return DataResponse.readFrom(deserializer, info);
             case 2:
                 throw ExceptionResponse.readExceptionFrom(deserializer);
             case 3:
@@ -43,9 +45,9 @@ public abstract class RequestOrResponse {
             case 6:
                 return ProfileInfoResponse.readFrom(deserializer);
             case 7:
-                return TotalsResponse.readFrom(deserializer);
+                return TotalsResponse.readFrom(deserializer, info);
             case 8:
-                return ExtremesResponse.readFrom(deserializer);
+                return ExtremesResponse.readFrom(deserializer, info);
             default:
                 throw new IllegalStateException("Accept the id of response that is not recognized by Server.");
         }

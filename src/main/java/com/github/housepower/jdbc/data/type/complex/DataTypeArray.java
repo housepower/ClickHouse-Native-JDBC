@@ -16,16 +16,18 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 public class DataTypeArray implements IDataType {
     private final String name;
     private final Array defaultValue;
     private final IDataType elemDataType;
-    private final IDataType offsetIDataType = DataTypeFactory.get("UInt64");
+    private final IDataType offsetIDataType;
 
-    public DataTypeArray(String name, IDataType elemDataType) throws SQLException {
+    public DataTypeArray(String name, IDataType elemDataType, IDataType offsetIDataType) throws SQLException {
         this.name = name;
         this.elemDataType = elemDataType;
+        this.offsetIDataType = offsetIDataType;
         this.defaultValue = new ClickHouseArray(new Object[] {elemDataType.defaultValue()});
     }
 
@@ -110,10 +112,11 @@ public class DataTypeArray implements IDataType {
         return data;
     }
 
-    public static IDataType createArrayType(QuotedLexer lexer) throws SQLException {
+    public static IDataType createArrayType(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
         Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
-        IDataType arrayNestedType = DataTypeFactory.get(lexer);
+        IDataType arrayNestedType = DataTypeFactory.get(lexer, serverZone);
         Validate.isTrue(lexer.next().type() == QuotedTokenType.ClosingRoundBracket);
-        return new DataTypeArray("Array(" + arrayNestedType.name() + ")", arrayNestedType);
+        return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
+            arrayNestedType, DataTypeFactory.get("UInt64", serverZone));
     }
 }

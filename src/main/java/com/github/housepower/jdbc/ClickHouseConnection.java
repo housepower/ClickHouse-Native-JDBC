@@ -101,7 +101,8 @@ public class ClickHouseConnection extends SQLConnection {
         List<RequestOrResponse> data = new ArrayList<RequestOrResponse>();
 
         while (true) {
-            RequestOrResponse response = connection.receiveResponse(configure.queryTimeout());
+            RequestOrResponse response =
+                connection.receiveResponse(configure.queryTimeout(), atomicInfo.get().server());
 
             if (response instanceof EOFStreamResponse) {
                 return new QueryResponse(data);
@@ -116,14 +117,14 @@ public class ClickHouseConnection extends SQLConnection {
 
         int rows = 0;
         connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
-        Block header = connection.receiveSampleBlock(configure.queryTimeout());
+        Block header = connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
 
         while (true) {
             Block block = input.next(header, 8192);
 
             if (block.rows() == 0) {
                 connection.sendData(new Block());
-                connection.receiveEndOfStream(configure.queryTimeout());
+                connection.receiveEndOfStream(configure.queryTimeout(), atomicInfo.get().server());
                 return rows;
             }
 
@@ -134,7 +135,7 @@ public class ClickHouseConnection extends SQLConnection {
 
     private PhysicalConnection getHealthyPhysicalConnection() throws SQLException {
         PhysicalInfo oldInfo = atomicInfo.get();
-        if (!oldInfo.connection().ping(configure.queryTimeout())) {
+        if (!oldInfo.connection().ping(configure.queryTimeout(), atomicInfo.get().server())) {
             PhysicalInfo newInfo = createPhysicalInfo(configure);
             PhysicalInfo closeableInfo = atomicInfo.compareAndSet(oldInfo, newInfo) ? oldInfo : newInfo;
             closeableInfo.connection().disPhysicalConnection();
@@ -165,7 +166,7 @@ public class ClickHouseConnection extends SQLConnection {
             long reversion = ClickHouseDefines.CLIENT_REVERSION;
             physical.sendHello("client", reversion, configure.database(), configure.username(), configure.password());
 
-            HelloResponse response = physical.receiveHello(configure.queryTimeout());
+            HelloResponse response = physical.receiveHello(configure.queryTimeout(), null);
             TimeZone timeZone = TimeZone.getTimeZone(response.serverTimeZone());
             return new PhysicalInfo.ServerInfo(response.reversion(), timeZone, response.serverDisplayName());
         } catch (SQLException rethrows) {
