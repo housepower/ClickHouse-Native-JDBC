@@ -3,9 +3,11 @@ package com.github.housepower.jdbc;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class InsertSimpleTypeITest extends AbstractITest {
 
@@ -120,7 +122,8 @@ public class InsertSimpleTypeITest extends AbstractITest {
                 statement.executeQuery("INSERT INTO test VALUES('2000-01-01')");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test");
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getDate(1).getTime(), 946598400000L);
+                Assert.assertEquals(rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1),
+                    new Date(2000 - 1900, 0, 1).getTime() / TimeUnit.DAYS.toMillis(1));
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }

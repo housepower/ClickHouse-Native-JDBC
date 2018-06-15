@@ -8,7 +8,7 @@ public abstract class AbstractITest {
     private static final int SERVER_PORT = Integer.valueOf(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
 
     protected void withNewConnection(WithConnection withConnection) throws Exception {
-        Class.forName("org.houseflys.jdbc.ClickHouseDriver");
+        Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
         Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:" + SERVER_PORT);
 
         try {

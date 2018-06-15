@@ -11,6 +11,7 @@ import com.github.housepower.jdbc.stream.QuotedTokenType;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.TimeZone;
 
 public class DataTypeFixedString implements IDataType {
 
@@ -78,7 +79,7 @@ public class DataTypeFixedString implements IDataType {
         return data;
     }
 
-    public static IDataType createFixedStringType(QuotedLexer lexer) throws SQLException {
+    public static IDataType createFixedStringType(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
         Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
         QuotedToken fixedStringN = lexer.next();
         Validate.isTrue(fixedStringN.type() == QuotedTokenType.Number);

@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 public class DataTypeEnum8 implements IDataType {
 
@@ -87,7 +88,7 @@ public class DataTypeEnum8 implements IDataType {
         return data;
     }
 
-    public static IDataType createEnum8Type(QuotedLexer lexer) throws SQLException {
+    public static IDataType createEnum8Type(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
         Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
 
         List<Byte> enumVals = new ArrayList<Byte>();

@@ -11,7 +11,7 @@ public class ConnectionParamITest {
 
     @Test(expected = SQLException.class)
     public void successfullyMaxRowsToRead() throws Exception {
-        Class.forName("org.houseflys.jdbc.ClickHouseDriver");
+        Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
         Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1?max_rows_to_read=1");
         Statement statement = connection.createStatement();
         statement.execute("SELECT 1 UNION ALL SELECT 2");

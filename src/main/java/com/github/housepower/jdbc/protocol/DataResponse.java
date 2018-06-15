@@ -1,5 +1,6 @@
 package com.github.housepower.jdbc.protocol;
 
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
@@ -23,11 +24,12 @@ public class DataResponse extends RequestOrResponse {
         throw new UnsupportedOperationException("DataResponse Cannot write to Server.");
     }
 
-    public static DataResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
+    public static DataResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
+        throws IOException, SQLException {
         String name = deserializer.readStringBinary();
 
         deserializer.maybeEnableCompressed();
-        Block block = Block.readFrom(deserializer);
+        Block block = Block.readFrom(deserializer, info);
         deserializer.maybeDisenableCompressed();
 
         return new DataResponse(name, block);

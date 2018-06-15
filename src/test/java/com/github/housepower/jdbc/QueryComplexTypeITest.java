@@ -96,7 +96,8 @@ public class QueryComplexTypeITest extends AbstractITest {
                 ResultSet rs = statement.executeQuery("SELECT toDateTime('2000-01-01 01:02:03')");
 
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getTimestamp(1).getTime(), 946659723000L);
+                Assert.assertEquals(rs.getTimestamp(1).getTime(),
+                    new Timestamp(2000 - 1900, 0, 1, 1, 2, 3, 0).getTime());
             }
         });
     }
