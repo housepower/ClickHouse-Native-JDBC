@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/housepower/ClickHouse-Native-JDBC.svg?branch=master)](https://travis-ci.org/housepower/ClickHouse-Native-JDBC)
+
 # ClickHouse-Native-JDBC 
 
 This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yandex/) in Java.
@@ -10,7 +12,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 
 ## Supported queries
 * [x] SELECT
-* [x] INSERT
+* [x] INSERT && BATCH INSERT
 * [x] CREATE
 * [x] ALTER
 * [x] DROP
@@ -36,8 +38,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 
 Select query, see also [SimpleQuery.java](./src/main/java/examples/SimpleQuery.java)
 ```java
-  public static void main(String[] args) throws Exception {
-    Class.forName("org.houseflys.jdbc.ClickHouseDriver");
+    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();
@@ -46,15 +47,12 @@ Select query, see also [SimpleQuery.java](./src/main/java/examples/SimpleQuery.j
     while (rs.next()) {
       System.out.println(rs.getInt(1) + "\t" + rs.getLong(2));
     }
-  }
-
 ```
 
 All DDL,DML queries, see also [ExecuteQuery.java](./src/main/java/examples/ExecuteQuery.java)
 
 ```java
-  public static void main(String[] args) throws Exception {
-    Class.forName("org.houseflys.jdbc.ClickHouseDriver");
+    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();
@@ -66,8 +64,28 @@ All DDL,DML queries, see also [ExecuteQuery.java](./src/main/java/examples/Execu
     stmt.executeQuery("alter table test_jdbc_example add column costs Float32");
     // drop the table
     stmt.executeQuery("drop table test_jdbc_example");
-  }
 ```
 
+Batch insert query, see also [BatchQuery.java](./src/main/java/examples/BatchQuery.java)
+
+``` java
+    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
+    Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
+
+    Statement stmt = connection.createStatement();
+    stmt.executeQuery("drop table if exists test_jdbc_example");
+    stmt.executeQuery("create table test_jdbc_example(day Date, name String, age UInt8) Engine=Log");
+
+    PreparedStatement pstmt = connection.prepareStatement("INSERT INTO test VALUES(?, 1, ?)");
+
+    for (int i = 0; i < 1000; i++) {
+        pstmt.setDate(1, new Date(System.currentTimeMillis()));
+        pstmt.setString(2, "Zhang San" + i);
+        pstmt.setByte(3, (byte)i);
+        pstmt.addBatch();
+    }
+    pstmt.executeBatch();
+    stmt.executeQuery("drop table test_jdbc_example");
+```
 ## TODO
 * Maven central
