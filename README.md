@@ -76,9 +76,9 @@ Batch insert query, see also [BatchQuery.java](./src/main/java/examples/BatchQue
     stmt.executeQuery("drop table if exists test_jdbc_example");
     stmt.executeQuery("create table test_jdbc_example(day Date, name String, age UInt8) Engine=Log");
 
-    PreparedStatement pstmt = connection.prepareStatement("INSERT INTO test VALUES(?, 1, ?)");
+    PreparedStatement pstmt = connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?)");
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 200; i++) {
         pstmt.setDate(1, new Date(System.currentTimeMillis()));
         pstmt.setString(2, "Zhang San" + i);
         pstmt.setByte(3, (byte)i);
