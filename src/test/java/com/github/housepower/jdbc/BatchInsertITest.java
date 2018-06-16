@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 
@@ -17,16 +18,16 @@ public class BatchInsertITest extends AbstractITest {
                 Statement statement = connection.createStatement();
 
                 statement.execute("DROP TABLE IF EXISTS test");
-                statement.execute("CREATE TABLE test(id UInt8, age UInt8, name String)ENGINE=Log");
+                statement.execute("CREATE TABLE test(id Int8, age UInt8, name String)ENGINE=Log");
                 PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, 1, ?)");
 
-                preparedStatement.setByte(1, (byte) 1);
-                preparedStatement.setString(2, "Zhang San");
-                preparedStatement.addBatch();
-                preparedStatement.setByte(1, (byte) 2);
-                preparedStatement.setString(2, "Li Si");
-                preparedStatement.addBatch();
-                Assert.assertArrayEquals(preparedStatement.executeBatch(), new int[] {-1, -1});
+                for (int i = 0; i < Byte.MAX_VALUE; i++) {
+                    preparedStatement.setByte(1, (byte) i);
+                    preparedStatement.setString(2, "Zhang San" + i);
+                    preparedStatement.addBatch();
+                }
+
+                Assert.assertEquals(preparedStatement.executeBatch().length, Byte.MAX_VALUE);
             }
         });
 

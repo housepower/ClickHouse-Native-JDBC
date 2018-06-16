@@ -1,6 +1,6 @@
 package com.github.housepower.jdbc.buffer;
 
-import com.github.housepower.jdbc.misc.CityHash;
+import com.github.housepower.jdbc.misc.ClickHouseCityHash;
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;
 
@@ -64,7 +64,7 @@ public class CompressedBuffedWriter implements BuffedWriter {
             System.arraycopy(littleEndian(compressedSize), 0, compressedBuffer, 17, 4);
             System.arraycopy(littleEndian(position), 0, compressedBuffer, 21, 4);
 
-            long[] checksum = CityHash.cityHash128(compressedBuffer, 16, compressedSize);
+            long[] checksum = ClickHouseCityHash.cityHash128(compressedBuffer, 16, compressedSize);
             System.arraycopy(littleEndian(checksum[0]), 0, compressedBuffer, 0, 8);
             System.arraycopy(littleEndian(checksum[1]), 0, compressedBuffer, 8, 8);
 
