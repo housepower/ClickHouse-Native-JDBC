@@ -27,7 +27,9 @@ public class DataTypeFactory {
         QuotedToken token = lexer.next();
         Validate.isTrue(token.type() == QuotedTokenType.BareWord);
 
-        if ("Tuple".equals(token.data())) {
+        if ("Date".equals(token.data())) {
+            return DataTypeDate.createDateType(lexer, serverZone);
+        } else if ("Tuple".equals(token.data())) {
             return DataTypeTuple.createTupleType(lexer, serverZone);
         } else if ("Array".equals(token.data())) {
             return DataTypeArray.createArrayType(lexer, serverZone);
@@ -52,7 +54,6 @@ public class DataTypeFactory {
     private static Map<String, IDataType> initialDataTypes() {
         Map<String, IDataType> creators = new HashMap<String, IDataType>();
 
-        creators.put("Date", new DataTypeDate());
         creators.put("UUID", new DataTypeUUID());
         creators.put("String", new DataTypeString());
         creators.put("Float32", new DataTypeFloat32());

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import com.github.housepower.jdbc.misc.Validate;
@@ -18,6 +19,12 @@ public class DataTypeDate implements IDataType {
 
     private static final Date DEFAULT_VALUE = new Date(0);
     private static final long MILLIS_DIFF = TimeUnit.DAYS.toMillis(1);
+    private final int offset;
+
+    public DataTypeDate(TimeZone zone) {
+        long now = System.currentTimeMillis();
+        this.offset = TimeZone.getDefault().getOffset(now) - zone.getOffset(now);
+    }
 
     @Override
     public String name() {
@@ -38,12 +45,12 @@ public class DataTypeDate implements IDataType {
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         Validate.isTrue(data instanceof Date, "Expected Date Parameter, but was " + data.getClass().getSimpleName());
 
-        serializer.writeShort((short) (((Date) data).getTime() / MILLIS_DIFF));
+        serializer.writeShort((short) ((((Date) data).getTime() + offset) / MILLIS_DIFF));
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        return new Date(deserializer.readShort() * MILLIS_DIFF);
+        return new Date(deserializer.readShort() * MILLIS_DIFF - offset);
     }
 
     @Override
@@ -57,7 +64,7 @@ public class DataTypeDate implements IDataType {
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
         Date[] data = new Date[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = new Date(deserializer.readShort() * MILLIS_DIFF);
+            data[row] = new Date(deserializer.readShort() * MILLIS_DIFF - offset);
         }
         return data;
     }
@@ -74,5 +81,9 @@ public class DataTypeDate implements IDataType {
             Integer.valueOf(yearMonthDay[0]) - 1900,
             Integer.valueOf(yearMonthDay[1]) - 1,
             Integer.valueOf(yearMonthDay[2]));
+    }
+
+    public static IDataType createDateType(QuotedLexer lexer, TimeZone serverZone) {
+        return new DataTypeDate(serverZone);
     }
 }
