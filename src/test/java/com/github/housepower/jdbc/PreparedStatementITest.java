@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.*;
+import java.sql.Date;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class PreparedStatementITest extends AbstractITest {
@@ -130,7 +132,7 @@ public class PreparedStatementITest extends AbstractITest {
                 ResultSet rs = preparedStatement.executeQuery();
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getDate(1).getTime(),
-                    now / TimeUnit.DAYS.toMillis(1) * TimeUnit.DAYS.toMillis(1));
+                    (now + TimeZone.getDefault().getOffset(now)) / TimeUnit.DAYS.toMillis(1) * TimeUnit.DAYS.toMillis(1));
                 Assert.assertFalse(rs.next());
             }
         });
