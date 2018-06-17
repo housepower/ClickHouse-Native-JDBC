@@ -1,8 +1,18 @@
 [![Build Status](https://travis-ci.org/housepower/ClickHouse-Native-JDBC.svg?branch=master)](https://travis-ci.org/housepower/ClickHouse-Native-JDBC)
 
-# ClickHouse-Native-JDBC 
+# ClickHouse-Native-JDBC
 
 This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yandex/) in Java.
+
+## Maven central
+
+```java
+    <dependency>
+	<groupId>com.github.housepower</groupId>
+	<artifactId>clickhouse-native-jdbc</artifactId>
+	<version>1.0-testing</version>
+    </dependency>
+```
 
 ## Features
 
@@ -24,7 +34,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 * [x] Float32, Float64
 * [x] String
 * [x] FixedString(N)
-* [x] Date 
+* [x] Date
 * [x] DateTime
 * [x] Nullable(T)
 * [x] Tuple
@@ -87,5 +97,3 @@ Batch insert query, see also [BatchQuery.java](./src/main/java/examples/BatchQue
     pstmt.executeBatch();
     stmt.executeQuery("drop table test_jdbc_example");
 ```
-## TODO
-* Maven central
