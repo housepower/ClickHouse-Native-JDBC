@@ -79,7 +79,7 @@ public class BinarySerializer {
         container.select(true);
     }
 
-    public void maybeDisenableCompressed() throws IOException {
+    public void maybeDisableCompressed() throws IOException {
         container.get().flushToTarget(true);
         container.select(false);
     }
