@@ -28,7 +28,7 @@ public class DataRequest extends RequestOrResponse {
 
         serializer.maybeEnableCompressed();
         block.writeTo(serializer);
-        serializer.maybeDisenableCompressed();
+        serializer.maybeDisableCompressed();
     }
 
 }
