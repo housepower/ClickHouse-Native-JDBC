@@ -131,8 +131,8 @@ public class PreparedStatementITest extends AbstractITest {
                 preparedStatement.setDate(1, new Date(now));
                 ResultSet rs = preparedStatement.executeQuery();
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getDate(1).getTime(),
-                    (now + TimeZone.getDefault().getOffset(now)) / TimeUnit.DAYS.toMillis(1) * TimeUnit.DAYS.toMillis(1));
+                Assert.assertEquals(rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1),
+                    now / TimeUnit.DAYS.toMillis(1));
                 Assert.assertFalse(rs.next());
             }
         });

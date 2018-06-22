@@ -4,7 +4,11 @@ import com.github.housepower.jdbc.connect.PhysicalConnection;
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.protocol.*;
+import com.github.housepower.jdbc.protocol.EOFStreamResponse;
+import com.github.housepower.jdbc.protocol.HelloResponse;
+import com.github.housepower.jdbc.protocol.QueryRequest;
+import com.github.housepower.jdbc.protocol.QueryResponse;
+import com.github.housepower.jdbc.protocol.RequestOrResponse;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
@@ -12,13 +16,14 @@ import com.github.housepower.jdbc.statement.ClickHousePreparedQueryStatement;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.stream.InputFormat;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
-import com.github.housepower.jdbc.protocol.EOFStreamResponse;
-import com.github.housepower.jdbc.protocol.HelloResponse;
-import com.github.housepower.jdbc.protocol.QueryResponse;
-import com.github.housepower.jdbc.protocol.RequestOrResponse;
 
 import java.net.InetSocketAddress;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.PreparedStatement;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -157,7 +162,7 @@ public class ClickHouseConnection extends SQLConnection {
         Validate.isTrue(physical.address() instanceof InetSocketAddress);
         InetSocketAddress address = (InetSocketAddress) physical.address();
         String clientName = String.format("%s %s", ClickHouseDefines.NAME, "client");
-        String initialAddress = String.format("%s:%d", address.getHostName(), address.getPort());
+        String initialAddress = "[::ffff:127.0.0.1]:0";
         return new QueryRequest.ClientInfo(initialAddress, address.getHostName(), clientName);
     }
 
