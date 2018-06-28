@@ -2,16 +2,17 @@ package com.github.housepower.jdbc.stream;
 
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.Column;
+import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 
 import java.sql.SQLException;
 import java.util.Arrays;
 
 public class ValuesInputFormat implements InputFormat {
-    private final QuotedLexer lexer;
+    private final SQLLexer lexer;
 
-    public ValuesInputFormat(int pos, String data) {
-        this.lexer = new QuotedLexer(data, pos);
+    public ValuesInputFormat(int pos, String data) throws SQLException {
+        this.lexer = new SQLLexer(pos, data);
     }
 
     @Override
@@ -19,22 +20,18 @@ public class ValuesInputFormat implements InputFormat {
         Object[][] columnData = new Object[header.columns()][maxRows];
 
         for (int row = 0; row < maxRows; row++) {
-            QuotedToken quotedToken = lexer.next();
-            if (quotedToken.type() == QuotedTokenType.EndOfStream || quotedToken.type() == QuotedTokenType.Semicolon) {
+            char nextChar = lexer.character();
+            if (lexer.eof() || nextChar == ';')
                 return newValuesBlock(header, row, columnData);
+
+            Validate.isTrue(nextChar == '(');
+            for (int column = 0; column < header.columns(); column++) {
+                if (column > 0)
+                    Validate.isTrue(lexer.character() == ',');
+
+                columnData[column][row] = header.getByPosition(column).type().deserializeTextQuoted(lexer);
             }
-
-            Validate.isTrue(quotedToken.type() == QuotedTokenType.OpeningRoundBracket, "Expected OpeningRoundBracket.");
-
-            for (int i = 0; i < header.columns(); i++) {
-                Column column = header.getByPosition(i);
-
-                columnData[i][row] = column.type().deserializeTextQuoted(this.lexer);
-
-                quotedToken = lexer.next();
-                Validate.isTrue(quotedToken.type() == QuotedTokenType.ClosingRoundBracket
-                    || quotedToken.type() == QuotedTokenType.Comma, "");
-            }
+            Validate.isTrue(lexer.character() == ')');
         }
         return newValuesBlock(header, maxRows, columnData);
     }

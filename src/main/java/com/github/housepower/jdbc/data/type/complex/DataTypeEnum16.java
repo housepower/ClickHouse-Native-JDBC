@@ -1,12 +1,11 @@
 package com.github.housepower.jdbc.data.type.complex;
 
+import com.github.housepower.jdbc.misc.SQLLexer;
+import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.stream.QuotedLexer;
-import com.github.housepower.jdbc.stream.QuotedToken;
-import com.github.housepower.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -43,22 +42,30 @@ public class DataTypeEnum16 implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
-        QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "Expected String Literal.");
-        return token.data();
+    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return lexer.stringLiteral();
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof String, "Expected String Parameter, but was " + data.getClass().getSimpleName());
+        Validate.isTrue(data instanceof String || data instanceof StringView,
+            "Expected Enum8 Parameter, but was " + data.getClass().getSimpleName());
+
         for (int i = 0; i < names.length; i++) {
-            if (names[i].equals(data)) {
+            if (data.equals(names[i])) {
                 serializer.writeShort(values[i]);
                 return;
             }
         }
-        throw new SQLException("");
+
+        String message = "Expected ";
+        for (int i = 0; i < names.length; i++) {
+            if (i > 0)
+                message += " OR ";
+            message += names[i];
+        }
+
+        throw new SQLException(message + " , but was " + String.valueOf(data));
     }
 
     @Override
@@ -88,34 +95,31 @@ public class DataTypeEnum16 implements IDataType {
         return data;
     }
 
-    public static IDataType createEnum16Type(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
-        Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
-
-        List<Short> enumVals = new ArrayList<Short>();
+    public static IDataType createEnum16Type(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        List<Short> enumValues = new ArrayList<Short>();
         List<String> enumNames = new ArrayList<String>();
-        StringBuilder enumString = new StringBuilder("Enum16(");
 
-        for (; ; ) {
-            QuotedToken name = lexer.next(), equals = lexer.next(), number = lexer.next();
-            Validate.isTrue(name.type() == QuotedTokenType.StringLiteral);
-            Validate.isTrue(equals.type() == QuotedTokenType.Equals);
-            Validate.isTrue(number.type() == QuotedTokenType.Number);
+        for (int i = 0; i < 65535; i++) {
+            enumNames.add(String.valueOf(lexer.stringLiteral()));
+            Validate.isTrue(lexer.character() == '=');
+            enumValues.add(lexer.numberLiteral().shortValue());
 
-            String nameString = name.data();
-            String numberString = number.data();
-            enumVals.add(Short.valueOf(numberString));
-            enumNames.add(String.valueOf(nameString));
-            enumString.append("'").append(nameString).append("'").append(" = ").append(numberString);
+            char character = lexer.character();
+            Validate.isTrue(character == ',' || character == ')');
 
-            QuotedToken next = lexer.next();
-            Validate.isTrue(next.type() == QuotedTokenType.Comma || next.type() == QuotedTokenType.ClosingRoundBracket);
-
-            if (next.type() == QuotedTokenType.ClosingRoundBracket) {
-                return new DataTypeEnum16(enumString.append(")").toString(),
-                    enumNames.toArray(new String[enumNames.size()]),
-                    enumVals.toArray(new Short[enumVals.size()]));
+            if (character == ')') {
+                StringBuilder builder = new StringBuilder("Enum16(");
+                for (int index = 0; index < enumNames.size(); index++) {
+                    if (index > 0)
+                        builder.append(",");
+                    builder.append("'").append(enumNames.get(index)).append("'")
+                        .append(" = ").append(enumValues.get(index));
+                }
+                return new DataTypeEnum16(builder.append(")").toString(),
+                    enumNames.toArray(new String[enumNames.size()]), enumValues.toArray(new Short[enumValues.size()]));
             }
-            enumString.append(" , ");
         }
+        throw new SQLException("DataType Enum16 size must be less than 65535");
     }
 }

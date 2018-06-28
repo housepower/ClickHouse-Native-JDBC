@@ -1,12 +1,10 @@
 package com.github.housepower.jdbc.data.type;
 
+import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.stream.QuotedLexer;
-import com.github.housepower.jdbc.stream.QuotedToken;
-import com.github.housepower.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -66,10 +64,8 @@ public class DataTypeInt16 implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
-        QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.Number, "Expected Number Literal.");
-        return Short.valueOf(token.data());
+    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return lexer.numberLiteral().shortValue();
     }
 
 }

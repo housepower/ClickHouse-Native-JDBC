@@ -2,11 +2,14 @@ package com.github.housepower.jdbc.serializer;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
 
 import com.github.housepower.jdbc.buffer.BuffedWriter;
 import com.github.housepower.jdbc.buffer.CompressedBuffedWriter;
 import com.github.housepower.jdbc.buffer.SocketBuffedWriter;
 import com.github.housepower.jdbc.misc.Container;
+import com.github.housepower.jdbc.misc.StringView;
+import com.github.housepower.jdbc.misc.StringViewCoding;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 public class BinarySerializer {
@@ -106,5 +109,10 @@ public class BinarySerializer {
 
     public void writeBytes(byte[] bytes) throws IOException {
         container.get().writeBinary(bytes);
+    }
+
+    public void writeStringViewBinary(StringView data) throws IOException, SQLException {
+        writeVarInt(data.end() - data.start());
+        container.get().writeBinary(StringViewCoding.bytes(data));
     }
 }
