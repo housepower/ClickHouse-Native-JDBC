@@ -10,6 +10,22 @@ import org.junit.Test;
 public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
+    public void successfullyNullableWithDateTimeWithoutTimezone() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+                ResultSet rs =
+                    statement.executeQuery("SELECT nullIf(toDateTime('2000-01-01 01:02:03'), toDateTime(0))");
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getTimestamp(1).getTime(),
+                    new Timestamp(2000 - 1900, 0, 1, 1, 2, 3, 0).getTime());
+                Assert.assertFalse(rs.next());
+            }
+        });
+    }
+
+    @Test
     public void successfullyFixedString() throws Exception {
         withNewConnection(new WithConnection() {
             @Override
