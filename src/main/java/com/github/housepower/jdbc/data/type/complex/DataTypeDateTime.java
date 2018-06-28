@@ -97,6 +97,7 @@ public class DataTypeDateTime implements IDataType {
             String timeZoneData = token.data();
             return new DataTypeDateTime("DateTime(" + timeZoneData + ")", TimeZone.getTimeZone(timeZoneData));
         }
+        lexer.prev();
         return new DataTypeDateTime("DateTime", serverZone);
     }
 }
