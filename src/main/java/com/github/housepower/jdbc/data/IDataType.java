@@ -1,6 +1,6 @@
 package com.github.housepower.jdbc.data;
 
-import com.github.housepower.jdbc.stream.QuotedLexer;
+import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
@@ -14,7 +14,7 @@ public interface IDataType {
 
     Object defaultValue();
 
-    Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException;
+    Object deserializeTextQuoted(SQLLexer lexer) throws SQLException;
 
     void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException;
 

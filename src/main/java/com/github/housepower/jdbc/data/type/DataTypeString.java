@@ -1,12 +1,10 @@
 package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.stream.QuotedLexer;
-import com.github.housepower.jdbc.stream.QuotedTokenType;
+import com.github.housepower.jdbc.misc.SQLLexer;
+import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.stream.QuotedToken;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -31,9 +29,13 @@ public class DataTypeString implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof String, "Expected String Parameter, but was " + data.getClass().getSimpleName());
-
-        serializer.writeStringBinary((String) data);
+        if (data instanceof String) {
+            serializer.writeStringBinary((String) data);
+        } else if (data instanceof StringView) {
+            serializer.writeStringViewBinary((StringView) data);
+        } else {
+            throw new SQLException("Expected String Parameter, but was " + data.getClass().getSimpleName());
+        }
     }
 
     @Override
@@ -59,10 +61,7 @@ public class DataTypeString implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
-        QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "Expected String Literal.");
-        return token.data();
+    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return lexer.stringLiteral();
     }
-
 }

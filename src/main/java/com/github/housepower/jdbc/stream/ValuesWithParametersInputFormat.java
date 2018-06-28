@@ -1,8 +1,8 @@
 package com.github.housepower.jdbc.stream;
 
-
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.Column;
+import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 
 import java.sql.SQLException;
@@ -11,15 +11,20 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ValuesWithParametersInputFormat implements InputFormat {
-    private final QuotedLexer lexer;
     private final Iterator<Object[]> iterator;
 
     private int pPos;
+    private SQLLexer lexer;
     private Object[] parameters;
 
-    public ValuesWithParametersInputFormat(String query, int pos, List<Object[]> parameters) {
+    private final int pos;
+    private final String query;
+
+    public ValuesWithParametersInputFormat(String query, int pos, List<Object[]> parameters) throws SQLException {
+        this.pos = pos;
+        this.query = query;
         this.iterator = parameters.iterator();
-        this.lexer = new QuotedLexer(query, pos);
+        this.lexer = new SQLLexer(pos, query);
         this.parameters = iterator.hasNext() ? iterator.next() : new Object[0];
     }
 
@@ -29,39 +34,32 @@ public class ValuesWithParametersInputFormat implements InputFormat {
         Object[][] columnData = new Object[header.columns()][maxRows];
 
         for (int row = 0; row < maxRows; row++) {
-            QuotedToken token = lexer.next();
-            if (isEndToken(token)) {
+            char nextChar = lexer.character();
+            if (lexer.eof() || nextChar == ';') {
                 if (!iterator.hasNext())
                     return newPreparedBlock(header, row, columnData);
-
-                pPos = 0;
-                lexer.reset();
+                pPos=0;
                 parameters = iterator.next();
-                token = lexer.next();
+                lexer = new SQLLexer(pos, query);
+                nextChar = lexer.character();
             }
 
-            Validate.isTrue(token.type() == QuotedTokenType.OpeningRoundBracket, "Expected OpeningRoundBracket.");
-            for (int i = 0; i < header.columns(); i++) {
-                Column column = header.getByPosition(i);
+            Validate.isTrue(nextChar == '(');
+            for (int column = 0; column < header.columns(); column++) {
+                if (column > 0)
+                    Validate.isTrue(lexer.character() == ',');
 
-                columnData[i][row] =
-                    lexer.next().type() == QuotedTokenType.QuestionMark ? parameters[pPos++] : getQuotedObject(column);
-
-                token = lexer.next();
-                Validate.isTrue(
-                    token.type() == QuotedTokenType.ClosingRoundBracket || token.type() == QuotedTokenType.Comma, "");
+                columnData[column][row] = lexer.isCharacter('?') ? quotedParameter() :
+                    header.getByPosition(column).type().deserializeTextQuoted(lexer);
             }
+            Validate.isTrue(lexer.character() == ')');
         }
         return newPreparedBlock(header, maxRows, columnData);
     }
 
-    private boolean isEndToken(QuotedToken token) {
-        return token.type() == QuotedTokenType.EndOfStream || token.type() == QuotedTokenType.Semicolon;
-    }
-
-    private Object getQuotedObject(Column column) throws SQLException {
-        lexer.prev();
-        return column.type().deserializeTextQuoted(lexer);
+    private Object quotedParameter() throws SQLException {
+        Validate.isTrue(lexer.character() == '?');
+        return parameters[pPos++];
     }
 
     private Block newPreparedBlock(Block header, int rows, Object[][] columnData) throws SQLException {

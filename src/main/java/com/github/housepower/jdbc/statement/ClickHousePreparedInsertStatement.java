@@ -1,9 +1,7 @@
 package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.stream.QuotedLexer;
-import com.github.housepower.jdbc.stream.QuotedToken;
-import com.github.housepower.jdbc.stream.QuotedTokenType;
+import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
 
 import java.sql.ResultSet;
@@ -19,7 +17,8 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     private final String insertQuery;
     private final List<Object[]> parameters;
 
-    public ClickHousePreparedInsertStatement(int posOfData, String fullQuery, ClickHouseConnection conn) {
+    public ClickHousePreparedInsertStatement(int posOfData, String fullQuery, ClickHouseConnection conn)
+        throws SQLException {
         super(conn, null, computeQuestionMarkSize(fullQuery, posOfData));
         this.posOfData = posOfData;
         this.fullQuery = fullQuery;
@@ -66,16 +65,22 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         return result;
     }
 
-    private static int computeQuestionMarkSize(String query, int start) {
-        int size = 0;
-        QuotedToken token;
-        QuotedLexer lexer = new QuotedLexer(query, start);
-
-        while ((token = lexer.next()).type() != QuotedTokenType.EndOfStream) {
-            if (token.type() == QuotedTokenType.QuestionMark) {
-                size++;
+    private static int computeQuestionMarkSize(String query, int start) throws SQLException {
+        int param = 0;
+        boolean inQuotes = false, inBackQuotes = false;
+        for (int i = 0; i < query.length(); i++) {
+            char ch = query.charAt(i);
+            if (ch == '`') {
+                inBackQuotes = !inBackQuotes;
+            } else if (ch == '\'') {
+                inQuotes = !inQuotes;
+            } else if (!inBackQuotes && !inQuotes) {
+                if (ch == '?') {
+                    Validate.isTrue(i > start, "");
+                    param++;
+                }
             }
         }
-        return size;
+        return param;
     }
 }

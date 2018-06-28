@@ -2,9 +2,6 @@ package com.github.housepower.jdbc.statement;
 
 
 import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.stream.QuotedLexer;
-import com.github.housepower.jdbc.stream.QuotedToken;
-import com.github.housepower.jdbc.stream.QuotedTokenType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,17 +41,32 @@ public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement 
 
     private static String[] splitQueryByQuestionMark(String query) {
         int lastPos = 0;
-        QuotedLexer lexer = new QuotedLexer(query);
         List<String> queryParts = new ArrayList<String>();
-        while (true) {
-            QuotedToken token = lexer.next();
-
-            if (token.type() == QuotedTokenType.QuestionMark) {
-                queryParts.add(query.substring(lastPos, (lastPos = lexer.pos()) - 1));
-            } else if (token.type().ordinal() >= QuotedTokenType.EndOfStream.ordinal()) {
-                queryParts.add(query.substring(lastPos, query.length()));
-                return queryParts.toArray(new String[queryParts.size()]);
+        //        while (true) {
+        //            QuotedToken token = lexer.next();
+        //
+        //            if (token.type() == QuotedTokenType.QuestionMark) {
+        //                queryParts.add(query.substring(lastPos, (lastPos = lexer.pos()) - 1));
+        //            } else if (token.type().ordinal() >= QuotedTokenType.EndOfStream.ordinal()) {
+        //                queryParts.add(query.substring(lastPos, query.length()));
+        //                return queryParts.toArray(new String[queryParts.size()]);
+        //            }
+        //        }
+        boolean inQuotes = false, inBackQuotes = false;
+        for (int i = 0; i < query.length(); i++) {
+            char ch = query.charAt(i);
+            if (ch == '`') {
+                inBackQuotes = !inBackQuotes;
+            } else if (ch == '\'') {
+                inQuotes = !inQuotes;
+            } else if (!inBackQuotes && !inQuotes) {
+                if (ch == '?') {
+                    queryParts.add(query.substring(lastPos, i));
+                    lastPos = i + 1;
+                }
             }
         }
+        queryParts.add(query.substring(lastPos, query.length()));
+        return queryParts.toArray(new String[queryParts.size()]);
     }
 }

@@ -10,22 +10,20 @@ import java.util.TimeZone;
 
 import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.jdbc.data.DataTypeFactory;
+import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.stream.QuotedLexer;
-import com.github.housepower.jdbc.stream.QuotedToken;
-import com.github.housepower.jdbc.stream.QuotedTokenType;
 
 public class DataTypeTuple implements IDataType {
 
     private final String name;
-    private final IDataType[] elemsDataType;
+    private final IDataType[] nestedTypes;
 
-    public DataTypeTuple(String name, IDataType[] elemsDataType) {
+    public DataTypeTuple(String name, IDataType[] nestedTypes) {
         this.name = name;
-        this.elemsDataType = elemsDataType;
+        this.nestedTypes = nestedTypes;
     }
 
     @Override
@@ -40,9 +38,9 @@ public class DataTypeTuple implements IDataType {
 
     @Override
     public Object defaultValue() {
-        Object[] attrs = new Object[elemsDataType.length];
-        for (int i = 0; i < elemsDataType.length; i++) {
-            attrs[i] = elemsDataType[i].defaultValue();
+        Object[] attrs = new Object[nestedTypes.length];
+        for (int i = 0; i < nestedTypes.length; i++) {
+            attrs[i] = nestedTypes[i].defaultValue();
         }
         return new ClickHouseStruct("Tuple", attrs);
     }
@@ -52,30 +50,30 @@ public class DataTypeTuple implements IDataType {
         Validate.isTrue(data instanceof Struct && "Tuple".equals(((Struct) data).getSQLTypeName()),
             "Expected Struct Parameter, but was " + data.getClass().getSimpleName());
 
-        for (int i = 0; i < elemsDataType.length; i++) {
-            elemsDataType[i].serializeBinary(((Struct) data).getAttributes()[i], serializer);
+        for (int i = 0; i < nestedTypes.length; i++) {
+            nestedTypes[i].serializeBinary(((Struct) data).getAttributes()[i], serializer);
         }
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        Object[] attrs = new Object[elemsDataType.length];
-        for (int i = 0; i < elemsDataType.length; i++) {
-            attrs[i] = elemsDataType[i].deserializeBinary(deserializer);
+        Object[] attrs = new Object[nestedTypes.length];
+        for (int i = 0; i < nestedTypes.length; i++) {
+            attrs[i] = nestedTypes[i].deserializeBinary(deserializer);
         }
         return new ClickHouseStruct("Tuple", attrs);
     }
 
     @Override
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (int i = 0; i < elemsDataType.length; i++) {
+        for (int i = 0; i < nestedTypes.length; i++) {
             Object[] elemsData = new Object[data.length];
             for (int row = 0; row < data.length; row++) {
                 Validate.isTrue(data[row] instanceof Struct && "Tuple".equals(((Struct) data[row]).getSQLTypeName()),
                     "Expected Struct Parameter, but was " + data.getClass().getSimpleName());
                 elemsData[row] = ((Struct) data[row]).getAttributes()[i];
             }
-            elemsDataType[i].serializeBinaryBulk(elemsData, serializer);
+            nestedTypes[i].serializeBinaryBulk(elemsData, serializer);
         }
     }
 
@@ -85,9 +83,9 @@ public class DataTypeTuple implements IDataType {
 
         Struct[] rowsData = new Struct[rows];
         for (int row = 0; row < rows; row++) {
-            Object[] elemsData = new Object[elemsDataType.length];
+            Object[] elemsData = new Object[nestedTypes.length];
 
-            for (int elemIndex = 0; elemIndex < elemsDataType.length; elemIndex++) {
+            for (int elemIndex = 0; elemIndex < nestedTypes.length; elemIndex++) {
                 elemsData[elemIndex] = rowsWithElems[elemIndex][row];
             }
             rowsData[row] = new ClickHouseStruct("Tuple", elemsData);
@@ -96,51 +94,44 @@ public class DataTypeTuple implements IDataType {
     }
 
     private Object[][] getRowsWithElems(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
-        Object[][] rowsWithElems = new Object[elemsDataType.length][];
-        for (int index = 0; index < elemsDataType.length; index++) {
-            rowsWithElems[index] = elemsDataType[index].deserializeBinaryBulk(rows, deserializer);
+        Object[][] rowsWithElems = new Object[nestedTypes.length][];
+        for (int index = 0; index < nestedTypes.length; index++) {
+            rowsWithElems[index] = nestedTypes[index].deserializeBinaryBulk(rows, deserializer);
         }
         return rowsWithElems;
     }
 
     @Override
-    public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
-        QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.OpeningRoundBracket);
-
-        Object[] elems = new Object[elemsDataType.length];
-        for (int i = 0; i < elemsDataType.length; i++) {
-            if (i > 0) {
-                Validate.isTrue(lexer.next().type() == QuotedTokenType.Comma);
-            }
-            elems[i] = elemsDataType[i].deserializeTextQuoted(lexer);
+    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        Object[] tupleData = new Object[nestedTypes.length];
+        for (int i = 0; i < nestedTypes.length; i++) {
+            if (i > 0)
+                Validate.isTrue(lexer.character() == ',');
+            tupleData[i] = nestedTypes[i].deserializeTextQuoted(lexer);
         }
-        Validate.isTrue(lexer.next().type() == QuotedTokenType.ClosingRoundBracket);
-        return new ClickHouseStruct("Tuple", elems);
+        Validate.isTrue(lexer.character() == ')');
+        return new ClickHouseStruct("Tuple", tupleData);
     }
 
-    public static DataTypeTuple createTupleType(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
-        Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
-        List<IDataType> tupleNestedDataType = new ArrayList<IDataType>();
+    public static DataTypeTuple createTupleType(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        List<IDataType> nestedDataTypes = new ArrayList<IDataType>();
 
         for (; ; ) {
-            tupleNestedDataType.add(DataTypeFactory.get(lexer, serverZone));
-            QuotedToken token = lexer.next();
-            if (token.type() == QuotedTokenType.ClosingRoundBracket) {
+            nestedDataTypes.add(DataTypeFactory.get(lexer, timeZone));
+            char delimiter = lexer.character();
+            Validate.isTrue(delimiter == ',' || delimiter == ')');
+            if (delimiter == ')') {
                 StringBuilder builder = new StringBuilder("Tuple(");
-                IDataType[] types = new IDataType[tupleNestedDataType.size()];
-                for (int i = 0; i < tupleNestedDataType.size(); i++) {
-                    types[i] = tupleNestedDataType.get(i);
-                    builder.append(tupleNestedDataType.get(i).name());
-                    if (i == tupleNestedDataType.size() - 1) {
-                        return new DataTypeTuple(builder.append(")").toString(), types);
-                    }
-
-                    builder.append(" ,");
+                for (int i = 0; i < nestedDataTypes.size(); i++) {
+                    if (i > 0)
+                        builder.append(",");
+                    builder.append(nestedDataTypes.get(i).name());
                 }
+                return new DataTypeTuple(builder.append(")").toString(),
+                    nestedDataTypes.toArray(new IDataType[nestedDataTypes.size()]));
             }
-
-            Validate.isTrue(token.type() == QuotedTokenType.Comma);
         }
     }
 }

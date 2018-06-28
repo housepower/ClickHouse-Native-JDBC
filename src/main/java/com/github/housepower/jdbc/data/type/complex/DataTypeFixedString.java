@@ -1,12 +1,12 @@
 package com.github.housepower.jdbc.data.type.complex;
 
+import com.github.housepower.jdbc.misc.SQLLexer;
+import com.github.housepower.jdbc.misc.StringView;
+import com.github.housepower.jdbc.misc.StringViewCoding;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.stream.QuotedLexer;
-import com.github.housepower.jdbc.stream.QuotedToken;
-import com.github.housepower.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -46,16 +46,19 @@ public class DataTypeFixedString implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
-        QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "Expected String Literal.");
-        return token.data();
+    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return lexer.stringLiteral();
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof String, "Expected String Parameter, but was " + data.getClass().getSimpleName());
-        serializer.writeBytes(((String) data).getBytes());
+        if (data instanceof String) {
+            serializer.writeBytes(((String) data).getBytes());
+        } else if (data instanceof StringView) {
+            serializer.writeBytes(StringViewCoding.bytes((StringView) data));
+        } else {
+            throw new SQLException("Expected String Parameter, but was " + data.getClass().getSimpleName());
+        }
     }
 
     @Override
@@ -79,12 +82,10 @@ public class DataTypeFixedString implements IDataType {
         return data;
     }
 
-    public static IDataType createFixedStringType(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
-        Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
-        QuotedToken fixedStringN = lexer.next();
-        Validate.isTrue(fixedStringN.type() == QuotedTokenType.Number);
-        Validate.isTrue(lexer.next().type() == QuotedTokenType.ClosingRoundBracket);
-        Integer bytes = Integer.valueOf(fixedStringN.data());
-        return new DataTypeFixedString("FixedString(" + bytes + ")", bytes);
+    public static IDataType createFixedStringType(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        Number fixedStringN = lexer.numberLiteral();
+        Validate.isTrue(lexer.character() == ')');
+        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue());
     }
 }

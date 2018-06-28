@@ -1,12 +1,11 @@
 package com.github.housepower.jdbc.data.type.complex;
 
+import com.github.housepower.jdbc.misc.SQLLexer;
+import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.stream.QuotedLexer;
-import com.github.housepower.jdbc.stream.QuotedToken;
-import com.github.housepower.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -43,23 +42,21 @@ public class DataTypeDateTime implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
-        QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.StringLiteral, "Expected String Literal.");
-        String timestampString = token.data();
-
-        String[] dateAndTime = timestampString.split(" ", 2);
-        String[] yearMonthDay = dateAndTime[0].split("-", 3);
-        String[] hourMinuteSecond = dateAndTime[1].split(":", 3);
-
-        return new Timestamp(
-            Integer.valueOf(yearMonthDay[0]) - 1900,
-            Integer.valueOf(yearMonthDay[1]) - 1,
-            Integer.valueOf(yearMonthDay[2]),
-            Integer.valueOf(hourMinuteSecond[0]),
-            Integer.valueOf(hourMinuteSecond[1]),
-            Integer.valueOf(hourMinuteSecond[2]),
-            0);
+    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        Validate.isTrue(lexer.character() == '\'');
+        int year = lexer.numberLiteral().intValue();
+        Validate.isTrue(lexer.character() == '-');
+        int month = lexer.numberLiteral().intValue();
+        Validate.isTrue(lexer.character() == '-');
+        int day = lexer.numberLiteral().intValue();
+        Validate.isTrue(lexer.isWhitespace());
+        int hours = lexer.numberLiteral().intValue();
+        Validate.isTrue(lexer.character() == ':');
+        int minutes = lexer.numberLiteral().intValue();
+        Validate.isTrue(lexer.character() == ':');
+        int seconds = lexer.numberLiteral().intValue();
+        Validate.isTrue(lexer.character() == '\'');
+        return new Timestamp(year - 1900, month - 1, day, hours, minutes, seconds, 0);
     }
 
     @Override
@@ -90,14 +87,14 @@ public class DataTypeDateTime implements IDataType {
         return data;
     }
 
-    public static IDataType createDateTimeType(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
-        if (lexer.next().type() == QuotedTokenType.OpeningRoundBracket) {
-            QuotedToken token;
-            Validate.isTrue((token = lexer.next()).type() == QuotedTokenType.StringLiteral);
-            String timeZoneData = token.data();
-            return new DataTypeDateTime("DateTime(" + timeZoneData + ")", TimeZone.getTimeZone(timeZoneData));
+    public static IDataType createDateTimeType(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+        if (lexer.isCharacter('(')) {
+            Validate.isTrue(lexer.character() == '(');
+            StringView dataTimeZone = lexer.stringLiteral();
+            Validate.isTrue(lexer.character() == ')');
+            return new DataTypeDateTime("DateTime(" +
+                String.valueOf(dataTimeZone) + ")", TimeZone.getTimeZone(String.valueOf(dataTimeZone)));
         }
-        lexer.prev();
-        return new DataTypeDateTime("DateTime", serverZone);
+        return new DataTypeDateTime("DateTime", timeZone);
     }
 }

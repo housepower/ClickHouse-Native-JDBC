@@ -2,13 +2,11 @@ package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.jdbc.data.DataTypeFactory;
+import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.stream.QuotedLexer;
-import com.github.housepower.jdbc.stream.QuotedToken;
-import com.github.housepower.jdbc.stream.QuotedTokenType;
 
 import java.io.IOException;
 import java.sql.Array;
@@ -47,20 +45,15 @@ public class DataTypeArray implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(QuotedLexer lexer) throws SQLException {
-        QuotedToken token = lexer.next();
-        Validate.isTrue(token.type() == QuotedTokenType.OpeningSquareBracket);
-
-        List<Object> elems = new ArrayList<Object>();
+    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        Validate.isTrue(lexer.character() == '[');
+        List<Object> arrayData = new ArrayList<Object>();
         for (; ; ) {
-            elems.add(elemDataType.deserializeTextQuoted(lexer));
-            token = lexer.next();
-            Validate.isTrue(
-                token.type() == QuotedTokenType.Comma || token.type() == QuotedTokenType.ClosingSquareBracket);
-
-            if (token.type() == QuotedTokenType.ClosingSquareBracket) {
-                return new ClickHouseArray(elems.toArray());
-            }
+            arrayData.add(elemDataType.deserializeTextQuoted(lexer));
+            char delimiter = lexer.character();
+            Validate.isTrue(delimiter == ',' || delimiter == ']');
+            if (delimiter == ']')
+                return new ClickHouseArray(arrayData.toArray());
         }
     }
 
@@ -112,11 +105,11 @@ public class DataTypeArray implements IDataType {
         return data;
     }
 
-    public static IDataType createArrayType(QuotedLexer lexer, TimeZone serverZone) throws SQLException {
-        Validate.isTrue(lexer.next().type() == QuotedTokenType.OpeningRoundBracket);
-        IDataType arrayNestedType = DataTypeFactory.get(lexer, serverZone);
-        Validate.isTrue(lexer.next().type() == QuotedTokenType.ClosingRoundBracket);
+    public static IDataType createArrayType(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        IDataType arrayNestedType = DataTypeFactory.get(lexer, timeZone);
+        Validate.isTrue(lexer.character() == ')');
         return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
-            arrayNestedType, DataTypeFactory.get("UInt64", serverZone));
+            arrayNestedType, DataTypeFactory.get("UInt64", timeZone));
     }
 }
