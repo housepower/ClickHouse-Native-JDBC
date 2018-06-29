@@ -7,42 +7,20 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 ## Maven central
 
 ```java
-    <dependency>
-	<groupId>com.github.housepower</groupId>
-	<artifactId>clickhouse-native-jdbc</artifactId>
-	<version>1.1-testing</version>
-    </dependency>
+<dependency>
+    <groupId>com.github.housepower</groupId>
+    <artifactId>clickhouse-native-jdbc</artifactId>
+    <version>1.1-testing</version>
+</dependency>
 ```
 
-## Features
+## Difference [Yandex/Clickhouse-JDBC](https://github.com/yandex/clickhouse-jdbc)
+* Data is organized and compressed by columns
+* We implemented it using the TCP Protocol, with higher performance than HTTP
 
-* Uses native ClickHouse tcp client-server protocol, with higher performance than HTTP
-* Compatibility with `java.sql`
-* Data Compression
-
-## Supported queries
-* [x] SELECT
-* [x] INSERT && BATCH INSERT
-* [x] CREATE
-* [x] ALTER
-* [x] DROP
-* [x] RENAME
-
-## Supported data types
-
-* [x] UInt8, UInt16, UInt32, UInt64, Int8, Int16, Int32, Int64
-* [x] Float32, Float64
-* [x] String
-* [x] FixedString(N)
-* [x] Date
-* [x] DateTime
-* [x] Nullable(T)
-* [x] Tuple
-* [x] Nested
-* [x] Array(T)
-* [x] Enum
-* [x] UUID
-
+## Not Support
+* Non-values format
+* Complex values expression, Like 'INSERT INTO test_table VALUES(toDate(123456))'
 
 ## Example
 
