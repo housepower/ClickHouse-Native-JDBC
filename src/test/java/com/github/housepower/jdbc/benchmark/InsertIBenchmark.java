@@ -13,10 +13,13 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
 public class InsertIBenchmark extends AbstractIBenchmark{
+    AtomicInteger tableMaxId = new AtomicInteger();
+
     @Rule
     public TestRule benchmarkRun = new BenchmarkRule();
 
@@ -27,7 +30,9 @@ public class InsertIBenchmark extends AbstractIBenchmark{
             Date date = new Date(ts.getTime());
 
             Statement stmt = connection.createStatement();
-            String testTable = "test_" + ts.getTime();
+
+            int tableId = tableMaxId.getAndIncrement();
+            String testTable = "test_" + tableId;
 
             stmt.executeQuery("DROP TABLE IF EXISTS " + testTable);
             stmt.executeQuery("CREATE TABLE " + testTable +" (number UInt32, name String, birthTime DateTime, birthDay Date) Engine = Log");
@@ -47,13 +52,13 @@ public class InsertIBenchmark extends AbstractIBenchmark{
         }
     };
 
-    @BenchmarkOptions(benchmarkRounds = 20, warmupRounds = 0)
+    @BenchmarkOptions(benchmarkRounds = 20, warmupRounds = 0, concurrency = 30)
     @Test
     public void benchInsertNative() throws Exception {
         withConnection(benchInsert, ConnectionType.NATIVE);
     }
 
-    @BenchmarkOptions(benchmarkRounds = 20, warmupRounds = 0)
+    @BenchmarkOptions(benchmarkRounds = 20, warmupRounds = 0, concurrency = 30)
     @Test
     public void benchInsertHttp() throws Exception {
         withConnection(benchInsert, ConnectionType.HTTP);
