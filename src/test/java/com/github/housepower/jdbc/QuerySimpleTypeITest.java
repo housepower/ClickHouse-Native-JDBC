@@ -1,11 +1,12 @@
 package com.github.housepower.jdbc;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 
 public class QuerySimpleTypeITest extends AbstractITest {
 
@@ -116,6 +117,24 @@ public class QuerySimpleTypeITest extends AbstractITest {
 
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getString(1), "01234567-89ab-cdef-0123-456789abcdef");
+            }
+        });
+    }
+
+    @Test
+    public void successfullyMetadata() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connect) throws Exception {
+                Statement statement = connect.createStatement();
+                ResultSet rs = statement.executeQuery("SELECT number as a1, number + 1 as a2, number * 3 as a3 from numbers(1)");
+
+                Assert.assertTrue(rs.next());
+                ResultSetMetaData metaData = rs.getMetaData();
+                Assert.assertEquals(metaData.getColumnName(1), "a1");
+                Assert.assertEquals(metaData.getColumnTypeName(1), "UInt64");
+                Assert.assertEquals(metaData.getColumnName(2), "a2");
+                Assert.assertEquals(metaData.getColumnTypeName(2), "UInt64");
             }
         });
     }
