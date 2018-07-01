@@ -42,7 +42,7 @@ public class DataTypeNullable implements IDataType {
 
     @Override
     public Class javaTypeClass() {
-        return Object.class;
+        return nestedDataType.javaTypeClass();
     }
 
     @Override

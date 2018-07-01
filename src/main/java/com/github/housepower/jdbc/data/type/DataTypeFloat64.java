@@ -31,7 +31,7 @@ public class DataTypeFloat64 implements IDataType {
 
     @Override
     public Class javaTypeClass() {
-        return Float.class;
+        return Double.class;
     }
 
     @Override

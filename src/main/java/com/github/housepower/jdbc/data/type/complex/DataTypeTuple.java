@@ -47,7 +47,7 @@ public class DataTypeTuple implements IDataType {
 
     @Override
     public Class javaTypeClass() {
-        return Object[].class;
+        return Struct.class;
     }
 
     @Override
