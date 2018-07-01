@@ -42,6 +42,11 @@ public class DataTypeDateTime implements IDataType {
     }
 
     @Override
+    public Class javaTypeClass() {
+        return Timestamp.class;
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '\'');
         int year = lexer.numberLiteral().intValue();

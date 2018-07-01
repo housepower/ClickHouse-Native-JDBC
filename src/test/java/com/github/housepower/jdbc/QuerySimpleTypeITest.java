@@ -127,14 +127,25 @@ public class QuerySimpleTypeITest extends AbstractITest {
             @Override
             public void apply(Connection connect) throws Exception {
                 Statement statement = connect.createStatement();
-                ResultSet rs = statement.executeQuery("SELECT number as a1, number + 1 as a2, number * 3 as a3 from numbers(1)");
+                ResultSet rs = statement.executeQuery("SELECT number as a1, toString(number) as a2, now() as a3, today() as a4 from numbers(1)");
 
                 Assert.assertTrue(rs.next());
                 ResultSetMetaData metaData = rs.getMetaData();
                 Assert.assertEquals(metaData.getColumnName(1), "a1");
                 Assert.assertEquals(metaData.getColumnTypeName(1), "UInt64");
+                Assert.assertEquals(metaData.getColumnClassName(1), "java.lang.Long");
+
                 Assert.assertEquals(metaData.getColumnName(2), "a2");
-                Assert.assertEquals(metaData.getColumnTypeName(2), "UInt64");
+                Assert.assertEquals(metaData.getColumnTypeName(2), "String");
+                Assert.assertEquals(metaData.getColumnClassName(2), "java.lang.String");
+
+                Assert.assertEquals(metaData.getColumnName(3), "a3");
+                Assert.assertEquals(metaData.getColumnTypeName(3), "DateTime");
+                Assert.assertEquals(metaData.getColumnClassName(3), "java.sql.Timestamp");
+
+                Assert.assertEquals(metaData.getColumnName(4), "a4");
+                Assert.assertEquals(metaData.getColumnTypeName(4), "Date");
+                Assert.assertEquals(metaData.getColumnClassName(4), "java.sql.Date");
             }
         });
     }

@@ -14,6 +14,8 @@ public interface IDataType {
 
     Object defaultValue();
 
+    Class javaTypeClass();
+
     Object deserializeTextQuoted(SQLLexer lexer) throws SQLException;
 
     void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException;
