@@ -31,7 +31,7 @@ public class DataTypeUUID implements IDataType {
 
     @Override
     public Class javaTypeClass() {
-        return UUID.class;
+        return String.class;
     }
 
     @Override

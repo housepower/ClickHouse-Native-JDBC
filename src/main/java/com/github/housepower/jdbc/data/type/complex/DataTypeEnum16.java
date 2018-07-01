@@ -43,7 +43,7 @@ public class DataTypeEnum16 implements IDataType {
 
     @Override
     public Class javaTypeClass() {
-        return Enum.class;
+        return String.class;
     }
 
     @Override
