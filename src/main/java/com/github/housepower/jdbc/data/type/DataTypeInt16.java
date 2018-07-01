@@ -35,6 +35,11 @@ public class DataTypeInt16 implements IDataType {
     }
 
     @Override
+    public Class javaTypeClass() {
+        return Short.class;
+    }
+
+    @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         Validate.isTrue(data instanceof Byte || data instanceof Short,
             "Expected Short Parameter, but was " + data.getClass().getSimpleName());

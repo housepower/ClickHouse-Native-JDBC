@@ -46,6 +46,11 @@ public class DataTypeFixedString implements IDataType {
     }
 
     @Override
+    public Class javaTypeClass() {
+        return String.class;
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.stringLiteral();
     }

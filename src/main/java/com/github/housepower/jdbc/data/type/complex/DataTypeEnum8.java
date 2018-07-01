@@ -42,6 +42,11 @@ public class DataTypeEnum8 implements IDataType {
     }
 
     @Override
+    public Class javaTypeClass() {
+        return Enum.class;
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.stringLiteral();
     }

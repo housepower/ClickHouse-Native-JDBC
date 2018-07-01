@@ -1,15 +1,15 @@
 package com.github.housepower.jdbc.data.type.complex;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.TimeZone;
-
+import com.github.housepower.jdbc.data.DataTypeFactory;
+import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.data.DataTypeFactory;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.TimeZone;
 
 public class DataTypeNullable implements IDataType {
     private static final Byte IS_NULL = 1;
@@ -38,6 +38,11 @@ public class DataTypeNullable implements IDataType {
     @Override
     public Object defaultValue() {
         return nestedDataType.defaultValue();
+    }
+
+    @Override
+    public Class javaTypeClass() {
+        return Object.class;
     }
 
     @Override

@@ -1,14 +1,14 @@
 package com.github.housepower.jdbc.data.type;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Types;
-
+import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.data.IDataType;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Types;
 
 public class DataTypeFloat64 implements IDataType {
 
@@ -27,6 +27,11 @@ public class DataTypeFloat64 implements IDataType {
     @Override
     public Object defaultValue() {
         return DEFAULT_VALUE;
+    }
+
+    @Override
+    public Class javaTypeClass() {
+        return Float.class;
     }
 
     @Override

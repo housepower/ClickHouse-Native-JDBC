@@ -30,6 +30,11 @@ public class DataTypeUUID implements IDataType {
     }
 
     @Override
+    public Class javaTypeClass() {
+        return UUID.class;
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.stringLiteral();
     }

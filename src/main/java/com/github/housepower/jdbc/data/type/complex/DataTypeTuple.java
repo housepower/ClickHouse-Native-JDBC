@@ -1,5 +1,13 @@
 package com.github.housepower.jdbc.data.type.complex;
 
+import com.github.housepower.jdbc.ClickHouseStruct;
+import com.github.housepower.jdbc.data.DataTypeFactory;
+import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.SQLLexer;
+import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.jdbc.serializer.BinaryDeserializer;
+import com.github.housepower.jdbc.serializer.BinarySerializer;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Struct;
@@ -7,14 +15,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-
-import com.github.housepower.jdbc.ClickHouseStruct;
-import com.github.housepower.jdbc.data.DataTypeFactory;
-import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.data.IDataType;
 
 public class DataTypeTuple implements IDataType {
 
@@ -43,6 +43,11 @@ public class DataTypeTuple implements IDataType {
             attrs[i] = nestedTypes[i].defaultValue();
         }
         return new ClickHouseStruct("Tuple", attrs);
+    }
+
+    @Override
+    public Class javaTypeClass() {
+        return Object[].class;
     }
 
     @Override

@@ -54,7 +54,7 @@ public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {
 
     @Override
     public String getColumnClassName(int column) throws SQLException {
-        return header.getByPosition(column - 1).type().getClass().getSimpleName();
+        return header.getByPosition(column - 1).type().javaTypeClass().getName();
     }
 
     @Override
