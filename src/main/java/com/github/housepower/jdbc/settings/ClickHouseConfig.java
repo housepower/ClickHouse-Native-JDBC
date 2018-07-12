@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ClickHouseConfig {
 
@@ -28,6 +30,7 @@ public class ClickHouseConfig {
 
     private Map<SettingKey, Object> settings;
 
+    public static final Pattern DB_PATH_PATTERN = Pattern.compile("/([a-zA-Z0-9_]+)");
 
     public ClickHouseConfig(String url, Properties properties) throws SQLException {
         this.settings = parseJDBCUrl(url);
@@ -95,9 +98,18 @@ public class ClickHouseConfig {
             URI uri = new URI(jdbcUrl.substring(5));
             Map<SettingKey, Object> settings = new HashMap<SettingKey, Object>();
 
+            String database = uri.getPath();
+            if (database != null && !database.isEmpty()) {
+                Matcher m = DB_PATH_PATTERN.matcher(database);
+                if (m.matches()) {
+                    settings.put(SettingKey.database, m.group(1));
+                } else {
+                    throw new URISyntaxException("wrong database name path: '" + database + "'", jdbcUrl);
+                }
+            }
+
             settings.put(SettingKey.port, uri.getPort());
             settings.put(SettingKey.address, uri.getHost());
-            settings.put(SettingKey.database, uri.getPath());
             settings.putAll(extractQueryParameters(uri.getQuery()));
 
             return settings;
