@@ -86,7 +86,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }
-        });
+        }, true);
     }
 
     @Test

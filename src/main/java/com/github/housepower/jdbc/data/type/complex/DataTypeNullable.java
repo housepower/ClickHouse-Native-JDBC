@@ -1,5 +1,6 @@
 package com.github.housepower.jdbc.data.type.complex;
 
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
@@ -9,7 +10,6 @@ import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.TimeZone;
 
 public class DataTypeNullable implements IDataType {
     private static final Byte IS_NULL = 1;
@@ -94,11 +94,11 @@ public class DataTypeNullable implements IDataType {
         return data;
     }
 
-    public static IDataType createNullableType(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+    public static IDataType createNullableType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
-        IDataType nestedType = DataTypeFactory.get(lexer, timeZone);
+        IDataType nestedType = DataTypeFactory.get(lexer, serverInfo);
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeNullable(
-            "Nullable(" + nestedType.name() + ")", nestedType, DataTypeFactory.get("UInt8", timeZone));
+            "Nullable(" + nestedType.name() + ")", nestedType, DataTypeFactory.get("UInt8", serverInfo));
     }
 }

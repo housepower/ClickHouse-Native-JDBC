@@ -1,9 +1,10 @@
 package com.github.housepower.jdbc.data.type.complex;
 
+import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
@@ -12,7 +13,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 
 public class DataTypeEnum8 implements IDataType {
 
@@ -100,7 +100,7 @@ public class DataTypeEnum8 implements IDataType {
         return data;
     }
 
-    public static IDataType createEnum8Type(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+    public static IDataType createEnum8Type(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
         List<Byte> enumValues = new ArrayList<Byte>();
         List<String> enumNames = new ArrayList<String>();

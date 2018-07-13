@@ -15,11 +15,11 @@ public class QueryComplexTypeITest extends AbstractITest {
             @Override
             public void apply(Connection connection) throws Exception {
                 Statement statement = connection.createStatement();
+                long ts = 946659723 * 1000L;
                 ResultSet rs =
-                    statement.executeQuery("SELECT nullIf(toDateTime('2000-01-01 01:02:03'), toDateTime(0))");
+                    statement.executeQuery("SELECT nullIf(toDateTime(946659723), toDateTime(0))");
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getTimestamp(1).getTime(),
-                    new Timestamp(2000 - 1900, 0, 1, 1, 2, 3, 0).getTime());
+                Assert.assertEquals(rs.getTimestamp(1).getTime(), ts);
                 Assert.assertFalse(rs.next());
             }
         });
@@ -109,11 +109,12 @@ public class QueryComplexTypeITest extends AbstractITest {
             @Override
             public void apply(Connection connection) throws Exception {
                 Statement statement = connection.createStatement();
-                ResultSet rs = statement.executeQuery("SELECT toDateTime('2000-01-01 01:02:03')");
+
+                long ts = 946659723 * 1000L;
+                ResultSet rs = statement.executeQuery("SELECT toDateTime(946659723)");
 
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getTimestamp(1).getTime(),
-                    new Timestamp(2000 - 1900, 0, 1, 1, 2, 3, 0).getTime());
+                Assert.assertEquals(rs.getTimestamp(1).getTime(), ts);
             }
         });
     }

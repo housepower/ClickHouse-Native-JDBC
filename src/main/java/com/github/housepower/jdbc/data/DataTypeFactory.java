@@ -1,7 +1,22 @@
 package com.github.housepower.jdbc.data;
 
-import com.github.housepower.jdbc.data.type.*;
-import com.github.housepower.jdbc.data.type.complex.*;
+import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.data.type.DataTypeDate;
+import com.github.housepower.jdbc.data.type.DataTypeFloat32;
+import com.github.housepower.jdbc.data.type.DataTypeFloat64;
+import com.github.housepower.jdbc.data.type.DataTypeInt16;
+import com.github.housepower.jdbc.data.type.DataTypeInt32;
+import com.github.housepower.jdbc.data.type.DataTypeInt64;
+import com.github.housepower.jdbc.data.type.DataTypeInt8;
+import com.github.housepower.jdbc.data.type.DataTypeString;
+import com.github.housepower.jdbc.data.type.DataTypeUUID;
+import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
+import com.github.housepower.jdbc.data.type.complex.DataTypeDateTime;
+import com.github.housepower.jdbc.data.type.complex.DataTypeEnum16;
+import com.github.housepower.jdbc.data.type.complex.DataTypeEnum8;
+import com.github.housepower.jdbc.data.type.complex.DataTypeFixedString;
+import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
+import com.github.housepower.jdbc.data.type.complex.DataTypeTuple;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
@@ -9,38 +24,38 @@ import com.github.housepower.jdbc.misc.Validate;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
+
 
 public class DataTypeFactory {
 
-    public static IDataType get(String type, TimeZone timeZone) throws SQLException {
+    public static IDataType get(String type, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         SQLLexer lexer = new SQLLexer(0, type);
-        IDataType dataType = get(lexer, timeZone);
+        IDataType dataType = get(lexer, serverInfo);
         Validate.isTrue(lexer.eof());
         return dataType;
     }
 
     private static final Map<String, IDataType> dataTypes = initialDataTypes();
 
-    public static IDataType get(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+    public static IDataType get(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         StringView dataTypeName = lexer.bareWord();
         
         if (dataTypeName.equals("Date")) {
-            return DataTypeDate.createDateType(lexer, timeZone);
+            return DataTypeDate.createDateType(lexer, serverInfo);
         } else if (dataTypeName.equals("Tuple")) {
-            return DataTypeTuple.createTupleType(lexer, timeZone);
+            return DataTypeTuple.createTupleType(lexer, serverInfo);
         } else if (dataTypeName.equals("Array")) {
-            return DataTypeArray.createArrayType(lexer, timeZone);
+            return DataTypeArray.createArrayType(lexer, serverInfo);
         } else if (dataTypeName.equals("Enum8")) {
-            return DataTypeEnum8.createEnum8Type(lexer, timeZone);
+            return DataTypeEnum8.createEnum8Type(lexer, serverInfo);
         } else if (dataTypeName.equals("Enum16")) {
-            return DataTypeEnum16.createEnum16Type(lexer, timeZone);
+            return DataTypeEnum16.createEnum16Type(lexer, serverInfo);
         } else if (dataTypeName.equals("DateTime")) {
-            return DataTypeDateTime.createDateTimeType(lexer, timeZone);
+            return DataTypeDateTime.createDateTimeType(lexer, serverInfo);
         } else if (dataTypeName.equals("Nullable")) {
-            return DataTypeNullable.createNullableType(lexer, timeZone);
+            return DataTypeNullable.createNullableType(lexer, serverInfo);
         } else if (dataTypeName.equals("FixedString")) {
-            return DataTypeFixedString.createFixedStringType(lexer, timeZone);
+            return DataTypeFixedString.createFixedStringType(lexer, serverInfo);
         } else {
             String name = String.valueOf(dataTypeName);
             IDataType dataType = dataTypes.get(name);
