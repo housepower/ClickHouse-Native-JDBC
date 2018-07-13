@@ -118,16 +118,19 @@ public class InsertSimpleTypeITest extends AbstractITest {
                 Statement statement = connection.createStatement();
 
                 statement.executeQuery("DROP TABLE IF EXISTS test");
-                statement.executeQuery("CREATE TABLE test(test Date)ENGINE=Log");
-                statement.executeQuery("INSERT INTO test VALUES('2000-01-01')");
+                statement.executeQuery("CREATE TABLE test(test Date, test2 Date)ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES('2000-01-01' , '2000-01-31')");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test");
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1),
                     new Date(2000 - 1900, 0, 1).getTime() / TimeUnit.DAYS.toMillis(1));
+                Assert.assertEquals(rs.getDate(2).getTime() / TimeUnit.DAYS.toMillis(1),
+                                    new Date(2000 - 1900, 0, 31).getTime() / TimeUnit.DAYS.toMillis(1));
+
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }
-        });
+        }, true);
     }
 
     @Test

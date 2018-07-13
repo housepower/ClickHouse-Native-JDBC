@@ -7,10 +7,17 @@ public abstract class AbstractITest {
 
     private static final int SERVER_PORT = Integer.valueOf(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
 
-    protected void withNewConnection(WithConnection withConnection) throws Exception {
+    protected void withNewConnection(WithConnection withConnection, Object ...args) throws Exception {
         Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
-        Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:" + SERVER_PORT);
+        String connectionStr = "jdbc:clickhouse://127.0.0.1:" + SERVER_PORT;
 
+        // first arg is use_client_time_zone
+        if (args.length > 0) {
+            if(args[0].equals(true)) {
+                connectionStr += "?use_client_time_zone=true";
+            }
+        }
+        Connection connection = DriverManager.getConnection(connectionStr);
         try {
             withConnection.apply(connection);
         } finally {

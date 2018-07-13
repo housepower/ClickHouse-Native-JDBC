@@ -82,7 +82,7 @@ public class Block {
             String name = deserializer.readStringBinary();
             String type = deserializer.readStringBinary();
 
-            IDataType dataType = DataTypeFactory.get(type, serverInfo.timeZone());
+            IDataType dataType = DataTypeFactory.get(type, serverInfo);
             cols[i] = new Column(name, dataType, dataType.deserializeBinaryBulk(rows, deserializer));
         }
 

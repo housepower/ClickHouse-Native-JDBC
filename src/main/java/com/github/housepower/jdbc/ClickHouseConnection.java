@@ -173,7 +173,7 @@ public class ClickHouseConnection extends SQLConnection {
 
             HelloResponse response = physical.receiveHello(configure.queryTimeout(), null);
             TimeZone timeZone = TimeZone.getTimeZone(response.serverTimeZone());
-            return new PhysicalInfo.ServerInfo(response.reversion(), timeZone, response.serverDisplayName());
+            return new PhysicalInfo.ServerInfo(configure, response.reversion(), timeZone, response.serverDisplayName());
         } catch (SQLException rethrows) {
             physical.disPhysicalConnection();
             throw rethrows;

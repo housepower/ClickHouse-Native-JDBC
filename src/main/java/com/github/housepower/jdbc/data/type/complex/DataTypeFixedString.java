@@ -1,17 +1,17 @@
 package com.github.housepower.jdbc.data.type.complex;
 
+import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.StringViewCoding;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.data.IDataType;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.TimeZone;
 
 public class DataTypeFixedString implements IDataType {
 
@@ -87,7 +87,7 @@ public class DataTypeFixedString implements IDataType {
         return data;
     }
 
-    public static IDataType createFixedStringType(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+    public static IDataType createFixedStringType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
         Number fixedStringN = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ')');

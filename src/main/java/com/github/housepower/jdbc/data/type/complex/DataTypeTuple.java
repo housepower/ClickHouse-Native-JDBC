@@ -1,6 +1,7 @@
 package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.ClickHouseStruct;
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
@@ -14,7 +15,6 @@ import java.sql.Struct;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 
 public class DataTypeTuple implements IDataType {
 
@@ -119,12 +119,12 @@ public class DataTypeTuple implements IDataType {
         return new ClickHouseStruct("Tuple", tupleData);
     }
 
-    public static DataTypeTuple createTupleType(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+    public static DataTypeTuple createTupleType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
         List<IDataType> nestedDataTypes = new ArrayList<IDataType>();
 
         for (; ; ) {
-            nestedDataTypes.add(DataTypeFactory.get(lexer, timeZone));
+            nestedDataTypes.add(DataTypeFactory.get(lexer, serverInfo));
             char delimiter = lexer.character();
             Validate.isTrue(delimiter == ',' || delimiter == ')');
             if (delimiter == ')') {

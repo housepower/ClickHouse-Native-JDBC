@@ -1,10 +1,11 @@
 package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.ClickHouseArray;
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.DataTypeFactory;
+import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
@@ -14,7 +15,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 
 public class DataTypeArray implements IDataType {
     private final String name;
@@ -110,11 +110,11 @@ public class DataTypeArray implements IDataType {
         return data;
     }
 
-    public static IDataType createArrayType(SQLLexer lexer, TimeZone timeZone) throws SQLException {
+    public static IDataType createArrayType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
-        IDataType arrayNestedType = DataTypeFactory.get(lexer, timeZone);
+        IDataType arrayNestedType = DataTypeFactory.get(lexer, serverInfo);
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
-            arrayNestedType, DataTypeFactory.get("UInt64", timeZone));
+            arrayNestedType, DataTypeFactory.get("UInt64", serverInfo));
     }
 }
