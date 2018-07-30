@@ -39,22 +39,19 @@ public abstract class SQLConnection implements Connection {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public boolean getAutoCommit() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return false;
     }
 
     @Override
     public void commit() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void rollback() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -74,12 +71,11 @@ public abstract class SQLConnection implements Connection {
 
     @Override
     public void setReadOnly(boolean readOnly) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public boolean isReadOnly() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return false;
     }
 
     @Override
@@ -94,22 +90,20 @@ public abstract class SQLConnection implements Connection {
 
     @Override
     public void setTransactionIsolation(int level) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public int getTransactionIsolation() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return Connection.TRANSACTION_NONE;
     }
 
     @Override
     public SQLWarning getWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return null;
     }
 
     @Override
     public void clearWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -131,22 +125,20 @@ public abstract class SQLConnection implements Connection {
 
     @Override
     public Map<String, Class<?>> getTypeMap() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return null;
     }
 
     @Override
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setHoldability(int holdability) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public int getHoldability() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return 0;
     }
 
     @Override
@@ -259,17 +251,16 @@ public abstract class SQLConnection implements Connection {
 
     @Override
     public void abort(Executor executor) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        this.close();
     }
 
     @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public int getNetworkTimeout() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return 0;
     }
 
     @Override

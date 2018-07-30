@@ -32,6 +32,9 @@ public class ClickHouseConfig {
 
     public static final Pattern DB_PATH_PATTERN = Pattern.compile("/([a-zA-Z0-9_]+)");
 
+    private ClickHouseConfig() {
+    }
+
     public ClickHouseConfig(String url, Properties properties) throws SQLException {
         this.settings = parseJDBCUrl(url);
         this.settings.putAll(parseJDBCProperties(properties));
@@ -134,5 +137,23 @@ public class ClickHouseConfig {
             }
         }
         return parameters;
+    }
+
+    public void setQueryTimeout(int timeout){
+        this.soTimeout = timeout;
+    }
+
+    public ClickHouseConfig copy() {
+        ClickHouseConfig configure = new ClickHouseConfig();
+        configure.port = this.port;
+        configure.address = this.address;
+        configure.database = this.database;
+        configure.username = this.username;
+        configure.password = this.password;
+        configure.soTimeout = this.soTimeout;
+        configure.connectTimeout = this.connectTimeout;
+        configure.settings = new HashMap<SettingKey, Object>(this.settings);
+
+        return configure;
     }
 }
