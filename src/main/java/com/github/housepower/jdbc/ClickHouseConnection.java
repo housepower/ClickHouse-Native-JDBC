@@ -18,12 +18,7 @@ import com.github.housepower.jdbc.stream.InputFormat;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
 
 import java.net.InetSocketAddress;
-import java.sql.Array;
-import java.sql.PreparedStatement;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Struct;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -97,6 +92,27 @@ public class ClickHouseConnection extends SQLConnection {
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create Struct, Because the connection is closed.");
         return new ClickHouseStruct(typeName, attributes);
+    }
+
+    @Override
+    public boolean isValid(int timeout) throws SQLException {
+        ClickHouseConfig validConfigure = configure.copy();
+        validConfigure.setQueryTimeout(timeout);
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            connection = new ClickHouseConnection(validConfigure, atomicInfo.get());
+            statement = connection.createStatement();
+            statement.execute("SELECT 1");
+            statement.close();
+            return true;
+        } finally {
+            if (statement != null)
+                statement.close();
+
+            if (connection != null)
+                connection.close();
+        }
     }
 
     public QueryResponse sendQueryRequest(final String query) throws SQLException {
