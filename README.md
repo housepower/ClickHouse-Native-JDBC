@@ -14,11 +14,11 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 </dependency>
 ```
 
-## Difference [Yandex/Clickhouse-JDBC](https://github.com/yandex/clickhouse-jdbc)
+## Differences from [Yandex/Clickhouse-JDBC](https://github.com/yandex/clickhouse-jdbc)
 * Data is organized and compressed by columns
 * We implemented it using the TCP Protocol, with higher performance than HTTP
 
-## Not Support
+## Not Supported
 * Non-values format
 * Complex values expression, Like 'INSERT INTO test_table VALUES(toDate(123456))'
 * More compression method, like `ZSTD`
