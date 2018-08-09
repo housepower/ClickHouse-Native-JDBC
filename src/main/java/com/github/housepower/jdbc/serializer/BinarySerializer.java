@@ -1,9 +1,5 @@
 package com.github.housepower.jdbc.serializer;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.sql.SQLException;
-
 import com.github.housepower.jdbc.buffer.BuffedWriter;
 import com.github.housepower.jdbc.buffer.CompressedBuffedWriter;
 import com.github.housepower.jdbc.buffer.SocketBuffedWriter;
@@ -11,6 +7,10 @@ import com.github.housepower.jdbc.misc.Container;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.StringViewCoding;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.sql.SQLException;
 
 public class BinarySerializer {
     private final Container<BuffedWriter> container;
@@ -70,8 +70,9 @@ public class BinarySerializer {
     }
 
     public void writeStringBinary(String binary) throws IOException {
-        writeVarInt(binary.length());
-        container.get().writeBinary(binary.getBytes());
+        byte []bs = binary.getBytes();
+        writeVarInt(bs.length);
+        container.get().writeBinary(bs);
     }
 
     public void flushToTarget(boolean force) throws IOException {
