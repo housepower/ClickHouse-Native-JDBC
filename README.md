@@ -20,7 +20,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 
 ## Not Supported
 * Non-values format
-* Complex values expression, Like 'INSERT INTO test_table VALUES(toDate(123456))'
+* Complex values expression, Like `INSERT INTO test_table VALUES(toDate(123456))`
 * More compression method, like `ZSTD`
 
 ## Example
