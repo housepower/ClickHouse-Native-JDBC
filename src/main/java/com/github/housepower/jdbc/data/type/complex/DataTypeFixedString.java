@@ -58,12 +58,26 @@ public class DataTypeFixedString implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         if (data instanceof String) {
-            serializer.writeBytes(((String) data).getBytes());
+            writeBytes(((String) data).getBytes(), serializer);
         } else if (data instanceof StringView) {
-            serializer.writeBytes(StringViewCoding.bytes((StringView) data));
+            writeBytes(StringViewCoding.bytes((StringView) data), serializer);
         } else {
-            throw new SQLException("Expected String Parameter, but was " + data.getClass().getSimpleName());
+            throw new SQLException("Expected FixedString Parameter, but was " + data.getClass().getSimpleName());
         }
+    }
+
+    private void writeBytes(byte []bs, BinarySerializer serializer) throws IOException, SQLException {
+        byte []res;
+        if (bs.length > n) {
+            throw new SQLException("The size of FixString column is too large, got " + bs.length);
+        }
+        if (bs.length == n) {
+            res = bs;
+        } else {
+            res = new byte[n];
+            System.arraycopy(bs, 0, res, 0, bs.length);
+        }
+        serializer.writeBytes(res);
     }
 
     @Override

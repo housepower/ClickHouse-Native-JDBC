@@ -35,11 +35,17 @@ public class InsertComplexTypeITest extends AbstractITest {
                 Statement statement = connection.createStatement();
 
                 statement.executeQuery("DROP TABLE IF EXISTS test");
-                statement.executeQuery("CREATE TABLE test(test_Array FixedString(3))ENGINE=Log");
+                statement.executeQuery("CREATE TABLE test(str FixedString(3))ENGINE=Log");
                 statement.executeQuery("INSERT INTO test VALUES('abc')");
-                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+
+                PreparedStatement stmt = connection.prepareStatement("INSERT INTO test VALUES(?)");
+                stmt.setString(1, "abc");
+                stmt.executeUpdate();
+
+                ResultSet rs = statement.executeQuery("SELECT str, COUNT(0) FROM test group by str");
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getString(1), "abc");
+                Assert.assertEquals(rs.getInt(2), 2);
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }
