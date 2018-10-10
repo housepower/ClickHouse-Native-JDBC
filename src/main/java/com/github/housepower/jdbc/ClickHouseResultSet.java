@@ -187,7 +187,7 @@ public class ClickHouseResultSet extends SQLResultSet {
             "No row information was obtained.You must call ResultSet.next() before that.");
         Column column = (lastFetchBlock = current).getByPosition((lastFetchColumn = index - 1));
         Object rowData = column.data((lastFetchRow = row));
-        return rowData == null ? (column.type().nullable() ? null : column.type().defaultValue()) : rowData;
+        return rowData == null ? column.type().defaultValue() : rowData;
     }
 
     @Override
