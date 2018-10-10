@@ -10,7 +10,7 @@ public interface ISettingType {
 
     void serializeSetting(BinarySerializer serializer, Object value) throws IOException;
 
-    ISettingType UInt64 = new ISettingType() {
+    ISettingType Int64 = new ISettingType() {
         @Override
         public Object deserializeURL(String queryParameter) {
             return Long.valueOf(queryParameter);
@@ -19,6 +19,18 @@ public interface ISettingType {
         @Override
         public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
             serializer.writeVarInt((Long) value);
+        }
+    };
+
+    ISettingType Int32 = new ISettingType() {
+        @Override
+        public Object deserializeURL(String queryParameter) {
+            return Integer.valueOf(queryParameter);
+        }
+
+        @Override
+        public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
+            serializer.writeVarInt((Integer) value);
         }
     };
 
@@ -61,12 +73,12 @@ public interface ISettingType {
     ISettingType Seconds = new ISettingType() {
         @Override
         public Object deserializeURL(String queryParameter) {
-            return Long.valueOf(queryParameter);
+            return Integer.valueOf(queryParameter);
         }
 
         @Override
         public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
-            serializer.writeVarInt((Long) value);
+            serializer.writeVarInt((Integer) value);
         }
     };
 
