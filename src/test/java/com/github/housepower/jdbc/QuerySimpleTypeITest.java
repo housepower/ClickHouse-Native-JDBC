@@ -11,6 +11,22 @@ import java.sql.Statement;
 public class QuerySimpleTypeITest extends AbstractITest {
 
     @Test
+    public void successfullyByName() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connect) throws Exception {
+                Statement statement = connect.createStatement();
+                ResultSet rs = statement
+                    .executeQuery("SELECT toInt8(" + Byte.MIN_VALUE + ") as a , toUInt8(" + Byte.MAX_VALUE + ") as b");
+
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getByte("a"), Byte.MIN_VALUE);
+                Assert.assertEquals(rs.getByte("b"), Byte.MAX_VALUE);
+            }
+        });
+    }
+
+    @Test
     public void successfullyByteColumn() throws Exception {
         withNewConnection(new WithConnection() {
             @Override
