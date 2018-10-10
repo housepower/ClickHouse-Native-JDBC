@@ -195,4 +195,23 @@ public class InsertSimpleTypeITest extends AbstractITest {
         });
     }
 
+    @Test
+    public void successfullyMultipleValuesWithComma() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.execute("CREATE TABLE test(id Int32) ENGINE = Log");
+                statement.execute("INSERT INTO test VALUES (1), (2)");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getInt(1), 1);
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getInt(1), 2);
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
+    }
 }

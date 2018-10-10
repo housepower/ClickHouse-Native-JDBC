@@ -24,6 +24,8 @@ public class ValuesInputFormat implements InputFormat {
             if (lexer.eof() || nextChar == ';')
                 return newValuesBlock(header, row, columnData);
 
+            if (row > 0 && nextChar == ',')
+                nextChar = lexer.character();
             Validate.isTrue(nextChar == '(');
             for (int column = 0; column < header.columns(); column++) {
                 if (column > 0)
