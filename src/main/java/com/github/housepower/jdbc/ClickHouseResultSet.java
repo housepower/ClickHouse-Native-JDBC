@@ -1,18 +1,23 @@
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.data.Block;
+import com.github.housepower.jdbc.data.Column;
+import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.jdbc.protocol.DataResponse;
+import com.github.housepower.jdbc.statement.ClickHouseStatement;
+import com.github.housepower.jdbc.wrapper.SQLResultSet;
+
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Date;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Iterator;
-
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.data.Column;
-import com.github.housepower.jdbc.protocol.DataResponse;
-import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.statement.ClickHouseStatement;
-import com.github.housepower.jdbc.wrapper.SQLResultSet;
 
 public class ClickHouseResultSet extends SQLResultSet {
     private int row = -1;
@@ -182,7 +187,7 @@ public class ClickHouseResultSet extends SQLResultSet {
             "No row information was obtained.You must call ResultSet.next() before that.");
         Column column = (lastFetchBlock = current).getByPosition((lastFetchColumn = index - 1));
         Object rowData = column.data((lastFetchRow = row));
-        return rowData == null ? column.type().defaultValue() : rowData;
+        return rowData == null ? (column.type().nullable() ? null : column.type().defaultValue()) : rowData;
     }
 
     @Override

@@ -46,6 +46,11 @@ public class DataTypeNullable implements IDataType {
     }
 
     @Override
+    public boolean nullable() {
+        return true;
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         if (lexer.isCharacter('n') || lexer.isCharacter('N')) {
             Validate.isTrue(Character.toLowerCase(lexer.character()) == 'n');

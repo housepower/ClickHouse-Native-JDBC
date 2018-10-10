@@ -33,6 +33,11 @@ public class DataTypeString implements IDataType {
     }
 
     @Override
+    public boolean nullable() {
+        return false;
+    }
+
+    @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         if (data instanceof String) {
             serializer.writeStringBinary((String) data);

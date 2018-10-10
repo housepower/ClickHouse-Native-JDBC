@@ -50,6 +50,11 @@ public class DataTypeArray implements IDataType {
     }
 
     @Override
+    public boolean nullable() {
+        return false;
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '[');
         List<Object> arrayData = new ArrayList<Object>();

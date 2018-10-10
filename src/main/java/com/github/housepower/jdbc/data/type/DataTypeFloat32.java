@@ -35,6 +35,11 @@ public class DataTypeFloat32 implements IDataType {
     }
 
     @Override
+    public boolean nullable() {
+        return false;
+    }
+
+    @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         Validate.isTrue(data instanceof Float, "Expected Float Parameter, but was " + data.getClass().getSimpleName());
 

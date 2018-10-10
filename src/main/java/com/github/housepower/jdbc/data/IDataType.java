@@ -16,6 +16,8 @@ public interface IDataType {
 
     Class javaTypeClass();
 
+    boolean nullable();
+
     Object deserializeTextQuoted(SQLLexer lexer) throws SQLException;
 
     void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException;

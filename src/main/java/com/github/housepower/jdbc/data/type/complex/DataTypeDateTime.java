@@ -57,6 +57,11 @@ public class DataTypeDateTime implements IDataType {
     }
 
     @Override
+    public boolean nullable() {
+        return false;
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '\'');
         int year = lexer.numberLiteral().intValue();

@@ -63,6 +63,11 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
+    public boolean nullable() {
+        return false;
+    }
+
+    @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
         throws SQLException, IOException {
         Validate.isTrue(data instanceof Date,

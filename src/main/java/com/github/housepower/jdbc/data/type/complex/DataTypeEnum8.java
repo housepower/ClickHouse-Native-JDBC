@@ -47,6 +47,11 @@ public class DataTypeEnum8 implements IDataType {
     }
 
     @Override
+    public boolean nullable() {
+        return false;
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.stringLiteral();
     }

@@ -40,6 +40,11 @@ public class DataTypeInt32 implements IDataType {
     }
 
     @Override
+    public boolean nullable() {
+        return false;
+    }
+
+    @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         Validate.isTrue(data instanceof Byte || data instanceof Short || data instanceof Integer,
             "Expected Integer Parameter, but was " + data.getClass().getSimpleName());
