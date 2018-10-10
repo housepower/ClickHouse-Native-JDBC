@@ -33,7 +33,7 @@ public class Block {
 
         nameWithPosition = new HashMap<String, Integer>();
         for (int i = 0; i < columns.length; i++) {
-            nameWithPosition.put(columns[i].name(), i);
+            nameWithPosition.put(columns[i].name(), i+1);
         }
     }
 
