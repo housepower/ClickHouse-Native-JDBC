@@ -14,9 +14,11 @@ public class DataTypeInt16 implements IDataType {
 
     private static final Short DEFAULT_VALUE = 0;
     private final String name;
+    private boolean isUnsigned;
 
     public DataTypeInt16(String name) {
         this.name = name;
+        this.isUnsigned = name.startsWith("U");
     }
 
     @Override
@@ -54,7 +56,11 @@ public class DataTypeInt16 implements IDataType {
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readShort();
+        short s = deserializer.readShort();
+        if (isUnsigned) {
+            return s & 0xffff;
+        }
+        return s;
     }
 
     @Override
@@ -66,9 +72,9 @@ public class DataTypeInt16 implements IDataType {
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        Short[] data = new Short[rows];
+        Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = deserializer.readShort();
+            data[row] = this.deserializeBinary(deserializer);
         }
         return data;
     }

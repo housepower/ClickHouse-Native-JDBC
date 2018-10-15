@@ -10,6 +10,7 @@ import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -107,7 +108,7 @@ public class DataTypeArray implements IDataType {
 
         Object[] offsets = offsetIDataType.deserializeBinaryBulk(rows, deserializer);
         for (int row = 0, lastOffset = 0; row < rows; row++) {
-            Long offset = (Long) offsets[row];
+            BigInteger offset = (BigInteger) offsets[row];
             data[row] = new ClickHouseArray(
                 elemDataType.deserializeBinaryBulk(offset.intValue() - lastOffset, deserializer));
             lastOffset = offset.intValue();

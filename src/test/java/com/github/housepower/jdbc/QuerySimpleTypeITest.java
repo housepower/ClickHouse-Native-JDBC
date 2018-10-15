@@ -76,6 +76,21 @@ public class QuerySimpleTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyUIntColumn() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connect) throws Exception {
+                Statement statement = connect.createStatement();
+                ResultSet rs = statement
+                    .executeQuery("SELECT toUInt32(" + Integer.MAX_VALUE + " + 128)");
+
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getLong(1), Integer.MAX_VALUE * 1L + 128L);
+            }
+        });
+    }
+
+    @Test
     public void successfullyLongColumn() throws Exception {
         withNewConnection(new WithConnection() {
             @Override
