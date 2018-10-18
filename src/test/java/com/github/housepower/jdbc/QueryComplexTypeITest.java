@@ -89,16 +89,17 @@ public class QueryComplexTypeITest extends AbstractITest {
             public void apply(Connection connection) throws Exception {
                 Statement statement = connection.createStatement();
 
+                // Array(UInt8)
                 ResultSet rs = statement.executeQuery("SELECT arrayJoin([[1,2,3],[4,5]])");
 
                 Assert.assertTrue(rs.next());
                 Array array1 = rs.getArray(1);
                 Assert.assertNotNull(array1);
-                Assert.assertArrayEquals((Byte[]) array1.getArray(), new Byte[]{1, 2, 3});
+                Assert.assertArrayEquals((Number[]) array1.getArray(), new Number[]{ (short)1,  (short)2,  (short)3});
                 Assert.assertTrue(rs.next());
                 Array array2 = rs.getArray(1);
                 Assert.assertNotNull(array2);
-                Assert.assertArrayEquals((Byte[]) array2.getArray(), new Byte[]{4, 5});
+                Assert.assertArrayEquals((Number[]) array2.getArray(), new Number[]{ (short) 4, (short) 5});
             }
         });
     }
@@ -129,12 +130,12 @@ public class QueryComplexTypeITest extends AbstractITest {
 
                 Assert.assertTrue(rs.next());
                 Struct struct = (Struct) rs.getObject(1);
-                Assert.assertEquals(struct.getAttributes(), new Object[]{1, "2"});
+                Assert.assertEquals(struct.getAttributes(), new Object[]{(long)1, "2"});
 
                 Map<String, Class<?>> attrNameWithClass = new LinkedHashMap<String, Class<?>>();
                 attrNameWithClass.put("_2", String.class);
-                attrNameWithClass.put("_1", Integer.class);
-                Assert.assertEquals(struct.getAttributes(attrNameWithClass), new Object[]{"2", 1});
+                attrNameWithClass.put("_1", Long.class);
+                Assert.assertEquals(struct.getAttributes(attrNameWithClass), new Object[]{"2", (long)1});
             }
         });
     }

@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class DataTypeNullable implements IDataType {
-    private static final Byte IS_NULL = 1;
-    private static final Byte NON_NULL = 0;
+    private static final Short IS_NULL = 1;
+    private static final Short NON_NULL = 0;
 
     private final String name;
     private final IDataType nestedDataType;
@@ -77,7 +77,7 @@ public class DataTypeNullable implements IDataType {
 
     @Override
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        Byte[] isNull = new Byte[data.length];
+        Short[] isNull = new Short[data.length];
         for (int i = 0; i < data.length; i++) {
             isNull[i] = (data[i] == null ? IS_NULL : NON_NULL);
             data[i] = data[i] == null ? nestedDataType.defaultValue() : data[i];

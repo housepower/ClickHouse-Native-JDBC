@@ -3,6 +3,8 @@ package com.github.housepower.jdbc;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.*;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -20,10 +22,11 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
                 statement.executeQuery("DROP TABLE IF EXISTS test");
                 statement.executeQuery("CREATE TABLE test(test_uInt8 UInt8, test_Int8 Int8)ENGINE=Log");
-                statement.executeQuery("INSERT INTO test VALUES(" + Byte.MAX_VALUE + "," + Byte.MIN_VALUE + ")");
+                statement.executeQuery("INSERT INTO test VALUES(" + 255 + "," + Byte.MIN_VALUE + ")");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_uInt8");
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getByte(1), Byte.MAX_VALUE);
+                int aa = rs.getInt(1);
+                Assert.assertEquals(aa, 255);
                 Assert.assertEquals(rs.getByte(2), Byte.MIN_VALUE);
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
@@ -209,6 +212,41 @@ public class InsertSimpleTypeITest extends AbstractITest {
                 Assert.assertEquals(rs.getInt(1), 1);
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getInt(1), 2);
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
+    }
+
+    @Test
+    public void successfullyUnsignedDataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(i8 UInt8, i16 UInt16, i32 UInt32, i64 UInt64)ENGINE=Log");
+
+                String insertSQL = "INSERT INTO test VALUES(" + ( (1 << 8) - 1) +
+                                   "," + ( (1 << 16) - 1) +
+                                   ",4294967295,-9223372036854775808)";
+
+                statement.executeQuery(insertSQL);
+
+                ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY i8");
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getByte(1), -1 );
+                Assert.assertEquals(rs.getShort(1), (1 << 8) - 1 );
+
+                Assert.assertEquals(rs.getShort(2), -1 );
+                Assert.assertEquals(rs.getInt(2), (1 << 16) - 1);
+
+                Assert.assertEquals(rs.getInt(3), -1 );
+                Assert.assertEquals(rs.getLong(3), 4294967295L);
+
+                Assert.assertEquals(rs.getLong(4), -9223372036854775808L);
+                Assert.assertEquals(rs.getBigDecimal(4), new BigDecimal("9223372036854775808"));
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }

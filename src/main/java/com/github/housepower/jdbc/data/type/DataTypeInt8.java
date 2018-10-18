@@ -14,9 +14,11 @@ public class DataTypeInt8 implements IDataType {
 
     private static final Byte DEFAULT_VALUE = 0;
     private final String name;
+    private boolean isUnsigned;
 
     public DataTypeInt8(String name) {
         this.name = name;
+        this.isUnsigned = name.startsWith("U");
     }
 
     @Override
@@ -46,13 +48,17 @@ public class DataTypeInt8 implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Byte, "Expected Byte Parameter, but was " + data.getClass().getSimpleName());
-        serializer.writeByte((Byte) data);
+        Validate.isTrue(data instanceof Number, "Expected Byte Parameter, but was " + data.getClass().getSimpleName());
+        serializer.writeByte(((Number)data).byteValue());
     }
 
     @Override
-    public Byte deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        return deserializer.readByte();
+    public Number deserializeBinary(BinaryDeserializer deserializer) throws IOException {
+        byte b = deserializer.readByte();
+        if (isUnsigned) {
+            return (short)(b & 0xff);
+        }
+        return b;
     }
 
     @Override
@@ -63,10 +69,10 @@ public class DataTypeInt8 implements IDataType {
     }
 
     @Override
-    public Byte[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
-        Byte[] data = new Byte[rows];
+    public Number[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
+        Number[] data = new Number[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = deserializer.readByte();
+            data[row] = deserializeBinary(deserializer);
         }
         return data;
     }

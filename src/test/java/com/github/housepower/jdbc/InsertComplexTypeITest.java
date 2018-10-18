@@ -20,7 +20,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 statement.executeQuery("INSERT INTO test VALUES ([1, 2, 3, 4])");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test");
                 Assert.assertTrue(rs.next());
-                Assert.assertArrayEquals((Object[]) rs.getArray(1).getArray(), new Byte[] {1, 2, 3, 4});
+                Assert.assertArrayEquals((Object[]) rs.getArray(1).getArray(), new Short[] {1, 2, 3, 4});
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }
@@ -68,7 +68,6 @@ public class InsertComplexTypeITest extends AbstractITest {
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getByte(1), 0);
                 Assert.assertTrue(rs.wasNull());
-                Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }
         });
@@ -107,7 +106,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 statement.executeQuery("INSERT INTO test VALUES(('test_string', 1))");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test");
                 Assert.assertTrue(rs.next());
-                Assert.assertArrayEquals(((Struct) rs.getObject(1)).getAttributes(), new Object[] {"test_string", (byte) 1});
+                Assert.assertArrayEquals(((Struct) rs.getObject(1)).getAttributes(), new Object[] {"test_string", (short)(1) });
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }
