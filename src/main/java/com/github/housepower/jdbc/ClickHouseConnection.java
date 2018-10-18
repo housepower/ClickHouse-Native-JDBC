@@ -58,13 +58,13 @@ public class ClickHouseConnection extends SQLConnection {
 
     @Override
     public Statement createStatement() throws SQLException {
-        Validate.isTrue(!isClosed(), "Unable to create Statement, Because the connection is closed.");
+        Validate.isTrue(!isClosed(), "Unable to create Statement, because the connection is closed.");
         return new ClickHouseStatement(this);
     }
 
     @Override
     public PreparedStatement prepareStatement(String query) throws SQLException {
-        Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, Because the connection is closed.");
+        Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, because the connection is closed.");
         Matcher matcher = VALUES_REGEX.matcher(query);
         return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this) :
             new ClickHousePreparedQueryStatement(this, query);
@@ -84,13 +84,13 @@ public class ClickHouseConnection extends SQLConnection {
 
     @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-        Validate.isTrue(!isClosed(), "Unable to create Array, Because the connection is closed.");
+        Validate.isTrue(!isClosed(), "Unable to create Array, because the connection is closed.");
         return new ClickHouseArray(elements);
     }
 
     @Override
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-        Validate.isTrue(!isClosed(), "Unable to create Struct, Because the connection is closed.");
+        Validate.isTrue(!isClosed(), "Unable to create Struct, because the connection is closed.");
         return new ClickHouseStruct(typeName, attributes);
     }
 
