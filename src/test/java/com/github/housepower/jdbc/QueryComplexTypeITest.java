@@ -105,6 +105,39 @@ public class QueryComplexTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyArrayTuple() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                ResultSet rs = statement.executeQuery("SELECT arrayJoin([[(1,'3'), (2,'4')],[(3,'5')]])");
+
+                Assert.assertTrue(rs.next());
+                Array array1 = rs.getArray(1);
+                Assert.assertNotNull(array1);
+
+                Object []row1 = (Object [])array1.getArray();
+                Assert.assertTrue(row1.length == 2);
+                Assert.assertEquals(((Short)(((ClickHouseStruct) row1[0]).getAttributes()[0])).intValue(), 1);
+                Assert.assertEquals(((ClickHouseStruct) row1[0]).getAttributes()[1], "3");
+
+                Assert.assertEquals(((Short)(((ClickHouseStruct) row1[1]).getAttributes()[0])).intValue(), 2);
+                Assert.assertEquals(((ClickHouseStruct) row1[1]).getAttributes()[1], "4");
+
+                Assert.assertTrue(rs.next());
+                Array array2 = rs.getArray(1);
+                Object []row2 = (Object [])array2.getArray();
+                Assert.assertTrue(row2.length == 1);
+                Assert.assertEquals(((Short)(((ClickHouseStruct) row2[0]).getAttributes()[0])).intValue(), 3);
+                Assert.assertEquals((((ClickHouseStruct) row2[0]).getAttributes()[1]), "5");
+
+                Assert.assertFalse(rs.next());
+            }
+        });
+    }
+
+    @Test
     public void successfullyTimestamp() throws Exception {
         withNewConnection(new WithConnection() {
             @Override
