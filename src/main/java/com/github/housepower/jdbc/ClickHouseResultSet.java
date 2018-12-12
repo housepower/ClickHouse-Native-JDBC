@@ -2,6 +2,7 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.Column;
+import com.github.housepower.jdbc.misc.CheckedIterator;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.DataResponse;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
@@ -29,9 +30,9 @@ public class ClickHouseResultSet extends SQLResultSet {
 
     private final Block header;
     private final ClickHouseStatement statement;
-    private final Iterator<DataResponse> iterator;
+    private final CheckedIterator<DataResponse, SQLException> iterator;
 
-    public ClickHouseResultSet(Block header, Iterator<DataResponse> iterator, ClickHouseStatement statement) {
+    public ClickHouseResultSet(Block header, CheckedIterator<DataResponse, SQLException> iterator, ClickHouseStatement statement) {
         this.header = header;
         this.iterator = iterator;
         this.statement = statement;
@@ -244,7 +245,7 @@ public class ClickHouseResultSet extends SQLResultSet {
         return ++row < current.rows() || (row = 0) < (current = fetchBlock()).rows();
     }
 
-    private Block fetchBlock() {
+    private Block fetchBlock() throws SQLException {
         while (iterator.hasNext()) {
             DataResponse next = iterator.next();
             if (next.block().rows() > 0) {

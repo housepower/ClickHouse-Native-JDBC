@@ -1,50 +1,80 @@
 package com.github.housepower.jdbc.protocol;
 
 import com.github.housepower.jdbc.data.Block;
+import com.github.housepower.jdbc.misc.CheckedIterator;
+import com.github.housepower.jdbc.misc.CheckedSupplier;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.SQLException;
+import java.util.function.Supplier;
 
 public class QueryResponse {
-    
-    private final Block header;
-    private final List<DataResponse> data;
+    private final CheckedSupplier<RequestOrResponse, SQLException> responseSupplier;
+    private Block header;
+    private boolean atEnd;
     // Progress
     // Totals
     // Extremes
     // ProfileInfo
     // EndOfStream
 
-    public QueryResponse(List<RequestOrResponse> responses) {
-        List<DataResponse> dataResponses = new ArrayList<DataResponse>(responses.size());
-        List<TotalsResponse> totalsResponses = new ArrayList<TotalsResponse>(responses.size());
-        List<ProgressResponse> progressResponses = new ArrayList<ProgressResponse>(responses.size());
-        List<ExtremesResponse> extremesResponses = new ArrayList<ExtremesResponse>(responses.size());
-        List<ProfileInfoResponse> profileInfoResponses = new ArrayList<ProfileInfoResponse>(responses.size());
-
-        for (RequestOrResponse response : responses) {
-            if (response instanceof DataResponse) {
-                dataResponses.add((DataResponse) response);
-            } else if (response instanceof TotalsResponse) {
-                totalsResponses.add((TotalsResponse) response);
-            } else if (response instanceof ProgressResponse) {
-                progressResponses.add((ProgressResponse) response);
-            } else if (response instanceof ExtremesResponse) {
-                extremesResponses.add((ExtremesResponse) response);
-            } else if (response instanceof ProfileInfoResponse) {
-                profileInfoResponses.add((ProfileInfoResponse) response);
-            }
-        }
-
-        data = dataResponses;
-        header = dataResponses.isEmpty() ? new Block() : dataResponses.remove(0).block();
+    public QueryResponse(CheckedSupplier<RequestOrResponse, SQLException> responseSupplier) {
+        this.responseSupplier = responseSupplier;
     }
 
-    public Block header() {
+    public Block header() throws SQLException {
+        ensureHeaderConsumed();
+
         return header;
     }
 
-    public List<DataResponse> data() {
-        return data;
+    private void ensureHeaderConsumed() throws SQLException {
+        if (header == null) {
+            DataResponse firstDataResponse = consumeDataResponse();
+            header = firstDataResponse != null ? firstDataResponse.block() : new Block();
+        }
+    }
+
+    private DataResponse consumeDataResponse() throws SQLException {
+        while (!atEnd) {
+            RequestOrResponse response = responseSupplier.get();
+            if (response instanceof DataResponse) {
+                return (DataResponse) response;
+            } else if (response instanceof EOFStreamResponse || response == null) {
+                atEnd = true;
+            }
+        }
+
+        return null;
+    }
+
+    public Supplier<CheckedIterator<DataResponse, SQLException>> data() {
+        return () -> new CheckedIterator<DataResponse, SQLException>() {
+            DataResponse current;
+
+            private DataResponse fill() throws SQLException {
+                ensureHeaderConsumed();
+                return current = consumeDataResponse();
+            }
+
+            private DataResponse drain() throws SQLException {
+                if (current == null) {
+                    fill();
+                }
+
+                DataResponse top = current;
+                current = null;
+                return top;
+            }
+
+            @Override
+            public boolean hasNext() throws SQLException {
+                return current != null || fill() != null;
+            }
+
+            @Override
+            public DataResponse next() throws SQLException {
+                return drain();
+            }
+        };
     }
 }
