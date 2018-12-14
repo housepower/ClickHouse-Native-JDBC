@@ -6,10 +6,7 @@ import com.github.housepower.jdbc.settings.SettingKey;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Properties;
 
 public class ConnectionParamITest {
@@ -19,7 +16,12 @@ public class ConnectionParamITest {
         Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
         Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1?max_rows_to_read=1&connect_timeout=10");
         Statement statement = connection.createStatement();
-        statement.execute("SELECT 1 UNION ALL SELECT 2");
+        ResultSet rs = statement.executeQuery("SELECT 1 UNION ALL SELECT 2");
+        int rowsRead = 0;
+        while (rs.next()) {
+            ++rowsRead;
+        }
+        Assert.assertEquals(1, rowsRead); // not reached
     }
 
     @Test
