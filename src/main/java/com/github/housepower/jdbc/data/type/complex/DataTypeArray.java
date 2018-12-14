@@ -105,12 +105,17 @@ public class DataTypeArray implements IDataType {
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
         ClickHouseArray[] data = new ClickHouseArray[rows];
+        if (rows == 0) {
+            return data;
+        }
 
         Object[] offsets = offsetIDataType.deserializeBinaryBulk(rows, deserializer);
+        ClickHouseArray res =  new ClickHouseArray(
+            elemDataType.deserializeBinaryBulk(((BigInteger) offsets[rows - 1]).intValue() , deserializer));
+
         for (int row = 0, lastOffset = 0; row < rows; row++) {
             BigInteger offset = (BigInteger) offsets[row];
-            data[row] = new ClickHouseArray(
-                elemDataType.deserializeBinaryBulk(offset.intValue() - lastOffset, deserializer));
+            data[row] = res.slice(lastOffset, offset.intValue() - lastOffset);
             lastOffset = offset.intValue();
         }
         return data;
