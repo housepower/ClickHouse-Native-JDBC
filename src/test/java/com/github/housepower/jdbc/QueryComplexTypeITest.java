@@ -95,11 +95,11 @@ public class QueryComplexTypeITest extends AbstractITest {
                 Assert.assertTrue(rs.next());
                 Array array1 = rs.getArray(1);
                 Assert.assertNotNull(array1);
-                Assert.assertArrayEquals((Number[]) array1.getArray(), new Number[]{ (short)1,  (short)2,  (short)3});
+                Assert.assertArrayEquals((Object[]) (array1.getArray()), new Short[]{ (short)1,  (short)2,  (short)3});
                 Assert.assertTrue(rs.next());
                 Array array2 = rs.getArray(1);
                 Assert.assertNotNull(array2);
-                Assert.assertArrayEquals((Number[]) array2.getArray(), new Number[]{ (short) 4, (short) 5});
+                Assert.assertArrayEquals((Object[]) array2.getArray(), new Number[]{ (short) 4, (short) 5});
             }
         });
     }
