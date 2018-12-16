@@ -119,18 +119,8 @@ public class ClickHouseConnection extends SQLConnection {
         PhysicalConnection connection = getHealthyPhysicalConnection();
 
         connection.sendQuery(query, atomicInfo.get().client(), configure.settings());
-        List<RequestOrResponse> data = new ArrayList<RequestOrResponse>();
 
-        while (true) {
-            RequestOrResponse response =
-                connection.receiveResponse(configure.queryTimeout(), atomicInfo.get().server());
-
-            if (response instanceof EOFStreamResponse) {
-                return new QueryResponse(data);
-            }
-
-            data.add(response);
-        }
+        return new QueryResponse(() -> connection.receiveResponse(configure.queryTimeout(), atomicInfo.get().server()));
     }
 
     public Integer sendInsertRequest(final String insertQuery, final InputFormat input) throws SQLException {

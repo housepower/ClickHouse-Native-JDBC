@@ -44,7 +44,7 @@ public class ClickHouseStatement extends SQLStatement {
             return connection.sendInsertRequest(insertQuery, new ValuesInputFormat(matcher.end() - 1, query));
         }
         QueryResponse response = connection.sendQueryRequest(query);
-        lastResultSet = new ClickHouseResultSet(response.header(), response.data().iterator(), this);
+        lastResultSet = new ClickHouseResultSet(response.header(), response.data().get(), this);
         return 0;
     }
 
