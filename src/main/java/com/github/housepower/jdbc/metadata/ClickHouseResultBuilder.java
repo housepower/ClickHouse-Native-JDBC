@@ -107,17 +107,31 @@ public class ClickHouseResultBuilder {
         if (types == null) {
             throw new IllegalStateException("types == null");
         }
-        Block header = new Block(rows.size(), toColumns(names, types, rows));
+        Column[] headerColumns = new Column[names.size()];
+        for (int i = 0; i < headerColumns.length; i++) {
+            headerColumns[i] = new Column(
+                    names.get(i),
+                    new DataTypeString(),
+                    new Object[] {names.get(i)});
+        }
+        Block header = new Block(names.size(), headerColumns);
+        Block data = new Block(rows.size(), toColumns(names, types, rows));
         ClickHouseResultSet crs = new ClickHouseResultSet(header,
                 new CheckedIterator<DataResponse, SQLException>() {
+                    private byte callTime = 0;
+
                     @Override
                     public boolean hasNext() throws SQLException {
+                        if (callTime == 0) {
+                            callTime++;
+                            return true;
+                        }
                         return false;
                     }
 
                     @Override
                     public DataResponse next() throws SQLException {
-                        return null;
+                        return new DataResponse("data", data);
                     }
                 }, (ClickHouseStatement) this.statement);
 
@@ -148,5 +162,10 @@ public class ClickHouseResultBuilder {
 
     public Statement getStatement() {
         return statement;
+    }
+
+    @Override
+    public String toString() {
+        return this.rows.toString();
     }
 }
