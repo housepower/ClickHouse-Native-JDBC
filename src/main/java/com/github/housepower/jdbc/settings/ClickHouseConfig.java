@@ -28,6 +28,8 @@ public class ClickHouseConfig {
 
     private int connectTimeout;
 
+    private String url;
+
     private Map<SettingKey, Object> settings;
 
     public static final Pattern DB_PATH_PATTERN = Pattern.compile("/([a-zA-Z0-9_]+)");
@@ -47,6 +49,7 @@ public class ClickHouseConfig {
         this.database = (obj = settings.remove(SettingKey.database)) == null ? "default" : String.valueOf(obj);
         this.soTimeout = (obj = settings.remove(SettingKey.query_timeout)) == null ? 0 : (Integer) obj;
         this.connectTimeout = (obj = settings.remove(SettingKey.connect_timeout)) == null ? 0 : (Integer) obj;
+        this.url = url;
     }
 
     public int port() {
@@ -128,7 +131,7 @@ public class ClickHouseConfig {
         while (tokenizer.hasMoreTokens()) {
             String[] queryParameter = tokenizer.nextToken().split("=", 2);
             Validate.isTrue(queryParameter.length == 2,
-                "ClickHouse JDBC URL Parameter '" + queryParameters + "' Error, Expected '='.");
+                    "ClickHouse JDBC URL Parameter '" + queryParameters + "' Error, Expected '='.");
 
             for (SettingKey settingKey : SettingKey.values()) {
                 if (settingKey.name().equalsIgnoreCase(queryParameter[0])) {
@@ -139,7 +142,7 @@ public class ClickHouseConfig {
         return parameters;
     }
 
-    public void setQueryTimeout(int timeout){
+    public void setQueryTimeout(int timeout) {
         this.soTimeout = timeout;
     }
 
@@ -153,7 +156,11 @@ public class ClickHouseConfig {
         configure.soTimeout = this.soTimeout;
         configure.connectTimeout = this.connectTimeout;
         configure.settings = new HashMap<SettingKey, Object>(this.settings);
-
+        configure.url = this.url;
         return configure;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }

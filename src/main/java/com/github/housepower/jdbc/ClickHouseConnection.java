@@ -3,12 +3,11 @@ package com.github.housepower.jdbc;
 import com.github.housepower.jdbc.connect.PhysicalConnection;
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.Block;
+import com.github.housepower.jdbc.metadata.ClickHouseDatabaseMetadata;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.protocol.EOFStreamResponse;
 import com.github.housepower.jdbc.protocol.HelloResponse;
 import com.github.housepower.jdbc.protocol.QueryRequest;
 import com.github.housepower.jdbc.protocol.QueryResponse;
-import com.github.housepower.jdbc.protocol.RequestOrResponse;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
@@ -19,8 +18,6 @@ import com.github.housepower.jdbc.wrapper.SQLConnection;
 
 import java.net.InetSocketAddress;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -67,7 +64,7 @@ public class ClickHouseConnection extends SQLConnection {
         Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, because the connection is closed.");
         Matcher matcher = VALUES_REGEX.matcher(query);
         return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this) :
-            new ClickHousePreparedQueryStatement(this, query);
+                new ClickHousePreparedQueryStatement(this, query);
     }
 
     @Override
@@ -107,11 +104,13 @@ public class ClickHouseConnection extends SQLConnection {
             statement.close();
             return true;
         } finally {
-            if (statement != null)
+            if (statement != null) {
                 statement.close();
+            }
 
-            if (connection != null)
+            if (connection != null) {
                 connection.close();
+            }
         }
     }
 
@@ -184,5 +183,15 @@ public class ClickHouseConnection extends SQLConnection {
             physical.disPhysicalConnection();
             throw rethrows;
         }
+    }
+
+    public String getServerVersion() {
+        return String.valueOf(atomicInfo.get().server().reversion());
+    }
+
+    @Override
+    public DatabaseMetaData getMetaData() throws SQLException {
+        String url = atomicInfo.get().server().getConfigure().getUrl();
+        return new ClickHouseDatabaseMetadata(url, this);
     }
 }
