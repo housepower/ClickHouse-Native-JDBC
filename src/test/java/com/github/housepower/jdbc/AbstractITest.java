@@ -25,7 +25,7 @@ public abstract class AbstractITest {
         }
     }
 
-    interface WithConnection {
+    public interface WithConnection {
         void apply(Connection connection) throws Exception;
     }
 }
