@@ -10,6 +10,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.Types;
 
+/**
+ * refer:
+ * https://github.com/yandex/clickhouse-jdbc/blob/a86eb8a65c25788f767e51a619f62073dbbfeddb/src/test/java/ru/yandex/clickhouse/integration/ClickHouseDatabaseMetadataTest.java
+ * https://github.com/housepower/ClickHouse-Native-JDBC/pull/74#issuecomment-452623435
+ */
 public class ClickHouseDatabaseMetadataTest extends AbstractITest {
     @Before
     public void setUp() throws Exception {
