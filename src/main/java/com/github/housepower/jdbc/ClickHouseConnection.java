@@ -185,10 +185,6 @@ public class ClickHouseConnection extends SQLConnection {
         }
     }
 
-    public String getServerVersion() {
-        return String.valueOf(atomicInfo.get().server().reversion());
-    }
-
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
         String url = atomicInfo.get().server().getConfigure().getUrl();
