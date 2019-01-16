@@ -13,7 +13,6 @@ import static com.github.housepower.jdbc.metadata.TypeUtils.NULLABLE_YES;
 
 /**
  * copy from https://github.com/yandex/clickhouse-jdbc/blob/master/src/main/java/ru/yandex/clickhouse/ClickHouseDatabaseMetadata.java
- *
  */
 public class ClickHouseDatabaseMetadata implements DatabaseMetaData {
 
@@ -79,7 +78,11 @@ public class ClickHouseDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public String getDatabaseProductVersion() throws SQLException {
-        return connection.getServerVersion();
+        ResultSet descTable = request("select version() as v");
+        if (descTable.next()) {
+            return descTable.getString("v");
+        }
+        return "-1.0.0.0.1-";
     }
 
     @Override
@@ -780,7 +783,7 @@ public class ClickHouseDatabaseMetadata implements DatabaseMetaData {
     @Override
     public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
         StringBuilder query;
-        if (connection.getServerVersion().compareTo("1.1.54237") > 0) {
+        if (this.getDatabaseProductVersion().compareTo("1.1.54237") > 0) {
             query = new StringBuilder("SELECT database, table, name, type, default_kind, default_expression ");
         } else {
             query = new StringBuilder("SELECT database, table, name, type, default_type, default_expression ");
@@ -804,7 +807,7 @@ public class ClickHouseDatabaseMetadata implements DatabaseMetaData {
         ResultSet descTable = request(query.toString());
         int colNum = 1;
         while (descTable.next()) {
-            List<String> row = new ArrayList<String>();
+            List<Object> row = new ArrayList<>();
             //catalog name
             row.add(DEFAULT_CAT);
             //database name
@@ -819,19 +822,19 @@ public class ClickHouseDatabaseMetadata implements DatabaseMetaData {
 
             int sqlType = TypeUtils.toSqlType(type);
             //data type
-            row.add(Integer.toString(sqlType));
+            row.add(sqlType);
             //type name
             row.add(TypeUtils.unwrapNullableIfApplicable(type));
             // column size / precision
-            row.add(Integer.toString(TypeUtils.getColumnSize(type)));
+            row.add(TypeUtils.getColumnSize(type));
             //buffer length
-            row.add("0");
+            row.add(0);
             // decimal digits
-            row.add(Integer.toString(TypeUtils.getDecimalDigits(type)));
+            row.add(TypeUtils.getDecimalDigits(type));
             // radix
-            row.add("10");
+            row.add(10);
             // nullable
-            row.add(String.valueOf(isNullableType == NULLABLE_YES ? columnNullable : columnNoNulls));
+            row.add(isNullableType == NULLABLE_YES ? columnNullable : columnNoNulls);
             //remarks
             row.add(null);
 
@@ -848,9 +851,9 @@ public class ClickHouseDatabaseMetadata implements DatabaseMetaData {
             row.add(null);
 
             // char octet length
-            row.add("0");
+            row.add(0);
             // ordinal
-            row.add(String.valueOf(colNum));
+            row.add(colNum);
             colNum += 1;
 
             //IS_NULLABLE
@@ -1225,14 +1228,12 @@ public class ClickHouseDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public int getDatabaseMajorVersion() throws SQLException {
-        return ClickHouseVersionNumberUtil.getMajorVersion(
-                connection.getServerVersion());
+        return this.getDriverMajorVersion();
     }
 
     @Override
     public int getDatabaseMinorVersion() throws SQLException {
-        return ClickHouseVersionNumberUtil.getMinorVersion(
-                connection.getServerVersion());
+        return this.getDriverMinorVersion();
     }
 
     @Override
