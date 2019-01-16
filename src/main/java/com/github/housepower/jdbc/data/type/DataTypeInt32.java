@@ -33,7 +33,7 @@ public class DataTypeInt32 implements IDataType {
 
     @Override
     public Object defaultValue() {
-        return DEFAULT_VALUE;
+        return null;
     }
 
     @Override

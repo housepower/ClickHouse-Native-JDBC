@@ -24,7 +24,7 @@ public class DataTypeString implements IDataType {
 
     @Override
     public Object defaultValue() {
-        return "";
+        return null;
     }
 
     @Override
