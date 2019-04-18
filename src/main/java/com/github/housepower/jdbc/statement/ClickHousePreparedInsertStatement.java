@@ -62,6 +62,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             insertQuery, new ValuesWithParametersInputFormat(fullQuery, posOfData, parameters));
         int[] result = new int[rows];
         Arrays.fill(result, -1);
+        clearBatch();
         return result;
     }
 
