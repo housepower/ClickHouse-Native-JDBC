@@ -138,6 +138,31 @@ public class QueryComplexTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyArrayArray() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                ResultSet rs = statement.executeQuery("SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v)");
+
+                Assert.assertTrue(rs.next());
+                Array array1 = rs.getArray(1);
+                Assert.assertNotNull(array1);
+
+                Double [][]res = new Double[][]{ {1.1, 1.2}, {2.1, 2.2}, {3.1, 3.2} };
+
+                Object[] arr = (Object[]) (rs.getArray(1).getArray());
+                Assert.assertArrayEquals((Object[]) ((ClickHouseArray)(arr[0])).getArray(), res[0]);
+                Assert.assertArrayEquals((Object[]) ((ClickHouseArray)(arr[1])).getArray(), res[1]);
+                Assert.assertArrayEquals((Object[]) ((ClickHouseArray)(arr[2])).getArray(), res[2]);
+                Assert.assertEquals(rs.getString(2), "Array(Array(Float64))");
+                Assert.assertFalse(rs.next());
+            }
+        });
+    }
+
+    @Test
     public void successfullyTimestamp() throws Exception {
         withNewConnection(new WithConnection() {
             @Override

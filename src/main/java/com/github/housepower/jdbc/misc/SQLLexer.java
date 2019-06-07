@@ -85,10 +85,6 @@ public class SQLLexer {
         return !eof() && data[pos] == ch;
     }
 
-    public void prev() {
-        pos --;
-    }
-
     public StringView bareWord() throws SQLException {
         skipAnyWhitespace();
         if (isCharacter('`')) {

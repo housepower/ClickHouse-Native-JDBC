@@ -56,7 +56,7 @@ public class BatchInsertITest extends AbstractITest {
 
                 statement.execute("DROP TABLE IF EXISTS test");
                 statement.execute("CREATE TABLE test(name Array(String), value Array(Float64), value2 Array(Array(Float64)) )ENGINE=Log");
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, ?, [[]])");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, ?, [[]] )");
 
                 List<String> array = Arrays.asList("aa", "bb", "cc");
                 List<Double> array2 = Arrays.asList(1.2, 2.2, 3.2);

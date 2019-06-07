@@ -60,14 +60,16 @@ public class DataTypeArray implements IDataType {
         Validate.isTrue(lexer.character() == '[');
         List<Object> arrayData = new ArrayList<Object>();
         for (; ; ) {
-            if (!lexer.isCharacter(']')) {
-                arrayData.add(elemDataType.deserializeTextQuoted(lexer));
+            if (lexer.isCharacter(']')) {
+                lexer.character();
+                break;
             }
-            char delimiter = lexer.character();
-            Validate.isTrue(delimiter == ',' || delimiter == ']');
-            if (delimiter == ']')
-                return new ClickHouseArray(arrayData.toArray());
+            if (lexer.isCharacter(',')) {
+                lexer.character();
+            }
+            arrayData.add(elemDataType.deserializeTextQuoted(lexer));
         }
+        return new ClickHouseArray(arrayData.toArray());
     }
 
     @Override
