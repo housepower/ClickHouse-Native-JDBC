@@ -60,7 +60,9 @@ public class DataTypeArray implements IDataType {
         Validate.isTrue(lexer.character() == '[');
         List<Object> arrayData = new ArrayList<Object>();
         for (; ; ) {
-            arrayData.add(elemDataType.deserializeTextQuoted(lexer));
+            if (!lexer.isCharacter(']')) {
+                arrayData.add(elemDataType.deserializeTextQuoted(lexer));
+            }
             char delimiter = lexer.character();
             Validate.isTrue(delimiter == ',' || delimiter == ']');
             if (delimiter == ']')
@@ -84,13 +86,14 @@ public class DataTypeArray implements IDataType {
 
     @Override
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-
+        long offset = 0;
         for (Object datum : data) {
             Validate.isTrue(datum instanceof Array,
                 "Expected Array Parameter, but was " + datum.getClass().getSimpleName());
 
             Object[] arrayData = (Object[]) ((Array) datum).getArray();
-            offsetIDataType.serializeBinary(arrayData.length, serializer);
+            offset += arrayData.length;
+            offsetIDataType.serializeBinary(offset, serializer);
         }
 
         for (Object datum : data) {

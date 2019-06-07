@@ -10,7 +10,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc</artifactId>
-    <version>1.6-stable</version>
+    <version>1.7-stable</version>
 </dependency>
 ```
 

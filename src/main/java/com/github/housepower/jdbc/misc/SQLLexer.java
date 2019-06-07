@@ -8,7 +8,10 @@ public class SQLLexer {
 
     public SQLLexer(int pos, String data) throws SQLException {
         this.pos = pos;
-        this.data = StringViewCoding.getValues(data);
+        // may have problem in newest java version
+        // https://github.com/housepower/ClickHouse-Native-JDBC/issues/82
+//        this.data = StringViewCoding.getValues(data);
+        this.data = data.toCharArray();
     }
 
     public char character() {
@@ -80,6 +83,10 @@ public class SQLLexer {
 
     public boolean isCharacter(char ch) {
         return !eof() && data[pos] == ch;
+    }
+
+    public void prev() {
+        pos --;
     }
 
     public StringView bareWord() throws SQLException {

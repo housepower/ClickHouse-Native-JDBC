@@ -4,12 +4,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
+import java.util.List;
 
 public class BatchInsertITest extends AbstractITest {
 
@@ -31,6 +31,49 @@ public class BatchInsertITest extends AbstractITest {
                 }
 
                 Assert.assertEquals(preparedStatement.executeBatch().length, Byte.MAX_VALUE);
+
+                ResultSet rs = statement.executeQuery("select * from test");
+
+                for (int i = 0; i < Byte.MAX_VALUE && rs.next(); i ++) {
+                    Assert.assertEquals(rs.getByte(1), i);
+                    Assert.assertEquals(rs.getByte(2), 1);
+                    Assert.assertEquals(rs.getString(3), "Zhang San" + i);
+                }
+            }
+
+        });
+
+    }
+
+    @Test
+    public void successfullyBatchInsertArray() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                System.setProperty("illegal-access", "allow");
+
+                Statement statement = connection.createStatement();
+
+                statement.execute("DROP TABLE IF EXISTS test");
+                statement.execute("CREATE TABLE test(name Array(String), value Array(Float64), value2 Array(Array(Float64)) )ENGINE=Log");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, ?, [[]])");
+
+                List<String> array = Arrays.asList("aa", "bb", "cc");
+                List<Double> array2 = Arrays.asList(1.2, 2.2, 3.2);
+
+                for (int i = 0; i < Byte.MAX_VALUE; i++) {
+                    preparedStatement.setArray(1, connection.createArrayOf("text", array.toArray()));
+                    preparedStatement.setArray(2, connection.createArrayOf("text", array2.toArray()));
+                    preparedStatement.addBatch();
+                }
+
+                Assert.assertEquals(preparedStatement.executeBatch().length, Byte.MAX_VALUE);
+
+                ResultSet rs = statement.executeQuery("select * from test");
+                while(rs.next()) {
+                    Assert.assertArrayEquals((Object[]) rs.getArray(1).getArray(), array.toArray());
+                    Assert.assertArrayEquals((Object[]) rs.getArray(2).getArray(), array2.toArray());
+                }
             }
         });
 

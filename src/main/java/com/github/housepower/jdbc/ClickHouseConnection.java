@@ -133,7 +133,7 @@ public class ClickHouseConnection extends SQLConnection {
         while (true) {
             Block block = input.next(header, 8192);
 
-            if (block.rows() == 0) {
+            if (block == null || block.rows() == 0) {
                 connection.sendData(new Block());
                 connection.receiveEndOfStream(configure.queryTimeout(), atomicInfo.get().server());
                 return rows;
