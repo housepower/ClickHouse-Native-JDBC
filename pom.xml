@@ -4,7 +4,7 @@
 
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc</artifactId>
-    <version>1.7-stable</version>
+    <version>1.8-stable-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>clickhouse-native-jdbc</name>
@@ -15,7 +15,7 @@
         <url>https://github.com/housepower/ClickHouse-Native-JDBC</url>
         <connection>scm:git:git@github.com:housepower/ClickHouse-Native-JDBC.git</connection>
         <developerConnection>scm:git:git@github.com:housepower/ClickHouse-Native-JDBC.git</developerConnection>
-        <tag>v1.7</tag>
+        <tag>HEAD</tag>
     </scm>
     <licenses>
         <license>
