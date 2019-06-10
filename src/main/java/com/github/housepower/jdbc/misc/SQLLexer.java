@@ -8,10 +8,7 @@ public class SQLLexer {
 
     public SQLLexer(int pos, String data) throws SQLException {
         this.pos = pos;
-        // may have problem in newest java version
-        // https://github.com/housepower/ClickHouse-Native-JDBC/issues/82
-//        this.data = StringViewCoding.getValues(data);
-        this.data = data.toCharArray();
+        this.data = StringViewCoding.getValues(data);
     }
 
     public char character() {
