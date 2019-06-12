@@ -4,6 +4,15 @@
 
 This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yandex/) in Java.
 
+
+## Use the latest code
+
+```
+    git clone git@github.com:housepower/ClickHouse-Native-JDBC.git
+    cd ClickHouse-Native-JDBC
+    mvn clean install
+```
+
 ## Maven central
 
 ```java
