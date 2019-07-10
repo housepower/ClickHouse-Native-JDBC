@@ -2,11 +2,20 @@ package com.github.housepower.jdbc.connect;
 
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.protocol.*;
-import com.github.housepower.jdbc.settings.ClickHouseDefines;
+import com.github.housepower.jdbc.protocol.DataRequest;
+import com.github.housepower.jdbc.protocol.DataResponse;
+import com.github.housepower.jdbc.protocol.EOFStreamResponse;
+import com.github.housepower.jdbc.protocol.HelloRequest;
+import com.github.housepower.jdbc.protocol.HelloResponse;
+import com.github.housepower.jdbc.protocol.PingRequest;
+import com.github.housepower.jdbc.protocol.PongResponse;
+import com.github.housepower.jdbc.protocol.ProgressResponse;
+import com.github.housepower.jdbc.protocol.QueryRequest;
+import com.github.housepower.jdbc.protocol.RequestOrResponse;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
+import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
 
 import java.io.IOException;
@@ -14,7 +23,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -82,7 +90,8 @@ public class PhysicalConnection {
 
     public RequestOrResponse receiveResponse(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
         try {
-            socket.setSoTimeout(soTimeout);
+        	// Note: https://github.com/housepower/ClickHouse-Native-JDBC/issues/91
+            socket.setSoTimeout(soTimeout * 1000);
             return RequestOrResponse.readFrom(deserializer, info);
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
