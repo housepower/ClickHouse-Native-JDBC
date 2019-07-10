@@ -90,8 +90,7 @@ public class PhysicalConnection {
 
     public RequestOrResponse receiveResponse(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
         try {
-        	// Note: https://github.com/housepower/ClickHouse-Native-JDBC/issues/91
-            socket.setSoTimeout(soTimeout * 1000);
+            socket.setSoTimeout(soTimeout);
             return RequestOrResponse.readFrom(deserializer, info);
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);

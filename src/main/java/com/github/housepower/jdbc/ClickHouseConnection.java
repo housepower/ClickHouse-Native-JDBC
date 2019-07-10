@@ -4,11 +4,9 @@ import com.github.housepower.jdbc.connect.PhysicalConnection;
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.protocol.EOFStreamResponse;
 import com.github.housepower.jdbc.protocol.HelloResponse;
 import com.github.housepower.jdbc.protocol.QueryRequest;
 import com.github.housepower.jdbc.protocol.QueryResponse;
-import com.github.housepower.jdbc.protocol.RequestOrResponse;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
@@ -18,9 +16,13 @@ import com.github.housepower.jdbc.stream.InputFormat;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
 
 import java.net.InetSocketAddress;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Array;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Struct;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -97,7 +99,7 @@ public class ClickHouseConnection extends SQLConnection {
     @Override
     public boolean isValid(int timeout) throws SQLException {
         ClickHouseConfig validConfigure = configure.copy();
-        validConfigure.setQueryTimeout(timeout);
+        validConfigure.setQueryTimeout(timeout * 1000);
         Connection connection = null;
         Statement statement = null;
         try {
