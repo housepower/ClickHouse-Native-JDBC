@@ -45,7 +45,7 @@ public class ClickHouseConfig {
         this.password = (obj = settings.remove(SettingKey.password)) == null ? "" : String.valueOf(obj);
         this.username = (obj = settings.remove(SettingKey.user)) == null ? "default" : String.valueOf(obj);
         this.database = (obj = settings.remove(SettingKey.database)) == null ? "default" : String.valueOf(obj);
-        this.soTimeout = (obj = settings.remove(SettingKey.query_timeout)) == null ? 0 : (Integer) obj;
+        this.soTimeout = (obj = settings.remove(SettingKey.query_timeout)) == null ? 0 : (Integer) obj * 1000;
         this.connectTimeout = (obj = settings.remove(SettingKey.connect_timeout)) == null ? 0 : (Integer) obj;
     }
 
