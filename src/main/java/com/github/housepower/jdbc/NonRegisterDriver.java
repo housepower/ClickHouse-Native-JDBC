@@ -19,6 +19,9 @@ public class NonRegisterDriver implements Driver {
     }
 
     public Connection connect(String url, Properties properties) throws SQLException {
+        if (!this.acceptsURL(url)) {
+            return null;
+        }
         ClickHouseConfig configure = new ClickHouseConfig(url, properties);
         return ClickHouseConnection.createClickHouseConnection(configure);
     }
