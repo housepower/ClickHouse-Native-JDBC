@@ -1,11 +1,9 @@
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.tool.EmbeddedDriver;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Properties;
 
@@ -18,15 +16,11 @@ public class ClickhouseDriverRegisterTest {
         Properties properties = new Properties();
         properties.setProperty("user", "user");
         properties.setProperty("password", "password");
-        String mockedUrl = "jdbc:mock://127.0.0.1:" + SERVER_PORT;
-        Driver mockedDriver = Mockito.mock(Driver.class);
-        Connection mockedConnection = Mockito.mock(Connection.class);
-        Mockito.when(mockedDriver.acceptsURL(mockedUrl)).thenReturn(true);
-        Mockito.when(mockedDriver.connect(mockedUrl, properties)).thenReturn(mockedConnection);
+        String mockedUrl = EmbeddedDriver.EMBEDDED_DRIVER_PREFIX + "//127.0.0.1:" + SERVER_PORT;
 
         Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
-        DriverManager.registerDriver(mockedDriver);
-        Assert.assertEquals(mockedConnection, DriverManager.getConnection(mockedUrl, properties));
+        DriverManager.registerDriver(new EmbeddedDriver());
+        Assert.assertEquals(EmbeddedDriver.MOCKED_CONNECTION, DriverManager.getConnection(mockedUrl, properties));
     }
 
 }
