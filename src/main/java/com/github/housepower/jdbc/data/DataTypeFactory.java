@@ -10,13 +10,7 @@ import com.github.housepower.jdbc.data.type.DataTypeInt64;
 import com.github.housepower.jdbc.data.type.DataTypeInt8;
 import com.github.housepower.jdbc.data.type.DataTypeString;
 import com.github.housepower.jdbc.data.type.DataTypeUUID;
-import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
-import com.github.housepower.jdbc.data.type.complex.DataTypeDateTime;
-import com.github.housepower.jdbc.data.type.complex.DataTypeEnum16;
-import com.github.housepower.jdbc.data.type.complex.DataTypeEnum8;
-import com.github.housepower.jdbc.data.type.complex.DataTypeFixedString;
-import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
-import com.github.housepower.jdbc.data.type.complex.DataTypeTuple;
+import com.github.housepower.jdbc.data.type.complex.*;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
@@ -39,7 +33,7 @@ public class DataTypeFactory {
 
     public static IDataType get(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         StringView dataTypeName = lexer.bareWord();
-        
+
         if (dataTypeName.equals("Date")) {
             return DataTypeDate.createDateType(lexer, serverInfo);
         } else if (dataTypeName.equals("Tuple")) {
@@ -56,6 +50,8 @@ public class DataTypeFactory {
             return DataTypeNullable.createNullableType(lexer, serverInfo);
         } else if (dataTypeName.equals("FixedString")) {
             return DataTypeFixedString.createFixedStringType(lexer, serverInfo);
+        } else if (dataTypeName.equals("Decimal")) {
+            return DataTypeDecimal.createDecimalType(lexer, serverInfo);
         } else {
             String name = String.valueOf(dataTypeName);
             IDataType dataType = dataTypes.get(name);
