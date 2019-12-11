@@ -22,7 +22,7 @@ public class DataTypeDecimal implements IDataType {
 
     private final int scale;
 
-    private final double scaleFactor;
+    private final BigDecimal scaleFactor;
 
     private final int nobits;
 
@@ -30,7 +30,7 @@ public class DataTypeDecimal implements IDataType {
         this.name = name;
         this.precision = precision;
         this.scale = scale;
-        this.scaleFactor = Math.pow(10, scale);
+        this.scaleFactor = BigDecimal.valueOf(Math.pow(10, scale));
         if (this.precision <= 9) {
             this.nobits = 32;
         } else if (this.precision <= 18) {
@@ -75,19 +75,23 @@ public class DataTypeDecimal implements IDataType {
             Number v = lexer.numberLiteral();
             result = BigDecimal.valueOf(v.doubleValue());
         }
-        result = result.setScale(scale, RoundingMode.UP);
+        result = result.setScale(scale, RoundingMode.HALF_UP);
         return result;
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+        if (!(data instanceof BigDecimal)) {
+            throw new RuntimeException(String.format("Error data type %s.", data.getClass().getSimpleName()));
+        }
+        BigDecimal targetValue = ((BigDecimal) data).multiply(scaleFactor);
         switch (this.nobits) {
             case 32: {
-                serializer.writeInt((int) (((Number) data).doubleValue() * this.scaleFactor));
+                serializer.writeInt(targetValue.intValue());
                 break;
             }
             case 64: {
-                serializer.writeLong((long) (((Number) data).doubleValue() * this.scaleFactor));
+                serializer.writeLong(targetValue.longValue());
                 break;
             }
             default: {
@@ -103,20 +107,20 @@ public class DataTypeDecimal implements IDataType {
             case 32: {
                 int v = deserializer.readInt();
                 value = BigDecimal.valueOf(v);
-                value = value.divide(BigDecimal.valueOf(scaleFactor), RoundingMode.HALF_UP);
+                value = value.divide(scaleFactor, RoundingMode.HALF_UP);
                 break;
             }
             case 64: {
                 long v = deserializer.readLong();
                 value = BigDecimal.valueOf(v);
-                value = value.divide(BigDecimal.valueOf(scaleFactor), RoundingMode.UP);
+                value = value.divide(scaleFactor, RoundingMode.HALF_UP);
                 break;
             }
             default: {
                 throw new RuntimeException(String.format("Unknown precision[%d] & scale[%d]", precision, scale));
             }
         }
-        value = value.setScale(scale, RoundingMode.UP);
+        value = value.setScale(scale, RoundingMode.HALF_UP);
         return value;
     }
 
