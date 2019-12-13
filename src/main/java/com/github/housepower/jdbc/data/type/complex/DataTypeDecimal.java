@@ -80,7 +80,7 @@ public class DataTypeDecimal implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
         if (!(data instanceof BigDecimal)) {
             throw new RuntimeException(String.format("Error data type %s.", data.getClass().getSimpleName()));
         }
@@ -107,13 +107,13 @@ public class DataTypeDecimal implements IDataType {
             case 32: {
                 int v = deserializer.readInt();
                 value = BigDecimal.valueOf(v);
-                value = value.divide(scaleFactor, RoundingMode.HALF_UP);
+                value = value.divide(scaleFactor);
                 break;
             }
             case 64: {
                 long v = deserializer.readLong();
                 value = BigDecimal.valueOf(v);
-                value = value.divide(scaleFactor, RoundingMode.HALF_UP);
+                value = value.divide(scaleFactor);
                 break;
             }
             default: {
