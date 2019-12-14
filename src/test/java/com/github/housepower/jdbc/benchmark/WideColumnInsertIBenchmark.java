@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  */
 public class WideColumnInsertIBenchmark extends AbstractIBenchmark{
-    private static final int COLUMN_NUM = 20;
+    private static final int COLUMN_NUM = 50;
     private static final int BATCH_SZIE = 400000;
 
     AtomicInteger tableMaxId = new AtomicInteger();
@@ -67,13 +67,13 @@ public class WideColumnInsertIBenchmark extends AbstractIBenchmark{
         }
     };
 
-    @BenchmarkOptions(benchmarkRounds = 1, warmupRounds = 0, concurrency = 1)
+    @BenchmarkOptions(benchmarkRounds = 2, warmupRounds = 0, concurrency = 1)
     @Test
     public void benchInsertNative() throws Exception {
         withConnection(benchInsert, ConnectionType.NATIVE);
     }
 
-    @BenchmarkOptions(benchmarkRounds = 1, warmupRounds = 0, concurrency = 1)
+    @BenchmarkOptions(benchmarkRounds = 2, warmupRounds = 0, concurrency = 1)
     @Test
     public void benchInsertHttp() throws Exception {
         withConnection(benchInsert, ConnectionType.HTTP);

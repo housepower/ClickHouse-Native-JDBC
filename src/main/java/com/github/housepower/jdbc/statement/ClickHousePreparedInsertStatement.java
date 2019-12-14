@@ -1,29 +1,37 @@
 package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.jdbc.misc.Slice;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
 
     private final int posOfData;
     private final String fullQuery;
     private final String insertQuery;
-    private final List<Object[]> parameters;
+    private final Slice []columns;
+
+	private int maxRows = 0;
 
     public ClickHousePreparedInsertStatement(int posOfData, String fullQuery, ClickHouseConnection conn)
         throws SQLException {
         super(conn, null, computeQuestionMarkSize(fullQuery, posOfData));
+
+    	int colSize = computeQuestionMarkSize(fullQuery, posOfData);
         this.posOfData = posOfData;
         this.fullQuery = fullQuery;
-        this.parameters = new ArrayList<Object[]>();
         this.insertQuery = fullQuery.substring(0, posOfData);
+
+        // extract the colSize
+        this.columns = new Slice[colSize];
+        for (int i = 0; i < colSize; ++i) {
+        	this.columns[i] = new Slice(8192);
+		}
     }
 
     @Override
@@ -33,9 +41,9 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     @Override
     public int executeUpdate() throws SQLException {
-        parameters.add(super.parameters);
-        return connection.sendInsertRequest(insertQuery,
-            new ValuesWithParametersInputFormat(fullQuery, posOfData, parameters));
+		addParameters();
+		return connection.sendInsertRequest(insertQuery,
+            new ValuesWithParametersInputFormat(fullQuery, posOfData, columns, maxRows));
     }
 
     @Override
@@ -46,20 +54,29 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     @Override
     public void addBatch() throws SQLException {
-        parameters.add(super.parameters);
-        super.parameters = new Object[super.parameters.length];
+		addParameters();
     }
+
+    private void addParameters() throws SQLException {
+    	//ensure rows size
+		for (int i = 0; i < super.parameters.length; i++) {
+		    columns[i].add(super.parameters[i]);
+		}
+		maxRows ++;
+	}
 
     @Override
     public void clearBatch() throws SQLException {
-        parameters.clear();
-        super.parameters = new Object[super.parameters.length];
+    	maxRows = 0;
+    	for (int i = 0; i < columns.length; i++) {
+    	    columns[i] = columns[i].sub(0,0);
+        }
     }
 
     @Override
     public int[] executeBatch() throws SQLException {
         Integer rows = connection.sendInsertRequest(
-            insertQuery, new ValuesWithParametersInputFormat(fullQuery, posOfData, parameters));
+            insertQuery, new ValuesWithParametersInputFormat(fullQuery, posOfData, columns, maxRows));
         int[] result = new int[rows];
         Arrays.fill(result, -1);
         clearBatch();

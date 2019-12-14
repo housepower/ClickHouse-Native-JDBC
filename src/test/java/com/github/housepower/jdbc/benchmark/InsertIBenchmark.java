@@ -26,6 +26,7 @@ public class InsertIBenchmark extends AbstractIBenchmark{
     public WithConnection benchInsert = new WithConnection(){
         @Override
         public void apply(Connection connection) throws Exception {
+        	int batchSize = 1000000;
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             Date date = new Date(ts.getTime());
 
@@ -39,7 +40,7 @@ public class InsertIBenchmark extends AbstractIBenchmark{
             PreparedStatement pstmt = connection.prepareStatement("INSERT INTO "  + testTable +" values(?, ?, ?, ?)");
 
 
-            for (int i = 0; i < 100000; i++) {
+            for (int i = 0; i < batchSize; i++) {
                 pstmt.setInt(1, i);
                 pstmt.setString(2, "i_am_a_string");
                 pstmt.setTimestamp(3, ts);
@@ -47,18 +48,18 @@ public class InsertIBenchmark extends AbstractIBenchmark{
                 pstmt.addBatch();
             }
             int []res = pstmt.executeBatch();
-            Assert.assertEquals(res.length, 100000);
+            Assert.assertEquals(res.length, batchSize);
             stmt.executeQuery("DROP TABLE " + testTable);
         }
     };
 
-    @BenchmarkOptions(benchmarkRounds = 20, warmupRounds = 0, concurrency = 30)
+    @BenchmarkOptions(benchmarkRounds = 2, warmupRounds = 0, concurrency = 1)
     @Test
     public void benchInsertNative() throws Exception {
         withConnection(benchInsert, ConnectionType.NATIVE);
     }
 
-    @BenchmarkOptions(benchmarkRounds = 20, warmupRounds = 0, concurrency = 30)
+    @BenchmarkOptions(benchmarkRounds = 2, warmupRounds = 0, concurrency = 1)
     @Test
     public void benchInsertHttp() throws Exception {
         withConnection(benchInsert, ConnectionType.HTTP);

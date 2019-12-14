@@ -3,34 +3,37 @@ package com.github.housepower.jdbc.stream;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.Column;
 import com.github.housepower.jdbc.misc.SQLLexer;
+import com.github.housepower.jdbc.misc.Slice;
 import com.github.housepower.jdbc.misc.Validate;
 
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 public class ValuesWithParametersInputFormat implements InputFormat {
 
-    private final Iterator<Object[]> iterator;
+    private final Slice[] columns;
+    private final int maxRows;
 
     private SQLLexer lexer;
     private Object[] parametersInLexer;
     private boolean parsed;
+    private int currentRow;
 
     private final int pos;
     private final String query;
 
-    public ValuesWithParametersInputFormat(String query, int pos, List<Object[]> parameters)
+    public ValuesWithParametersInputFormat(String query, int pos, Slice[] columns,
+                                           int maxRows)
         throws SQLException {
         this.pos = pos;
         this.query = query;
-        this.iterator = parameters.iterator();
+        this.columns = columns;
+        this.currentRow = 0;
+        this.maxRows = maxRows;
         this.lexer = new SQLLexer(pos, query);
         this.parsed = false;
     }
 
-    private void parseLexer(Block header) throws SQLException{
+    private void parseLexer(Block header) throws SQLException {
         parametersInLexer = new Object[header.columns()];
 
         char nextChar = lexer.character();
@@ -41,7 +44,8 @@ public class ValuesWithParametersInputFormat implements InputFormat {
             }
 
             if (!lexer.isCharacter('?')) {
-                parametersInLexer[column] =  header.getByPosition(column).type().deserializeTextQuoted(lexer);
+                parametersInLexer[column] =
+                    header.getByPosition(column).type().deserializeTextQuoted(lexer);
             } else {
                 lexer.character();
             }
@@ -51,36 +55,26 @@ public class ValuesWithParametersInputFormat implements InputFormat {
     }
 
     @Override
-    public Block next(Block header, int maxRows) throws SQLException {
-        Object[][] columnData = new Object[header.columns()][maxRows];
-
+    public Block next(Block header, int blockMaxRows) throws SQLException {
         if (!parsed) {
             parseLexer(header);
         }
 
-        for (int row = 0; row < maxRows; row++) {
-            if (!iterator.hasNext()) {
-                return newPreparedBlock(header, row, columnData);
-            }
-            int idx = 0;
-            Object[] params = iterator.next();
-            for (int column = 0; column < header.columns(); column++) {
-                columnData[column][row]  = parametersInLexer[column] == null? params[idx++] : parametersInLexer[column];
-            }
-        }
-        return newPreparedBlock(header, maxRows, columnData);
-    }
-
-    private Block newPreparedBlock(Block header, int rows, Object[][] columnData)
-        throws SQLException {
-        Validate.isTrue(header.columns() == columnData.length, "");
-
-        Column[] columns = new Column[columnData.length];
+        int numRows = Math.min(blockMaxRows, maxRows - currentRow);
+        Column[] cols = new Column[header.columns()];
         for (int i = 0; i < columns.length; i++) {
-            columns[i] = new Column(header.getByPosition(i).name(),
-                                    header.getByPosition(i).type(),
-                                    Arrays.copyOf(columnData[i], rows));
+            if (parametersInLexer[i] == null) {
+                cols[i] = new Column(header.getByPosition(i).name(),
+                                     header.getByPosition(i).type(),
+                                     columns[i].sub(currentRow, currentRow + numRows));
+            } else {
+                // set other parameters to const columns
+                cols[i] = new Column(header.getByPosition(i).name(),
+                                     header.getByPosition(i).type(),
+                                     parametersInLexer[i], maxRows);
+            }
         }
-        return new Block(rows, columns);
+        currentRow += numRows;
+        return new Block(numRows, cols);
     }
 }
