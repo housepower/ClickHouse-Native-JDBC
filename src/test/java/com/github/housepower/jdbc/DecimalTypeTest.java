@@ -51,6 +51,7 @@ public class DecimalTypeTest extends AbstractITest {
                     }
                     assertEquals(size, 3);
                 } finally {
+                    statement = connection.createStatement();
                     statement.execute("DROP TABLE IF EXISTS decimal_test");
                 }
             }
