@@ -74,8 +74,6 @@ public class DataTypeArray implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Array, "Expected Array Parameter, but was " + data.getClass().getSimpleName());
-
         offsetIDataType.serializeBinary(((Object[]) ((Array) data).getArray()).length, serializer);
         elemDataType.serializeBinaryBulk(((Object[]) ((Array) data).getArray()), serializer);
     }
@@ -90,18 +88,12 @@ public class DataTypeArray implements IDataType {
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
         long offset = 0;
         for (Object datum : data) {
-            Validate.isTrue(datum instanceof Array,
-                            "Expected Array Parameter, but was " + datum.getClass().getSimpleName());
-
             Object[] arrayData = (Object[]) ((Array) datum).getArray();
             offset += arrayData.length;
             offsetIDataType.serializeBinary(offset, serializer);
         }
 
         for (Object datum : data) {
-            Validate.isTrue(datum instanceof Array,
-                            "Expected Array Parameter, but was " + datum.getClass().getSimpleName());
-
             Object[] arrayData = (Object[]) ((Array) datum).getArray();
             elemDataType.serializeBinaryBulk(arrayData, serializer);
         }

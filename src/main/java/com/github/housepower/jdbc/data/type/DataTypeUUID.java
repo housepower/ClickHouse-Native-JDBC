@@ -2,8 +2,6 @@ package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
-import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
@@ -46,9 +44,6 @@ public class DataTypeUUID implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof String || data instanceof StringView,
-            "Expected String Parameter, but was " + data.getClass().getSimpleName());
-
         UUID uuid = UUID.fromString(String.valueOf(data));
         serializer.writeLong(uuid.getMostSignificantBits());
         serializer.writeLong(uuid.getLeastSignificantBits());

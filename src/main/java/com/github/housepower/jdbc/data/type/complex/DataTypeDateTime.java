@@ -89,8 +89,6 @@ public class DataTypeDateTime implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Timestamp,
-            "Expected Timestamp Parameter, but was " + data.getClass().getSimpleName());
         serializer.writeInt((int) ((((Timestamp) data).getTime()) / 1000));
     }
 

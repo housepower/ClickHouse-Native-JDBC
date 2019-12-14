@@ -3,7 +3,6 @@ package com.github.housepower.jdbc.data.type.complex;
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
@@ -58,9 +57,6 @@ public class DataTypeEnum16 implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof String || data instanceof StringView,
-            "Expected Enum8 Parameter, but was " + data.getClass().getSimpleName());
-
         for (int i = 0; i < names.length; i++) {
             if (data.equals(names[i])) {
                 serializer.writeShort(values[i]);
