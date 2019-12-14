@@ -11,17 +11,15 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
 public class WideColumnInsertIBenchmark extends AbstractIBenchmark{
     private static final int COLUMN_NUM = 50;
-    private static final int BATCH_SZIE = 400000;
+    private static final int BATCH_SZIE = 200000;
 
     AtomicInteger tableMaxId = new AtomicInteger();
 
@@ -31,9 +29,6 @@ public class WideColumnInsertIBenchmark extends AbstractIBenchmark{
     public WithConnection benchInsert = new WithConnection(){
         @Override
         public void apply(Connection connection) throws Exception {
-            Timestamp ts = new Timestamp(System.currentTimeMillis());
-            Date date = new Date(ts.getTime());
-
             Statement stmt = connection.createStatement();
 
             int tableId = tableMaxId.getAndIncrement();
@@ -63,17 +58,17 @@ public class WideColumnInsertIBenchmark extends AbstractIBenchmark{
             }
             int []res = pstmt.executeBatch();
             Assert.assertEquals(res.length, BATCH_SZIE);
-//            stmt.executeQuery("DROP TABLE " + testTable);
+            stmt.executeQuery("DROP TABLE " + testTable);
         }
     };
 
-    @BenchmarkOptions(benchmarkRounds = 2, warmupRounds = 0, concurrency = 1)
+    @BenchmarkOptions(benchmarkRounds = 1, warmupRounds = 0, concurrency = 1)
     @Test
     public void benchInsertNative() throws Exception {
         withConnection(benchInsert, ConnectionType.NATIVE);
     }
 
-    @BenchmarkOptions(benchmarkRounds = 2, warmupRounds = 0, concurrency = 1)
+    @BenchmarkOptions(benchmarkRounds = 1, warmupRounds = 0, concurrency = 1)
     @Test
     public void benchInsertHttp() throws Exception {
         withConnection(benchInsert, ConnectionType.HTTP);

@@ -54,13 +54,6 @@ public class DataTypeString implements IDataType {
     }
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
-    }
-
-    @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
         throws SQLException, IOException {
         String[] data = new String[rows];

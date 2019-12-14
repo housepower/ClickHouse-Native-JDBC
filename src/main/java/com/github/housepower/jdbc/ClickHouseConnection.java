@@ -145,7 +145,6 @@ public class ClickHouseConnection extends SQLConnection {
                 connection.receiveEndOfStream(configure.queryTimeout(), atomicInfo.get().server());
                 return rows;
             }
-
             connection.sendData(block);
             rows += block.rows();
         }

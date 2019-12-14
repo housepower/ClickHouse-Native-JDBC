@@ -5,6 +5,7 @@ import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public class Column {
 
@@ -55,12 +56,25 @@ public class Column {
         serializer.writeStringBinary(name);
         serializer.writeStringBinary(type.name());
 
-        if (isConstant) {
-                type.serializeBinary(rowsData.get(0), serializer);
-        } else {
-            for (int i = 0; i < rows; i++) {
-                type.serializeBinary(rowsData.get(i), serializer);
+        if (type.sqlTypeId() == Types.ARRAY) {
+            if (isConstant) {
+                Object[] objects = new Object[rows];
+                for (int i = 0; i < rows; i++) {
+                    objects[i] = rowsData.get(0);
+                }
+                type.serializeBinaryBulk(objects, serializer);
+            } else {
+                type.serializeBinaryBulk(rowsData.iterator(), serializer);
             }
+            return;
+        }
+
+        if (isConstant) {
+            for (int i = 0; i < rows; i++) {
+                type.serializeBinary(rowsData.get(0), serializer);
+            }
+        } else {
+            type.serializeBinaryBulk(rowsData.iterator(), serializer);
         }
     }
 }

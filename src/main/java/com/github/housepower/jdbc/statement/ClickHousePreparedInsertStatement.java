@@ -3,6 +3,7 @@ package com.github.housepower.jdbc.statement;
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.misc.Slice;
 import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
 
 import java.sql.ResultSet;
@@ -22,15 +23,15 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         throws SQLException {
         super(conn, null, computeQuestionMarkSize(fullQuery, posOfData));
 
-    	int colSize = computeQuestionMarkSize(fullQuery, posOfData);
+    	int parameterSize = computeQuestionMarkSize(fullQuery, posOfData);
         this.posOfData = posOfData;
         this.fullQuery = fullQuery;
         this.insertQuery = fullQuery.substring(0, posOfData);
 
-        // extract the colSize
-        this.columns = new Slice[colSize];
-        for (int i = 0; i < colSize; ++i) {
-        	this.columns[i] = new Slice(8192);
+        this.columns = new Slice[parameterSize];
+        // TODO make a slicePool
+        for (int i = 0; i < parameterSize; ++i) {
+        	this.columns[i] = new Slice(ClickHouseDefines.getBufferRows());
 		}
     }
 

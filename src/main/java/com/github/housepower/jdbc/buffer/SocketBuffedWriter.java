@@ -1,10 +1,10 @@
 package com.github.housepower.jdbc.buffer;
 
+import com.github.housepower.jdbc.settings.ClickHouseDefines;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-
-import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 public class SocketBuffedWriter implements BuffedWriter {
 
@@ -16,7 +16,7 @@ public class SocketBuffedWriter implements BuffedWriter {
 
     public SocketBuffedWriter(Socket socket) throws IOException {
         this.position = 0;
-        this.capacity = ClickHouseDefines.DEFAULT_BUFFER_SIZE;
+        this.capacity = ClickHouseDefines.getSocketBufferSize();
 
         this.buf = new byte[capacity];
         this.out = socket.getOutputStream();

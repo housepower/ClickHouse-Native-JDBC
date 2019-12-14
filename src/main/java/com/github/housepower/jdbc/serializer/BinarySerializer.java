@@ -18,7 +18,7 @@ public class BinarySerializer {
     public BinarySerializer(Socket socket) throws IOException {
         SocketBuffedWriter socketWriter = new SocketBuffedWriter(socket);
         container = new Container<BuffedWriter>(socketWriter,
-            new CompressedBuffedWriter(ClickHouseDefines.DEFAULT_BUFFER_SIZE, socketWriter));
+            new CompressedBuffedWriter(ClickHouseDefines.getSocketBufferSize(), socketWriter));
     }
 
     public void writeVarInt(long x) throws IOException {

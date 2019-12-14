@@ -70,8 +70,6 @@ public class DataTypeDate implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
         throws SQLException, IOException {
-        Validate.isTrue(data instanceof Date,
-                        "Expected Date Parameter, but was " + data.getClass().getSimpleName());
         LocalDate localDate = new LocalDate(((Date) data).getTime(), dateTimeZone);
         int daysSinceEpoch = Days.daysBetween(epochDate, localDate).getDays();
         serializer.writeShort((short) daysSinceEpoch);
@@ -82,14 +80,6 @@ public class DataTypeDate implements IDataType {
         short daysSinceEpoch = deserializer.readShort();
         LocalDate localDate = epochDate.plusDays(daysSinceEpoch);
         return new Date(localDate.toDate().getTime());
-    }
-
-    @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer)
-        throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
     }
 
     @Override

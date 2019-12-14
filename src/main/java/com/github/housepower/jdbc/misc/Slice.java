@@ -1,11 +1,14 @@
 package com.github.housepower.jdbc.misc;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 
 /**
- * Slice Object just like slice of Go
+ * Slice Object just like the slice of Go
  */
-public class Slice {
+public class Slice implements Iterable<Object>{
     private Object []array;
 
     private int capacity;
@@ -61,6 +64,7 @@ public class Slice {
         array[offset + index] = object;
     }
 
+
     private void grow(int minCapacity) {
         // overflow-conscious code
         int oldCapacity = array.length;
@@ -82,5 +86,51 @@ public class Slice {
         return (minCapacity > MAX_ARRAY_SIZE) ?
                Integer.MAX_VALUE :
                MAX_ARRAY_SIZE;
+    }
+
+    public static class SliceIterator implements Iterator<Object>{
+        int current;
+        Slice slice;
+        SliceIterator(Slice slice) {
+            this.slice = slice;
+            this.current = slice.offset;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return current < slice.pos;
+        }
+
+        @Override
+        public Object next() {
+            Object obj = slice.array[current];
+            current ++;
+            return obj;
+        }
+
+        @Override
+        public void remove() {
+            return;
+        }
+
+        @Override
+        public void forEachRemaining(Consumer<? super Object> action) {
+            return;
+        }
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+        return new SliceIterator(this);
+    }
+
+    @Override
+    public void forEach(Consumer<? super Object> action) {
+
+    }
+
+    @Override
+    public Spliterator<Object> spliterator() {
+        return null;
     }
 }

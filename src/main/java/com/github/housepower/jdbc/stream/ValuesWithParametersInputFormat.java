@@ -62,16 +62,19 @@ public class ValuesWithParametersInputFormat implements InputFormat {
 
         int numRows = Math.min(blockMaxRows, maxRows - currentRow);
         Column[] cols = new Column[header.columns()];
-        for (int i = 0; i < columns.length; i++) {
-            if (parametersInLexer[i] == null) {
-                cols[i] = new Column(header.getByPosition(i).name(),
-                                     header.getByPosition(i).type(),
-                                     columns[i].sub(currentRow, currentRow + numRows));
+
+        int j = 0;
+        for (int idx = 0; idx < cols.length; idx ++) {
+            if (parametersInLexer == null || parametersInLexer[idx] == null) {
+                cols[idx] = new Column(header.getByPosition(idx).name(),
+                                     header.getByPosition(idx).type(),
+                                     columns[j].sub(currentRow, currentRow + numRows));
+                j ++;
             } else {
                 // set other parameters to const columns
-                cols[i] = new Column(header.getByPosition(i).name(),
-                                     header.getByPosition(i).type(),
-                                     parametersInLexer[i], maxRows);
+                cols[idx] = new Column(header.getByPosition(idx).name(),
+                                     header.getByPosition(idx).type(),
+                                     parametersInLexer[idx], maxRows);
             }
         }
         currentRow += numRows;

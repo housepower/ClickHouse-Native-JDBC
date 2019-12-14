@@ -2,7 +2,6 @@ package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
@@ -48,7 +47,6 @@ public class DataTypeInt8 implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Number, "Expected Byte Parameter, but was " + data.getClass().getSimpleName());
         serializer.writeByte(((Number)data).byteValue());
     }
 
@@ -59,13 +57,6 @@ public class DataTypeInt8 implements IDataType {
             return (short)(b & 0xff);
         }
         return b;
-    }
-
-    @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
     }
 
     @Override

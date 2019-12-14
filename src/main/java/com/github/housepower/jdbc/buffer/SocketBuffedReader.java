@@ -1,11 +1,11 @@
 package com.github.housepower.jdbc.buffer;
 
+import com.github.housepower.jdbc.settings.ClickHouseDefines;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-
-import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 public class SocketBuffedReader implements BuffedReader {
 
@@ -17,7 +17,7 @@ public class SocketBuffedReader implements BuffedReader {
     private final InputStream in;
 
     public SocketBuffedReader(Socket socket) throws IOException {
-        this(socket.getInputStream(), ClickHouseDefines.DEFAULT_BUFFER_SIZE);
+        this(socket.getInputStream(), ClickHouseDefines.getSocketBufferSize());
     }
 
     SocketBuffedReader(InputStream in, int capacity) {

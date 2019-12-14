@@ -81,8 +81,8 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void setObject(int index, Object x) throws SQLException {
-        Validate.isTrue((index - 1) < parameters.length,
-            "Index " + index + " is out of bound in PreparedStatement, max index " + (parameters.length + 1));
+//        Validate.isTrue((index - 1) < parameters.length,
+//            "Index " + index + " is out of bound in PreparedStatement, max index " + (parameters.length + 1));
         parameters[index - 1] = x;
     }
 

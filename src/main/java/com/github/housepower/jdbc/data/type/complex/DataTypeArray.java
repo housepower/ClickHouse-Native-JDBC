@@ -91,7 +91,7 @@ public class DataTypeArray implements IDataType {
         long offset = 0;
         for (Object datum : data) {
             Validate.isTrue(datum instanceof Array,
-                "Expected Array Parameter, but was " + datum.getClass().getSimpleName());
+                            "Expected Array Parameter, but was " + datum.getClass().getSimpleName());
 
             Object[] arrayData = (Object[]) ((Array) datum).getArray();
             offset += arrayData.length;
@@ -100,7 +100,7 @@ public class DataTypeArray implements IDataType {
 
         for (Object datum : data) {
             Validate.isTrue(datum instanceof Array,
-                "Expected Array Parameter, but was " + datum.getClass().getSimpleName());
+                            "Expected Array Parameter, but was " + datum.getClass().getSimpleName());
 
             Object[] arrayData = (Object[]) ((Array) datum).getArray();
             elemDataType.serializeBinaryBulk(arrayData, serializer);
@@ -131,6 +131,6 @@ public class DataTypeArray implements IDataType {
         IDataType arrayNestedType = DataTypeFactory.get(lexer, serverInfo);
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
-            arrayNestedType, DataTypeFactory.get("UInt64", serverInfo));
+                                 arrayNestedType, DataTypeFactory.get("UInt64", serverInfo));
     }
 }
