@@ -73,6 +73,11 @@ public class ClickHouseConnection extends SQLConnection {
     }
 
     @Override
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        return this.prepareStatement(sql);
+    }
+
+    @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
         configure.parseJDBCProperties(properties);
     }

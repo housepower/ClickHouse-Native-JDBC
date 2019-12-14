@@ -49,6 +49,10 @@ public class ClickHouseStatement extends SQLStatement {
     }
 
     @Override
+    public void setFetchSize(int rows) throws SQLException {
+    }
+
+    @Override
     public void close() throws SQLException {
     }
 
