@@ -57,15 +57,11 @@ public class Column {
         serializer.writeStringBinary(type.name());
 
         if (type.sqlTypeId() == Types.ARRAY) {
-            if (isConstant) {
-                Object[] objects = new Object[rows];
-                for (int i = 0; i < rows; i++) {
-                    objects[i] = rowsData.get(0);
-                }
-                type.serializeBinaryBulk(objects, serializer);
-            } else {
-                type.serializeBinaryBulk(rowsData.iterator(), serializer);
+            Object[] objects = new Object[rows];
+            for (int i = 0; i < rows; i++) {
+                objects[i] = rowsData.get(isConstant ? 0 : i);
             }
+            type.serializeBinaryBulk(objects, serializer);
             return;
         }
 

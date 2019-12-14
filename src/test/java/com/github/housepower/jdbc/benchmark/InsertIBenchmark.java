@@ -26,7 +26,7 @@ public class InsertIBenchmark extends AbstractIBenchmark{
     public WithConnection benchInsert = new WithConnection(){
         @Override
         public void apply(Connection connection) throws Exception {
-        	int batchSize = 1000000;
+            int batchSize = 1000000;
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             Date date = new Date(ts.getTime());
 
