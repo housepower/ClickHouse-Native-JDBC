@@ -4,13 +4,10 @@ import com.github.housepower.jdbc.buffer.BuffedWriter;
 import com.github.housepower.jdbc.buffer.CompressedBuffedWriter;
 import com.github.housepower.jdbc.buffer.SocketBuffedWriter;
 import com.github.housepower.jdbc.misc.Container;
-import com.github.housepower.jdbc.misc.StringView;
-import com.github.housepower.jdbc.misc.StringViewCoding;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.sql.SQLException;
 
 public class BinarySerializer {
     private final Container<BuffedWriter> container;
@@ -18,7 +15,7 @@ public class BinarySerializer {
     public BinarySerializer(Socket socket) throws IOException {
         SocketBuffedWriter socketWriter = new SocketBuffedWriter(socket);
         container = new Container<BuffedWriter>(socketWriter,
-            new CompressedBuffedWriter(ClickHouseDefines.getSocketBufferSize(), socketWriter));
+            new CompressedBuffedWriter(ClickHouseDefines.SOCKET_BUFFER_SIZE, socketWriter));
     }
 
     public void writeVarInt(long x) throws IOException {
@@ -110,10 +107,5 @@ public class BinarySerializer {
 
     public void writeBytes(byte[] bytes) throws IOException {
         container.get().writeBinary(bytes);
-    }
-
-    public void writeStringViewBinary(StringView data) throws IOException, SQLException {
-        writeVarInt(data.end() - data.start());
-        container.get().writeBinary(StringViewCoding.bytes(data));
     }
 }

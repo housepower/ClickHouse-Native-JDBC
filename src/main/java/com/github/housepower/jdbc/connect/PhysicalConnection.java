@@ -132,8 +132,8 @@ public class PhysicalConnection {
 
             Socket socket = new Socket();
             socket.setTcpNoDelay(true);
-            socket.setSendBufferSize(ClickHouseDefines.getSocketBufferSize());
-            socket.setReceiveBufferSize(ClickHouseDefines.getSocketBufferSize());
+            socket.setSendBufferSize(ClickHouseDefines.SOCKET_BUFFER_SIZE);
+            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_BUFFER_SIZE);
             socket.connect(endpoint, configure.connectTimeout());
 
             return new PhysicalConnection(socket, new BinarySerializer(socket), new BinaryDeserializer(socket));

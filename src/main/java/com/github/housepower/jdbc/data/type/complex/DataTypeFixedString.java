@@ -3,8 +3,6 @@ package com.github.housepower.jdbc.data.type.complex;
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
-import com.github.housepower.jdbc.misc.StringViewCoding;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
@@ -57,22 +55,18 @@ public class DataTypeFixedString implements IDataType {
 
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.stringLiteral();
+        return String.valueOf(lexer.stringLiteral());
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof String) {
-            writeBytes(((String) data).getBytes(), serializer);
-        } else if (data instanceof StringView) {
-            writeBytes(StringViewCoding.bytes((StringView) data), serializer);
-        } else {
-            throw new SQLException("Expected FixedString Parameter, but was " + data.getClass().getSimpleName());
-        }
+    public void serializeBinary(Object data, BinarySerializer serializer)
+        throws SQLException, IOException {
+        writeBytes(((String) data).getBytes(), serializer);
     }
 
-    private void writeBytes(byte []bs, BinarySerializer serializer) throws IOException, SQLException {
-        byte []res;
+    private void writeBytes(byte[] bs, BinarySerializer serializer)
+        throws IOException, SQLException {
+        byte[] res;
         if (bs.length > n) {
             throw new SQLException("The size of FixString column is too large, got " + bs.length);
         }
@@ -86,19 +80,14 @@ public class DataTypeFixedString implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object deserializeBinary(BinaryDeserializer deserializer)
+        throws SQLException, IOException {
         return new String(deserializer.readBytes(n));
     }
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
+        throws SQLException, IOException {
         String[] data = new String[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = new String(deserializer.readBytes(n));
@@ -106,10 +95,13 @@ public class DataTypeFixedString implements IDataType {
         return data;
     }
 
-    public static IDataType createFixedStringType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+    public static IDataType createFixedStringType(SQLLexer lexer,
+                                                  PhysicalInfo.ServerInfo serverInfo)
+        throws SQLException {
         Validate.isTrue(lexer.character() == '(');
         Number fixedStringN = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ')');
-        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue());
+        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")",
+                                       fixedStringN.intValue());
     }
 }

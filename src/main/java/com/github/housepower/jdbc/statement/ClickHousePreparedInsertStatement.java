@@ -31,7 +31,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         this.columns = new Slice[parameterSize];
         // TODO make a slicePool
         for (int i = 0; i < parameterSize; ++i) {
-        	this.columns[i] = new Slice(ClickHouseDefines.getBufferRows());
+            this.columns[i] = new Slice(ClickHouseDefines.BUFFER_ROWS);
 		}
     }
 

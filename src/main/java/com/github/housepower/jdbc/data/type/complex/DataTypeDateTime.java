@@ -98,13 +98,6 @@ public class DataTypeDateTime implements IDataType {
     }
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
-    }
-
-    @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         Timestamp[] data = new Timestamp[rows];
         for (int row = 0; row < rows; row++) {
@@ -119,7 +112,7 @@ public class DataTypeDateTime implements IDataType {
             StringView dataTimeZone = lexer.stringLiteral();
             Validate.isTrue(lexer.character() == ')');
             return new DataTypeDateTime("DateTime(" +
-                String.valueOf(dataTimeZone) + ")", serverInfo);
+                                        dataTimeZone + ")", serverInfo);
         }
         return new DataTypeDateTime("DateTime", serverInfo);
     }

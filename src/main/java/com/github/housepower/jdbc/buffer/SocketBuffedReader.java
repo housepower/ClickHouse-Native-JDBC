@@ -17,7 +17,7 @@ public class SocketBuffedReader implements BuffedReader {
     private final InputStream in;
 
     public SocketBuffedReader(Socket socket) throws IOException {
-        this(socket.getInputStream(), ClickHouseDefines.getSocketBufferSize());
+        this(socket.getInputStream(), ClickHouseDefines.SOCKET_BUFFER_SIZE);
     }
 
     SocketBuffedReader(InputStream in, int capacity) {

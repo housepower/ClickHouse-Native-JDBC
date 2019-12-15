@@ -38,7 +38,7 @@ public class WideColumnInsertIBenchmark extends AbstractIBenchmark{
             stmt.executeQuery("DROP TABLE IF EXISTS " + testTable);
             String createSQL = "CREATE TABLE " + testTable + " (";
             for (int i = 0; i < COLUMN_NUM; i++) {
-                createSQL += "col_" + i + " UInt32";
+                createSQL += "col_" + i + " String";
                 if (i + 1 != COLUMN_NUM) {
                     createSQL += ",\n";
                 }
@@ -52,7 +52,7 @@ public class WideColumnInsertIBenchmark extends AbstractIBenchmark{
 
             for (int i = 0; i < BATCH_SZIE; i++) {
                 for (int j = 0; j < COLUMN_NUM; j++ ) {
-                    pstmt.setInt(j + 1, j + 1);
+                    pstmt.setString(j + 1, j + 1 + "");
                 }
                 pstmt.addBatch();
             }
