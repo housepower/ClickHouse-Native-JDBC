@@ -81,9 +81,6 @@ public class DataTypeDecimal implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
-        if (!(data instanceof BigDecimal)) {
-            throw new RuntimeException(String.format("Error data type %s.", data.getClass().getSimpleName()));
-        }
         BigDecimal targetValue = ((BigDecimal) data).multiply(scaleFactor);
         switch (this.nobits) {
             case 32: {
@@ -122,13 +119,6 @@ public class DataTypeDecimal implements IDataType {
         }
         value = value.setScale(scale, RoundingMode.HALF_UP);
         return value;
-    }
-
-    @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object obj : data) {
-            serializeBinary(obj, serializer);
-        }
     }
 
     @Override
