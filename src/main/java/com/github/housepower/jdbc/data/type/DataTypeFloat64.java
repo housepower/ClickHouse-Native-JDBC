@@ -2,7 +2,6 @@ package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
@@ -41,22 +40,12 @@ public class DataTypeFloat64 implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Double || data instanceof Float,
-            "Expected Double Parameter, but was " + data.getClass().getSimpleName());
-
         serializer.writeDouble(((Number) data).doubleValue());
     }
 
     @Override
     public Double deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         return deserializer.readDouble();
-    }
-
-    @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
     }
 
     @Override

@@ -2,12 +2,10 @@ package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.sql.SQLException;
@@ -52,15 +50,14 @@ public class DataTypeInt64 implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Byte || data instanceof Short || data instanceof Integer ||
-            data instanceof Long, "Expected Long Parameter, but was " + data.getClass().getSimpleName());
-
+    public void serializeBinary(Object data, BinarySerializer serializer)
+        throws SQLException, IOException {
         serializer.writeLong(((Number) data).longValue());
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object deserializeBinary(BinaryDeserializer deserializer)
+        throws SQLException, IOException {
         long l = deserializer.readLong();
         if (isUnsigned) {
             BigInteger unsigned = new BigInteger(1, longToBytes(l));
@@ -75,22 +72,17 @@ public class DataTypeInt64 implements IDataType {
         return buffer.array();
     }
 
-    public static BigInteger parseBigIntegerPositive(String num,int bitlen) {
+    public static BigInteger parseBigIntegerPositive(String num, int bitlen) {
         BigInteger b = new BigInteger(num);
-        if (b.compareTo(BigInteger.ZERO) < 0)
+        if (b.compareTo(BigInteger.ZERO) < 0) {
             b = b.add(BigInteger.ONE.shiftLeft(bitlen));
+        }
         return b;
     }
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
+        throws SQLException, IOException {
         Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = this.deserializeBinary(deserializer);

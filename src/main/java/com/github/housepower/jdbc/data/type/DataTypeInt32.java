@@ -1,8 +1,7 @@
 package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
@@ -47,14 +46,14 @@ public class DataTypeInt32 implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Number,
-            "Expected Integer Parameter, but was " + data.getClass().getSimpleName());
+    public void serializeBinary(Object data, BinarySerializer serializer)
+        throws SQLException, IOException {
         serializer.writeInt(((Number) data).intValue());
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object deserializeBinary(BinaryDeserializer deserializer)
+        throws SQLException, IOException {
         int res = deserializer.readInt();
         if (isUnsigned) {
             return 0xffffffffL & res;
@@ -63,14 +62,8 @@ public class DataTypeInt32 implements IDataType {
     }
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
+        throws SQLException, IOException {
         Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = this.deserializeBinary(deserializer);

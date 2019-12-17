@@ -1,12 +1,12 @@
 package com.github.housepower.jdbc.serializer;
 
-import java.io.IOException;
-import java.net.Socket;
-
 import com.github.housepower.jdbc.buffer.BuffedReader;
-import com.github.housepower.jdbc.misc.Container;
 import com.github.housepower.jdbc.buffer.CompressedBuffedReader;
 import com.github.housepower.jdbc.buffer.SocketBuffedReader;
+import com.github.housepower.jdbc.misc.Container;
+
+import java.io.IOException;
+import java.net.Socket;
 
 public class BinaryDeserializer {
 

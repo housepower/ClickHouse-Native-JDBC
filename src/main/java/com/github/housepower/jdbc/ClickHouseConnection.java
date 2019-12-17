@@ -136,13 +136,13 @@ public class ClickHouseConnection extends SQLConnection {
         int rows = 0;
         connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
         Block header = connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
-
         while (true) {
-            Block block = input.next(header, 8192);
+            Block block = input.next(header, ClickHouseDefines.MAX_BLOCK_SIZE);
 
             if (block == null || block.rows() == 0) {
                 connection.sendData(new Block());
                 connection.receiveEndOfStream(configure.queryTimeout(), atomicInfo.get().server());
+
                 return rows;
             }
 

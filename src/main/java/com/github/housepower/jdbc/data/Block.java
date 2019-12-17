@@ -1,6 +1,7 @@
 package com.github.housepower.jdbc.data;
 
 import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.misc.Slice;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
@@ -44,9 +45,7 @@ public class Block {
         serializer.writeVarInt(rows);
 
         for (Column column : columns) {
-            serializer.writeStringBinary(column.name());
-            serializer.writeStringBinary(column.type().name());
-            column.type().serializeBinaryBulk(column.data(), serializer);
+            column.serializeBinaryBulk(serializer);
         }
     }
 
@@ -83,7 +82,8 @@ public class Block {
             String type = deserializer.readStringBinary();
 
             IDataType dataType = DataTypeFactory.get(type, serverInfo);
-            cols[i] = new Column(name, dataType, dataType.deserializeBinaryBulk(rows, deserializer));
+            Object []arr = dataType.deserializeBinaryBulk(rows, deserializer);
+            cols[i] = new Column(name, dataType, new Slice(arr));
         }
 
         return new Block(rows, cols, info);

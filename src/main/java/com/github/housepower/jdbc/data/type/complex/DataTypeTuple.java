@@ -57,9 +57,6 @@ public class DataTypeTuple implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Struct && "Tuple".equals(((Struct) data).getSQLTypeName()),
-            "Expected Struct Parameter, but was " + data.getClass().getSimpleName());
-
         for (int i = 0; i < nestedTypes.length; i++) {
             nestedTypes[i].serializeBinary(((Struct) data).getAttributes()[i], serializer);
         }
@@ -79,8 +76,6 @@ public class DataTypeTuple implements IDataType {
         for (int i = 0; i < nestedTypes.length; i++) {
             Object[] elemsData = new Object[data.length];
             for (int row = 0; row < data.length; row++) {
-                Validate.isTrue(data[row] instanceof Struct && "Tuple".equals(((Struct) data[row]).getSQLTypeName()),
-                    "Expected Struct Parameter, but was " + data.getClass().getSimpleName());
                 elemsData[row] = ((Struct) data[row]).getAttributes()[i];
             }
             nestedTypes[i].serializeBinaryBulk(elemsData, serializer);

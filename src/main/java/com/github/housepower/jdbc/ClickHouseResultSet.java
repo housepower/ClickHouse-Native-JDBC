@@ -18,7 +18,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.Iterator;
 
 public class ClickHouseResultSet extends SQLResultSet {
     private int row = -1;
@@ -107,8 +106,7 @@ public class ClickHouseResultSet extends SQLResultSet {
 
     @Override
     public int getInt(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Number);
+        Object data = getObject(index);
         return ((Number) data).intValue();
     }
 
@@ -123,15 +121,13 @@ public class ClickHouseResultSet extends SQLResultSet {
 
     @Override
     public byte getByte(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Number);
+        Object data = getObject(index);
         return ((Number) data).byteValue();
     }
 
     @Override
     public Date getDate(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Date);
+        Object data = getObject(index);
         return (Date) data;
     }
 
@@ -142,43 +138,37 @@ public class ClickHouseResultSet extends SQLResultSet {
 
     @Override
     public long getLong(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Number);
+        Object data = getObject(index);
         return ((Number) data).longValue();
     }
 
     @Override
     public Array getArray(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Array);
+        Object data = getObject(index);
         return (Array) data;
     }
 
     @Override
     public float getFloat(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Number);
+        Object data = getObject(index);
         return ((Number) data).floatValue();
     }
 
     @Override
     public short getShort(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Number);
+        Object data = getObject(index);
         return ((Number) data).shortValue();
     }
 
     @Override
     public double getDouble(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Number);
+        Object data = getObject(index);
         return ((Number) data).doubleValue();
     }
 
     @Override
     public String getString(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof String);
+        Object data = getObject(index);
         return (String) data;
     }
 
@@ -193,15 +183,13 @@ public class ClickHouseResultSet extends SQLResultSet {
 
     @Override
     public Timestamp getTimestamp(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Timestamp);
+        Object data = getObject(index);
         return (Timestamp) data;
     }
 
     @Override
     public BigDecimal getBigDecimal(int index) throws SQLException {
-        Object data;
-        Validate.isTrue((data = getObject(index)) instanceof Number);
+        Object data = getObject(index);
         return new BigDecimal(data.toString());
     }
 

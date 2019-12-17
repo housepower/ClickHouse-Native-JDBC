@@ -3,8 +3,12 @@ package com.github.housepower.jdbc;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.*;
-import java.util.TimeZone;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Struct;
+import java.sql.Timestamp;
 
 public class InsertComplexTypeITest extends AbstractITest {
 
@@ -68,7 +72,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getByte(1), 0);
                 Assert.assertTrue(rs.wasNull());
-                statement.executeQuery("DROP TABLE IF EXISTS test");
+//                statement.executeQuery("DROP TABLE IF EXISTS test");
             }
         });
     }

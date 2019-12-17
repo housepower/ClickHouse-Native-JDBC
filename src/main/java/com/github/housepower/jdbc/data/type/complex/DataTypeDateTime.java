@@ -89,21 +89,12 @@ public class DataTypeDateTime implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof Timestamp,
-            "Expected Timestamp Parameter, but was " + data.getClass().getSimpleName());
         serializer.writeInt((int) ((((Timestamp) data).getTime()) / 1000));
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         return new Timestamp(deserializer.readInt() * 1000L);
-    }
-
-    @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
     }
 
     @Override
@@ -121,7 +112,7 @@ public class DataTypeDateTime implements IDataType {
             StringView dataTimeZone = lexer.stringLiteral();
             Validate.isTrue(lexer.character() == ')');
             return new DataTypeDateTime("DateTime(" +
-                String.valueOf(dataTimeZone) + ")", serverInfo);
+                                        dataTimeZone + ")", serverInfo);
         }
         return new DataTypeDateTime("DateTime", serverInfo);
     }

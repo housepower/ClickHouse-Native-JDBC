@@ -3,10 +3,10 @@ package com.github.housepower.jdbc.stream;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.Column;
 import com.github.housepower.jdbc.misc.SQLLexer;
+import com.github.housepower.jdbc.misc.Slice;
 import com.github.housepower.jdbc.misc.Validate;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 
 public class ValuesInputFormat implements InputFormat {
     private final SQLLexer lexer;
@@ -43,8 +43,9 @@ public class ValuesInputFormat implements InputFormat {
 
         Column[] columns = new Column[columnData.length];
         for (int i = 0; i < columns.length; i++) {
+            Slice slice = new Slice(columnData[i]);
             columns[i] = new Column(header.getByPosition(i).name(),
-                header.getByPosition(i).type(), Arrays.copyOf(columnData[i], rows));
+                header.getByPosition(i).type(), slice.sub(0, rows));
         }
         return new Block(rows, columns);
     }
