@@ -177,7 +177,7 @@ public class ClickHouseResultSet extends SQLResultSet {
         Validate.isTrue(row >= 0 && row < current.rows(),
             "No row information was obtained.You must call ResultSet.next() before that.");
         Column column = (lastFetchBlock = current).getByPosition((lastFetchColumn = index - 1));
-        Object rowData = column.data((lastFetchRow = row));
+        Object rowData = column.values((lastFetchRow = row));
         return rowData == null ? column.type().defaultValue() : rowData;
     }
 
@@ -205,7 +205,7 @@ public class ClickHouseResultSet extends SQLResultSet {
         Validate.isTrue(lastFetchBlock != null, "Please call Result.next()");
         Validate.isTrue(lastFetchColumn >= 0, "Please call Result.getXXX()");
         Validate.isTrue(lastFetchRow >= 0 && lastFetchRow < lastFetchBlock.rows(), "Please call Result.next()");
-        return lastFetchBlock.getByPosition(lastFetchColumn).data(lastFetchRow) == null;
+        return lastFetchBlock.getByPosition(lastFetchColumn).values(lastFetchRow) == null;
     }
 
     @Override

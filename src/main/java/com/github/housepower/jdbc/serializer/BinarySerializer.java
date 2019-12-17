@@ -2,20 +2,22 @@ package com.github.housepower.jdbc.serializer;
 
 import com.github.housepower.jdbc.buffer.BuffedWriter;
 import com.github.housepower.jdbc.buffer.CompressedBuffedWriter;
-import com.github.housepower.jdbc.buffer.SocketBuffedWriter;
 import com.github.housepower.jdbc.misc.Container;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
-import java.net.Socket;
 
 public class BinarySerializer {
     private final Container<BuffedWriter> container;
+    private final boolean enableCompress;
 
-    public BinarySerializer(Socket socket) throws IOException {
-        SocketBuffedWriter socketWriter = new SocketBuffedWriter(socket);
-        container = new Container<BuffedWriter>(socketWriter,
-            new CompressedBuffedWriter(ClickHouseDefines.SOCKET_BUFFER_SIZE, socketWriter));
+    public BinarySerializer(BuffedWriter writer, boolean enableCompress) {
+        this.enableCompress =enableCompress;
+        BuffedWriter compressBuffer = null;
+        if (enableCompress) {
+            compressBuffer = new CompressedBuffedWriter(ClickHouseDefines.SOCKET_BUFFER_SIZE, writer);
+        }
+        container = new Container<>(writer, compressBuffer);
     }
 
     public void writeVarInt(long x) throws IOException {
@@ -77,20 +79,20 @@ public class BinarySerializer {
     }
 
     public void maybeEnableCompressed() {
-        container.select(true);
+        if (enableCompress)
+            container.select(true);
     }
 
     public void maybeDisableCompressed() throws IOException {
-        container.get().flushToTarget(true);
-        container.select(false);
+        if (enableCompress) {
+            container.get().flushToTarget(true);
+            container.select(false);
+        }
     }
 
     public void writeFloat(float datum) throws IOException {
         int x = Float.floatToIntBits(datum);
-        container.get().writeBinary((byte) (x & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 8) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 16) & 0xFF));
-        container.get().writeBinary((byte) ((x >>> 24) & 0xFF));
+        writeInt(x);
     }
 
     public void writeDouble(double datum) throws IOException {

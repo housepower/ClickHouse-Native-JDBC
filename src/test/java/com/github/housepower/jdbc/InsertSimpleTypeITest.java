@@ -4,11 +4,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.*;
+import java.sql.Connection;
 import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
 public class InsertSimpleTypeITest extends AbstractITest {
@@ -21,7 +20,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
                 Statement statement = connection.createStatement();
 
                 statement.executeQuery("DROP TABLE IF EXISTS test");
-                statement.executeQuery("CREATE TABLE test(test_uInt8 UInt8, test_Int8 Int8)ENGINE=Log");
+                    statement.executeQuery("CREATE TABLE test(test_uInt8 UInt8, test_Int8 Int8)ENGINE=Log");
                 statement.executeQuery("INSERT INTO test VALUES(" + 255 + "," + Byte.MIN_VALUE + ")");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_uInt8");
                 Assert.assertTrue(rs.next());
@@ -29,7 +28,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
                 Assert.assertEquals(aa, 255);
                 Assert.assertEquals(rs.getByte(2), Byte.MIN_VALUE);
                 Assert.assertFalse(rs.next());
-                statement.executeQuery("DROP TABLE IF EXISTS test");
+//                statement.executeQuery("DROP TABLE IF EXISTS test");
             }
         });
     }

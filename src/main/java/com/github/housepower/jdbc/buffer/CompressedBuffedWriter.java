@@ -25,7 +25,6 @@ public class CompressedBuffedWriter implements BuffedWriter {
     @Override
     public void writeBinary(byte byt) throws IOException {
         writtenBuf[position++] = byt;
-        flushToTarget(false);
     }
 
     @Override
@@ -42,7 +41,6 @@ public class CompressedBuffedWriter implements BuffedWriter {
                 i += writtenNumber;
                 position += writtenNumber;
             }
-            flushToTarget(false);
         }
     }
 
@@ -51,8 +49,6 @@ public class CompressedBuffedWriter implements BuffedWriter {
     @Override
     public void flushToTarget(boolean force) throws IOException {
         if (force || !remaining()) {
-            ///TODO: None compressed method
-            ///TODO: use buf
             int maxLen = lz4Compressor.maxCompressedLength(position);
 
             byte[] compressedBuffer = new byte[maxLen + 9 + 16];
@@ -70,7 +66,6 @@ public class CompressedBuffedWriter implements BuffedWriter {
 
             writer.writeBinary(compressedBuffer, 0, compressedSize + 16);
             position = 0;
-            writer.flushToTarget(force);
         }
     }
 

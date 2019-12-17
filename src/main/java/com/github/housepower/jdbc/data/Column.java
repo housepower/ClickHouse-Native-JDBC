@@ -1,6 +1,5 @@
 package com.github.housepower.jdbc.data;
 
-import com.github.housepower.jdbc.misc.Slice;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
@@ -11,26 +10,23 @@ public class Column {
 
     private final String name;
     private final IDataType type;
-    private final Slice rowsData;
-    private final int rows;
 
-    private boolean isConstant;
+    private Object[] values;
+    private ColumnWriterBuffer buffer;
 
-    public Column(String name, IDataType type, Slice rowsData) {
+    public Column(String name, IDataType type) {
         this.name = name;
         this.type = type;
-        this.rowsData = rowsData;
-        this.rows = rowsData.size();
     }
 
-    // const column
-    public Column(String name, IDataType type, Object constData, int rows) {
+    public Column(String name, IDataType type, Object[] values) {
+        this.values = values;
         this.name = name;
         this.type = type;
-        this.isConstant = true;
-        this.rows = rows;
-        this.rowsData = new Slice(1);
-        this.rowsData.add(constData);
+    }
+
+    public void initWriteBuffer() {
+        this.buffer = new ColumnWriterBuffer();
     }
 
     public String name() {
@@ -41,36 +37,26 @@ public class Column {
         return this.type;
     }
 
-    public Slice data() {
-        return rowsData;
+    public Object values(int rowIdx) {
+        return this.values[rowIdx];
     }
 
-    public Object data(int rows) {
-        if (isConstant) {
-            return rowsData.get(0);
+    public void write(Object object) throws IOException, SQLException {
+        if (type().sqlTypeId() == Types.ARRAY) {
+            //TODO
+        } else {
+            type().serializeBinary(object, buffer.column);
         }
-        return rowsData.get(rows);
     }
+
 
     public void serializeBinaryBulk(BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeStringBinary(name);
         serializer.writeStringBinary(type.name());
+        buffer.writeTo(serializer);
+    }
 
-        if (type.sqlTypeId() == Types.ARRAY) {
-            Object[] objects = new Object[rows];
-            for (int i = 0; i < rows; i++) {
-                objects[i] = rowsData.get(isConstant ? 0 : i);
-            }
-            type.serializeBinaryBulk(objects, serializer);
-            return;
-        }
-
-        if (isConstant) {
-            for (int i = 0; i < rows; i++) {
-                type.serializeBinary(rowsData.get(0), serializer);
-            }
-        } else {
-            type.serializeBinaryBulk(rowsData.iterator(), serializer);
-        }
+    public ColumnWriterBuffer getBuffer() {
+        return buffer;
     }
 }

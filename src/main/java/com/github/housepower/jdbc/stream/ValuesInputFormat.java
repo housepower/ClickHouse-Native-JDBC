@@ -1,52 +1,49 @@
 package com.github.housepower.jdbc.stream;
 
 import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.data.Column;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.Slice;
 import com.github.housepower.jdbc.misc.Validate;
 
 import java.sql.SQLException;
 
 public class ValuesInputFormat implements InputFormat {
+
     private final SQLLexer lexer;
 
     public ValuesInputFormat(int pos, String data) throws SQLException {
         this.lexer = new SQLLexer(pos, data);
     }
 
+
     @Override
-    public Block next(Block header, int maxRows) throws SQLException {
-        Object[][] columnData = new Object[header.columns()][maxRows];
-
-        for (int row = 0; row < maxRows; row++) {
+    public void fillBlock(Block block) throws SQLException {
+        int[] constIdx = new int[block.columns()];
+        for (; ; ) {
             char nextChar = lexer.character();
-            if (lexer.eof() || nextChar == ';')
-                return newValuesBlock(header, row, columnData);
+            if (lexer.eof() || nextChar == ';') {
+                break;
+            }
 
-            if (row > 0 && nextChar == ',')
+            if (nextChar == ',') {
                 nextChar = lexer.character();
+            }
             Validate.isTrue(nextChar == '(');
-            for (int column = 0; column < header.columns(); column++) {
-                if (column > 0)
+            for (int column = 0; column < block.columns(); column++) {
+                if (column > 0) {
                     Validate.isTrue(lexer.character() == ',');
-
-                columnData[column][row] = header.getByPosition(column).type().deserializeTextQuoted(lexer);
+                }
+                constIdx[column] = 1;
+                block.setConstObject(column, block.getByPosition(column).type()
+                                                 .deserializeTextQuoted(lexer));
             }
             Validate.isTrue(lexer.character() == ')');
+            block.appendRow();
         }
-        return newValuesBlock(header, maxRows, columnData);
-    }
 
-    private Block newValuesBlock(Block header, int rows, Object[][] columnData) throws SQLException {
-        Validate.isTrue(header.columns() == columnData.length, "");
-
-        Column[] columns = new Column[columnData.length];
-        for (int i = 0; i < columns.length; i++) {
-            Slice slice = new Slice(columnData[i]);
-            columns[i] = new Column(header.getByPosition(i).name(),
-                header.getByPosition(i).type(), slice.sub(0, rows));
+        for (int column = 0; column < block.columns(); column++) {
+            if (constIdx[column] > 0) {
+                block.incrIndex(column);
+            }
         }
-        return new Block(rows, columns);
     }
 }
