@@ -15,6 +15,7 @@ import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class DataTypeArray implements IDataType {
@@ -22,6 +23,8 @@ public class DataTypeArray implements IDataType {
     private final Array defaultValue;
     private final IDataType elemDataType;
     private final IDataType offsetIDataType;
+
+    private int offset = 0;
 
     public DataTypeArray(String name, IDataType elemDataType, IDataType offsetIDataType) throws SQLException {
         this.name = name;
@@ -72,10 +75,35 @@ public class DataTypeArray implements IDataType {
         return new ClickHouseArray(arrayData.toArray());
     }
 
+    public void serializeBinary(Object data, BinarySerializer dataBinarySerializer, BinarySerializer offsetBinarySerializer) throws SQLException, IOException {
+        int dataOffset = ((Object[]) ((Array) data).getArray()).length;
+        offset += dataOffset;
+        offsetIDataType.serializeBinary(offset, offsetBinarySerializer);
+
+        for (Object v : ((Object[]) ((Array) data).getArray())) {
+            if (elemDataType.sqlTypeId() == Types.ARRAY) {
+                serializeBinary(v, dataBinarySerializer, offsetBinarySerializer);
+            } else {
+                elemDataType.serializeBinary(v, dataBinarySerializer);
+            }
+        }
+    }
+
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        offsetIDataType.serializeBinary(((Object[]) ((Array) data).getArray()).length, serializer);
-        elemDataType.serializeBinaryBulk(((Object[]) ((Array) data).getArray()), serializer);
+    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException{
+        throw new SQLException("DataTypeArray serializeBinary not supported");
+    }
+
+    @Override
+    public void serializeBinaryBulk(Iterator<Object> data, BinarySerializer serializer)
+        throws SQLException, IOException {
+        throw new SQLException("DataTypeArray serializeBinaryBulk not supported");
+    }
+
+    @Override
+    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer)
+        throws SQLException, IOException {
+        throw new SQLException("DataTypeArray serializeBinaryBulk not supported");
     }
 
     @Override
@@ -84,20 +112,6 @@ public class DataTypeArray implements IDataType {
         return elemDataType.deserializeBinaryBulk(offset.intValue(), deserializer);
     }
 
-    @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        long offset = 0;
-        for (Object datum : data) {
-            Object[] arrayData = (Object[]) ((Array) datum).getArray();
-            offset += arrayData.length;
-            offsetIDataType.serializeBinary(offset, serializer);
-        }
-
-        for (Object datum : data) {
-            Object[] arrayData = (Object[]) ((Array) datum).getArray();
-            elemDataType.serializeBinaryBulk(arrayData, serializer);
-        }
-    }
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
@@ -117,6 +131,7 @@ public class DataTypeArray implements IDataType {
         }
         return data;
     }
+
 
     public static IDataType createArrayType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         Validate.isTrue(lexer.character() == '(');

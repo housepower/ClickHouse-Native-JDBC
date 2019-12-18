@@ -20,11 +20,9 @@ public interface IDataType {
     boolean nullable();
 
     Object deserializeTextQuoted(SQLLexer lexer) throws SQLException;
-
-    void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException;
-
     Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;
 
+    void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException;
     default void serializeBinaryBulk(Iterator<Object> data, BinarySerializer serializer) throws SQLException, IOException {
         while(data.hasNext()) {
             serializeBinary(data.next(), serializer);

@@ -1,5 +1,6 @@
 package com.github.housepower.jdbc.data;
 
+import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
@@ -43,7 +44,8 @@ public class Column {
 
     public void write(Object object) throws IOException, SQLException {
         if (type().sqlTypeId() == Types.ARRAY) {
-
+            DataTypeArray typ = (DataTypeArray)(type());
+            typ.serializeBinary(object, buffer.column, buffer.offset);
         } else {
             type().serializeBinary(object, buffer.column);
         }
