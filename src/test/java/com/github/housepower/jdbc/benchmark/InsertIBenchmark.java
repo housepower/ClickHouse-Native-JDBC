@@ -33,10 +33,10 @@ public class InsertIBenchmark extends AbstractIBenchmark{
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                          .include(InsertIBenchmark.class.getSimpleName())
+                          .include(WideColumnDoubleInsertIBenchmark.class.getSimpleName())
                           .warmupIterations(0)
-                          .measurementIterations(1)
-                          .forks(2)
+                          .measurementIterations(3)
+                          .forks(1)
                           .build();
 
         new Runner(opt).run();

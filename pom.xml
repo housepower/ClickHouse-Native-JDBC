@@ -237,7 +237,12 @@
                                 <argument>-classpath</argument>
                                 <classpath/>
                                 <argument>org.openjdk.jmh.Main</argument>
-                                <argument>.*</argument>
+                                <argument>-wi</argument>
+                                <argument>0</argument>
+                                <argument>-i</argument>
+                                <argument>3</argument>
+                                <argument>-f</argument>
+                                <argument>1</argument>
                             </arguments>
                         </configuration>
                     </execution>

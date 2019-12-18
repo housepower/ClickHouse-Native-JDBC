@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  */
 @BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Thread)
 public class WideColumnIntInsertIBenchmark extends AbstractIBenchmark{
     @Param({"20", "50", "100"})
@@ -36,10 +36,10 @@ public class WideColumnIntInsertIBenchmark extends AbstractIBenchmark{
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                          .include(WideColumnIntInsertIBenchmark.class.getSimpleName())
+                          .include(WideColumnDoubleInsertIBenchmark.class.getSimpleName())
                           .warmupIterations(0)
-                          .measurementIterations(1)
-                          .forks(2)
+                          .measurementIterations(3)
+                          .forks(1)
                           .build();
 
         new Runner(opt).run();
