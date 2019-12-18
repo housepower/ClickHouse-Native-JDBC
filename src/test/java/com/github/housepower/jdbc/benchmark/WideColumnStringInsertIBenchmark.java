@@ -1,5 +1,7 @@
 package com.github.housepower.jdbc.benchmark;
 
+import com.google.common.base.Strings;
+
 import org.junit.Assert;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -14,10 +16,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,14 +26,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Thread)
-public class InsertIBenchmark extends AbstractIBenchmark{
-    @Param({"10000", "100000", "1000000"})
+public class WideColumnStringInsertIBenchmark extends AbstractIBenchmark{
+    @Param({"20", "50", "100"})
+    private int columnNum;
+    @Param({"200000", "400000"})
     private int batchSize;
     AtomicInteger tableMaxId = new AtomicInteger();
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                          .include(InsertIBenchmark.class.getSimpleName())
+                          .include(WideColumnStringInsertIBenchmark.class.getSimpleName())
                           .warmupIterations(0)
                           .measurementIterations(1)
                           .forks(2)
@@ -42,27 +44,44 @@ public class InsertIBenchmark extends AbstractIBenchmark{
         new Runner(opt).run();
     }
 
+    @Benchmark
+    public void benchInsertNative() throws Exception {
+        withConnection(benchInsert, ConnectionType.NATIVE);
+    }
+
+    @Benchmark
+    public void benchInsertHttp() throws Exception {
+        withConnection(benchInsert, ConnectionType.HTTP);
+    }
+
     public WithConnection benchInsert = new WithConnection(){
         @Override
         public void apply(Connection connection) throws Exception {
-            Timestamp ts = new Timestamp(System.currentTimeMillis());
-            Date date = new Date(ts.getTime());
-
             Statement stmt = connection.createStatement();
 
             int tableId = tableMaxId.getAndIncrement();
-            String testTable = "test_" + tableId;
+            String testTable = "test2_" + tableId;
+
 
             stmt.executeQuery("DROP TABLE IF EXISTS " + testTable);
-            stmt.executeQuery("CREATE TABLE " + testTable +" (number UInt32, name String, birthTime DateTime, birthDay Date) Engine = Log");
-            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO "  + testTable +" values(?, ?, ?, ?)");
+            String createSQL = "CREATE TABLE " + testTable + " (";
+            for (int i = 0; i < columnNum; i++) {
+                createSQL += "col_" + i + " String";
+                if (i + 1 != columnNum) {
+                    createSQL += ",\n";
+                }
+            }
+            createSQL += ") Engine = Log";
+
+            stmt.executeQuery(createSQL);
+            String params = Strings.repeat("?, ", columnNum);
+            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO "  + testTable +" values("   + params.substring(0, params.length()-2) + ")");
 
 
             for (int i = 0; i < batchSize; i++) {
-                pstmt.setInt(1, i);
-                pstmt.setString(2, "i_am_a_string");
-                pstmt.setTimestamp(3, ts);
-                pstmt.setDate(4, date);
+                for (int j = 0; j < columnNum; j++ ) {
+                    pstmt.setString(j + 1, j + 1 + "");
+                }
                 pstmt.addBatch();
             }
             int []res = pstmt.executeBatch();
@@ -71,13 +90,4 @@ public class InsertIBenchmark extends AbstractIBenchmark{
         }
     };
 
-    @Benchmark @BenchmarkMode(Mode.AverageTime) @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void benchInsertNative() throws Exception {
-        withConnection(benchInsert, ConnectionType.NATIVE);
-    }
-
-    @Benchmark @BenchmarkMode(Mode.AverageTime) @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void benchInsertHttp() throws Exception {
-        withConnection(benchInsert, ConnectionType.HTTP);
-    }
 }

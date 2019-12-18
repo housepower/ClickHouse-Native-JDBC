@@ -1,27 +1,46 @@
 package com.github.housepower.jdbc.benchmark;
 
-import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
-import com.carrotsearch.junitbenchmarks.BenchmarkRule;
-
 import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestRule;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@State(Scope.Thread)
 public class SelectIBenchmark extends AbstractIBenchmark {
+    @Param({"10000"})
+    private int number;
+    AtomicInteger tableMaxId = new AtomicInteger();
 
-    @Rule
-    public TestRule benchmarkRun = new BenchmarkRule();
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                          .include(SelectIBenchmark.class.getSimpleName())
+                          .warmupIterations(0)
+                          .measurementIterations(1)
+                          .forks(2)
+                          .build();
 
+        new Runner(opt).run();
+    }
     public WithConnection benchSelect = connection -> {
         long sum = 0;
         Statement statement = connection.createStatement();
-        long number = 1000000;
         ResultSet rs = statement.executeQuery(String.format("SELECT number as n1, 'i_am_a_string' , now(), today() from numbers(%d)", number));
         while (rs.next()) {
             sum += rs.getInt(1);
@@ -33,14 +52,12 @@ public class SelectIBenchmark extends AbstractIBenchmark {
         Assert.assertEquals((number-1) * number / 2, sum);
     };
 
-    @BenchmarkOptions(benchmarkRounds = 2, warmupRounds = 0)
-    @Test
+    @Benchmark
     public void benchSelectNative() throws Exception {
         withConnection(benchSelect, ConnectionType.NATIVE);
     }
 
-    @BenchmarkOptions(benchmarkRounds = 2, warmupRounds = 0)
-    @Test
+    @Benchmark
     public void benchSelectHTTP() throws Exception {
         withConnection(benchSelect, ConnectionType.HTTP);
     }

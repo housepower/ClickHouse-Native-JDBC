@@ -59,9 +59,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.carrotsearch</groupId>
-            <artifactId>junit-benchmarks</artifactId>
-            <version>0.7.2</version>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.21</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.21</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -174,6 +180,8 @@
                     <skip>true</skip>
                 </configuration>
                 <executions>
+
+                    <!-- Run tests with clickhouse-server -->
                     <execution>
                         <id>run-integration-test</id>
                         <phase>integration-test</phase>
@@ -190,6 +198,8 @@
                             </includes>
                         </configuration>
                     </execution>
+
+                    <!-- Run tests without clickhouse-server -->
                     <execution>
                         <id>run-test</id>
                         <phase>test</phase>
@@ -200,9 +210,25 @@
                             <skip>false</skip>
                             <excludes>
                                 <exclude>**/*ITest*</exclude>
+                                <exclude>**/*IBenchmark*</exclude>
                             </excludes>
                         </configuration>
                     </execution>
+
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <includes>
+                                <include>**/*IBenchmark*</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
             <plugin>
@@ -240,6 +266,8 @@
                             <goal>start</goal>
                         </goals>
                     </execution>
+
+
                     <execution>
                         <id>docker:stop</id>
                         <phase>post-integration-test</phase>
