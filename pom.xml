@@ -90,6 +90,7 @@
     </dependencies>
     <properties>
         <ClickHousePort>9000</ClickHousePort>
+        <ClickHouseHTTPPort>8123</ClickHouseHTTPPort>
     </properties>
 
     <profiles>
@@ -193,6 +194,7 @@
                             <skip>false</skip>
                             <systemPropertyVariables>
                                 <CLICK_HOUSE_SERVER_PORT>${ClickHousePort}</CLICK_HOUSE_SERVER_PORT>
+                                <CLICK_HOUSE_SERVER_PORT>${ClickHouseHTTPPort}</CLICK_HOUSE_SERVER_PORT>
                             </systemPropertyVariables>
                             <includes>
                                 <include>**/*ITest*</include>
@@ -255,6 +257,7 @@
                             <run>
                                 <ports>
                                     <port>${ClickHousePort}:9000</port>
+                                    <port>${ClickHouseHTTPPort}:8123</port>
                                 </ports>
                                 <wait>
                                     <tcp>
@@ -263,6 +266,12 @@
                                             <port>${ClickHousePort}</port>
                                         </ports>
                                     </tcp>
+
+                                    <http>
+                                        <url>http://127.0.0.1:${ClickHouseHTTPPort}</url>
+                                        <method>GET</method>
+                                        <status>200</status>
+                                    </http>
                                     <time>20000</time>
                                 </wait>
                             </run>

@@ -33,7 +33,6 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 * Non-values format
 * Complex values expression, Like `INSERT INTO test_table VALUES(toDate(123456))`
 * More compression method, like `ZSTD`
-* Array(T)
 
 ## Example
 
@@ -57,13 +56,9 @@ All DDL,DML queries, see also [ExecuteQuery.java](./src/main/java/examples/Execu
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();
-    // drop table
     stmt.executeQuery("drop table if exists test_jdbc_example");
-    // create table
     stmt.executeQuery("create table test_jdbc_example(day default toDate( toDateTime(timestamp) ), timestamp UInt32, name String, impressions UInt32) Engine=MergeTree(day, (timestamp, name), 8192)");
-    // add column `costs`
     stmt.executeQuery("alter table test_jdbc_example add column costs Float32");
-    // drop the table
     stmt.executeQuery("drop table test_jdbc_example");
 ```
 
