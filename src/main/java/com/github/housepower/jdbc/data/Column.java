@@ -43,7 +43,7 @@ public class Column {
 
     public void write(Object object) throws IOException, SQLException {
         if (type().sqlTypeId() == Types.ARRAY) {
-            //TODO
+
         } else {
             type().serializeBinary(object, buffer.column);
         }

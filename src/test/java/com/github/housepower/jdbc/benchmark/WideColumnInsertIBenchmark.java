@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  */
 public class WideColumnInsertIBenchmark extends AbstractIBenchmark{
-    private static final int COLUMN_NUM = 50;
-    private static final int BATCH_SZIE = 400000;
+    private static final int COLUMN_NUM = 150;
+    private static final int BATCH_SZIE = 200000;
 
     AtomicInteger tableMaxId = new AtomicInteger();
 
