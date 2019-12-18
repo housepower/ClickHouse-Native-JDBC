@@ -43,7 +43,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 statement.executeQuery("INSERT INTO test VALUES('abc')");
 
                 PreparedStatement stmt = connection.prepareStatement("INSERT INTO test VALUES(?)");
-                stmt.setString(1, "abc");
+                stmt.setObject(1, "abc");
                 stmt.executeUpdate();
 
                 ResultSet rs = statement.executeQuery("SELECT str, COUNT(0) FROM test group by str");

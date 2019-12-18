@@ -36,7 +36,7 @@ public class Block {
 
         this.objects = new Object[columns.length];
         this.columnIndexAdds = new int[columns.length];
-        nameWithPosition = new HashMap<String, Integer>();
+        nameWithPosition = new HashMap<>();
         for (int i = 0; i < columns.length; i++) {
             nameWithPosition.put(columns[i].name(), i + 1);
             columnIndexAdds[i] = i;

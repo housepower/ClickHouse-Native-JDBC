@@ -13,6 +13,5 @@ public class ClickHouseDefines {
     public static final int MAX_BLOCK_SIZE = 1048576 * 10;
     public static int SOCKET_BUFFER_SIZE = 1048576;
 
-    public static int COLUMN_BUFFER = 1048576;
-    public static int BUFFER_ROWS = 102400;
+    public static int COLUMN_BUFFER = 102400;
 }

@@ -21,14 +21,16 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
                 statement.executeQuery("DROP TABLE IF EXISTS test");
                     statement.executeQuery("CREATE TABLE test(test_uInt8 UInt8, test_Int8 Int8)ENGINE=Log");
+
                 statement.executeQuery("INSERT INTO test VALUES(" + 255 + "," + Byte.MIN_VALUE + ")");
+
                 ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_uInt8");
                 Assert.assertTrue(rs.next());
                 int aa = rs.getInt(1);
                 Assert.assertEquals(aa, 255);
                 Assert.assertEquals(rs.getByte(2), Byte.MIN_VALUE);
                 Assert.assertFalse(rs.next());
-//                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("DROP TABLE IF EXISTS test");
             }
         });
     }

@@ -2,6 +2,7 @@ package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,6 +24,8 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
         this.block = getSampleBlock(insertQuery);
         this.block.initWriteBuffer();
+
+        new ValuesWithParametersInputFormat(fullQuery, posOfData).fillBlock(block);
     }
 
     @Override
@@ -47,9 +50,10 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 		addParameters();
     }
 
+
     @Override
     public void setObject(int index, Object x) throws SQLException {
-        block.setObject(index, x);
+        block.setObject(index - 1, x);
     }
 
     private void addParameters() throws SQLException {

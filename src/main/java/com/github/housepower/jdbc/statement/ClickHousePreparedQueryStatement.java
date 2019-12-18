@@ -39,6 +39,11 @@ public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement 
         return executeQuery(assembleQueryPartsAndParameters());
     }
 
+    @Override
+    public void setObject(int index, Object x) throws SQLException {
+        parameters[index - 1] = x;
+    }
+
     private static String[] splitQueryByQuestionMark(String query) {
         int lastPos = 0;
         List<String> queryParts = new ArrayList<String>();

@@ -122,14 +122,13 @@ public class ClickHouseConnection extends SQLConnection {
     }
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
-        PhysicalConnection connection = getHealthyPhysicalConnection();
+        PhysicalConnection connection = getPhysicalConnection();
         connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
         return connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
     }
 
     public QueryResponse sendQueryRequest(final String query) throws SQLException {
         PhysicalConnection connection = getHealthyPhysicalConnection();
-
         connection.sendQuery(query, atomicInfo.get().client(), configure.settings());
 
         return new QueryResponse(() -> connection.receiveResponse(configure.queryTimeout(), atomicInfo.get().server()));
@@ -138,9 +137,9 @@ public class ClickHouseConnection extends SQLConnection {
     public Integer sendInsertRequest(Block block)
         throws SQLException {
 
-        PhysicalConnection connection = getHealthyPhysicalConnection();
+        PhysicalConnection connection = getPhysicalConnection();
         connection.sendData(block);
-            connection.sendData(new Block());
+        connection.sendData(new Block());
         connection.receiveEndOfStream(configure.queryTimeout(), atomicInfo.get().server());
         return block.rows();
     }
@@ -153,6 +152,10 @@ public class ClickHouseConnection extends SQLConnection {
             closeableInfo.connection().disPhysicalConnection();
         }
 
+        return atomicInfo.get().connection();
+    }
+
+    private PhysicalConnection getPhysicalConnection() throws SQLException {
         return atomicInfo.get().connection();
     }
 

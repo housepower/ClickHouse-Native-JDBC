@@ -25,6 +25,8 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     public AbstractPreparedStatement(ClickHouseConnection connection, String[] queryParts) {
         super(connection);
         this.queryParts = queryParts;
+        if (queryParts != null && queryParts.length > 0)
+            this.parameters = new Object[queryParts.length];
     }
 
     @Override
@@ -82,10 +84,6 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         setObject(index, x);
     }
 
-    @Override
-    public void setObject(int index, Object x) throws SQLException {
-        block.setObject(index - 1, x);
-    }
 
     @Override
     public void setTimestamp(int index, Timestamp x) throws SQLException {

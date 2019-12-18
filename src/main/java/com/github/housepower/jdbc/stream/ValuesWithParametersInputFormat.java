@@ -29,6 +29,7 @@ public class ValuesWithParametersInputFormat implements InputFormat {
             if (!lexer.isCharacter('?')) {
                 block.setConstObject(column, block.getByPosition(column).type()
                                                  .deserializeTextQuoted(lexer));
+                constIdx[column] = 1;
             } else {
                 lexer.character();
             }
