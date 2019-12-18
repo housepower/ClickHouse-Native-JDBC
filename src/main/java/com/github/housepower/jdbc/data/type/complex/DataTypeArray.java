@@ -82,7 +82,7 @@ public class DataTypeArray implements IDataType {
 
         for (Object v : ((Object[]) ((Array) data).getArray())) {
             if (elemDataType.sqlTypeId() == Types.ARRAY) {
-                serializeBinary(v, dataBinarySerializer, offsetBinarySerializer);
+                ((DataTypeArray)(elemDataType)).serializeBinary(v, dataBinarySerializer, offsetBinarySerializer);
             } else {
                 elemDataType.serializeBinary(v, dataBinarySerializer);
             }

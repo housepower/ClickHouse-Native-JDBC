@@ -33,7 +33,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 * Non-values format
 * Complex values expression, Like `INSERT INTO test_table VALUES(toDate(123456))`
 * More compression method, like `ZSTD`
-* Array(T) only supports one-dimensional
+* Array(T)
 
 ## Example
 
