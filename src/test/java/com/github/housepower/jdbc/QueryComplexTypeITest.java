@@ -190,7 +190,7 @@ public class QueryComplexTypeITest extends AbstractITest {
                 ResultSet
                     rs =
                     statement.executeQuery(
-                        "SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v) from number(10)");
+                        "SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v) from numbers(10)");
 
                 for (int i = 0; i < 10; i++) {
                     Assert.assertTrue(rs.next());
