@@ -161,7 +161,147 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>intergration-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.17</version>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                        <executions>
+
+                            <!-- Run tests with clickhouse-server -->
+                            <execution>
+                                <id>run-integration-test</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>false</skip>
+                                    <systemPropertyVariables>
+                                        <CLICK_HOUSE_SERVER_PORT>${ClickHousePort}</CLICK_HOUSE_SERVER_PORT>
+                                        <CLICK_HOUSE_SERVER_PORT>${ClickHouseHTTPPort}</CLICK_HOUSE_SERVER_PORT>
+                                    </systemPropertyVariables>
+                                    <includes>
+                                        <include>**/*ITest*</include>
+                                        <include>**/*IBenchmark*</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+
+                            <!-- Run tests without clickhouse-server -->
+                            <execution>
+                                <id>run-test</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>false</skip>
+                                    <excludes>
+                                        <exclude>**/*ITest*</exclude>
+                                        <exclude>**/*IBenchmark*</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>run-benchmarks</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-classpath</argument>
+                                        <classpath/>
+                                        <argument>org.openjdk.jmh.Main</argument>
+                                        <argument>-bm</argument>
+                                        <argument>avgt</argument>
+                                        <argument>-wi</argument>
+                                        <argument>0</argument>
+                                        <argument>-i</argument>
+                                        <argument>1</argument>
+                                        <argument>-f</argument>
+                                        <argument>2</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.20.1</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>ClickHouse-Server</alias>
+                                    <name>yandex/clickhouse-server</name>
+                                    <run>
+                                        <ports>
+                                            <port>${ClickHousePort}:9000</port>
+                                            <port>${ClickHouseHTTPPort}:8123</port>
+                                        </ports>
+                                        <wait>
+                                            <tcp>
+                                                <host>127.0.0.1</host>
+                                                <ports>
+                                                    <port>${ClickHousePort}</port>
+                                                </ports>
+                                            </tcp>
+
+                                            <http>
+                                                <url>http://127.0.0.1:${ClickHouseHTTPPort}</url>
+                                                <method>GET</method>
+                                                <status>200</status>
+                                            </http>
+                                            <time>20000</time>
+                                        </wait>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>docker:start</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+
+
+                            <execution>
+                                <id>docker:stop</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -174,136 +314,22 @@
                     <fork>true</fork>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.17</version>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5</version>
                 <configuration>
-                    <skip>true</skip>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
                 </configuration>
-                <executions>
-
-                    <!-- Run tests with clickhouse-server -->
-                    <execution>
-                        <id>run-integration-test</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <skip>false</skip>
-                            <systemPropertyVariables>
-                                <CLICK_HOUSE_SERVER_PORT>${ClickHousePort}</CLICK_HOUSE_SERVER_PORT>
-                                <CLICK_HOUSE_SERVER_PORT>${ClickHouseHTTPPort}</CLICK_HOUSE_SERVER_PORT>
-                            </systemPropertyVariables>
-                            <includes>
-                                <include>**/*ITest*</include>
-                                <include>**/*IBenchmark*</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-
-                    <!-- Run tests without clickhouse-server -->
-                    <execution>
-                        <id>run-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <skip>false</skip>
-                            <excludes>
-                                <exclude>**/*ITest*</exclude>
-                                <exclude>**/*IBenchmark*</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>run-benchmarks</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <classpathScope>test</classpathScope>
-                            <executable>java</executable>
-                            <arguments>
-                                <argument>-classpath</argument>
-                                <classpath/>
-                                <argument>org.openjdk.jmh.Main</argument>
-                                <argument>-bm</argument>
-                                <argument>avgt</argument>
-                                <argument>-wi</argument>
-                                <argument>0</argument>
-                                <argument>-i</argument>
-                                <argument>1</argument>
-                                <argument>-f</argument>
-                                <argument>2</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.20.1</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <images>
-                        <image>
-                            <alias>ClickHouse-Server</alias>
-                            <name>yandex/clickhouse-server</name>
-                            <run>
-                                <ports>
-                                    <port>${ClickHousePort}:9000</port>
-                                    <port>${ClickHouseHTTPPort}:8123</port>
-                                </ports>
-                                <wait>
-                                    <tcp>
-                                        <host>127.0.0.1</host>
-                                        <ports>
-                                            <port>${ClickHousePort}</port>
-                                        </ports>
-                                    </tcp>
-
-                                    <http>
-                                        <url>http://127.0.0.1:${ClickHouseHTTPPort}</url>
-                                        <method>GET</method>
-                                        <status>200</status>
-                                    </http>
-                                    <time>20000</time>
-                                </wait>
-                            </run>
-                        </image>
-                    </images>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>docker:start</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-
-
-                    <execution>
-                        <id>docker:stop</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -325,4 +351,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

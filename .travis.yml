@@ -10,7 +10,8 @@ jdk:
   - oraclejdk8
   - oraclejdk9
 script:
-  - mvn clean verify
+  -mvn clean package
+  -mvn verify -P intergration-test
 
 
 

@@ -10,7 +10,9 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 ```
     git clone git@github.com:housepower/ClickHouse-Native-JDBC.git
     cd ClickHouse-Native-JDBC
-    mvn clean install
+    mvn clean package
+    #build single jar with dependencies
+    mvn clean package assembly:single -DskipTests=true
 ```
 
 ## Maven central
@@ -38,7 +40,6 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 
 Select query, see also [SimpleQuery.java](./src/main/java/examples/SimpleQuery.java)
 ```java
-    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();
@@ -52,7 +53,6 @@ Select query, see also [SimpleQuery.java](./src/main/java/examples/SimpleQuery.j
 All DDL,DML queries, see also [ExecuteQuery.java](./src/main/java/examples/ExecuteQuery.java)
 
 ```java
-    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();
@@ -65,7 +65,6 @@ All DDL,DML queries, see also [ExecuteQuery.java](./src/main/java/examples/Execu
 Batch insert query, see also [BatchQuery.java](./src/main/java/examples/BatchQuery.java)
 
 ``` java
-    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();

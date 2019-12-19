@@ -17,7 +17,6 @@ public abstract class AbstractITest {
         }
         DriverManager.registerDriver(new ClickHouseDriver());
 
-        Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
         String connectionStr = "jdbc:clickhouse://127.0.0.1:" + SERVER_PORT;
 
         // first arg is use_client_time_zone
