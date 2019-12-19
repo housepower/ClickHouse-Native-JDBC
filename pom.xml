@@ -198,6 +198,7 @@
                             </systemPropertyVariables>
                             <includes>
                                 <include>**/*ITest*</include>
+                                <include>**/*IBenchmark*</include>
                             </includes>
                         </configuration>
                     </execution>
@@ -237,12 +238,14 @@
                                 <argument>-classpath</argument>
                                 <classpath/>
                                 <argument>org.openjdk.jmh.Main</argument>
+                                <argument>-bm</argument>
+                                <argument>avgt</argument>
                                 <argument>-wi</argument>
                                 <argument>0</argument>
                                 <argument>-i</argument>
-                                <argument>3</argument>
-                                <argument>-f</argument>
                                 <argument>1</argument>
+                                <argument>-f</argument>
+                                <argument>2</argument>
                             </arguments>
                         </configuration>
                     </execution>

@@ -1,43 +1,18 @@
 package com.github.housepower.jdbc.benchmark;
 
 import org.junit.Assert;
+import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
-@State(Scope.Thread)
 public class SelectIBenchmark extends AbstractIBenchmark {
-    @Param({"10000"})
-    private int number;
     AtomicInteger tableMaxId = new AtomicInteger();
 
-    public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                          .include(WideColumnDoubleInsertIBenchmark.class.getSimpleName())
-                          .warmupIterations(0)
-                          .measurementIterations(3)
-                          .forks(1)
-                          .build();
-
-        new Runner(opt).run();
-    }
     public WithConnection benchSelect = connection -> {
         long sum = 0;
         Statement statement = connection.createStatement();
@@ -53,11 +28,13 @@ public class SelectIBenchmark extends AbstractIBenchmark {
     };
 
     @Benchmark
+    @Test
     public void benchSelectNative() throws Exception {
         withConnection(benchSelect, ConnectionType.NATIVE);
     }
 
     @Benchmark
+    @Test
     public void benchSelectHTTP() throws Exception {
         withConnection(benchSelect, ConnectionType.HTTP);
     }

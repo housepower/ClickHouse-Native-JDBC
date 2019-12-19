@@ -27,7 +27,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 
 ## Differences from [Yandex/Clickhouse-JDBC](https://github.com/yandex/clickhouse-jdbc)
 * Data is organized and compressed by columns
-* We implemented it using the TCP Protocol, with higher performance than HTTP
+* We implemented it using the TCP Protocol, with higher performance than HTTP, here is the [benchmark](./Benchmark.md).
 
 ## Not Supported
 * Non-values format

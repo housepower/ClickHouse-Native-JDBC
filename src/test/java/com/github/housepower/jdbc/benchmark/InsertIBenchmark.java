@@ -1,46 +1,20 @@
 package com.github.housepower.jdbc.benchmark;
 
 import org.junit.Assert;
+import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Thread)
 public class InsertIBenchmark extends AbstractIBenchmark{
-    @Param({"10000", "100000", "1000000"})
-    private int batchSize;
     AtomicInteger tableMaxId = new AtomicInteger();
-
-    public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                          .include(WideColumnDoubleInsertIBenchmark.class.getSimpleName())
-                          .warmupIterations(0)
-                          .measurementIterations(3)
-                          .forks(1)
-                          .build();
-
-        new Runner(opt).run();
-    }
 
     public WithConnection benchInsert = new WithConnection(){
         @Override
@@ -71,12 +45,14 @@ public class InsertIBenchmark extends AbstractIBenchmark{
         }
     };
 
-    @Benchmark @BenchmarkMode(Mode.AverageTime) @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    @Test
     public void benchInsertNative() throws Exception {
         withConnection(benchInsert, ConnectionType.NATIVE);
     }
 
-    @Benchmark @BenchmarkMode(Mode.AverageTime) @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    @Test
     public void benchInsertHttp() throws Exception {
         withConnection(benchInsert, ConnectionType.HTTP);
     }
