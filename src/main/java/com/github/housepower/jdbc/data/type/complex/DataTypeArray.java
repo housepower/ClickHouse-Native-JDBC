@@ -24,8 +24,6 @@ public class DataTypeArray implements IDataType {
     private final IDataType elemDataType;
     private final IDataType offsetIDataType;
 
-    private int offset = 0;
-
     public DataTypeArray(String name, IDataType elemDataType, IDataType offsetIDataType) throws SQLException {
         this.name = name;
         this.elemDataType = elemDataType;
@@ -75,14 +73,21 @@ public class DataTypeArray implements IDataType {
         return new ClickHouseArray(arrayData.toArray());
     }
 
-    public void serializeBinary(Object data, BinarySerializer dataBinarySerializer, BinarySerializer offsetBinarySerializer) throws SQLException, IOException {
+    public void serializeBinary(Object data, BinarySerializer dataBinarySerializer, List<List<Integer>> offsets, int level) throws SQLException, IOException {
         int dataOffset = ((Object[]) ((Array) data).getArray()).length;
-        offset += dataOffset;
-        offsetIDataType.serializeBinary(offset, offsetBinarySerializer);
+        if (offsets.size() < level) {
+            List<Integer> offset = new ArrayList<>();
+            offset.add(dataOffset);
+            offsets.add(offset);
+        } else {
+            int lastIdx =  offsets.get(level - 1).size() - 1;
+            int lastOffset =  offsets.get(level - 1).get(lastIdx);
+            offsets.get(level - 1).add(lastOffset + dataOffset);
+        }
 
         for (Object v : ((Object[]) ((Array) data).getArray())) {
             if (elemDataType.sqlTypeId() == Types.ARRAY) {
-                ((DataTypeArray)(elemDataType)).serializeBinary(v, dataBinarySerializer, offsetBinarySerializer);
+                ((DataTypeArray)(elemDataType)).serializeBinary(v, dataBinarySerializer, offsets, level + 1);
             } else {
                 elemDataType.serializeBinary(v, dataBinarySerializer);
             }

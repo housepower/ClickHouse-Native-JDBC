@@ -6,6 +6,8 @@ import com.github.housepower.jdbc.serializer.BinarySerializer;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Column {
 
@@ -14,6 +16,8 @@ public class Column {
 
     private Object[] values;
     private ColumnWriterBuffer buffer;
+    private boolean isArray;
+    private List<List<Integer>> offsets;
 
     public Column(String name, IDataType type) {
         this.name = name;
@@ -24,6 +28,10 @@ public class Column {
         this.values = values;
         this.name = name;
         this.type = type;
+        if (this.type.sqlTypeId() == Types.ARRAY) {
+            this.isArray = true;
+            this.offsets = new ArrayList<>();
+        }
     }
 
     public void initWriteBuffer() {
@@ -43,9 +51,9 @@ public class Column {
     }
 
     public void write(Object object) throws IOException, SQLException {
-        if (type().sqlTypeId() == Types.ARRAY) {
+        if (isArray) {
             DataTypeArray typ = (DataTypeArray)(type());
-            typ.serializeBinary(object, buffer.column, buffer.offset);
+            typ.serializeBinary(object, buffer.column, offsets, 1);
         } else {
             type().serializeBinary(object, buffer.column);
         }
@@ -55,6 +63,16 @@ public class Column {
     public void serializeBinaryBulk(BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeStringBinary(name);
         serializer.writeStringBinary(type.name());
+
+        //writer offsets
+        if (offsets != null) {
+            for (List<Integer> offsetList : offsets) {
+                for (int offset : offsetList) {
+                    serializer.writeLong(offset);
+                }
+            }
+        }
+
         buffer.writeTo(serializer);
     }
 
