@@ -28,9 +28,9 @@ public class AbstractIBenchmark {
     @Param({"10000"})
     protected int number = 10000;
     @Param({"20", "50", "100"})
-    protected int columnNum = 50;
+    protected int columnNum = 20;
     @Param({"200000", "500000"})
-    protected int batchSize = 500000;
+    protected int batchSize = 200000;
 
     AtomicInteger tableMaxId = new AtomicInteger();
 

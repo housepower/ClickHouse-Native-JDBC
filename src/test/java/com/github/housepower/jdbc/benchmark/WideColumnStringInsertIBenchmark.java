@@ -13,9 +13,7 @@ import org.openjdk.jmh.annotations.State;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
@@ -23,8 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Thread)
 public class WideColumnStringInsertIBenchmark extends AbstractIBenchmark{
-
-    AtomicInteger tableMaxId = new AtomicInteger();
 
     @Benchmark
     @Test
@@ -41,26 +37,9 @@ public class WideColumnStringInsertIBenchmark extends AbstractIBenchmark{
     public WithConnection benchInsert = new WithConnection(){
         @Override
         public void apply(Connection connection) throws Exception {
-            Statement stmt = connection.createStatement();
-
-            int tableId = tableMaxId.getAndIncrement();
-            String testTable = "test2_" + tableId;
-
-
-            stmt.executeQuery("DROP TABLE IF EXISTS " + testTable);
-            String createSQL = "CREATE TABLE " + testTable + " (";
-            for (int i = 0; i < columnNum; i++) {
-                createSQL += "col_" + i + " String";
-                if (i + 1 != columnNum) {
-                    createSQL += ",\n";
-                }
-            }
-            createSQL += ") Engine = Log";
-
-            stmt.executeQuery(createSQL);
+            wideColumnPrepare(connection, "String");
             String params = Strings.repeat("?, ", columnNum);
-            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO "  + testTable +" values("   + params.substring(0, params.length()-2) + ")");
-
+            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO "  + getTableName() +" values("   + params.substring(0, params.length()-2) + ")");
 
             for (int i = 0; i < batchSize; i++) {
                 for (int j = 0; j < columnNum; j++ ) {
@@ -70,7 +49,7 @@ public class WideColumnStringInsertIBenchmark extends AbstractIBenchmark{
             }
             int []res = pstmt.executeBatch();
             Assert.assertEquals(res.length, batchSize);
-            stmt.executeQuery("DROP TABLE " + testTable);
+            wideColumnAfter(connection);
         }
     };
 
