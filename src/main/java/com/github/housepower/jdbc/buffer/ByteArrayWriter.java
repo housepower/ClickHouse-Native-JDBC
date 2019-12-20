@@ -2,19 +2,23 @@ package com.github.housepower.jdbc.buffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
  */
 public class ByteArrayWriter implements BuffedWriter{
-    ByteBuffer buffer;
+    private int blockSize;
+    private ByteBuffer buffer;
 
-    public ByteArrayWriter(ByteBuffer buffer) {
-        this.buffer = buffer;
-    }
+    //TODO pooling
+    private List<ByteBuffer> byteBufferList = new LinkedList<>();
 
-    public ByteArrayWriter(int size) {
-        this.buffer = ByteBuffer.allocate(size);
+    public ByteArrayWriter(int blockSize) {
+        this.blockSize = blockSize;
+        this.buffer = ByteBuffer.allocate(blockSize);
+        byteBufferList.add(buffer);
     }
 
     @Override
@@ -44,6 +48,15 @@ public class ByteArrayWriter implements BuffedWriter{
         if (buffer.hasRemaining()) {
             return;
         }
+        buffer = ByteBuffer.allocate(blockSize);
+        byteBufferList.add(buffer);
+    }
+
+    @Deprecated
+    private void expend() throws IOException {
+        if (buffer.hasRemaining()) {
+            return;
+        }
         int newCapacity = (int) (buffer.capacity() * expandFactor);
         while (newCapacity < (buffer.capacity() + 1)) {
             newCapacity *= expandFactor;
@@ -53,11 +66,12 @@ public class ByteArrayWriter implements BuffedWriter{
         buffer.flip();
         expanded.put(buffer);
         buffer = expanded;
+        byteBufferList.set(0, buffer);
     }
 
     private static final float expandFactor = 1.5f;
 
-    public ByteBuffer getBuffer() {
-        return buffer;
+    public List<ByteBuffer> getBufferList() {
+        return byteBufferList;
     }
 }

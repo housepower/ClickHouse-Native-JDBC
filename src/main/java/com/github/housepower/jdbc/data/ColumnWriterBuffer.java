@@ -5,6 +5,7 @@ import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  *
@@ -21,10 +22,11 @@ public class ColumnWriterBuffer {
     }
 
     public void writeTo(BinarySerializer serializer) throws IOException {
-        columnWriter.getBuffer().flip();
-
-        while (columnWriter.getBuffer().hasRemaining()) {
-            serializer.writeByte(columnWriter.getBuffer().get());
+        for (ByteBuffer buffer : columnWriter.getBufferList()) {
+            buffer.flip();
+            while (buffer.hasRemaining()) {
+                serializer.writeByte(buffer.get());
+            }
         }
     }
 }

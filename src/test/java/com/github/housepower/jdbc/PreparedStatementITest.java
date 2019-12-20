@@ -3,10 +3,12 @@ package com.github.housepower.jdbc;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.sql.Date;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Timestamp;
 
 public class PreparedStatementITest extends AbstractITest {
 

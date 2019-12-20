@@ -14,8 +14,11 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @BenchmarkMode(Mode.AverageTime)
@@ -25,15 +28,29 @@ public class AbstractIBenchmark {
     @Param({"10000"})
     protected int number = 10000;
     @Param({"20", "50", "100"})
-    protected int columnNum = 10;
+    protected int columnNum = 50;
     @Param({"200000", "500000"})
-    protected int batchSize = 200000;
+    protected int batchSize = 500000;
+
+    AtomicInteger tableMaxId = new AtomicInteger();
 
     private static final int SERVER_PORT = Integer.valueOf(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
     private static final int SERVER_HTTP_PORT = Integer.valueOf(System.getProperty("CLICK_HOUSE_SERVER_HTTP_PORT", "8123"));
 
     private final Driver httpDriver = new ru.yandex.clickhouse.ClickHouseDriver();
     private final Driver nativeDriver = new com.github.housepower.jdbc.ClickHouseDriver();
+
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                          .include(".*")
+                          .warmupIterations(0)
+                          .measurementIterations(1)
+                          .forks(2)
+                          .build();
+
+        new Runner(opt).run();
+    }
 
     protected void withConnection(WithConnection withConnection, ConnectionType connectionType) throws Exception {
         int port = SERVER_PORT;
@@ -63,6 +80,7 @@ public class AbstractIBenchmark {
         }
     }
 
+
     public interface WithConnection {
         void apply(Connection connection) throws Exception;
     }
@@ -71,14 +89,29 @@ public class AbstractIBenchmark {
         NATIVE, HTTP
     }
 
-    public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                          .include(".*")
-                          .warmupIterations(0)
-                          .measurementIterations(1)
-                          .forks(2)
-                          .build();
 
-        new Runner(opt).run();
+    //drop table, create table
+    protected void wideColumnPrepare(Connection connection, String columnType) throws SQLException {
+        int tableId = tableMaxId.incrementAndGet();
+        String testTable = "test_" + tableId;
+        Statement stmt = connection.createStatement();
+        stmt.executeQuery("DROP TABLE IF EXISTS " + testTable);
+        String createSQL = "CREATE TABLE " + testTable + " (";
+        for (int i = 0; i < columnNum; i++) {
+            createSQL += "col_" + i + " "  + columnType ;
+            if (i + 1 != columnNum) {
+                createSQL += ",\n";
+            }
+        }
+        stmt.executeQuery(createSQL + ")Engine = Log");
+    }
+
+    protected void wideColumnAfter(Connection connection) throws SQLException {
+        Statement stmt = connection.createStatement();
+        stmt.executeQuery("DROP TABLE " + getTableName());
+    }
+
+    protected String getTableName() {
+        return "test_" + tableMaxId.get();
     }
 }

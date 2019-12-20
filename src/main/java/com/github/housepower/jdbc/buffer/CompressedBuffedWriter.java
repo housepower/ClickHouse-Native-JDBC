@@ -1,6 +1,7 @@
 package com.github.housepower.jdbc.buffer;
 
 import com.github.housepower.jdbc.misc.ClickHouseCityHash;
+
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;
 
@@ -35,15 +36,22 @@ public class CompressedBuffedWriter implements BuffedWriter {
 
     @Override
     public void writeBinary(byte[] bytes, int offset, int length) throws IOException {
-        for (int i = offset, max = offset + length; i < max; ) {
-            if (hasRemaining()) {
-                int writtenNumber = Math.min(capacity - position, max - i);
-                System.arraycopy(bytes, i, writtenBuf, position, writtenNumber);
-                i += writtenNumber;
-                position += writtenNumber;
-            }
+        while (remaing() < length) {
+            int num = remaing();
+            System.arraycopy(bytes, offset, writtenBuf, position, remaing());
+            position += num;
+
             flushToTarget(false);
+            offset += num;
+            length -= num;
         }
+
+        for (int i = offset, max = offset + length; i < max; ) {
+            System.arraycopy(bytes, i, writtenBuf, position, length);
+            i += length;
+            position += length;
+        }
+        flushToTarget(false);
     }
 
 
@@ -51,11 +59,10 @@ public class CompressedBuffedWriter implements BuffedWriter {
 
     @Override
     public void flushToTarget(boolean force) throws IOException {
-        if (position > 0 &&(force || !hasRemaining())) {
+        if (position > 0 && (force || !hasRemaining())) {
             int maxLen = lz4Compressor.maxCompressedLength(position);
 
             byte[] compressedBuffer = new byte[maxLen + 9 + 16];
-
             int res = lz4Compressor.compress(writtenBuf, 0, position, compressedBuffer, 9 + 16);
 
             compressedBuffer[16] = (byte) (0x82 & 0xFF);
@@ -76,6 +83,9 @@ public class CompressedBuffedWriter implements BuffedWriter {
         return position < capacity;
     }
 
+    private int remaing() {
+        return capacity - position;
+    }
 
     private byte[] littleEndian(int x) {
         byte[] data = new byte[4];
