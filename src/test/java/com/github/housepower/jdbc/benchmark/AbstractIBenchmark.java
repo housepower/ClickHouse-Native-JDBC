@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Thread)
 public class AbstractIBenchmark {
-    @Param({"10000"})
-    protected int number = 10000;
+    @Param({"100000", "500000", "10000000"})
+    protected long selectNumber = 100000;
     @Param({"20", "50", "100"})
     protected int columnNum = 20;
     @Param({"200000", "500000"})

@@ -122,7 +122,7 @@ public class ClickHouseConnection extends SQLConnection {
     }
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
-        PhysicalConnection connection = getPhysicalConnection();
+        PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
         return connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
     }
@@ -134,6 +134,8 @@ public class ClickHouseConnection extends SQLConnection {
         return new QueryResponse(() -> connection.receiveResponse(configure.queryTimeout(), atomicInfo.get().server()));
     }
 
+    // when sendInsertRequest we must ensure the connection is healthy
+    // the sampleblock mus be called before this method
     public Integer sendInsertRequest(Block block)
         throws SQLException {
 

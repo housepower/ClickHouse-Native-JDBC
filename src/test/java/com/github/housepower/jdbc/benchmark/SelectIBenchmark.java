@@ -6,25 +6,22 @@ import org.openjdk.jmh.annotations.Benchmark;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
 public class SelectIBenchmark extends AbstractIBenchmark {
-    AtomicInteger tableMaxId = new AtomicInteger();
-
     public WithConnection benchSelect = connection -> {
         long sum = 0;
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery(String.format("SELECT number as n1, 'i_am_a_string' , now(), today() from numbers(%d)", number));
+        ResultSet rs = statement.executeQuery(String.format("SELECT number as n1, 'i_am_a_string' , now(), today() from numbers(%d)", selectNumber));
         while (rs.next()) {
-            sum += rs.getInt(1);
+            sum += rs.getLong(1);
 
             rs.getString(2);
             rs.getTimestamp(3);
             rs.getDate(4);
         }
-        Assert.assertEquals((number-1) * number / 2, sum);
+        Assert.assertEquals((selectNumber-1) * selectNumber / 2, sum);
     };
 
     @Benchmark
