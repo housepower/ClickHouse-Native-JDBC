@@ -12,7 +12,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
     cd ClickHouse-Native-JDBC
     mvn clean package
     #build single jar with dependencies
-    mvn clean package assembly:single -DskipTests=true
+    mvn clean package assembly:single -Dmaven.skip.assembly=false  
 ```
 
 ## Maven central
