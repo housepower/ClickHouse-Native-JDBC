@@ -16,68 +16,66 @@ Benchmarks are run by the `travis-ci` docker integration-test, eg [here](https:/
     - `selectNumber`: select row size.
     
 ```
- InsertIBenchmark.benchInsertHttp                         200000           20             N/A  avgt    2    322.867          ms/op
- InsertIBenchmark.benchInsertHttp                         200000           50             N/A  avgt    2    323.162          ms/op
- InsertIBenchmark.benchInsertHttp                         500000           20             N/A  avgt    2    827.496          ms/op
- InsertIBenchmark.benchInsertHttp                         500000           50             N/A  avgt    2    836.865          ms/op
- InsertIBenchmark.benchInsertNative                       200000           20             N/A  avgt    2     72.309          ms/op
- InsertIBenchmark.benchInsertNative                       200000           50             N/A  avgt    2     72.948          ms/op
- InsertIBenchmark.benchInsertNative                       500000           20             N/A  avgt    2    168.628          ms/op
- InsertIBenchmark.benchInsertNative                       500000           50             N/A  avgt    2    165.061          ms/op
  
- 
- SelectIBenchmark.benchSelectHTTP                            N/A          N/A          500000  avgt    2   1062.264          ms/op
- SelectIBenchmark.benchSelectHTTP                            N/A          N/A        10000000  avgt    2  21549.043          ms/op
- SelectIBenchmark.benchSelectNative                          N/A          N/A          500000  avgt    2    307.442          ms/op
- SelectIBenchmark.benchSelectNative                          N/A          N/A        10000000  avgt    2   5794.785          ms/op
- 
- WideColumnDoubleInsertIBenchmark.benchInsertHttp         200000           20             N/A  avgt    2    717.190          ms/op
- WideColumnDoubleInsertIBenchmark.benchInsertHttp         200000           50             N/A  avgt    2   1818.837          ms/op
- WideColumnDoubleInsertIBenchmark.benchInsertHttp         500000           20             N/A  avgt    2   1829.937          ms/op
- WideColumnDoubleInsertIBenchmark.benchInsertHttp         500000           50             N/A  avgt    2   4469.529          ms/op
- WideColumnDoubleInsertIBenchmark.benchInsertNative       200000           20             N/A  avgt    2    339.103          ms/op
- WideColumnDoubleInsertIBenchmark.benchInsertNative       200000           50             N/A  avgt    2    876.465          ms/op
- WideColumnDoubleInsertIBenchmark.benchInsertNative       500000           20             N/A  avgt    2    784.621          ms/op
- WideColumnDoubleInsertIBenchmark.benchInsertNative       500000           50             N/A  avgt    2   2200.515          ms/op
- WideColumnIntInsertIBenchmark.benchInsertHttp            200000           20             N/A  avgt    2    366.501          ms/op
- WideColumnIntInsertIBenchmark.benchInsertHttp            200000           50             N/A  avgt    2    874.524          ms/op
- WideColumnIntInsertIBenchmark.benchInsertHttp            500000           20             N/A  avgt    2    930.941          ms/op
- WideColumnIntInsertIBenchmark.benchInsertHttp            500000           50             N/A  avgt    2   2174.565          ms/op
- WideColumnIntInsertIBenchmark.benchInsertNative          200000           20             N/A  avgt    2    196.612          ms/op
- WideColumnIntInsertIBenchmark.benchInsertNative          200000           50             N/A  avgt    2    500.912          ms/op
- WideColumnIntInsertIBenchmark.benchInsertNative          500000           20             N/A  avgt    2    511.506          ms/op
- WideColumnIntInsertIBenchmark.benchInsertNative          500000           50             N/A  avgt    2   1266.273          ms/op
- WideColumnStringInsertIBenchmark.benchInsertHttp         200000           20             N/A  avgt    2    454.479          ms/op
- WideColumnStringInsertIBenchmark.benchInsertHttp         200000           50             N/A  avgt    2   1063.671          ms/op
- WideColumnStringInsertIBenchmark.benchInsertHttp         500000           20             N/A  avgt    2   1143.546          ms/op
- WideColumnStringInsertIBenchmark.benchInsertHttp         500000           50             N/A  avgt    2   2671.942          ms/op
- WideColumnStringInsertIBenchmark.benchInsertNative       200000           20             N/A  avgt    2    415.649          ms/op
- WideColumnStringInsertIBenchmark.benchInsertNative       200000           50             N/A  avgt    2   1117.887          ms/op
- WideColumnStringInsertIBenchmark.benchInsertNative       500000           20             N/A  avgt    2   1040.238          ms/op
- WideColumnStringInsertIBenchmark.benchInsertNative       500000           50             N/A  avgt    2   2805.116          ms/op
- 
- RowBinaryDoubleIBenchmark.benchInsertHttpRowBinary       200000           20             N/A  avgt    2    210.101          ms/op
- RowBinaryDoubleIBenchmark.benchInsertHttpRowBinary       200000           50             N/A  avgt    2    512.881          ms/op
- RowBinaryDoubleIBenchmark.benchInsertHttpRowBinary       500000           20             N/A  avgt    2    494.944          ms/op
- RowBinaryDoubleIBenchmark.benchInsertHttpRowBinary       500000           50             N/A  avgt    2   1217.977          ms/op
- RowBinaryDoubleIBenchmark.benchInsertNative              200000           20             N/A  avgt    2    317.598          ms/op
- RowBinaryDoubleIBenchmark.benchInsertNative              200000           50             N/A  avgt    2    882.392          ms/op
- RowBinaryDoubleIBenchmark.benchInsertNative              500000           20             N/A  avgt    2    786.638          ms/op
- RowBinaryDoubleIBenchmark.benchInsertNative              500000           50             N/A  avgt    2   2178.728          ms/op
- RowBinaryIntIBenchmark.benchInsertHttpRowBinary          200000           20             N/A  avgt    2    214.144          ms/op
- RowBinaryIntIBenchmark.benchInsertHttpRowBinary          200000           50             N/A  avgt    2    520.860          ms/op
- RowBinaryIntIBenchmark.benchInsertHttpRowBinary          500000           20             N/A  avgt    2    497.062          ms/op
- RowBinaryIntIBenchmark.benchInsertHttpRowBinary          500000           50             N/A  avgt    2   1318.273          ms/op
- RowBinaryIntIBenchmark.benchInsertNative                 200000           20             N/A  avgt    2    204.526          ms/op
- RowBinaryIntIBenchmark.benchInsertNative                 200000           50             N/A  avgt    2    482.022          ms/op
- RowBinaryIntIBenchmark.benchInsertNative                 500000           20             N/A  avgt    2    519.482          ms/op
- RowBinaryIntIBenchmark.benchInsertNative                 500000           50             N/A  avgt    2   1323.276          ms/op
- RowBinaryStringIBenchmark.benchInsertHttpRowBinary       200000           20             N/A  avgt    2    446.506          ms/op
- RowBinaryStringIBenchmark.benchInsertHttpRowBinary       200000           50             N/A  avgt    2   1089.095          ms/op
- RowBinaryStringIBenchmark.benchInsertHttpRowBinary       500000           20             N/A  avgt    2   1076.479          ms/op
- RowBinaryStringIBenchmark.benchInsertHttpRowBinary       500000           50             N/A  avgt    2   2845.602          ms/op
- RowBinaryStringIBenchmark.benchInsertNative              200000           20             N/A  avgt    2    418.727          ms/op
- RowBinaryStringIBenchmark.benchInsertNative              200000           50             N/A  avgt    2   1079.312          ms/op
- RowBinaryStringIBenchmark.benchInsertNative              500000           20             N/A  avgt    2   1016.174          ms/op
- RowBinaryStringIBenchmark.benchInsertNative              500000           50             N/A  avgt    2   2785.120          ms/op
+ Benchmark                                                       Score   (batchSize)  (columnNum) (selectNumber)
+ InsertIBenchmark.benchInsertHttp                        322.867 ms/op     200000           20        N/A  
+ InsertIBenchmark.benchInsertHttp                        323.162 ms/op     200000           50        N/A  
+ InsertIBenchmark.benchInsertHttp                        827.496 ms/op     500000           20        N/A  
+ InsertIBenchmark.benchInsertHttp                        836.865 ms/op     500000           50        N/A  
+ InsertIBenchmark.benchInsertNative                       72.309 ms/op     200000           20        N/A  
+ InsertIBenchmark.benchInsertNative                       72.948 ms/op     200000           50        N/A  
+ InsertIBenchmark.benchInsertNative                      168.628 ms/op     500000           20        N/A  
+ InsertIBenchmark.benchInsertNative                      165.061 ms/op     500000           50        N/A  
+ SelectIBenchmark.benchSelectHTTP                       1062.264 ms/op        N/A          N/A     500000  
+ SelectIBenchmark.benchSelectHTTP                      21549.043 ms/op        N/A          N/A   10000000  
+ SelectIBenchmark.benchSelectNative                      307.442 ms/op        N/A          N/A     500000  
+ SelectIBenchmark.benchSelectNative                     5794.785 ms/op        N/A          N/A   10000000  
+ WideColumnDoubleInsertIBenchmark.benchInsertHttp        717.190 ms/op     200000           20        N/A  
+ WideColumnDoubleInsertIBenchmark.benchInsertHttp       1818.837 ms/op     200000           50        N/A  
+ WideColumnDoubleInsertIBenchmark.benchInsertHttp       1829.937 ms/op     500000           20        N/A  
+ WideColumnDoubleInsertIBenchmark.benchInsertHttp       4469.529 ms/op     500000           50        N/A  
+ WideColumnDoubleInsertIBenchmark.benchInsertNative      339.103 ms/op     200000           20        N/A  
+ WideColumnDoubleInsertIBenchmark.benchInsertNative      876.465 ms/op     200000           50        N/A  
+ WideColumnDoubleInsertIBenchmark.benchInsertNative      784.621 ms/op     500000           20        N/A  
+ WideColumnDoubleInsertIBenchmark.benchInsertNative     2200.515 ms/op     500000           50        N/A  
+ WideColumnIntInsertIBenchmark.benchInsertHttp           366.501 ms/op     200000           20        N/A  
+ WideColumnIntInsertIBenchmark.benchInsertHttp           874.524 ms/op     200000           50        N/A  
+ WideColumnIntInsertIBenchmark.benchInsertHttp           930.941 ms/op     500000           20        N/A  
+ WideColumnIntInsertIBenchmark.benchInsertHttp          2174.565 ms/op     500000           50        N/A  
+ WideColumnIntInsertIBenchmark.benchInsertNative         196.612 ms/op     200000           20        N/A  
+ WideColumnIntInsertIBenchmark.benchInsertNative         500.912 ms/op     200000           50        N/A  
+ WideColumnIntInsertIBenchmark.benchInsertNative         511.506 ms/op     500000           20        N/A  
+ WideColumnIntInsertIBenchmark.benchInsertNative        1266.273 ms/op     500000           50        N/A  
+ WideColumnStringInsertIBenchmark.benchInsertHttp        454.479 ms/op     200000           20        N/A  
+ WideColumnStringInsertIBenchmark.benchInsertHttp       1063.671 ms/op     200000           50        N/A  
+ WideColumnStringInsertIBenchmark.benchInsertHttp       1143.546 ms/op     500000           20        N/A  
+ WideColumnStringInsertIBenchmark.benchInsertHttp       2671.942 ms/op     500000           50        N/A  
+ WideColumnStringInsertIBenchmark.benchInsertNative      415.649 ms/op     200000           20        N/A  
+ WideColumnStringInsertIBenchmark.benchInsertNative     1117.887 ms/op     200000           50        N/A  
+ WideColumnStringInsertIBenchmark.benchInsertNative     1040.238 ms/op     500000           20        N/A  
+ WideColumnStringInsertIBenchmark.benchInsertNative     2805.116 ms/op     500000           50        N/A  
+ RowBinaryDoubleIBenchmark.benchInsertHttpRowBinary      210.101 ms/op     200000           20        N/A  
+ RowBinaryDoubleIBenchmark.benchInsertHttpRowBinary      512.881 ms/op     200000           50        N/A  
+ RowBinaryDoubleIBenchmark.benchInsertHttpRowBinary      494.944 ms/op     500000           20        N/A  
+ RowBinaryDoubleIBenchmark.benchInsertHttpRowBinary     1217.977 ms/op     500000           50        N/A  
+ RowBinaryDoubleIBenchmark.benchInsertNative             317.598 ms/op     200000           20        N/A  
+ RowBinaryDoubleIBenchmark.benchInsertNative             882.392 ms/op     200000           50        N/A  
+ RowBinaryDoubleIBenchmark.benchInsertNative             786.638 ms/op     500000           20        N/A  
+ RowBinaryDoubleIBenchmark.benchInsertNative            2178.728 ms/op     500000           50        N/A  
+ RowBinaryIntIBenchmark.benchInsertHttpRowBinary         214.144 ms/op     200000           20        N/A  
+ RowBinaryIntIBenchmark.benchInsertHttpRowBinary         520.860 ms/op     200000           50        N/A  
+ RowBinaryIntIBenchmark.benchInsertHttpRowBinary         497.062 ms/op     500000           20        N/A  
+ RowBinaryIntIBenchmark.benchInsertHttpRowBinary        1318.273 ms/op     500000           50        N/A  
+ RowBinaryIntIBenchmark.benchInsertNative                204.526 ms/op     200000           20        N/A  
+ RowBinaryIntIBenchmark.benchInsertNative                482.022 ms/op     200000           50        N/A  
+ RowBinaryIntIBenchmark.benchInsertNative                519.482 ms/op     500000           20        N/A  
+ RowBinaryIntIBenchmark.benchInsertNative               1323.276 ms/op     500000           50        N/A  
+ RowBinaryStringIBenchmark.benchInsertHttpRowBinary      446.506 ms/op     200000           20        N/A  
+ RowBinaryStringIBenchmark.benchInsertHttpRowBinary     1089.095 ms/op     200000           50        N/A  
+ RowBinaryStringIBenchmark.benchInsertHttpRowBinary     1076.479 ms/op     500000           20        N/A  
+ RowBinaryStringIBenchmark.benchInsertHttpRowBinary     2845.602 ms/op     500000           50        N/A  
+ RowBinaryStringIBenchmark.benchInsertNative             418.727 ms/op     200000           20        N/A  
+ RowBinaryStringIBenchmark.benchInsertNative            1079.312 ms/op     200000           50        N/A  
+ RowBinaryStringIBenchmark.benchInsertNative            1016.174 ms/op     500000           20        N/A  
+ RowBinaryStringIBenchmark.benchInsertNative            2785.120 ms/op     500000           50        N/A  
 ```
