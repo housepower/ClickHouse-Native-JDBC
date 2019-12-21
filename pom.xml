@@ -165,6 +165,7 @@
                         <configuration>
                             <mavenExecutorId>forked-path</mavenExecutorId>
                             <useReleaseProfile>false</useReleaseProfile>
+                            <arguments>-Dmaven.javadoc.skip=true -Dmaven.test.skipTests=true -Dmaven.test.skip=true</arguments>
                         </configuration>
                     </plugin>
                 </plugins>
