@@ -103,10 +103,7 @@
     <properties>
         <ClickHousePort>9000</ClickHousePort>
         <ClickHouseHTTPPort>8123</ClickHouseHTTPPort>
-        <maven.skip.integration>true</maven.skip.integration>
-        <maven.skip.benchmark>true</maven.skip.benchmark>
-        <maven.skip.assembly>true</maven.skip.assembly>
-        <maven.skip.docker>true</maven.skip.docker>
+
     </properties>
 
 
@@ -226,7 +223,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.4.0</version>
                 <configuration>
-                    <skip>${maven.skip.benchmark}</skip>
+                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
@@ -263,7 +260,7 @@
                 <extensions>true</extensions>
 
                 <configuration>
-                    <skip>${maven.skip.docker}</skip>
+                    <!-- <skip>true</skip> -->
                     <images>
                         <image>
                             <alias>ClickHouse-Server</alias>
@@ -317,7 +314,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.1.1</version>
                 <configuration>
-                    <skipAssembly>${maven.skip.assembly}</skipAssembly>
+                    <skipAssembly>true</skipAssembly>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
