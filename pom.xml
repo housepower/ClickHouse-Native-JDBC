@@ -260,7 +260,7 @@
                 <extensions>true</extensions>
 
                 <configuration>
-                    <!-- <skip>true</skip> -->
+                     <skip>true</skip>
                     <images>
                         <image>
                             <alias>ClickHouse-Server</alias>
