@@ -284,7 +284,17 @@
                                         <method>GET</method>
                                         <status>200</status>
                                     </http>
-                                    <time>20000</time>
+
+                                    <healthCheck>
+                                        <!-- Fail if no response after 3 seconds -->
+                                        <timeout>3s</timeout>
+                                        <!-- Fail 3 times until the container is considerd unhealthy -->
+                                        <retries>3</retries>
+                                        <!-- Command to execute in shell form -->
+                                        <cmd>curl -f http://127.0.0.1:8123/ || exit 1</cmd>
+                                    </healthCheck>
+
+                                    <time>50000</time>
                                 </wait>
                             </run>
                         </image>

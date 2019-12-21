@@ -3,6 +3,7 @@ package com.github.housepower.jdbc.benchmark;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Param;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -10,6 +11,8 @@ import java.sql.Statement;
 /**
  */
 public class SelectIBenchmark extends AbstractIBenchmark {
+    @Param({"100000", "500000", "10000000"})
+    protected long selectNumber = 100000;
     public WithConnection benchSelect = connection -> {
         long sum = 0;
         Statement statement = connection.createStatement();
