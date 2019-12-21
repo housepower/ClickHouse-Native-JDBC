@@ -21,7 +21,7 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc</artifactId>
-    <version>1.7-stable</version>
+    <version>2.0-stable</version>
 </dependency>
 ```
 
