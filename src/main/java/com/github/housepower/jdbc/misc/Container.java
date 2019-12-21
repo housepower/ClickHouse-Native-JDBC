@@ -12,7 +12,7 @@ public class Container<T> {
     }
 
     public void select(boolean isRight) {
-        isLeft = (isLeft == isRight) ? !isRight : isLeft;
+        isLeft = !isRight;
     }
 
     public T get() {

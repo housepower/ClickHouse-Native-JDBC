@@ -1,36 +1,41 @@
 package com.github.housepower.jdbc.data;
 
-import com.github.housepower.jdbc.misc.Slice;
+import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Column {
 
     private final String name;
     private final IDataType type;
-    private final Slice rowsData;
-    private final int rows;
 
-    private boolean isConstant;
+    private Object[] values;
+    private ColumnWriterBuffer buffer;
+    private boolean isArray;
+    private List<List<Integer>> offsets;
 
-    public Column(String name, IDataType type, Slice rowsData) {
+    public Column(String name, IDataType type) {
         this.name = name;
         this.type = type;
-        this.rowsData = rowsData;
-        this.rows = rowsData.size();
     }
 
-    // const column
-    public Column(String name, IDataType type, Object constData, int rows) {
+    public Column(String name, IDataType type, Object[] values) {
+        this.values = values;
         this.name = name;
         this.type = type;
-        this.isConstant = true;
-        this.rows = rows;
-        this.rowsData = new Slice(1);
-        this.rowsData.add(constData);
+        if (this.type.sqlTypeId() == Types.ARRAY) {
+            this.isArray = true;
+            this.offsets = new ArrayList<>();
+        }
+    }
+
+    public void initWriteBuffer() {
+        this.buffer = new ColumnWriterBuffer();
     }
 
     public String name() {
@@ -41,36 +46,37 @@ public class Column {
         return this.type;
     }
 
-    public Slice data() {
-        return rowsData;
+    public Object values(int rowIdx) {
+        return this.values[rowIdx];
     }
 
-    public Object data(int rows) {
-        if (isConstant) {
-            return rowsData.get(0);
+    public void write(Object object) throws IOException, SQLException {
+        if (isArray) {
+            DataTypeArray typ = (DataTypeArray)(type());
+            typ.serializeBinary(object, buffer.column, offsets, 1);
+        } else {
+            type().serializeBinary(object, buffer.column);
         }
-        return rowsData.get(rows);
     }
+
 
     public void serializeBinaryBulk(BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeStringBinary(name);
         serializer.writeStringBinary(type.name());
 
-        if (type.sqlTypeId() == Types.ARRAY) {
-            Object[] objects = new Object[rows];
-            for (int i = 0; i < rows; i++) {
-                objects[i] = rowsData.get(isConstant ? 0 : i);
+        //writer offsets
+        if (offsets != null) {
+            for (List<Integer> offsetList : offsets) {
+                for (int offset : offsetList) {
+                    serializer.writeLong(offset);
+                }
             }
-            type.serializeBinaryBulk(objects, serializer);
-            return;
         }
 
-        if (isConstant) {
-            for (int i = 0; i < rows; i++) {
-                type.serializeBinary(rowsData.get(0), serializer);
-            }
-        } else {
-            type.serializeBinaryBulk(rowsData.iterator(), serializer);
-        }
+        buffer.writeTo(serializer);
+    }
+
+    public ColumnWriterBuffer getBuffer() {
+        return buffer;
     }
 }

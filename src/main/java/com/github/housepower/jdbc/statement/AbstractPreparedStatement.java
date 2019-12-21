@@ -1,12 +1,17 @@
 package com.github.housepower.jdbc.statement;
 
 
-import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.jdbc.misc.Validate;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Struct;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 public abstract class AbstractPreparedStatement extends ClickHouseStatement implements PreparedStatement {
@@ -17,11 +22,11 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     protected Object[] parameters;
 
-    public AbstractPreparedStatement(ClickHouseConnection connection, String[] queryParts, int parameters) {
+    public AbstractPreparedStatement(ClickHouseConnection connection, String[] queryParts) {
         super(connection);
-
         this.queryParts = queryParts;
-        this.parameters = new Object[parameters];
+        if (queryParts != null && queryParts.length > 0)
+            this.parameters = new Object[queryParts.length];
     }
 
     @Override
@@ -79,12 +84,6 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         setObject(index, x);
     }
 
-    @Override
-    public void setObject(int index, Object x) throws SQLException {
-//        Validate.isTrue((index - 1) < parameters.length,
-//            "Index " + index + " is out of bound in PreparedStatement, max index " + (parameters.length + 1));
-        parameters[index - 1] = x;
-    }
 
     @Override
     public void setTimestamp(int index, Timestamp x) throws SQLException {

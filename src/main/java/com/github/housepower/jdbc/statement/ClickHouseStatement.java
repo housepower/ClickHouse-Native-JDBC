@@ -1,5 +1,12 @@
 package com.github.housepower.jdbc.statement;
 
+import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.jdbc.ClickHouseResultSet;
+import com.github.housepower.jdbc.data.Block;
+import com.github.housepower.jdbc.protocol.QueryResponse;
+import com.github.housepower.jdbc.stream.ValuesInputFormat;
+import com.github.housepower.jdbc.wrapper.SQLStatement;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -7,16 +14,14 @@ import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.github.housepower.jdbc.ClickHouseResultSet;
-import com.github.housepower.jdbc.wrapper.SQLStatement;
-import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.protocol.QueryResponse;
-import com.github.housepower.jdbc.stream.ValuesInputFormat;
-
 public class ClickHouseStatement extends SQLStatement {
-    private static final Pattern VALUES_REGEX = Pattern.compile("[V|v][A|a][L|l][U|u][E|e][S|s]\\s*\\(");
+
+    private static final Pattern
+        VALUES_REGEX =
+        Pattern.compile("[V|v][A|a][L|l][U|u][E|e][S|s]\\s*\\(");
 
     private ResultSet lastResultSet;
+    protected Block block;
 
     protected final ClickHouseConnection connection;
 
@@ -41,7 +46,10 @@ public class ClickHouseStatement extends SQLStatement {
         if (matcher.find()) {
             lastResultSet = null;
             String insertQuery = query.substring(0, matcher.end() - 1);
-            return connection.sendInsertRequest(insertQuery, new ValuesInputFormat(matcher.end() - 1, query));
+            block = getSampleBlock(insertQuery);
+            block.initWriteBuffer();
+            new ValuesInputFormat(matcher.end() - 1, query).fillBlock(block);
+            return connection.sendInsertRequest(block);
         }
         QueryResponse response = connection.sendQueryRequest(query);
         lastResultSet = new ClickHouseResultSet(response.header(), response.data().get(), this);
@@ -69,5 +77,9 @@ public class ClickHouseStatement extends SQLStatement {
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         return lastResultSet.getMetaData();
+    }
+
+    public Block getSampleBlock(final String insertQuery) throws SQLException {
+        return connection.getSampleBlock(insertQuery);
     }
 }

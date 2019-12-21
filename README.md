@@ -10,7 +10,9 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 ```
     git clone git@github.com:housepower/ClickHouse-Native-JDBC.git
     cd ClickHouse-Native-JDBC
-    mvn clean install
+    mvn clean package
+    #build single jar with dependencies
+    mvn clean package assembly:single -DskipTests=true
 ```
 
 ## Maven central
@@ -27,19 +29,17 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 
 ## Differences from [Yandex/Clickhouse-JDBC](https://github.com/yandex/clickhouse-jdbc)
 * Data is organized and compressed by columns
-* We implemented it using the TCP Protocol, with higher performance than HTTP
+* We implemented it using the TCP Protocol, with higher performance than HTTP, here is the [benchmark](./Benchmark.md).
 
 ## Not Supported
 * Non-values format
 * Complex values expression, Like `INSERT INTO test_table VALUES(toDate(123456))`
 * More compression method, like `ZSTD`
-* Array(T) only supports one-dimensional
 
 ## Example
 
 Select query, see also [SimpleQuery.java](./src/main/java/examples/SimpleQuery.java)
 ```java
-    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();
@@ -53,24 +53,18 @@ Select query, see also [SimpleQuery.java](./src/main/java/examples/SimpleQuery.j
 All DDL,DML queries, see also [ExecuteQuery.java](./src/main/java/examples/ExecuteQuery.java)
 
 ```java
-    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();
-    // drop table
     stmt.executeQuery("drop table if exists test_jdbc_example");
-    // create table
     stmt.executeQuery("create table test_jdbc_example(day default toDate( toDateTime(timestamp) ), timestamp UInt32, name String, impressions UInt32) Engine=MergeTree(day, (timestamp, name), 8192)");
-    // add column `costs`
     stmt.executeQuery("alter table test_jdbc_example add column costs Float32");
-    // drop the table
     stmt.executeQuery("drop table test_jdbc_example");
 ```
 
 Batch insert query, see also [BatchQuery.java](./src/main/java/examples/BatchQuery.java)
 
 ``` java
-    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();

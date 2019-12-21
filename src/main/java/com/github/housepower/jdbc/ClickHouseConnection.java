@@ -12,7 +12,6 @@ import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
 import com.github.housepower.jdbc.statement.ClickHousePreparedQueryStatement;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
-import com.github.housepower.jdbc.stream.InputFormat;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
 
 import java.net.InetSocketAddress;
@@ -122,33 +121,29 @@ public class ClickHouseConnection extends SQLConnection {
         }
     }
 
+    public Block getSampleBlock(final String insertQuery) throws SQLException {
+        PhysicalConnection connection = getHealthyPhysicalConnection();
+        connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
+        return connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
+    }
+
     public QueryResponse sendQueryRequest(final String query) throws SQLException {
         PhysicalConnection connection = getHealthyPhysicalConnection();
-
         connection.sendQuery(query, atomicInfo.get().client(), configure.settings());
 
         return new QueryResponse(() -> connection.receiveResponse(configure.queryTimeout(), atomicInfo.get().server()));
     }
 
-    public Integer sendInsertRequest(final String insertQuery, final InputFormat input) throws SQLException {
-        PhysicalConnection connection = getHealthyPhysicalConnection();
+    // when sendInsertRequest we must ensure the connection is healthy
+    // the sampleblock mus be called before this method
+    public Integer sendInsertRequest(Block block)
+        throws SQLException {
 
-        int rows = 0;
-        connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
-        Block header = connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
-        while (true) {
-            Block block = input.next(header, ClickHouseDefines.MAX_BLOCK_SIZE);
-
-            if (block == null || block.rows() == 0) {
-                connection.sendData(new Block());
-                connection.receiveEndOfStream(configure.queryTimeout(), atomicInfo.get().server());
-
-                return rows;
-            }
-
-            connection.sendData(block);
-            rows += block.rows();
-        }
+        PhysicalConnection connection = getPhysicalConnection();
+        connection.sendData(block);
+        connection.sendData(new Block());
+        connection.receiveEndOfStream(configure.queryTimeout(), atomicInfo.get().server());
+        return block.rows();
     }
 
     private PhysicalConnection getHealthyPhysicalConnection() throws SQLException {
@@ -159,6 +154,10 @@ public class ClickHouseConnection extends SQLConnection {
             closeableInfo.connection().disPhysicalConnection();
         }
 
+        return atomicInfo.get().connection();
+    }
+
+    private PhysicalConnection getPhysicalConnection() throws SQLException {
         return atomicInfo.get().connection();
     }
 

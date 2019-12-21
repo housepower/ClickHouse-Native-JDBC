@@ -1,9 +1,7 @@
 package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.misc.Slice;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
 
 import java.sql.ResultSet;
@@ -15,24 +13,19 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     private final int posOfData;
     private final String fullQuery;
     private final String insertQuery;
-    private final Slice []columns;
-
-	private int maxRows = 0;
 
     public ClickHousePreparedInsertStatement(int posOfData, String fullQuery, ClickHouseConnection conn)
         throws SQLException {
-        super(conn, null, computeQuestionMarkSize(fullQuery, posOfData));
+        super(conn, null);
 
-    	int parameterSize = computeQuestionMarkSize(fullQuery, posOfData);
         this.posOfData = posOfData;
         this.fullQuery = fullQuery;
         this.insertQuery = fullQuery.substring(0, posOfData);
 
-        this.columns = new Slice[parameterSize];
-        // TODO make a slicePool
-        for (int i = 0; i < parameterSize; ++i) {
-            this.columns[i] = new Slice(ClickHouseDefines.BUFFER_ROWS);
-		}
+        this.block = getSampleBlock(insertQuery);
+        this.block.initWriteBuffer();
+
+        new ValuesWithParametersInputFormat(fullQuery, posOfData).fillBlock(block);
     }
 
     @Override
@@ -43,8 +36,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     @Override
     public int executeUpdate() throws SQLException {
 		addParameters();
-		return connection.sendInsertRequest(insertQuery,
-            new ValuesWithParametersInputFormat(fullQuery, posOfData, columns, maxRows));
+		return connection.sendInsertRequest(block);
     }
 
     @Override
@@ -58,26 +50,23 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 		addParameters();
     }
 
+
+    @Override
+    public void setObject(int index, Object x) throws SQLException {
+        block.setObject(index - 1, x);
+    }
+
     private void addParameters() throws SQLException {
-    	//ensure rows size
-		for (int i = 0; i < super.parameters.length; i++) {
-		    columns[i].add(super.parameters[i]);
-		}
-		maxRows ++;
+        block.appendRow();
 	}
 
     @Override
     public void clearBatch() throws SQLException {
-    	maxRows = 0;
-    	for (int i = 0; i < columns.length; i++) {
-    	    columns[i] = columns[i].sub(0,0);
-        }
     }
 
     @Override
     public int[] executeBatch() throws SQLException {
-        Integer rows = connection.sendInsertRequest(
-            insertQuery, new ValuesWithParametersInputFormat(fullQuery, posOfData, columns, maxRows));
+        Integer rows = connection.sendInsertRequest(block);
         int[] result = new int[rows];
         Arrays.fill(result, -1);
         clearBatch();

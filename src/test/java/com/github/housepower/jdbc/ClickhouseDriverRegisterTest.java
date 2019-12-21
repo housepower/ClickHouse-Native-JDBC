@@ -18,7 +18,6 @@ public class ClickhouseDriverRegisterTest {
         properties.setProperty("password", "password");
         String mockedUrl = EmbeddedDriver.EMBEDDED_DRIVER_PREFIX + "//127.0.0.1:" + SERVER_PORT;
 
-        Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
         DriverManager.registerDriver(new EmbeddedDriver());
         Assert.assertEquals(EmbeddedDriver.MOCKED_CONNECTION, DriverManager.getConnection(mockedUrl, properties));
     }
