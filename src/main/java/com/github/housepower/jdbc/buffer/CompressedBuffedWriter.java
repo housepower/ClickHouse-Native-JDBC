@@ -46,11 +46,8 @@ public class CompressedBuffedWriter implements BuffedWriter {
             length -= num;
         }
 
-        for (int i = offset, max = offset + length; i < max; ) {
-            System.arraycopy(bytes, i, writtenBuf, position, length);
-            i += length;
-            position += length;
-        }
+        System.arraycopy(bytes, offset, writtenBuf, position, length);
+        position += length;
         flushToTarget(false);
     }
 

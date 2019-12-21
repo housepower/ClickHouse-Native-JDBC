@@ -11,7 +11,7 @@ import java.sql.Statement;
 /**
  */
 public class SelectIBenchmark extends AbstractIBenchmark {
-    @Param({"100000", "500000", "10000000"})
+    @Param({"500000", "10000000"})
     protected long selectNumber = 100000;
     public WithConnection benchSelect = connection -> {
         long sum = 0;

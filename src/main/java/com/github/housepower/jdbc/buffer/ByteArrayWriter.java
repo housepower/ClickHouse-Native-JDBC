@@ -34,18 +34,23 @@ public class ByteArrayWriter implements BuffedWriter{
 
     @Override
     public void writeBinary(byte[] bytes, int offset, int length) throws IOException {
-        for (int i = offset, max = offset + length; i < max; ) {
-            if (buffer.hasRemaining()) {
-                buffer.put(bytes[i]);
-                i ++;
-            }
-            flushToTarget(false);
+
+        while (buffer.remaining() < length) {
+            int num = buffer.remaining();
+            buffer.put(bytes, offset, num);
+            flushToTarget(true);
+
+            offset += num;
+            length -= num;
         }
+
+        buffer.put(bytes, offset, length);
+        flushToTarget(false);
     }
 
     @Override
     public void flushToTarget(boolean force) throws IOException {
-        if (buffer.hasRemaining()) {
+        if (buffer.hasRemaining() && !force) {
             return;
         }
         buffer = ByteBuffer.allocate(blockSize);

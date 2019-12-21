@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Thread)
 public class AbstractIBenchmark {
-    @Param({"20", "50", "100"})
+    @Param({"50"})
     protected int columnNum = 20;
     @Param({"200000", "500000"})
     protected int batchSize = 200000;
