@@ -10,7 +10,7 @@
     <name>clickhouse-native-jdbc</name>
     <description>ClickHouse Native Protocol JDBC implementation</description>
     <url>https://github.com/housepower/ClickHouse-Native-JDBC</url>
-    
+
     <scm>
         <url>https://github.com/housepower/ClickHouse-Native-JDBC</url>
         <connection>scm:git:git@github.com:housepower/ClickHouse-Native-JDBC.git</connection>
@@ -195,7 +195,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.17</version>
                 <configuration>
-                    <skipTests>${maven.skip.integration}</skipTests>
+                    <skip>${maven.skip.integration}</skip>
                 </configuration>
                 <executions>
                     <execution>
@@ -230,7 +230,7 @@
                 </executions>
             </plugin>
 
-            <!-- Benchmark -->
+            <!--Benchmark -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -273,7 +273,7 @@
                 <extensions>true</extensions>
 
                 <configuration>
-                    <skip>${maven.skip.docker}</skip>
+                    <skip>false</skip>
                     <images>
                         <image>
                             <alias>ClickHouse-Server</alias>
@@ -320,24 +320,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -355,6 +338,16 @@
                         </manifest>
                     </archive>
                 </configuration>
+
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
