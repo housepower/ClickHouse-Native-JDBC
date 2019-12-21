@@ -106,8 +106,7 @@
         <maven.skip.integration>true</maven.skip.integration>
         <maven.skip.benchmark>true</maven.skip.benchmark>
         <maven.skip.assembly>true</maven.skip.assembly>
-
-        <maven.skip.docker>false</maven.skip.docker>
+        <maven.skip.docker>true</maven.skip.docker>
     </properties>
 
 
