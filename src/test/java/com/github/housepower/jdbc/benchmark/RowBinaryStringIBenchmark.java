@@ -13,7 +13,7 @@ import ru.yandex.clickhouse.domain.ClickHouseFormat;
 
 /**
  */
-public class RowBinaryStringIBenchmark extends AbstractIBenchmark{
+public class RowBinaryStringIBenchmark extends AbstractInsertIBenchmark{
     private String columnType = "String";
 
     @Benchmark

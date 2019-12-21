@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Thread)
-public class WideColumnStringInsertIBenchmark extends AbstractIBenchmark{
+public class WideColumnStringInsertIBenchmark extends AbstractInsertIBenchmark {
 
     @Benchmark
     @Test

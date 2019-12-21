@@ -11,7 +11,7 @@ import java.sql.PreparedStatement;
 
 /**
  */
-public class WideColumnDoubleInsertIBenchmark extends AbstractIBenchmark{
+public class WideColumnDoubleInsertIBenchmark extends AbstractInsertIBenchmark {
     @Benchmark
     @Test
     public void benchInsertNative() throws Exception {
