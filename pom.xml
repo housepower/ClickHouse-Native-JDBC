@@ -105,8 +105,9 @@
         <ClickHouseHTTPPort>8123</ClickHouseHTTPPort>
         <maven.skip.integration>true</maven.skip.integration>
         <maven.skip.benchmark>true</maven.skip.benchmark>
-        <maven.skip.docker>true</maven.skip.docker>
         <maven.skip.assembly>true</maven.skip.assembly>
+
+        <maven.skip.docker>false</maven.skip.docker>
     </properties>
 
 
@@ -273,7 +274,7 @@
                 <extensions>true</extensions>
 
                 <configuration>
-                    <skip>false</skip>
+                    <skip>${maven.skip.docker}</skip>
                     <images>
                         <image>
                             <alias>ClickHouse-Server</alias>
