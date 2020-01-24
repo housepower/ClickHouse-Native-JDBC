@@ -96,7 +96,7 @@ public class Block {
     }
 
     public int getPositionByName(String name) throws SQLException {
-        Validate.isTrue(nameWithPosition.containsKey(name));
+        Validate.isTrue(nameWithPosition.containsKey(name),"Column '" + name + "' does not exist");
         return nameWithPosition.get(name);
     }
 
