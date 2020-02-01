@@ -31,7 +31,7 @@ public class ConnectionParamITest {
     public void successfullyMaxRowsToRead() throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1?max_rows_to_read=1&connect_timeout=10");
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT 1 UNION ALL SELECT 2");
+        ResultSet rs = statement.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
         int rowsRead = 0;
         while (rs.next()) {
             ++rowsRead;
