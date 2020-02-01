@@ -9,6 +9,8 @@ jdk:
   - openjdk10
   - oraclejdk8
   - oraclejdk9
+before_install:
+  - export TZ=Asia/Shanghai
 script:
   - mvn clean verify -Dmaven.skip.integration=false
   - echo "benchmark TODO"

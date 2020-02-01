@@ -4,12 +4,28 @@ import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.SettingKey;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Enumeration;
 import java.util.Properties;
 
 public class ConnectionParamITest {
+
+    @Before
+    public void init() throws SQLException {
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements()) {
+            DriverManager.deregisterDriver(drivers.nextElement());
+        }
+        DriverManager.registerDriver(new ClickHouseDriver());
+    }
 
     @Test(expected = SQLException.class)
     public void successfullyMaxRowsToRead() throws Exception {

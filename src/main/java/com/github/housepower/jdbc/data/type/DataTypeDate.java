@@ -33,7 +33,7 @@ public class DataTypeDate implements IDataType {
     public DataTypeDate(PhysicalInfo.ServerInfo serverInfo) {
         long now = System.currentTimeMillis();
         if (!java.lang.Boolean.TRUE
-            .equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
+                 .equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
             this.dateTimeZone = DateTimeZone.forTimeZone(serverInfo.timeZone());
         } else {
             this.dateTimeZone = DateTimeZone.getDefault();
