@@ -18,7 +18,7 @@ public class QueryComplexTypeITest extends AbstractITest {
     public void successfullyDate() throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
-//         use client timezone, Asia/Shanghai in traivs-ci
+        // use client timezone, Asia/Shanghai in traivs-ci
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
             ResultSet rs =
@@ -26,10 +26,23 @@ public class QueryComplexTypeITest extends AbstractITest {
             Assert.assertTrue(rs.next());
 
             dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
-            java.util.Date date = dateFormat.parse("2020-01-01 00:00:00");
+            java.util.Date date = dateFormat.parse("2020-01-01 08:00:00");
             Assert.assertEquals(rs.getDate(1).getTime(), date.getTime());
             Assert.assertFalse(rs.next());
         }, true);
+
+        // use server timezone, UTC
+        withNewConnection(connection -> {
+            Statement statement = connection.createStatement();
+            ResultSet rs =
+                statement.executeQuery("select toDate('2020-01-01') as dateValue");
+            Assert.assertTrue(rs.next());
+
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            java.util.Date date = dateFormat.parse("2020-01-01 00:00:00");
+            Assert.assertEquals(rs.getDate(1).getTime(), date.getTime());
+            Assert.assertFalse(rs.next());
+        }, false);
     }
 
     @Test
