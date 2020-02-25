@@ -44,13 +44,16 @@ public class Block {
     }
 
     public void appendRow() throws SQLException {
+    	int i=0;
         try {
-            for (int i = 0; i < columns.length; i++) {
+            for (i = 0; i < columns.length; i++) {
                 columns[i].write(objects[i]);
             }
             rows ++;
         } catch (IOException e) {
-            throw new SQLException(e);
+            throw new SQLException("Exception processing value "+objects[i]+" for column : "+columns[i].name(),e);
+        } catch (ClassCastException e) {
+            throw new SQLException("Exception processing value "+objects[i]+" for column : "+columns[i].name(),e);
         }
     }
 
