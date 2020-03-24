@@ -6,24 +6,26 @@ import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
 
     private final int posOfData;
     private final String fullQuery;
     private final String insertQuery;
-    private final List<Object[]> parameters;
 
     public ClickHousePreparedInsertStatement(int posOfData, String fullQuery, ClickHouseConnection conn)
         throws SQLException {
-        super(conn, null, computeQuestionMarkSize(fullQuery, posOfData));
+        super(conn, null);
+
         this.posOfData = posOfData;
         this.fullQuery = fullQuery;
-        this.parameters = new ArrayList<Object[]>();
         this.insertQuery = fullQuery.substring(0, posOfData);
+
+        this.block = getSampleBlock(insertQuery);
+        this.block.initWriteBuffer();
+
+        new ValuesWithParametersInputFormat(fullQuery, posOfData).fillBlock(block);
     }
 
     @Override
@@ -33,9 +35,8 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     @Override
     public int executeUpdate() throws SQLException {
-        parameters.add(super.parameters);
-        return connection.sendInsertRequest(insertQuery,
-            new ValuesWithParametersInputFormat(fullQuery, posOfData, parameters));
+		addParameters();
+		return connection.sendInsertRequest(block);
     }
 
     @Override
@@ -46,20 +47,26 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     @Override
     public void addBatch() throws SQLException {
-        parameters.add(super.parameters);
-        super.parameters = new Object[super.parameters.length];
+		addParameters();
     }
+
+
+    @Override
+    public void setObject(int index, Object x) throws SQLException {
+        block.setObject(index - 1, x);
+    }
+
+    private void addParameters() throws SQLException {
+        block.appendRow();
+	}
 
     @Override
     public void clearBatch() throws SQLException {
-        parameters.clear();
-        super.parameters = new Object[super.parameters.length];
     }
 
     @Override
     public int[] executeBatch() throws SQLException {
-        Integer rows = connection.sendInsertRequest(
-            insertQuery, new ValuesWithParametersInputFormat(fullQuery, posOfData, parameters));
+        Integer rows = connection.sendInsertRequest(block);
         int[] result = new int[rows];
         Arrays.fill(result, -1);
         clearBatch();

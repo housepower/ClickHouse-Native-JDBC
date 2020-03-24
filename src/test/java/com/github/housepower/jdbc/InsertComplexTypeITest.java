@@ -3,8 +3,12 @@ package com.github.housepower.jdbc;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.*;
-import java.util.TimeZone;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Struct;
+import java.sql.Timestamp;
 
 public class InsertComplexTypeITest extends AbstractITest {
 
@@ -16,11 +20,14 @@ public class InsertComplexTypeITest extends AbstractITest {
                 Statement statement = connection.createStatement();
 
                 statement.executeQuery("DROP TABLE IF EXISTS test");
-                statement.executeQuery("CREATE TABLE test(test_Array Array(UInt8))ENGINE=Log");
-                statement.executeQuery("INSERT INTO test VALUES ([1, 2, 3, 4])");
+                statement.executeQuery("CREATE TABLE test(test_Array Array(UInt8), test_Array2 Array(Array(String)))ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES ([1, 2, 3, 4], [ ['1', '2'] ])");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test");
                 Assert.assertTrue(rs.next());
                 Assert.assertArrayEquals((Object[]) rs.getArray(1).getArray(), new Short[] {1, 2, 3, 4});
+                Object[] objects = (Object[]) rs.getArray(2).getArray();
+                ClickHouseArray array = (ClickHouseArray) objects[0];
+                Assert.assertArrayEquals((Object [])array.getArray(), new Object[]{"1","2"});
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }
@@ -39,7 +46,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 statement.executeQuery("INSERT INTO test VALUES('abc')");
 
                 PreparedStatement stmt = connection.prepareStatement("INSERT INTO test VALUES(?)");
-                stmt.setString(1, "abc");
+                stmt.setObject(1, "abc");
                 stmt.executeUpdate();
 
                 ResultSet rs = statement.executeQuery("SELECT str, COUNT(0) FROM test group by str");
@@ -68,7 +75,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getByte(1), 0);
                 Assert.assertTrue(rs.wasNull());
-                statement.executeQuery("DROP TABLE IF EXISTS test");
+//                statement.executeQuery("DROP TABLE IF EXISTS test");
             }
         });
     }

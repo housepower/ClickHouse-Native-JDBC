@@ -1,5 +1,6 @@
 package com.github.housepower.jdbc.connect;
 
+import com.github.housepower.jdbc.buffer.SocketBuffedWriter;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.DataRequest;
@@ -132,11 +133,11 @@ public class PhysicalConnection {
 
             Socket socket = new Socket();
             socket.setTcpNoDelay(true);
-            socket.setSendBufferSize(ClickHouseDefines.DEFAULT_BUFFER_SIZE);
-            socket.setReceiveBufferSize(ClickHouseDefines.DEFAULT_BUFFER_SIZE);
+            socket.setSendBufferSize(ClickHouseDefines.SOCKET_BUFFER_SIZE);
+            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_BUFFER_SIZE);
             socket.connect(endpoint, configure.connectTimeout());
 
-            return new PhysicalConnection(socket, new BinarySerializer(socket), new BinaryDeserializer(socket));
+            return new PhysicalConnection(socket, new BinarySerializer(new SocketBuffedWriter(socket), true), new BinaryDeserializer(socket));
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }

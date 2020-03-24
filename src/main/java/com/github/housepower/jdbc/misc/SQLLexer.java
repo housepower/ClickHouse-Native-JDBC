@@ -8,7 +8,7 @@ public class SQLLexer {
 
     public SQLLexer(int pos, String data) throws SQLException {
         this.pos = pos;
-        this.data = StringViewCoding.getValues(data);
+        this.data = data.toCharArray();
     }
 
     public char character() {

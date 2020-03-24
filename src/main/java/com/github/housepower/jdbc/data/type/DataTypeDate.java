@@ -9,8 +9,6 @@ import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.settings.SettingKey;
 
 import org.joda.time.DateTimeZone;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -18,28 +16,22 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.concurrent.TimeUnit;
 
 public class DataTypeDate implements IDataType {
 
     private static final Date DEFAULT_VALUE = new Date(0);
-    private static final long MILLIS_DIFF = TimeUnit.DAYS.toMillis(1);
-
     private final DateTimeZone dateTimeZone;
-    private final LocalDate epochDate;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 
     public DataTypeDate(PhysicalInfo.ServerInfo serverInfo) {
-        long now = System.currentTimeMillis();
         if (!java.lang.Boolean.TRUE
-            .equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
+                 .equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
             this.dateTimeZone = DateTimeZone.forTimeZone(serverInfo.timeZone());
         } else {
             this.dateTimeZone = DateTimeZone.getDefault();
         }
         this.dateFormat.setTimeZone(this.dateTimeZone.toTimeZone());
-        this.epochDate = new LocalDate(0, dateTimeZone);
     }
 
     @Override
@@ -70,26 +62,15 @@ public class DataTypeDate implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
         throws SQLException, IOException {
-        Validate.isTrue(data instanceof Date,
-                        "Expected Date Parameter, but was " + data.getClass().getSimpleName());
-        LocalDate localDate = new LocalDate(((Date) data).getTime(), dateTimeZone);
-        int daysSinceEpoch = Days.daysBetween(epochDate, localDate).getDays();
+        long mills = ((Date) data).getTime();
+        long daysSinceEpoch = mills / 1000 / 3600 / 24;
         serializer.writeShort((short) daysSinceEpoch);
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         short daysSinceEpoch = deserializer.readShort();
-        LocalDate localDate = epochDate.plusDays(daysSinceEpoch);
-        return new Date(localDate.toDate().getTime());
-    }
-
-    @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer)
-        throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
+        return new Date(3600L * 24 * 1000 * daysSinceEpoch);
     }
 
     @Override
@@ -98,8 +79,7 @@ public class DataTypeDate implements IDataType {
         Date[] data = new Date[rows];
         for (int row = 0; row < rows; row++) {
             short daysSinceEpoch = deserializer.readShort();
-            LocalDate localDate = epochDate.plusDays(daysSinceEpoch);
-            data[row] = new Date(localDate.toDate().getTime());
+            data[row] = new Date(3600L * 24 * 1000 * daysSinceEpoch);
         }
         return data;
     }

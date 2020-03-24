@@ -16,7 +16,7 @@ public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement 
     }
 
     private ClickHousePreparedQueryStatement(ClickHouseConnection conn, String[] parts) {
-        super(conn, parts, parts.length - 1);
+        super(conn, parts);
     }
 
     @Override
@@ -39,19 +39,14 @@ public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement 
         return executeQuery(assembleQueryPartsAndParameters());
     }
 
+    @Override
+    public void setObject(int index, Object x) throws SQLException {
+        parameters[index - 1] = x;
+    }
+
     private static String[] splitQueryByQuestionMark(String query) {
         int lastPos = 0;
         List<String> queryParts = new ArrayList<String>();
-        //        while (true) {
-        //            QuotedToken token = lexer.next();
-        //
-        //            if (token.type() == QuotedTokenType.QuestionMark) {
-        //                queryParts.add(query.substring(lastPos, (lastPos = lexer.pos()) - 1));
-        //            } else if (token.type().ordinal() >= QuotedTokenType.EndOfStream.ordinal()) {
-        //                queryParts.add(query.substring(lastPos, query.length()));
-        //                return queryParts.toArray(new String[queryParts.size()]);
-        //            }
-        //        }
         boolean inQuotes = false, inBackQuotes = false;
         for (int i = 0; i < query.length(); i++) {
             char ch = query.charAt(i);

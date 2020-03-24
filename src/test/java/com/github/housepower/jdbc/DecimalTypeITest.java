@@ -7,7 +7,7 @@ import java.sql.*;
 
 import static org.junit.Assert.assertEquals;
 
-public class DecimalTypeTest extends AbstractITest {
+public class DecimalTypeITest extends AbstractITest {
 
     @Test
     public void testDecimalType() throws Exception {

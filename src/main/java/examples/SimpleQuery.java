@@ -10,7 +10,6 @@ import java.sql.Statement;
 public class SimpleQuery {
 
   public static void main(String[] args) throws Exception {
-    Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();

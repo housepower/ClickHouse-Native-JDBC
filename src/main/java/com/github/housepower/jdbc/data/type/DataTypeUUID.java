@@ -2,8 +2,6 @@ package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
-import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
@@ -41,14 +39,11 @@ public class DataTypeUUID implements IDataType {
 
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.stringLiteral();
+        return String.valueOf(lexer.stringLiteral());
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Validate.isTrue(data instanceof String || data instanceof StringView,
-            "Expected String Parameter, but was " + data.getClass().getSimpleName());
-
         UUID uuid = UUID.fromString(String.valueOf(data));
         serializer.writeLong(uuid.getMostSignificantBits());
         serializer.writeLong(uuid.getLeastSignificantBits());
@@ -57,13 +52,6 @@ public class DataTypeUUID implements IDataType {
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         return new UUID(deserializer.readLong(), deserializer.readLong()).toString();
-    }
-
-    @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object datum : data) {
-            serializeBinary(datum, serializer);
-        }
     }
 
     @Override
