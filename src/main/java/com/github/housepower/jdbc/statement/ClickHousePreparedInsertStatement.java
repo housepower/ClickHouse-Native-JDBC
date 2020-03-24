@@ -62,7 +62,6 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     @Override
     public void clearBatch() throws SQLException {
-        this.block = getSampleBlock(insertQuery);
         this.block.initWriteBuffer();
     }
 

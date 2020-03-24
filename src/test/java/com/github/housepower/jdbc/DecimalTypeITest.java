@@ -1,5 +1,6 @@
 package com.github.housepower.jdbc;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ public class DecimalTypeITest extends AbstractITest {
 
                 BigDecimal[] valueArray = new BigDecimal[]{BigDecimal.valueOf(412341.21D).setScale(3), BigDecimal.valueOf(512341.25D).setScale(3)};
                 Statement statement = connection.createStatement();
+                statement.execute("DROP TABLE IF EXISTS decimal_test");
                 statement.execute("CREATE TABLE IF NOT EXISTS decimal_test (value32 Decimal(7,2), value64 Decimal(15,5), value_array Array(Decimal(5,3))) Engine=Memory();");
                 PreparedStatement pstmt = connection.prepareStatement("INSERT INTO decimal_test(value32,value64,value_array) values(?,?,?);");
                 for (int i = 0; i < 3; i++) {
@@ -48,7 +50,7 @@ public class DecimalTypeITest extends AbstractITest {
                         assertEquals(decimalArray[i], valueArray[i]);
                     }
                 }
-                assertEquals(size, 3);
+                assertEquals(3, size);
                 statement.execute("DROP TABLE IF EXISTS decimal_test");
             }
         });
