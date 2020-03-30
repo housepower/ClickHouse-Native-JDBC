@@ -102,6 +102,27 @@ public class InsertComplexTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyDateTime64DataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(test_datetime DateTime64(9, 'UTC'))ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES(toDateTime64('2000-01-01 00:01:01.123456789'))");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                Assert.assertTrue(rs.next());
+
+                Assert.assertEquals(rs.getTimestamp(1).getTime(),
+                        new Timestamp(2000 - 1900, 0, 1, 0, 1, 1, 123456789).getTime());
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        }, true);
+    }
+
+    @Test
     public void successfullyTupleDataType() throws Exception {
         withNewConnection(new WithConnection() {
             @Override
