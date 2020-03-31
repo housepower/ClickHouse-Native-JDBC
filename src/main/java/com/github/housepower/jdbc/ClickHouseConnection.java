@@ -37,6 +37,7 @@ public class ClickHouseConnection extends SQLConnection {
     private final AtomicBoolean isClosed;
     private final ClickHouseConfig configure;
     private final AtomicReference<PhysicalInfo> atomicInfo;
+    private ConnectionState state = ConnectionState.IDLE;
 
     protected ClickHouseConnection(ClickHouseConfig configure, PhysicalInfo info) {
         this.isClosed = new AtomicBoolean(false);
@@ -124,10 +125,14 @@ public class ClickHouseConnection extends SQLConnection {
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
+        this.state=ConnectionState.WAITING_INSERT;
         return connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
     }
 
     public QueryResponse sendQueryRequest(final String query) throws SQLException {
+        if (this.state == ConnectionState.WAITING_INSERT) {
+            throw new RuntimeException("Connection is currently waiting for an insert operation, check your previous InsertStatement.");
+        }
         PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(query, atomicInfo.get().client(), configure.settings());
 
@@ -138,11 +143,15 @@ public class ClickHouseConnection extends SQLConnection {
     // the sampleblock mus be called before this method
     public Integer sendInsertRequest(Block block)
         throws SQLException {
+        if (this.state != ConnectionState.WAITING_INSERT) {
+            throw new RuntimeException("Call getSampleBlock before insert.");
+        }
 
         PhysicalConnection connection = getPhysicalConnection();
         connection.sendData(block);
         connection.sendData(new Block());
         connection.receiveEndOfStream(configure.queryTimeout(), atomicInfo.get().server());
+        this.state = ConnectionState.IDLE;
         return block.rows();
     }
 
