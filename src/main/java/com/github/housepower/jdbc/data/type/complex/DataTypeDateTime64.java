@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
@@ -22,6 +21,8 @@ import java.util.TimeZone;
 public class DataTypeDateTime64 implements IDataType {
 
     public static final Timestamp DEFAULT_VALUE = new Timestamp(0);
+    public static final int NANOS_IN_SECOND = 1_000_000_000;
+    public static final int MILLIS_IN_SECOND = 1000;
     private final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
     private final String name;
     private final TimeZone timeZone;
@@ -88,18 +89,8 @@ public class DataTypeDateTime64 implements IDataType {
 
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        Validate.isTrue(lexer.character() == 't');
-        Validate.isTrue(lexer.character() == 'o');
-        Validate.isTrue(lexer.character() == 'D');
-        Validate.isTrue(lexer.character() == 'a');
-        Validate.isTrue(lexer.character() == 't');
-        Validate.isTrue(lexer.character() == 'e');
-        Validate.isTrue(lexer.character() == 'T');
-        Validate.isTrue(lexer.character() == 'i');
-        Validate.isTrue(lexer.character() == 'm');
-        Validate.isTrue(lexer.character() == 'e');
-        Validate.isTrue(lexer.character() == '6');
-        Validate.isTrue(lexer.character() == '4');
+        StringView dataTypeName = lexer.bareWord();
+        Validate.isTrue(dataTypeName.equals("toDateTime64"));
         Validate.isTrue(lexer.character() == '(');
         Validate.isTrue(lexer.character() == '\'');
         int year = lexer.numberLiteral().intValue();
@@ -125,16 +116,23 @@ public class DataTypeDateTime64 implements IDataType {
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        long epochSeconds = deserializer.readInt();
-        long nanos = deserializer.readInt();
-        return Timestamp.valueOf(Instant.ofEpochSecond(epochSeconds, nanos).atZone(timeZone.toZoneId()).toLocalDateTime());
+        long value = deserializer.readLong();
+        long epochSeconds = value / NANOS_IN_SECOND;
+        int nanos = (int) (value % NANOS_IN_SECOND);
+        Timestamp timestamp = new Timestamp(epochSeconds * 1000);
+        if (nanos != 0)
+            timestamp.setNanos(nanos);
+        return timestamp;
     }
 
+    //946674184456789
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
         Timestamp timestamp = (Timestamp) data;
-        serializer.writeInt((int) (timestamp.getTime() / 1000));
-        serializer.writeInt(timestamp.getNanos());
+        long epochSeconds = timestamp.getTime() / MILLIS_IN_SECOND;
+        int nanos = timestamp.getNanos();
+        long value = epochSeconds * NANOS_IN_SECOND + nanos;
+        serializer.writeLong(value);
     }
 
     @Override

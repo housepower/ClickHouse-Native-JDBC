@@ -3,12 +3,7 @@ package com.github.housepower.jdbc;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.Struct;
-import java.sql.Timestamp;
+import java.sql.*;
 
 public class InsertComplexTypeITest extends AbstractITest {
 
@@ -114,8 +109,50 @@ public class InsertComplexTypeITest extends AbstractITest {
                 ResultSet rs = statement.executeQuery("SELECT * FROM test");
                 Assert.assertTrue(rs.next());
 
-                Assert.assertEquals(rs.getTimestamp(1).getTime(),
-                        new Timestamp(2000 - 1900, 0, 1, 0, 1, 1, 123456789).getTime());
+                Assert.assertEquals(new Timestamp(2000 - 1900, 0, 1, 0, 1, 1, 123456789),
+                        rs.getTimestamp(1));
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        }, true);
+    }
+
+    @Test
+    public void successfullyMinDateTime64DataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(test_datetime DateTime64(9, 'UTC'))ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES(toDateTime64('1970-01-01 00:00:00.000000000'))");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                Assert.assertTrue(rs.next());
+
+                Assert.assertEquals(new Timestamp(1970 - 1900, 0, 1, 0, 0, 0, 0),
+                        rs.getTimestamp(1));
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        }, true);
+    }
+
+    @Test
+    public void successfullyMaxDateTime64DataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(test_datetime DateTime64(9, 'UTC'))ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES(toDateTime64('2105-12-31 23:59:59.999999999'))");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                Assert.assertTrue(rs.next());
+
+                Assert.assertEquals(new Timestamp(2105 - 1900, 11, 31, 23, 59, 59, 999999999),
+                        rs.getTimestamp(1));
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }
