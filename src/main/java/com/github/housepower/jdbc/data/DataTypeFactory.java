@@ -46,6 +46,8 @@ public class DataTypeFactory {
             return DataTypeEnum16.createEnum16Type(lexer, serverInfo);
         } else if (dataTypeName.equals("DateTime")) {
             return DataTypeDateTime.createDateTimeType(lexer, serverInfo);
+        } else if (dataTypeName.equals("DateTime64")) {
+            return DataTypeDateTime64.createDateTime64Type(lexer, serverInfo);
         } else if (dataTypeName.equals("Nullable")) {
             return DataTypeNullable.createNullableType(lexer, serverInfo);
         } else if (dataTypeName.equals("FixedString")) {
