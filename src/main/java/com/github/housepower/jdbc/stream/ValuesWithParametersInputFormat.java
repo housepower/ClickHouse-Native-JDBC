@@ -19,6 +19,7 @@ public class ValuesWithParametersInputFormat implements InputFormat {
     @Override
     public void fillBlock(Block block) throws SQLException {
         int[] constIdx = new int[block.columns()];
+        block.resetIndex();
         char nextChar = lexer.character();
         Validate.isTrue(nextChar == '(');
         for (int column = 0; column < block.columns(); column++) {

@@ -65,6 +65,13 @@ public class Block {
         objects[i] = object;
     }
 
+    public void resetIndex() {
+        for (int i = 0; i < columns.length; i++) {
+            nameWithPosition.put(columns[i].name(), i + 1);
+            columnIndexAdds[i] = i;
+        }
+    }
+
     public void incrIndex(int i) {
         for (int j = i; j < columnIndexAdds.length; j++) {
             columnIndexAdds[j] += 1;
@@ -134,6 +141,7 @@ public class Block {
     }
 
     public void initWriteBuffer() {
+        this.rows = 0;
         for (Column column : columns) {
             column.initWriteBuffer();
         }
