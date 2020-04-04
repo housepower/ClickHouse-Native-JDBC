@@ -48,6 +48,43 @@ public class BatchInsertITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyMissSetBatchInsert() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+
+                statement.execute("DROP TABLE IF EXISTS test");
+                statement.execute("CREATE TABLE test(id Int8, age UInt8, name String)ENGINE=Log");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, 1, ?)");
+
+                preparedStatement.setByte(1, (byte) 1);
+                preparedStatement.setString(2, "Zhang San");
+                preparedStatement.addBatch();
+
+                // Ignore string value.
+                preparedStatement.setByte(1, (byte) 2);
+                preparedStatement.addBatch();
+
+                Assert.assertEquals(preparedStatement.executeBatch().length, 2);
+
+                ResultSet rs = statement.executeQuery("select * from test");
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getByte(1), 1);
+                Assert.assertEquals(rs.getByte(2), 1);
+                Assert.assertEquals(rs.getString(3), "Zhang San");
+
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getByte(1), 2);
+                Assert.assertEquals(rs.getByte(2), 1);
+                Assert.assertEquals(rs.getString(3), "");
+            }
+
+        });
+
+    }
+
+    @Test
     public void successfullyMultipleBatchInsert() throws Exception {
         withNewConnection(new WithConnection() {
             @Override

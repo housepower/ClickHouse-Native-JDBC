@@ -64,6 +64,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     @Override
     public void clearBatch() throws SQLException {
         this.block.initWriteBuffer();
+        new ValuesWithParametersInputFormat(fullQuery, posOfData).fillBlock(block);
     }
 
     @Override

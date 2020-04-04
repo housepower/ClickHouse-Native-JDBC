@@ -19,6 +19,7 @@ public class Block {
 
     private Object[]  objects;
     private int[] columnIndexAdds;
+    private boolean[] constantColumn;
     private int rows;
 
     public Block() {
@@ -35,12 +36,10 @@ public class Block {
         this.settings = settings;
 
         this.objects = new Object[columns.length];
+        this.constantColumn = new boolean[columns.length];
         this.columnIndexAdds = new int[columns.length];
         nameWithPosition = new HashMap<>();
-        for (int i = 0; i < columns.length; i++) {
-            nameWithPosition.put(columns[i].name(), i + 1);
-            columnIndexAdds[i] = i;
-        }
+        resetIndex();
     }
 
     public void appendRow() throws SQLException {
@@ -48,6 +47,10 @@ public class Block {
         try {
             for (i = 0; i < columns.length; i++) {
                 columns[i].write(objects[i]);
+                // Clear object after write to column.
+                if (!constantColumn[i]) {
+                    objects[i] = null;
+                }
             }
             rows ++;
         } catch (IOException e) {
@@ -63,12 +66,15 @@ public class Block {
 
     public void setConstObject(int i, Object object) throws SQLException {
         objects[i] = object;
+        constantColumn[i] = true;
     }
 
     public void resetIndex() {
         for (int i = 0; i < columns.length; i++) {
+            objects[i] = null;
             nameWithPosition.put(columns[i].name(), i + 1);
             columnIndexAdds[i] = i;
+            constantColumn[i] = false;
         }
     }
 

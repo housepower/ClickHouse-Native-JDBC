@@ -69,6 +69,9 @@ public class BinarySerializer {
     }
 
     public void writeStringBinary(String binary) throws IOException {
+        if (binary == null) {
+            binary = "";
+        }
         byte []bs = binary.getBytes();
         writeVarInt(bs.length);
         container.get().writeBinary(bs);
