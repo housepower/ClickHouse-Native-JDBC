@@ -1,4 +1,5 @@
 *.iml
+.editorconfig
 
 .idea/
 target/

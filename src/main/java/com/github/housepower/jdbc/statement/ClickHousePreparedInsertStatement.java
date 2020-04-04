@@ -16,7 +16,8 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     private final String insertQuery;
     private boolean blockInit;
 
-    public ClickHousePreparedInsertStatement(int posOfData, String fullQuery, ClickHouseConnection conn) throws SQLException {
+    public ClickHousePreparedInsertStatement(int posOfData, String fullQuery,
+                                             ClickHouseConnection conn) throws SQLException {
         super(conn, null);
         this.blockInit = false;
         this.posOfData = posOfData;
@@ -27,12 +28,12 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     }
 
     private void initBlockIfPossible() throws SQLException {
-        if(this.blockInit){
+        if (this.blockInit) {
             return;
         }
         this.block = getSampleBlock(insertQuery);
         this.block.initWriteBuffer();
-        this.blockInit=true;
+        this.blockInit = true;
         new ValuesWithParametersInputFormat(fullQuery, posOfData).fillBlock(block);
     }
 
@@ -44,8 +45,8 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     @Override
     public int executeUpdate() throws SQLException {
         addParameters();
-        int result= connection.sendInsertRequest(block);
-        this.blockInit =false;
+        int result = connection.sendInsertRequest(block);
+        this.blockInit = false;
         this.block.initWriteBuffer();
         return result;
     }
@@ -58,7 +59,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     @Override
     public void addBatch() throws SQLException {
-		addParameters();
+        addParameters();
     }
 
 
@@ -70,7 +71,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     private void addParameters() throws SQLException {
         block.appendRow();
-	}
+    }
 
     @Override
     public void clearBatch() throws SQLException {
@@ -92,7 +93,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         if (blockInit) {
             // Empty insert when close.
             this.connection.sendInsertRequest(new Block());
-            this.blockInit =false;
+            this.blockInit = false;
             this.block.initWriteBuffer();
         }
         super.close();
@@ -116,30 +117,30 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         }
         return param;
     }
-    
+
     public String toString() {
-    	StringBuilder sb=new StringBuilder();
-    	sb.append(super.toString());
-    	sb.append(": ");
-    	try {
-			sb.append(insertQuery+" (");
-			for (int i = 0; i < block.columns(); i++) {
-				Object obj=block.getObject(i);
-				if(obj==null) {
-					sb.append("?");
-				}else if(obj instanceof Number) {
-					sb.append(obj);
-				}else {
-					sb.append("'"+obj+"'");
-				}
-				if(i<block.columns()-1) {
-					sb.append(",");	
-				}
-			}
-			sb.append(")");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-    	return sb.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString());
+        sb.append(": ");
+        try {
+            sb.append(insertQuery + " (");
+            for (int i = 0; i < block.columns(); i++) {
+                Object obj = block.getObject(i);
+                if (obj == null) {
+                    sb.append("?");
+                } else if (obj instanceof Number) {
+                    sb.append(obj);
+                } else {
+                    sb.append("'" + obj + "'");
+                }
+                if (i < block.columns() - 1) {
+                    sb.append(",");
+                }
+            }
+            sb.append(")");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
     }
 }
