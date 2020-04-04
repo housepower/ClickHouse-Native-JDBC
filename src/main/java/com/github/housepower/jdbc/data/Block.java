@@ -102,6 +102,14 @@ public class Block {
         Validate.isTrue(nameWithPosition.containsKey(name),"Column '" + name + "' does not exist");
         return nameWithPosition.get(name);
     }
+    
+    public Object getObject(int index) throws SQLException {
+    	Validate.isTrue(index < columns.length,
+                "Position " + index 
+                + " is out of bound in Block.getByPosition, max position = " + (
+                    columns.length - 1));
+    	return objects[index];
+    }
 
     public static Block readFrom(BinaryDeserializer deserializer,
                                  PhysicalInfo.ServerInfo serverInfo)

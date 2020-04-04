@@ -116,4 +116,30 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         }
         return param;
     }
+    
+    public String toString() {
+    	StringBuilder sb=new StringBuilder();
+    	sb.append(super.toString());
+    	sb.append(": ");
+    	try {
+			sb.append(insertQuery+" (");
+			for (int i = 0; i < block.columns(); i++) {
+				Object obj=block.getObject(i);
+				if(obj==null) {
+					sb.append("?");
+				}else if(obj instanceof Number) {
+					sb.append(obj);
+				}else {
+					sb.append("'"+obj+"'");
+				}
+				if(i<block.columns()-1) {
+					sb.append(",");	
+				}
+			}
+			sb.append(")");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return sb.toString();
+    }
 }
