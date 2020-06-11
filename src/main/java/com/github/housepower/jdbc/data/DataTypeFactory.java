@@ -33,8 +33,8 @@ public class DataTypeFactory {
     private static final Map<String, IDataType> dataTypes = initialDataTypes();
 
     public static IDataType get(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
-    	StringView dataTypeName = lexer.bareWord();
-	
+        StringView dataTypeName = lexer.bareWord();
+
         if (dataTypeName.equals("Date")) {
             return DataTypeDate.createDateType(lexer, serverInfo);
         } else if (dataTypeName.equals("Tuple")) {
