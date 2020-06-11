@@ -34,7 +34,7 @@ public class DataTypeFactory {
 
     public static IDataType get(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
     	StringView dataTypeName = lexer.bareWord();
-    	
+	
         if (dataTypeName.equals("Date")) {
             return DataTypeDate.createDateType(lexer, serverInfo);
         } else if (dataTypeName.equals("Tuple")) {
