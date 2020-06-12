@@ -74,6 +74,27 @@ public class InsertSimpleTypeITest extends AbstractITest {
             }
         });
     }
+    
+    @Test
+    public void successfullyIPv4DataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement statement = connection.createStatement();
+                System.out.println(Integer.MAX_VALUE);
+                System.out.println(2l<<32-1);
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(min_ip IPv4,max_ip IPv4)ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES(" + 0 + "," + (2l<<32-1) + ")");
+                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getLong(1), 0l);
+                Assert.assertEquals(rs.getLong(2), (2l<<32-1));
+                Assert.assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
+    }
 
     @Test
     public void successfullyInt64DataType() throws Exception {
