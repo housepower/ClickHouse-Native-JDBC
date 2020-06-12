@@ -89,7 +89,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
                 statement.executeQuery("CREATE TABLE test(min_ip IPv4,max_ip IPv4)ENGINE=Log");
                 PreparedStatement pstmt = connection.prepareStatement("INSERT INTO test(min_ip, max_ip) VALUES(?, ?)");
                 for (int i = 0; i < 1; i++) {
-                	pstmt.setLong(1, minIp);
+                    pstmt.setLong(1, minIp);
                     pstmt.setLong(2, maxIp);
                     pstmt.addBatch();
                 }
