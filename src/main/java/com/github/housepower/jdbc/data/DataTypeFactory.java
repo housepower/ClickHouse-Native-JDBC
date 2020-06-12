@@ -4,6 +4,7 @@ import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.type.DataTypeDate;
 import com.github.housepower.jdbc.data.type.DataTypeFloat32;
 import com.github.housepower.jdbc.data.type.DataTypeFloat64;
+import com.github.housepower.jdbc.data.type.DataTypeIPv4;
 import com.github.housepower.jdbc.data.type.DataTypeInt16;
 import com.github.housepower.jdbc.data.type.DataTypeInt32;
 import com.github.housepower.jdbc.data.type.DataTypeInt64;
@@ -64,7 +65,8 @@ public class DataTypeFactory {
 
     private static Map<String, IDataType> initialDataTypes() {
         Map<String, IDataType> creators = new HashMap<String, IDataType>();
-
+        
+        creators.put("IPv4", new DataTypeIPv4());
         creators.put("UUID", new DataTypeUUID());
         creators.put("String", new DataTypeString());
         creators.put("Float32", new DataTypeFloat32());

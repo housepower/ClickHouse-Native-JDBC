@@ -1,5 +1,7 @@
 *.iml
 .editorconfig
-
+.settings
+.classpath
+.project
 .idea/
 target/
