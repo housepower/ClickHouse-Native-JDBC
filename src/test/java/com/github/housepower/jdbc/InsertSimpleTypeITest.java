@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
@@ -81,15 +82,22 @@ public class InsertSimpleTypeITest extends AbstractITest {
             @Override
             public void apply(Connection connection) throws Exception {
                 Statement statement = connection.createStatement();
-                System.out.println(Integer.MAX_VALUE);
-                System.out.println(2l<<32-1);
+                Long minIp = 0l;
+                Long maxIp = (1l<<32) -1 ;
+              
                 statement.executeQuery("DROP TABLE IF EXISTS test");
                 statement.executeQuery("CREATE TABLE test(min_ip IPv4,max_ip IPv4)ENGINE=Log");
-                statement.executeQuery("INSERT INTO test VALUES(" + 0 + "," + (2l<<32-1) + ")");
-                ResultSet rs = statement.executeQuery("SELECT * FROM test");
+                PreparedStatement pstmt = connection.prepareStatement("INSERT INTO test(min_ip, max_ip) VALUES(?, ?)");
+                for (int i = 0; i < 1; i++) {
+                	pstmt.setLong(1, minIp);
+                    pstmt.setLong(2, maxIp);
+                    pstmt.addBatch();
+                }
+                pstmt.executeBatch();
+                ResultSet rs = statement.executeQuery("SELECT min_ip,max_ip FROM test");
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getLong(1), 0l);
-                Assert.assertEquals(rs.getLong(2), (2l<<32-1));
+                Assert.assertEquals(rs.getLong(1), minIp.longValue());
+                Assert.assertEquals(rs.getLong(2), maxIp.longValue());
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }
