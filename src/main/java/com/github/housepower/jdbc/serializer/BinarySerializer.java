@@ -6,6 +6,7 @@ import com.github.housepower.jdbc.misc.Container;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class BinarySerializer {
     private final Container<BuffedWriter> container;
@@ -69,7 +70,7 @@ public class BinarySerializer {
     }
 
     public void writeStringBinary(String binary) throws IOException {
-        byte []bs = binary.getBytes();
+        byte []bs = binary.getBytes(StandardCharsets.UTF_8);
         writeVarInt(bs.length);
         container.get().writeBinary(bs);
     }

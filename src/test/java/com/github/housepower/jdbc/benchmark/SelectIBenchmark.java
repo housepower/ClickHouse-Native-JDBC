@@ -7,6 +7,7 @@ import org.openjdk.jmh.annotations.Param;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Locale;
 
 /**
  */
@@ -16,7 +17,7 @@ public class SelectIBenchmark extends AbstractIBenchmark {
     public WithConnection benchSelect = connection -> {
         long sum = 0;
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery(String.format("SELECT number as n1, 'i_am_a_string' , now(), today() from numbers(%d)", selectNumber));
+        ResultSet rs = statement.executeQuery(String.format(Locale.ROOT, "SELECT number as n1, 'i_am_a_string' , now(), today() from numbers(%d)", selectNumber));
         while (rs.next()) {
             sum += rs.getLong(1);
 

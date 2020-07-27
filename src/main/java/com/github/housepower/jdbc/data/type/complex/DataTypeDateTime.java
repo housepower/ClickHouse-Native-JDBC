@@ -18,11 +18,12 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class DataTypeDateTime implements IDataType {
 
     private static final Timestamp DEFAULT_VALUE = new Timestamp(0);
-    private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT);
 
     private final String name;
 
@@ -77,7 +78,7 @@ public class DataTypeDateTime implements IDataType {
         int seconds = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '\'');
 
-        String timeStr = String.format("%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hours, minutes, seconds);
+        String timeStr = String.format(Locale.ROOT, "%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hours, minutes, seconds);
 
         try {
             Date date = dateTimeFormat.parse(timeStr);

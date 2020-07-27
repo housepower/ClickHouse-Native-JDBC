@@ -8,6 +8,7 @@ import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -61,7 +62,7 @@ public class DataTypeFixedString implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
         throws SQLException, IOException {
-        writeBytes(((String) data).getBytes(), serializer);
+        writeBytes(((String) data).getBytes(StandardCharsets.UTF_8), serializer);
     }
 
     private void writeBytes(byte[] bs, BinarySerializer serializer)
@@ -82,7 +83,7 @@ public class DataTypeFixedString implements IDataType {
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer)
         throws SQLException, IOException {
-        return new String(deserializer.readBytes(n));
+        return new String(deserializer.readBytes(n), StandardCharsets.UTF_8);
     }
 
     @Override
@@ -90,7 +91,7 @@ public class DataTypeFixedString implements IDataType {
         throws SQLException, IOException {
         String[] data = new String[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = new String(deserializer.readBytes(n));
+            data[row] = new String(deserializer.readBytes(n), StandardCharsets.UTF_8);
         }
         return data;
     }
