@@ -1,5 +1,7 @@
 package com.github.housepower.jdbc.benchmark;
 
+import java.util.Locale;
+
 /**
  * From https://gist.github.com/gothug/3b35fe0cec302efe6f8314a9cab8865e
  */
@@ -24,7 +26,7 @@ public class Profiler {
     }
 
     public static String fixedLengthString(String string, int length) {
-        return String.format("%1$"+length+ "s", string);
+        return String.format(Locale.ROOT, "%1$"+length+ "s", string);
     }
 
 

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Locale;
 
 public class DataTypeDecimal implements IDataType {
 
@@ -36,7 +37,7 @@ public class DataTypeDecimal implements IDataType {
         } else if (this.precision <= 18) {
             this.nobits = 64;
         } else {
-            throw new IllegalArgumentException(String.format("Precision[%d] is out of boundary.", precision));
+            throw new IllegalArgumentException(String.format(Locale.ENGLISH, "Precision[%d] is out of boundary.", precision));
         }
     }
 
@@ -92,7 +93,7 @@ public class DataTypeDecimal implements IDataType {
                 break;
             }
             default: {
-                throw new RuntimeException(String.format("Unknown precision[%d] & scale[%d]", precision, scale));
+                throw new RuntimeException(String.format(Locale.ENGLISH, "Unknown precision[%d] & scale[%d]", precision, scale));
             }
         }
     }
@@ -114,7 +115,7 @@ public class DataTypeDecimal implements IDataType {
                 break;
             }
             default: {
-                throw new RuntimeException(String.format("Unknown precision[%d] & scale[%d]", precision, scale));
+                throw new RuntimeException(String.format(Locale.ENGLISH, "Unknown precision[%d] & scale[%d]", precision, scale));
             }
         }
         value = value.setScale(scale, RoundingMode.HALF_UP);

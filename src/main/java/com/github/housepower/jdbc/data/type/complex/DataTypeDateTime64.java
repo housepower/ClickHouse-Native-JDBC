@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class DataTypeDateTime64 implements IDataType {
@@ -23,7 +24,7 @@ public class DataTypeDateTime64 implements IDataType {
     public static final Timestamp DEFAULT_VALUE = new Timestamp(0);
     public static final int NANOS_IN_SECOND = 1_000_000_000;
     public static final int MILLIS_IN_SECOND = 1000;
-    private final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
+    private final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS", Locale.ROOT);
     private final String name;
     private final TimeZone timeZone;
 
@@ -109,7 +110,7 @@ public class DataTypeDateTime64 implements IDataType {
         Validate.isTrue(lexer.character() == '\'');
         Validate.isTrue(lexer.character() == ')');
 
-        String timeStr = String.format("%04d-%02d-%02d %02d:%02d:%02d.%09d", year, month, day, hours, minutes, seconds, nanos);
+        String timeStr = String.format(Locale.ROOT, "%04d-%02d-%02d %02d:%02d:%02d.%09d", year, month, day, hours, minutes, seconds, nanos);
         LocalDateTime dateTime = LocalDateTime.parse(timeStr, dateTimeFormat);
         return Timestamp.valueOf(dateTime);
     }

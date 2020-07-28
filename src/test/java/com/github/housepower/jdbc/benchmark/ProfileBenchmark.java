@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Locale;
 
 /**
  */
@@ -16,7 +17,7 @@ public class ProfileBenchmark extends AbstractIBenchmark{
 
     public WithConnection benchSelectSumInt = connection -> {
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery(String.format("SELECT number as n1 from numbers(%d)", n));
+        ResultSet rs = statement.executeQuery(String.format(Locale.ROOT, "SELECT number as n1 from numbers(%d)", n));
 
         long sum = 0;
         long counter = 0;
@@ -35,7 +36,7 @@ public class ProfileBenchmark extends AbstractIBenchmark{
 
     public WithConnection benchSelectSumDouble = connection -> {
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery(String.format("SELECT number/rand64() as n1 from numbers(%d)", n));
+        ResultSet rs = statement.executeQuery(String.format(Locale.ROOT, "SELECT number/rand64() as n1 from numbers(%d)", n));
 
         double sum = 0;
         long counter = 0;

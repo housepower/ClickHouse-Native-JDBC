@@ -22,6 +22,7 @@ import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -182,7 +183,7 @@ public class ClickHouseConnection extends SQLConnection {
     private static QueryRequest.ClientInfo clientInfo(PhysicalConnection physical, ClickHouseConfig configure) throws SQLException {
         Validate.isTrue(physical.address() instanceof InetSocketAddress);
         InetSocketAddress address = (InetSocketAddress) physical.address();
-        String clientName = String.format("%s %s", ClickHouseDefines.NAME, "client");
+        String clientName = String.format(Locale.ROOT, "%s %s", ClickHouseDefines.NAME, "client");
         String initialAddress = "[::ffff:127.0.0.1]:0";
         return new QueryRequest.ClientInfo(initialAddress, address.getHostName(), clientName);
     }

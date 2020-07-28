@@ -7,6 +7,7 @@ import com.github.housepower.jdbc.misc.Container;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class BinaryDeserializer {
 
@@ -53,7 +54,7 @@ public class BinaryDeserializer {
 
     public String readStringBinary() throws IOException {
         byte[] data = new byte[(int) readVarInt()];
-        return container.get().readBinary(data) > 0 ? new String(data) : "";
+        return container.get().readBinary(data) > 0 ? new String(data, StandardCharsets.UTF_8) : "";
     }
 
     public byte readByte() throws IOException {

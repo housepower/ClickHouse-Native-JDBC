@@ -16,12 +16,13 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class DataTypeDate implements IDataType {
 
     private static final Date DEFAULT_VALUE = new Date(0);
     private final DateTimeZone dateTimeZone;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
 
 
     public DataTypeDate(PhysicalInfo.ServerInfo serverInfo) {
@@ -94,7 +95,7 @@ public class DataTypeDate implements IDataType {
         int day = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '\'');
 
-        String timeStr = String.format("%04d-%02d-%02d", year, month, day);
+        String timeStr = String.format(Locale.ROOT, "%04d-%02d-%02d", year, month, day);
         try {
             java.util.Date date = dateFormat.parse(timeStr);
             return new Date(date.getTime());
