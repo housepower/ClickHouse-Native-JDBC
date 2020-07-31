@@ -63,14 +63,18 @@ public class InsertComplexTypeITest extends AbstractITest {
 
                 statement.executeQuery("DROP TABLE IF EXISTS test");
                 statement.executeQuery("CREATE TABLE test(test_nullable Nullable(UInt8))ENGINE=Log");
-                statement.executeQuery("INSERT INTO test VALUES(Null)(1)");
+                statement.executeQuery("INSERT INTO test VALUES(Null)(1)(3)(Null)");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_nullable");
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getByte(1), 1);
                 Assert.assertTrue(rs.next());
+                Assert.assertEquals(rs.getByte(1), 3);
+                Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getByte(1), 0);
                 Assert.assertTrue(rs.wasNull());
-//                statement.executeQuery("DROP TABLE IF EXISTS test");
+                Assert.assertEquals(rs.getByte(1), 0);
+                Assert.assertTrue(rs.wasNull());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
             }
         });
     }

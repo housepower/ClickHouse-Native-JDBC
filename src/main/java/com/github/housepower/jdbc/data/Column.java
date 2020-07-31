@@ -1,6 +1,7 @@
 package com.github.housepower.jdbc.data;
 
 import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
+import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ public class Column {
     private ColumnWriterBuffer buffer;
     private boolean isArray;
     private List<List<Integer>> offsets;
+    private List<Byte> nullableOffset;
 
     public Column(String name, IDataType type) {
         this.name = name;
@@ -31,6 +33,9 @@ public class Column {
         if (this.type.sqlTypeId() == Types.ARRAY) {
             this.isArray = true;
             this.offsets = new ArrayList<>();
+        }
+        if (this.type.nullable()) {
+            this.nullableOffset = new ArrayList<>();
         }
     }
 
@@ -52,8 +57,11 @@ public class Column {
 
     public void write(Object object) throws IOException, SQLException {
         if (isArray) {
-            DataTypeArray typ = (DataTypeArray)(type());
+            DataTypeArray typ = (DataTypeArray) (type());
             typ.serializeBinary(object, buffer.column, offsets, 1);
+        } else if (type.nullable()) {
+            DataTypeNullable typ = (DataTypeNullable) (type());
+            typ.serializeBinary(object, buffer.column, nullableOffset);
         } else {
             type().serializeBinary(object, buffer.column);
         }
@@ -70,6 +78,12 @@ public class Column {
                 for (int offset : offsetList) {
                     serializer.writeLong(offset);
                 }
+            }
+        }
+
+        if (nullableOffset != null) {
+            for (byte offset : nullableOffset) {
+                serializer.writeByte(offset);
             }
         }
 

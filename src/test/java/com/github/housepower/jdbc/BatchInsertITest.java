@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -83,6 +84,39 @@ public class BatchInsertITest extends AbstractITest {
 
         });
 
+    }
+
+    @Test
+    public void successfullyNullableDataType() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                Statement stmt = connection.createStatement();
+                int insertBatchSize = 100;
+
+                stmt.executeQuery("DROP TABLE IF EXISTS test");
+                stmt.executeQuery("create table test(day Date, name Nullable(String)) Engine=Memory");
+                PreparedStatement pstmt = connection.prepareStatement("INSERT INTO test VALUES(?, ? )");
+                for (int i = 0; i < insertBatchSize; i++) {
+                    pstmt.setDate(1, new Date(System.currentTimeMillis()));
+
+                    if (i % 2 == 0) {
+                        pstmt.setString(2, "String");
+                    } else {
+                        pstmt.setString(2, null);
+                    }
+                    pstmt.addBatch();
+                }
+                pstmt.executeBatch();
+
+                ResultSet rs = stmt.executeQuery("select countIf(isNull(name)), countIf(isNotNull(name))  from test;");
+                Assert.assertTrue(rs.next());
+                Assert.assertEquals(insertBatchSize/2, rs.getInt(1));
+                Assert.assertEquals(insertBatchSize/2, rs.getInt(2));
+
+                stmt.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
     }
 
     @Test
