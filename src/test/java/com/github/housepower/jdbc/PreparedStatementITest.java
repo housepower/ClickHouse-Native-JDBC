@@ -113,7 +113,7 @@ public class PreparedStatementITest extends AbstractITest {
                 preparedStatement.setString(2, "test2");
                 ResultSet rs = preparedStatement.executeQuery();
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getString(1), "");
+                Assert.assertEquals(rs.getString(1), null);
                 Assert.assertTrue(rs.wasNull());
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getString(1), "test2");

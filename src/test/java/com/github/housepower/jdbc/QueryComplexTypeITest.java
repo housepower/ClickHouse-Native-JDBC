@@ -99,7 +99,7 @@ public class QueryComplexTypeITest extends AbstractITest {
                 statement.executeQuery("SELECT arrayJoin([NULL,toFixedString('abc',3)])");
 
             Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), "\u0000\u0000\u0000");
+            Assert.assertEquals(rs.getString(1), null);
             Assert.assertTrue(rs.wasNull());
             Assert.assertTrue(rs.next());
             Assert.assertEquals(rs.getString(1), "abc");

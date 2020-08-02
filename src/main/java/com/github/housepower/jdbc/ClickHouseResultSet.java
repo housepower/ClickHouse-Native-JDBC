@@ -107,6 +107,9 @@ public class ClickHouseResultSet extends SQLResultSet {
     @Override
     public int getInt(int index) throws SQLException {
         Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
         return ((Number) data).intValue();
     }
 
@@ -122,6 +125,9 @@ public class ClickHouseResultSet extends SQLResultSet {
     @Override
     public byte getByte(int index) throws SQLException {
         Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
         return ((Number) data).byteValue();
     }
 
@@ -139,6 +145,9 @@ public class ClickHouseResultSet extends SQLResultSet {
     @Override
     public long getLong(int index) throws SQLException {
         Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
         return ((Number) data).longValue();
     }
 
@@ -151,18 +160,27 @@ public class ClickHouseResultSet extends SQLResultSet {
     @Override
     public float getFloat(int index) throws SQLException {
         Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
         return ((Number) data).floatValue();
     }
 
     @Override
     public short getShort(int index) throws SQLException {
         Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
         return ((Number) data).shortValue();
     }
 
     @Override
     public double getDouble(int index) throws SQLException {
         Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
         return ((Number) data).doubleValue();
     }
 
@@ -178,7 +196,7 @@ public class ClickHouseResultSet extends SQLResultSet {
             "No row information was obtained.You must call ResultSet.next() before that.");
         Column column = (lastFetchBlock = current).getByPosition((lastFetchColumn = index - 1));
         Object rowData = column.values((lastFetchRow = row));
-        return rowData == null ? column.type().defaultValue() : rowData;
+        return rowData == null ? null: rowData;
     }
 
     @Override
