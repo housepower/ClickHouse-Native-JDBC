@@ -12,8 +12,8 @@ jdk:
 before_install:
   - export TZ=Asia/Shanghai
 script:
+  - docker-compose up -d
   - mvn clean verify -Dmaven.skip.integration=false
-  - echo "benchmark TODO"
 
 
 
