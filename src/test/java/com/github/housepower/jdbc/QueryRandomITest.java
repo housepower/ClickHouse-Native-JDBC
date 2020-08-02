@@ -25,7 +25,7 @@ public class QueryRandomITest extends AbstractITest {
                                        + "ENGINE = GenerateRandom(1, 8, 8)");
 
                 ResultSet rs = statement.executeQuery("SELECT * FROM test_random limit 10000");
-                
+
                 int i = 0;
                 while (rs.next()) {
                     Object name = rs.getObject(1);
