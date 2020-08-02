@@ -22,12 +22,13 @@ public class BatchInsertITest extends AbstractITest {
                 Statement statement = connection.createStatement();
 
                 statement.execute("DROP TABLE IF EXISTS test");
-                statement.execute("CREATE TABLE test(id Int8, age UInt8, name String)ENGINE=Log");
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, 1, ?)");
+                statement.execute("CREATE TABLE test(id Int8, age UInt8, name String, name2 String)ENGINE=Log");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, 1, ?, ?)");
 
                 for (int i = 0; i < Byte.MAX_VALUE; i++) {
                     preparedStatement.setByte(1, (byte) i);
                     preparedStatement.setString(2, "Zhang San" + i);
+                    preparedStatement.setString(3, "张三" + i);
                     preparedStatement.addBatch();
                 }
 
@@ -40,6 +41,7 @@ public class BatchInsertITest extends AbstractITest {
                     Assert.assertEquals(rs.getByte(1), i);
                     Assert.assertEquals(rs.getByte(2), 1);
                     Assert.assertEquals(rs.getString(3), "Zhang San" + i);
+                    Assert.assertEquals(rs.getString(4), "张三" + i);
                 }
                 Assert.assertTrue(hasResult);
             }
