@@ -12,8 +12,8 @@ jdk:
 before_install:
   - export TZ=Asia/Shanghai
 script:
-  - mvn clean verify -Dmaven.skip.integration=false
-  - echo "benchmark TODO"
-
+  - docker-compose up -d
+  - java -cp target/clickhouse-native-jdbc-2.2-stable-SNAPSHOT-shaded.jar examples.TestFetchData "native"
+  - java -cp target/clickhouse-native-jdbc-2.2-stable-SNAPSHOT-shaded.jar examples.TestFetchData "http"
 
 

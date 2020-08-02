@@ -74,8 +74,7 @@
         <dependency>
             <groupId>ru.yandex.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
-            <version>0.2</version>
-            <scope>test</scope>
+            <version>0.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
