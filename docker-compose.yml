@@ -1,0 +1,5 @@
+server:
+  image: yandex/clickhouse-server
+  ports:
+    - 9000:9000
+    - 8123:8123
