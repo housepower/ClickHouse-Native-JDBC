@@ -13,7 +13,10 @@ before_install:
   - export TZ=Asia/Shanghai
 script:
   - docker-compose up -d
-  - java -cp target/clickhouse-native-jdbc-2.2-stable-SNAPSHOT-shaded.jar examples.TestFetchData "native"
-  - java -cp target/clickhouse-native-jdbc-2.2-stable-SNAPSHOT-shaded.jar examples.TestFetchData "http"
+  - mvn clean package -Dmaven.test.skip=true -q
+  - java -cp target/clickhouse-native-jdbc-2.2-stable-SNAPSHOT-shaded.jar examples.TestFetchData "native" "1000000" "1"
+  - java -cp target/clickhouse-native-jdbc-2.2-stable-SNAPSHOT-shaded.jar examples.TestFetchData "http" "1000000" "1"
+  - java -cp target/clickhouse-native-jdbc-2.2-stable-SNAPSHOT-shaded.jar examples.TestFetchData "native" "1000000" "0"
+  - java -cp target/clickhouse-native-jdbc-2.2-stable-SNAPSHOT-shaded.jar examples.TestFetchData "http" "1000000" "0"
 
 

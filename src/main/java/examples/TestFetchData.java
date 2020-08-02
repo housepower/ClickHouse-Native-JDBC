@@ -1,5 +1,7 @@
 package examples;
 
+import com.google.common.base.Joiner;
+
 import com.github.housepower.jdbc.ClickHouseDriver;
 
 import java.sql.Connection;
@@ -24,7 +26,7 @@ public class TestFetchData {
         try {
             List<ThreadTestFetchData> threads = new ArrayList<ThreadTestFetchData>();
             for (int i = 0; i < 10; i++) {
-                ThreadTestFetchData t = new ThreadTestFetchData(args[0]);
+                ThreadTestFetchData t = new ThreadTestFetchData(args[0], Long.parseLong(args[1]), Integer.parseInt(args[2]));
                 threads.add(t);
                 t.start();
             }
@@ -35,7 +37,7 @@ public class TestFetchData {
 
         }
         long end = System.currentTimeMillis() - start;
-        System.out.println(args[0] +  "-jdbc, costs " + end);
+        System.out.println( "ARGS [" +  Joiner.on(" ").join(args) +   "] costs" + end);
     }
 }
 
@@ -61,8 +63,12 @@ class ClickHouseJDBCUtil {
 
 class ThreadTestFetchData extends Thread {
     private String mode;
-    ThreadTestFetchData(String mode) {
+    private long number;
+    private int read;
+    ThreadTestFetchData(String mode, long number, int read) {
         this.mode = mode;
+        this.number = number;
+        this.read = read;
     }
 
     public void run() {
@@ -85,12 +91,16 @@ class ThreadTestFetchData extends Thread {
     }
 
     public void test1(Connection c) throws SQLException {
-        PreparedStatement p = c.prepareStatement("select * from numbers(1000000)");
+        PreparedStatement p = c.prepareStatement("select * from numbers(?)");
+        p.setLong(1, number);
         ResultSet rs = p.executeQuery();
-        long sum = 0;
-        while (rs.next()) {
-            sum += rs.getInt(1);
+
+        if (read > 0) {
+            long sum = 0;
+            while (rs.next()) {
+                sum += rs.getInt(1);
+            }
         }
-//      System.out.println("Sum " + sum);
+
     }
 }
