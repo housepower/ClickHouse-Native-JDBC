@@ -320,12 +320,12 @@
                         </goals>
 
                         <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>com.</pattern>
-                                    <shadedPattern>com.github.housepower.repackaged.com</shadedPattern>
-                                </relocation>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer"/>
+                            </transformers>
 
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <relocations>
                                 <relocation>
                                     <pattern>net.</pattern>
                                     <shadedPattern>com.github.housepower.repackaged.net</shadedPattern>
@@ -336,7 +336,6 @@
                                     <shadedPattern>com.github.housepower.repackaged.org</shadedPattern>
                                 </relocation>
                             </relocations>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
                         </configuration>
                     </execution>
                 </executions>
