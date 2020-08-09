@@ -40,6 +40,19 @@ public class ConnectionParamITest {
     }
 
     @Test
+    public void successfullyMaxResultRows() throws Exception {
+        Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1?max_result_rows=1&connect_timeout=10");
+        Statement statement = connection.createStatement();
+        statement.setMaxRows(400);
+        ResultSet rs = statement.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
+        int rowsRead = 0;
+        while (rs.next()) {
+            ++rowsRead;
+        }
+        Assert.assertEquals(400, rowsRead);
+    }
+
+    @Test
     public void successfullyUrlParser() throws Exception {
         String url = "jdbc:clickhouse://127.0.0.1/system?min_insert_block_size_rows=1000&connect_timeout=50";
         ClickHouseConfig config = new ClickHouseConfig(url , new Properties());

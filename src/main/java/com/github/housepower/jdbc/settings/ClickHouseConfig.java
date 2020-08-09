@@ -154,7 +154,7 @@ public class ClickHouseConfig {
         configure.password = this.password;
         configure.soTimeout = this.soTimeout;
         configure.connectTimeout = this.connectTimeout;
-        configure.settings = new HashMap<SettingKey, Object>(this.settings);
+        configure.settings = new HashMap<>(this.settings);
 
         return configure;
     }
