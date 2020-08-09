@@ -4,7 +4,7 @@
 
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc</artifactId>
-    <version>2.2-stable-SNAPSHOT</version>
+    <version>2.2-stable</version>
     <packaging>jar</packaging>
 
     <name>clickhouse-native-jdbc</name>
@@ -321,7 +321,7 @@
 
                         <configuration>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
                             </transformers>
 
                             <shadedArtifactAttached>true</shadedArtifactAttached>
