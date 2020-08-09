@@ -18,4 +18,4 @@ jobs:
       - name: Start clickhouse-server
         run: docker-compose up -d
       - name: Run integration-tests with maven
-        run:  mvn -B clean integration-test -Dmaven.skip.integration=false
+        run:  mvn -B clean verify -Dmaven.skip.integration=false

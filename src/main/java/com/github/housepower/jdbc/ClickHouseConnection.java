@@ -46,6 +46,10 @@ public class ClickHouseConnection extends SQLConnection {
         this.atomicInfo = new AtomicReference<PhysicalInfo>(info);
     }
 
+    public ClickHouseConfig getConfigure() {
+        return configure;
+    }
+
     @Override
     public void close() throws SQLException {
         if (!isClosed() && isClosed.compareAndSet(false, true)) {
@@ -130,12 +134,12 @@ public class ClickHouseConnection extends SQLConnection {
         return connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
     }
 
-    public QueryResponse sendQueryRequest(final String query) throws SQLException {
+    public QueryResponse sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
         if (this.state == ConnectionState.WAITING_INSERT) {
             throw new RuntimeException("Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         }
         PhysicalConnection connection = getHealthyPhysicalConnection();
-        connection.sendQuery(query, atomicInfo.get().client(), configure.settings());
+        connection.sendQuery(query, atomicInfo.get().client(), cfg.settings());
 
         return new QueryResponse(() -> connection.receiveResponse(configure.queryTimeout(), atomicInfo.get().server()));
     }
