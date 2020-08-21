@@ -97,6 +97,16 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     @Override
+    public void setObject(int index, Object x, int targetSqlType) throws SQLException {
+        setObject(index, x);
+    }
+
+    @Override
+    public void setObject(int index, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
+        setObject(index, x);
+    }
+
+    @Override
     public void clearParameters() throws SQLException {
         for (int i = 0; i < parameters.length; i++) {
             parameters[i] = null;
