@@ -16,8 +16,8 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     private final String insertQuery;
     private boolean blockInit;
 
-    public ClickHousePreparedInsertStatement(int posOfData, String fullQuery,
-                                             ClickHouseConnection conn) throws SQLException {
+    public ClickHousePreparedInsertStatement(int posOfData, String fullQuery, ClickHouseConnection conn)
+            throws SQLException {
         super(conn, null);
         this.blockInit = false;
         this.posOfData = posOfData;
@@ -62,7 +62,6 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         addParameters();
     }
 
-
     @Override
     public void setObject(int index, Object x) throws SQLException {
         initBlockIfPossible();
@@ -81,7 +80,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     public int[] executeBatch() throws SQLException {
         Integer rows = connection.sendInsertRequest(block);
         int[] result = new int[rows];
-        Arrays.fill(result, -1);
+        Arrays.fill(result, 1);
         clearBatch();
         this.blockInit = false;
         this.block.initWriteBuffer();

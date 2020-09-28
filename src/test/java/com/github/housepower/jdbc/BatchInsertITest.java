@@ -14,6 +14,11 @@ import java.util.List;
 
 public class BatchInsertITest extends AbstractITest {
 
+    void assertBatchInsertResult(int[] result, int expectedRowCount) {
+        Assert.assertEquals(result.length, expectedRowCount);
+        Assert.assertEquals(Arrays.stream(result).sum(), expectedRowCount);
+    }
+
     @Test
     public void successfullyBatchInsert() throws Exception {
         withNewConnection(new WithConnection() {
@@ -23,7 +28,8 @@ public class BatchInsertITest extends AbstractITest {
 
                 statement.execute("DROP TABLE IF EXISTS test");
                 statement.execute("CREATE TABLE test(id Int8, age UInt8, name String, name2 String)ENGINE=Log");
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, 1, ?, ?)");
+                PreparedStatement preparedStatement = connection
+                        .prepareStatement("INSERT INTO test VALUES(?, 1, ?, ?)");
 
                 for (int i = 0; i < Byte.MAX_VALUE; i++) {
                     preparedStatement.setByte(1, (byte) i);
@@ -32,7 +38,7 @@ public class BatchInsertITest extends AbstractITest {
                     preparedStatement.addBatch();
                 }
 
-                Assert.assertEquals(preparedStatement.executeBatch().length, Byte.MAX_VALUE);
+                assertBatchInsertResult(preparedStatement.executeBatch(), Byte.MAX_VALUE);
 
                 ResultSet rs = statement.executeQuery("select * from test");
                 boolean hasResult = false;
@@ -69,19 +75,14 @@ public class BatchInsertITest extends AbstractITest {
                     preparedStatement.addBatch();
                 }
 
-                Assert.assertEquals(preparedStatement.executeBatch().length, insertBatchSize);
+                assertBatchInsertResult(preparedStatement.executeBatch(), insertBatchSize);
 
                 for (int i = 0; i < insertBatchSize; i++) {
                     preparedStatement.setByte(1, (byte) i);
                     preparedStatement.setString(2, "Zhang San" + i);
                     preparedStatement.addBatch();
                 }
-
-                Assert.assertEquals(preparedStatement.executeBatch().length, insertBatchSize);
-
-                ResultSet rs = statement.executeQuery("select count(1) from test");
-                Assert.assertTrue(rs.next());
-                Assert.assertEquals(2 * insertBatchSize, rs.getInt(1));
+                assertBatchInsertResult(preparedStatement.executeBatch(), insertBatchSize);
             }
 
         });
@@ -97,7 +98,8 @@ public class BatchInsertITest extends AbstractITest {
                 int insertBatchSize = 100;
 
                 stmt.executeQuery("DROP TABLE IF EXISTS test");
-                stmt.executeQuery("create table test(day Date, name Nullable(String), name2 Nullable(FixedString(10)) ) Engine=Memory");
+                stmt.executeQuery(
+                        "create table test(day Date, name Nullable(String), name2 Nullable(FixedString(10)) ) Engine=Memory");
                 PreparedStatement pstmt = connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?)");
                 for (int i = 0; i < insertBatchSize; i++) {
                     pstmt.setDate(1, new Date(System.currentTimeMillis()));
@@ -111,7 +113,7 @@ public class BatchInsertITest extends AbstractITest {
                     }
                     pstmt.addBatch();
                 }
-                pstmt.executeBatch();
+                assertBatchInsertResult(pstmt.executeBatch(), insertBatchSize);
 
                 ResultSet rs = stmt.executeQuery("select name, name2 from test order by name");
                 int i = 0;
@@ -127,14 +129,15 @@ public class BatchInsertITest extends AbstractITest {
                         Assert.assertTrue(name2.contains("String"));
                         Assert.assertTrue(name2.length() == 10);
                     }
-                    i ++;
+                    i++;
                 }
 
-                rs = stmt.executeQuery("select countIf(isNull(name)), countIf(isNotNull(name)), countIf(isNotNull(name2))  from test;");
+                rs = stmt.executeQuery(
+                        "select countIf(isNull(name)), countIf(isNotNull(name)), countIf(isNotNull(name2))  from test;");
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(insertBatchSize/2, rs.getInt(1));
-                Assert.assertEquals(insertBatchSize/2, rs.getInt(2));
-                Assert.assertEquals(insertBatchSize/2, rs.getInt(3));
+                Assert.assertEquals(insertBatchSize / 2, rs.getInt(1));
+                Assert.assertEquals(insertBatchSize / 2, rs.getInt(2));
+                Assert.assertEquals(insertBatchSize / 2, rs.getInt(3));
 
                 stmt.executeQuery("DROP TABLE IF EXISTS test");
             }
@@ -151,8 +154,10 @@ public class BatchInsertITest extends AbstractITest {
                 Statement statement = connection.createStatement();
 
                 statement.execute("DROP TABLE IF EXISTS test");
-                statement.execute("CREATE TABLE test(name Array(String), value Array(Float64), value2 Array(Array(Int32)))ENGINE=Log");
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, ?, [[1,2,3]])");
+                statement.execute(
+                        "CREATE TABLE test(name Array(String), value Array(Float64), value2 Array(Array(Int32)))ENGINE=Log");
+                PreparedStatement preparedStatement = connection
+                        .prepareStatement("INSERT INTO test VALUES(?, ?, [[1,2,3]])");
 
                 List<String> array = Arrays.asList("aa", "bb", "cc");
                 List<Double> array2 = Arrays.asList(1.2, 2.2, 3.2);
@@ -164,7 +169,7 @@ public class BatchInsertITest extends AbstractITest {
                     preparedStatement.addBatch();
                 }
 
-                Assert.assertEquals(preparedStatement.executeBatch().length, Byte.MAX_VALUE);
+                assertBatchInsertResult(preparedStatement.executeBatch(), Byte.MAX_VALUE);
 
                 ResultSet rs = statement.executeQuery("select * from test");
                 while (rs.next()) {
@@ -187,7 +192,7 @@ public class BatchInsertITest extends AbstractITest {
                 statement.execute("CREATE TABLE test(time DateTime)ENGINE=Log");
                 PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?)");
 
-                // 2018-07-01 00:00:00  Asia/Shanghai
+                // 2018-07-01 00:00:00 Asia/Shanghai
                 long time = 1530374400;
                 long insertTime = time;
                 for (int i = 0; i < 24; i++) {
@@ -196,13 +201,12 @@ public class BatchInsertITest extends AbstractITest {
                     insertTime += 3600;
                 }
 
-                Assert.assertEquals(preparedStatement.executeBatch().length, 24);
+                assertBatchInsertResult(preparedStatement.executeBatch(), 24);
 
                 long selectTime = time;
                 ResultSet rs = statement.executeQuery("SELECT  * FROM test ORDER BY time ASC");
                 while (rs.next()) {
-                    Assert.assertEquals(rs.getTimestamp(1).getTime(),
-                            selectTime * 1000);
+                    Assert.assertEquals(rs.getTimestamp(1).getTime(), selectTime * 1000);
                     selectTime += 3600;
                 }
             }
