@@ -1,6 +1,5 @@
 package com.github.housepower.jdbc.statement;
 
-
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.misc.Validate;
 
@@ -8,14 +7,13 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Struct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public abstract class AbstractPreparedStatement extends ClickHouseStatement implements PreparedStatement {
+public abstract class AbstractPreparedStatement extends ClickHouseStatement {
 
     private final String[] queryParts;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
@@ -85,7 +83,6 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         setObject(index, x);
     }
 
-
     @Override
     public void setTimestamp(int index, Timestamp x) throws SQLException {
         setObject(index, x);
@@ -114,12 +111,12 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     protected String assembleQueryPartsAndParameters() throws SQLException {
-        //TODO: move to DataType
+        // TODO: move to DataType
         StringBuilder queryBuilder = new StringBuilder();
         for (int i = 0; i < queryParts.length; i++) {
             if (i - 1 >= 0 && i - 1 < parameters.length) {
                 Validate.isTrue(assembleParameter(parameters[i - 1], queryBuilder),
-                    "UNKNOWN DataType :" + (parameters[i - 1] == null ? null : parameters[i - 1].getClass()));
+                        "UNKNOWN DataType :" + (parameters[i - 1] == null ? null : parameters[i - 1].getClass()));
             }
             queryBuilder.append(queryParts[i]);
         }
@@ -127,7 +124,8 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     private boolean assembleParameter(Object parameter, StringBuilder queryBuilder) throws SQLException {
-        return assembleSimpleParameter(queryBuilder, parameter) || assembleComplexQuotedParameter(queryBuilder, parameter);
+        return assembleSimpleParameter(queryBuilder, parameter)
+                || assembleComplexQuotedParameter(queryBuilder, parameter);
 
     }
 
