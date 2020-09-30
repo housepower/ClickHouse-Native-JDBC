@@ -7,7 +7,7 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
 
-public abstract class SQLStatement implements Statement, PreparedStatement {
+public abstract class SQLStatement implements PreparedStatement {
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
@@ -228,7 +228,6 @@ public abstract class SQLStatement implements Statement, PreparedStatement {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
-
 
     @Override
     public ResultSet executeQuery() throws SQLException {
@@ -451,8 +450,7 @@ public abstract class SQLStatement implements Statement, PreparedStatement {
     }
 
     @Override
-    public void setObject(int parameterIndex, Object x, int targetSqlType, int scaleOrLength)
-        throws SQLException {
+    public void setObject(int parameterIndex, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 

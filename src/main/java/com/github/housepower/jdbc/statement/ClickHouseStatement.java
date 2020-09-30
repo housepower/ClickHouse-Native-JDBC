@@ -19,9 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClickHouseStatement extends SQLStatement {
-    private static final Pattern
-        VALUES_REGEX =
-        Pattern.compile("[V|v][A|a][L|l][U|u][E|e][S|s]\\s*\\(");
+    private static final Pattern VALUES_REGEX = Pattern.compile("[V|v][A|a][L|l][U|u][E|e][S|s]\\s*\\(");
 
     private ResultSet lastResultSet;
     protected Block block;
@@ -29,7 +27,6 @@ public class ClickHouseStatement extends SQLStatement {
 
     private long maxRows;
     private ClickHouseConfig cfg;
-
 
     public ClickHouseStatement(ClickHouseConnection connection) {
         this.connection = connection;
@@ -160,7 +157,6 @@ public class ClickHouseStatement extends SQLStatement {
         return 0;
     }
 
-
     @Override
     public int getFetchSize() throws SQLException {
         return 0;
@@ -252,7 +248,6 @@ public class ClickHouseStatement extends SQLStatement {
         }
         throw new SQLException("Cannot unwrap to " + iface.getName());
     }
-
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
