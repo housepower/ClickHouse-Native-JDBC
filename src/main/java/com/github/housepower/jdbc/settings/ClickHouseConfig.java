@@ -31,7 +31,7 @@ public class ClickHouseConfig {
     private Map<SettingKey, Object> settings;
 
     public static final Pattern DB_PATH_PATTERN = Pattern.compile("/([a-zA-Z0-9_]+)");
-    public static final Pattern HOST_PORT_PATH_PATTERN = Pattern.compile("//(?<host>[^:\s]+)(:(?<port>\\d+))?");
+    public static final Pattern HOST_PORT_PATH_PATTERN = Pattern.compile("//(?<host>[^/:\s]+)(:(?<port>\\d+))?");
 
     private ClickHouseConfig() {
     }
@@ -103,37 +103,63 @@ public class ClickHouseConfig {
 
     private Map<SettingKey, Object> parseJDBCUrl(String jdbcUrl) throws SQLException {
         try {
-            String uriStr = jdbcUrl.substring(5);
-            URI uri = new URI(uriStr);
-            Map<SettingKey, Object> settings = new HashMap<SettingKey, Object>();
+            URI uri = new URI(jdbcUrl.substring(5));
 
-            String host = uri.getHost();
-            int port = uri.getPort();
-            String database = uri.getPath();
-            if (database != null && !database.isEmpty()) {
-                Matcher m = DB_PATH_PATTERN.matcher(database);
-                if (m.matches()) {
-                    settings.put(SettingKey.database, m.group(1));
-                } else {
-                    throw new URISyntaxException("wrong database name path: '" + database + "'", jdbcUrl);
-                }
-            }
-            if (host == null || host.isEmpty()) {
-                Matcher m = HOST_PORT_PATH_PATTERN.matcher(uriStr);
-                if (m.find()) {
-                    host = m.group("host");
-                } else {
-                    throw new URISyntaxException("no valid host was found", jdbcUrl);
-                }
-            }
-            settings.put(SettingKey.port, port);
+            String host = parseHost(jdbcUrl);
+            Integer port = parsePort(jdbcUrl);
+            String database = parseDatabase(jdbcUrl);
+            Map<SettingKey, Object> settings = new HashMap<SettingKey, Object>();
             settings.put(SettingKey.address, host);
+            settings.put(SettingKey.port, port);
+            settings.put(SettingKey.database, database);
             settings.putAll(extractQueryParameters(uri.getQuery()));
 
             return settings;
         } catch (URISyntaxException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
+    }
+
+    private String parseDatabase(String jdbcUrl) throws URISyntaxException {
+        URI uri = new URI(jdbcUrl.substring(5));
+        String database = uri.getPath();
+        if (database != null && !database.isEmpty()) {
+            Matcher m = DB_PATH_PATTERN.matcher(database);
+            if (m.matches()) {
+                database = m.group(1);
+            } else {
+                throw new URISyntaxException("wrong database name path: '" + database + "'", jdbcUrl);
+            }
+        }
+        return database;
+    }
+
+    private String parseHost(String jdbcUrl) throws URISyntaxException {
+        String uriStr = jdbcUrl.substring(5);
+        URI uri = new URI(uriStr);
+        String host = uri.getHost();
+        if (host == null || host.isEmpty()) {
+            Matcher m = HOST_PORT_PATH_PATTERN.matcher(uriStr);
+            if (m.find()) {
+                host = m.group("host");
+            } else {
+                throw new URISyntaxException("No valid host was found", jdbcUrl);
+            }
+        }
+        return host;
+    }
+
+    private Integer parsePort(String jdbcUrl) throws URISyntaxException {
+        String uriStr = jdbcUrl.substring(5);
+        URI uri = new URI(uriStr);
+        int port = uri.getPort();
+        if (port <= -1) {
+            Matcher m = HOST_PORT_PATH_PATTERN.matcher(uriStr);
+            if (m.find() && m.group("port") != null) {
+                port = Integer.parseInt(m.group("port"));
+            }
+        }
+        return port;
     }
 
     private Map<SettingKey, Object> extractQueryParameters(String queryParameters) throws SQLException {
