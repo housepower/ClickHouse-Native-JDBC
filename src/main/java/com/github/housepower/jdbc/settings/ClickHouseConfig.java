@@ -31,6 +31,7 @@ public class ClickHouseConfig {
     private Map<SettingKey, Object> settings;
 
     public static final Pattern DB_PATH_PATTERN = Pattern.compile("/([a-zA-Z0-9_]+)");
+    public static final Pattern HOST_PORT_PATH_PATTERN = Pattern.compile("//(?<host>[^:\s]+)(:(?<port>\\d+))?");
 
     private ClickHouseConfig() {
     }
@@ -40,13 +41,15 @@ public class ClickHouseConfig {
         this.settings.putAll(parseJDBCProperties(properties));
 
         Object obj;
-        this.port = (obj = settings.remove(SettingKey.port)) == null ? 9000 : ((Integer) obj) == -1 ? 9000 : (Integer) obj;
+        this.port = (obj = settings.remove(SettingKey.port)) == null ? 9000
+                : ((Integer) obj) == -1 ? 9000 : (Integer) obj;
         this.address = (obj = settings.remove(SettingKey.address)) == null ? "127.0.0.1" : String.valueOf(obj);
         this.password = (obj = settings.remove(SettingKey.password)) == null ? "" : String.valueOf(obj);
         this.username = (obj = settings.remove(SettingKey.user)) == null ? "default" : String.valueOf(obj);
         this.database = (obj = settings.remove(SettingKey.database)) == null ? "default" : String.valueOf(obj);
 
-        // Java use time unit mills @ https://docs.oracle.com/javase/7/docs/api/java/net/Socket.html#connect(java.net.SocketAddress,%20int)
+        // Java use time unit mills @
+        // https://docs.oracle.com/javase/7/docs/api/java/net/Socket.html#connect(java.net.SocketAddress,%20int)
         this.soTimeout = (obj = settings.remove(SettingKey.query_timeout)) == null ? 0 : (Integer) obj * 1000;
         this.connectTimeout = (obj = settings.remove(SettingKey.connect_timeout)) == null ? 0 : (Integer) obj * 1000;
     }
@@ -100,9 +103,12 @@ public class ClickHouseConfig {
 
     private Map<SettingKey, Object> parseJDBCUrl(String jdbcUrl) throws SQLException {
         try {
-            URI uri = new URI(jdbcUrl.substring(5));
+            String uriStr = jdbcUrl.substring(5);
+            URI uri = new URI(uriStr);
             Map<SettingKey, Object> settings = new HashMap<SettingKey, Object>();
 
+            String host = uri.getHost();
+            int port = uri.getPort();
             String database = uri.getPath();
             if (database != null && !database.isEmpty()) {
                 Matcher m = DB_PATH_PATTERN.matcher(database);
@@ -112,9 +118,16 @@ public class ClickHouseConfig {
                     throw new URISyntaxException("wrong database name path: '" + database + "'", jdbcUrl);
                 }
             }
-
-            settings.put(SettingKey.port, uri.getPort());
-            settings.put(SettingKey.address, uri.getHost());
+            if (host == null || host.isEmpty()) {
+                Matcher m = HOST_PORT_PATH_PATTERN.matcher(uriStr);
+                if (m.find()) {
+                    host = m.group("host");
+                } else {
+                    throw new URISyntaxException("no valid host was found", jdbcUrl);
+                }
+            }
+            settings.put(SettingKey.port, port);
+            settings.put(SettingKey.address, host);
             settings.putAll(extractQueryParameters(uri.getQuery()));
 
             return settings;
@@ -130,7 +143,7 @@ public class ClickHouseConfig {
         while (tokenizer.hasMoreTokens()) {
             String[] queryParameter = tokenizer.nextToken().split("=", 2);
             Validate.isTrue(queryParameter.length == 2,
-                "ClickHouse JDBC URL Parameter '" + queryParameters + "' Error, Expected '='.");
+                    "ClickHouse JDBC URL Parameter '" + queryParameters + "' Error, Expected '='.");
 
             for (SettingKey settingKey : SettingKey.values()) {
                 if (settingKey.name().equalsIgnoreCase(queryParameter[0])) {
@@ -141,7 +154,7 @@ public class ClickHouseConfig {
         return parameters;
     }
 
-    public void setQueryTimeout(int timeout){
+    public void setQueryTimeout(int timeout) {
         this.soTimeout = timeout;
     }
 
