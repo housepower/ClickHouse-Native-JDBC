@@ -31,7 +31,7 @@ public class ClickHouseConfig {
     private Map<SettingKey, Object> settings;
 
     public static final Pattern DB_PATH_PATTERN = Pattern.compile("/([a-zA-Z0-9_]+)");
-    public static final Pattern HOST_PORT_PATH_PATTERN = Pattern.compile("//(?<host>[^/:\s]+)(:(?<port>\\d+))?");
+    public static final Pattern HOST_PORT_PATH_PATTERN = Pattern.compile("//(?<host>[^/:\\s]+)(:(?<port>\\d+))?");
 
     private ClickHouseConfig() {
     }

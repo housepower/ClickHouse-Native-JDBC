@@ -96,4 +96,5 @@ public class ConnectionParamITest {
         Assert.assertEquals(config.settings().get(SettingKey.min_insert_block_size_rows), 1000L);
         Assert.assertEquals(config.connectTimeout(), 50000);
     }
+
 }
