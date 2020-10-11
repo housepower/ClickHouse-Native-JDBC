@@ -12,6 +12,7 @@ import java.sql.Struct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.regex.Matcher;
 
 public abstract class AbstractPreparedStatement extends ClickHouseStatement {
 
@@ -145,7 +146,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement {
 
     private boolean assembleQuotedParameter(StringBuilder queryBuilder, String parameter) {
         queryBuilder.append("'");
-        queryBuilder.append(parameter);
+        queryBuilder.append(parameter.replaceAll("'", Matcher.quoteReplacement("\\'")));
         queryBuilder.append("'");
         return true;
     }

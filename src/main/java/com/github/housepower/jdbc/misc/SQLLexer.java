@@ -1,6 +1,7 @@
 package com.github.housepower.jdbc.misc;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
 public class SQLLexer {
     private int pos;
@@ -25,8 +26,8 @@ public class SQLLexer {
             pos++;
 
         if (pos + 2 < data.length) {
-            if (data[pos] == '0' && (Character.toLowerCase(data[pos + 1]) == 'x'
-                    || Character.toLowerCase(data[pos + 1]) == 'b')) {
+            if (data[pos] == '0'
+                    && (Character.toLowerCase(data[pos + 1]) == 'x' || Character.toLowerCase(data[pos + 1]) == 'b')) {
                 pos += 2;
                 isHex = Character.toLowerCase(data[pos + 1]) == 'x';
             }
@@ -46,16 +47,22 @@ public class SQLLexer {
 
         int start = pos;
         boolean isHex = false;
+        boolean isBinary = false;
         boolean isDouble = false;
+        boolean hasExponent = false;
+        boolean hasSigned = false;
 
-        if (isCharacter('-') || isCharacter('+'))
+        if (isCharacter('-') || isCharacter('+')) {
+            hasSigned = true;
             pos++;
+        }
 
         if (pos + 2 < data.length) {
-            if (data[pos] == '0' && (Character.toLowerCase(data[pos + 1]) == 'x'
-                || Character.toLowerCase(data[pos + 1]) == 'b')) {
-                pos += 2;
+            if (data[pos] == '0'
+                    && (Character.toLowerCase(data[pos + 1]) == 'x' || Character.toLowerCase(data[pos + 1]) == 'b')) {
                 isHex = Character.toLowerCase(data[pos + 1]) == 'x';
+                isBinary = Character.toLowerCase(data[pos + 1]) == 'b';
+                pos += 2;
             }
         }
 
@@ -73,9 +80,9 @@ public class SQLLexer {
             }
         }
 
-        if (pos + 1 < data.length && (isHex ? (data[pos] == 'p' || data[pos] == 'P') :
-            (data[pos] == 'E' || data[pos] == 'e'))) {
-
+        if (pos + 1 < data.length
+                && (isHex ? (Character.toLowerCase(data[pos]) == 'p') : (Character.toLowerCase(data[pos]) == 'e'))) {
+            hasExponent = true;
             pos++;
 
             if (pos + 1 < data.length && (data[pos] == '-' || data[pos] == '+')) {
@@ -89,8 +96,15 @@ public class SQLLexer {
                 }
             }
         }
-        return isDouble ? Double.valueOf(String.valueOf(new StringView(start, pos, data))) :
-            Long.valueOf(String.valueOf(new StringView(start, pos, data)));
+
+        if (isBinary) {
+            String signed = hasSigned ? data[start] + "" : "";
+            return Long.parseLong(signed + new String(Arrays.copyOfRange(data, start + (hasSigned ? 3 : 2), pos)), 2);
+        } else if (isDouble || hasExponent) {
+            return Double.valueOf(new String(Arrays.copyOfRange(data, start, pos)));
+        } else {
+            return Long.decode(new String(Arrays.copyOfRange(data, start, pos)));
+        }
     }
 
     public StringView stringLiteral() throws SQLException {
@@ -114,12 +128,12 @@ public class SQLLexer {
             return stringLiteralWithQuoted('`');
         } else if (isCharacter('"')) {
             return stringLiteralWithQuoted('"');
-        } else if ('_' == data[pos] || (data[pos] >= 'a' && data[pos] <= 'z') || (data[pos] >= 'A'
-            && data[pos] <= 'Z')) {
+        } else if ('_' == data[pos] || (data[pos] >= 'a' && data[pos] <= 'z')
+                || (data[pos] >= 'A' && data[pos] <= 'Z')) {
             int start = pos;
             for (pos++; pos < data.length; pos++) {
-                if (!('_' == data[pos] || (data[pos] >= 'a' && data[pos] <= 'z') || (data[pos] >= 'A'
-                    && data[pos] <= 'Z') || (data[pos] >= '0' && data[pos] <= '9')))
+                if (!('_' == data[pos] || (data[pos] >= 'a' && data[pos] <= 'z')
+                        || (data[pos] >= 'A' && data[pos] <= 'Z') || (data[pos] >= '0' && data[pos] <= '9')))
                     break;
             }
             return new StringView(start, pos, data);
@@ -142,7 +156,7 @@ public class SQLLexer {
     private void skipAnyWhitespace() {
         for (; pos < data.length; pos++) {
             if (!(data[pos] == ' ' || data[pos] == '\t' || data[pos] == '\n' || data[pos] == '\r'
-                || data[pos] == '\f')) {
+                    || data[pos] == '\f')) {
                 return;
             }
         }

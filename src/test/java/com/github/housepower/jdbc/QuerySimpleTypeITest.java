@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -16,8 +17,8 @@ public class QuerySimpleTypeITest extends AbstractITest {
             @Override
             public void apply(Connection connect) throws Exception {
                 Statement statement = connect.createStatement();
-                ResultSet rs = statement
-                    .executeQuery("SELECT toInt8(" + Byte.MIN_VALUE + ") as a , toUInt8(" + Byte.MAX_VALUE + ") as b");
+                ResultSet rs = statement.executeQuery(
+                        "SELECT toInt8(" + Byte.MIN_VALUE + ") as a , toUInt8(" + Byte.MAX_VALUE + ") as b");
 
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getByte("a"), Byte.MIN_VALUE);
@@ -33,7 +34,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
             public void apply(Connection connect) throws Exception {
                 Statement statement = connect.createStatement();
                 ResultSet rs = statement
-                    .executeQuery("SELECT toInt8(" + Byte.MIN_VALUE + "), toUInt8(" + Byte.MAX_VALUE + ")");
+                        .executeQuery("SELECT toInt8(" + Byte.MIN_VALUE + "), toUInt8(" + Byte.MAX_VALUE + ")");
 
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getByte(1), Byte.MIN_VALUE);
@@ -42,7 +43,6 @@ public class QuerySimpleTypeITest extends AbstractITest {
         });
     }
 
-
     @Test
     public void successfullyShortColumn() throws Exception {
         withNewConnection(new WithConnection() {
@@ -50,7 +50,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
             public void apply(Connection connect) throws Exception {
                 Statement statement = connect.createStatement();
                 ResultSet rs = statement
-                    .executeQuery("SELECT toInt16(" + Short.MIN_VALUE + "), toUInt16(" + Short.MAX_VALUE + ")");
+                        .executeQuery("SELECT toInt16(" + Short.MIN_VALUE + "), toUInt16(" + Short.MAX_VALUE + ")");
 
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getShort(1), Short.MIN_VALUE);
@@ -66,7 +66,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
             public void apply(Connection connect) throws Exception {
                 Statement statement = connect.createStatement();
                 ResultSet rs = statement
-                    .executeQuery("SELECT toInt32(" + Integer.MIN_VALUE + "), toUInt32(" + Integer.MAX_VALUE + ")");
+                        .executeQuery("SELECT toInt32(" + Integer.MIN_VALUE + "), toUInt32(" + Integer.MAX_VALUE + ")");
 
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getInt(1), Integer.MIN_VALUE);
@@ -81,8 +81,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
             @Override
             public void apply(Connection connect) throws Exception {
                 Statement statement = connect.createStatement();
-                ResultSet rs = statement
-                    .executeQuery("SELECT toUInt32(" + Integer.MAX_VALUE + " + 128)");
+                ResultSet rs = statement.executeQuery("SELECT toUInt32(" + Integer.MAX_VALUE + " + 128)");
 
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getLong(1), Integer.MAX_VALUE * 1L + 128L);
@@ -97,7 +96,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
             public void apply(Connection connect) throws Exception {
                 Statement statement = connect.createStatement();
                 ResultSet rs = statement
-                    .executeQuery("SELECT toInt64(" + Long.MIN_VALUE + "), toUInt64(" + Long.MAX_VALUE + ")");
+                        .executeQuery("SELECT toInt64(" + Long.MIN_VALUE + "), toUInt64(" + Long.MAX_VALUE + ")");
 
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getLong(1), Long.MIN_VALUE);
@@ -113,7 +112,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
             public void apply(Connection connect) throws Exception {
                 Statement statement = connect.createStatement();
                 ResultSet rs = statement
-                    .executeQuery("SELECT toFloat32(" + Float.MIN_VALUE + "), toFloat32(" + Float.MAX_VALUE + ")");
+                        .executeQuery("SELECT toFloat32(" + Float.MIN_VALUE + "), toFloat32(" + Float.MAX_VALUE + ")");
 
                 Assert.assertTrue(rs.next());
                 Assert.assertEquals(rs.getFloat(1), Float.MIN_VALUE, 0.000000000001);
@@ -121,7 +120,6 @@ public class QuerySimpleTypeITest extends AbstractITest {
             }
         });
     }
-
 
     @Test
     public void successfullyDoubleColumn() throws Exception {
@@ -158,7 +156,8 @@ public class QuerySimpleTypeITest extends AbstractITest {
             @Override
             public void apply(Connection connect) throws Exception {
                 Statement statement = connect.createStatement();
-                ResultSet rs = statement.executeQuery("SELECT number as a1, toString(number) as a2, now() as a3, today() as a4 from numbers(1)");
+                ResultSet rs = statement.executeQuery(
+                        "SELECT number as a1, toString(number) as a2, now() as a3, today() as a4 from numbers(1)");
 
                 Assert.assertTrue(rs.next());
                 ResultSetMetaData metaData = rs.getMetaData();
@@ -180,4 +179,34 @@ public class QuerySimpleTypeITest extends AbstractITest {
             }
         });
     }
+
+    @Test
+    public void successfullyStringDataTypeWithSingleQuote() throws Exception {
+        withNewConnection(new WithConnection() {
+            @Override
+            public void apply(Connection connection) throws Exception {
+                try (Statement statement = connection.createStatement()) {
+
+                    statement.executeQuery("DROP TABLE IF EXISTS test");
+                    statement.executeQuery("CREATE TABLE test(test String)ENGINE=Log");
+
+                    try (PreparedStatement ps = connection.prepareStatement("INSERT INTO test VALUES(?)")) {
+                        ps.setString(1, "test_string with ' character");
+                        Assert.assertEquals(1, ps.executeUpdate());
+                    }
+
+                    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM test WHERE test=?")) {
+                        ps.setString(1, "test_string with ' character");
+                        try (ResultSet rs = ps.executeQuery()) {
+                            Assert.assertTrue(rs.next());
+                            Assert.assertEquals(rs.getString(1), "test_string with ' character");
+                            Assert.assertFalse(rs.next());
+                        }
+                    }
+                    statement.executeQuery("DROP TABLE IF EXISTS test");
+                }
+            }
+        });
+    }
+
 }
