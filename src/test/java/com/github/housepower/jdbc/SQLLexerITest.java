@@ -64,7 +64,7 @@ public class SQLLexerITest extends AbstractITest {
         String s =  "'this is a message with \\' char'";
         SQLLexer sqlLexer = new SQLLexer(0,s);
         System.out.println(s);
-        Assert.assertEquals("this is a message with ' char", sqlLexer.stringLiteral().toString());
+        Assert.assertEquals("this is a message with \\' char", sqlLexer.stringLiteral().toString());
     }
 
     @Test
