@@ -132,11 +132,12 @@ public class InsertSimpleTypeITest extends AbstractITest {
                 Statement statement = connection.createStatement();
 
                 statement.executeQuery("DROP TABLE IF EXISTS test");
-                statement.executeQuery("CREATE TABLE test(test String)ENGINE=Log");
-                statement.executeQuery("INSERT INTO test VALUES('test_string')");
+                statement.executeQuery("CREATE TABLE test(aa Int32, bb String)ENGINE=Log");
+                statement.executeQuery("INSERT INTO test VALUES(1, '中国')");
                 ResultSet rs = statement.executeQuery("SELECT * FROM test");
                 Assert.assertTrue(rs.next());
-                Assert.assertEquals(rs.getString(1), "test_string");
+                Assert.assertEquals(rs.getInt(1), 1);
+                Assert.assertEquals(rs.getString(2), "中国");
                 Assert.assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
             }

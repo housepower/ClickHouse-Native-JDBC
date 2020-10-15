@@ -17,5 +17,11 @@ jobs:
           java-version: 1.8
       - name: Start clickhouse-server
         run: docker-compose up -d
+      - name: set up LOCAL to POSIX
+        run:  |
+            export LC_ALL=POSIX
+            export LANG=POSIX
+            export LANGUAGE=POSIX
+
       - name: Run integration-tests with maven
         run:  mvn -B clean verify -Dmaven.skip.integration=false
