@@ -7,20 +7,26 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 
 ## Use the latest code
 
-```
-    git clone git@github.com:housepower/ClickHouse-Native-JDBC.git
-    cd ClickHouse-Native-JDBC
-    mvn clean package
-    #build single jar with dependencies
-    mvn clean package assembly:single -Dmaven.skip.assembly=false
+```shell script
+git clone git@github.com:housepower/ClickHouse-Native-JDBC.git
+cd ClickHouse-Native-JDBC
+mvn clean package
 ```
 
 ## Maven central
 
-```java
+```xml
+<!-- normal version -->
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc</artifactId>
+    <version>2.2-stable</version>
+</dependency>
+
+<!-- shaded version, available since 2.3-stable -->
+<dependency>
+    <groupId>com.github.housepower</groupId>
+    <artifactId>clickhouse-native-jdbc-shaded</artifactId>
     <version>2.2-stable</version>
 </dependency>
 ```
@@ -28,17 +34,20 @@ This is a native JDBC library for accessing [ClickHouse](https://clickhouse.yand
 ## Support Java8 or above
 
 ## Differences from [Yandex/Clickhouse-JDBC](https://github.com/yandex/clickhouse-jdbc)
+
 * Data is organized and compressed by columns
 * We implemented it using the TCP Protocol, with higher performance than HTTP, here is the [benchmark](./Benchmark.md).
 
 ## Not Supported
+
 * Non-values format
 * Complex values expression, Like `INSERT INTO test_table VALUES(toDate(123456))`
 * More compression method, like `ZSTD`
 
 ## Example
 
-Select query, see also [SimpleQuery.java](./src/main/java/examples/SimpleQuery.java)
+Select query, see also [SimpleQuery.java](./examples/src/main/java/examples/SimpleQuery.java)
+
 ```java
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
@@ -50,7 +59,7 @@ Select query, see also [SimpleQuery.java](./src/main/java/examples/SimpleQuery.j
     }
 ```
 
-All DDL,DML queries, see also [ExecuteQuery.java](./src/main/java/examples/ExecuteQuery.java)
+All DDL,DML queries, see also [ExecuteQuery.java](./examples/src/main/java/examples/ExecuteQuery.java)
 
 ```java
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
@@ -62,9 +71,9 @@ All DDL,DML queries, see also [ExecuteQuery.java](./src/main/java/examples/Execu
     stmt.executeQuery("drop table test_jdbc_example");
 ```
 
-Batch insert query, see also [BatchQuery.java](./src/main/java/examples/BatchQuery.java)
+Batch insert query, see also [BatchQuery.java](./examples/src/main/java/examples/BatchQuery.java)
 
-``` java
+```java
     Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000");
 
     Statement stmt = connection.createStatement();
