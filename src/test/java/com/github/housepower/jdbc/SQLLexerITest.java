@@ -1,8 +1,9 @@
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.misc.SQLLexer;
+
 import org.junit.Assert;
 import org.junit.Test;
-import com.github.housepower.jdbc.misc.SQLLexer;
 
 public class SQLLexerITest extends AbstractITest {
 
@@ -27,12 +28,13 @@ public class SQLLexerITest extends AbstractITest {
 
     @Test
     public void successfullyNumberInHexa() throws Exception {
-        SQLLexer sqlLexer = new SQLLexer(0, "-0xfp2 0xfp2 0xfp1 0xfp0 0xf");
+        SQLLexer sqlLexer = new SQLLexer(0, "-0xfp2 0xfp2 0xfp1 0xfp0 0xf -0xf");
         Assert.assertEquals(sqlLexer.numberLiteral(), -60.0);
         Assert.assertEquals(sqlLexer.numberLiteral(), 60.0d);
         Assert.assertEquals(sqlLexer.numberLiteral(), 30.0);
         Assert.assertEquals(sqlLexer.numberLiteral(), 15.0);
         Assert.assertEquals(sqlLexer.numberLiteral(), 15L);
+        Assert.assertEquals(sqlLexer.numberLiteral(), -15L);
     }
 
     @Test
@@ -75,4 +77,13 @@ public class SQLLexerITest extends AbstractITest {
 
     }
 
+    @Test
+    public void successfullyDateTime() throws Exception {
+        SQLLexer sqlLexer = new SQLLexer(0, "h DateTime('Asia/Shanghai')");
+        Assert.assertEquals(sqlLexer.bareWord().toString(), "h");
+        Assert.assertEquals(sqlLexer.bareWord().toString(), "DateTime");
+        Assert.assertEquals(sqlLexer.character(), '(');
+        Assert.assertEquals(sqlLexer.stringLiteral().toString(), "Asia/Shanghai");
+        Assert.assertEquals(sqlLexer.character(), ')');
+    }
 }
