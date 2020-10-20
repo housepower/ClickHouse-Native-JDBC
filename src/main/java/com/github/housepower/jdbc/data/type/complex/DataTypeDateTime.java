@@ -112,8 +112,8 @@ public class DataTypeDateTime implements IDataType {
             Validate.isTrue(lexer.character() == '(');
             StringView dataTimeZone = lexer.stringLiteral();
             Validate.isTrue(lexer.character() == ')');
-            return new DataTypeDateTime("DateTime(" +
-                                        dataTimeZone + ")", serverInfo);
+            return new DataTypeDateTime("DateTime('" +
+                                        dataTimeZone + "')", serverInfo);
         }
         return new DataTypeDateTime("DateTime", serverInfo);
     }

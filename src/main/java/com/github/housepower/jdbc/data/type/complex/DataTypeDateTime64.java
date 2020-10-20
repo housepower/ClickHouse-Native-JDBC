@@ -54,7 +54,7 @@ public class DataTypeDateTime64 implements IDataType {
                 Validate.isTrue(lexer.isWhitespace());
                 StringView dataTimeZone = lexer.stringLiteral();
                 Validate.isTrue(lexer.character() == ')');
-                return new DataTypeDateTime64("DateTime64(" + precision + ", " + dataTimeZone + ")", serverInfo);
+                return new DataTypeDateTime64("DateTime64(" + precision + ", '" + dataTimeZone + "')", serverInfo);
             }
 
             Validate.isTrue(lexer.character() == ')');

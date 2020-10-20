@@ -102,8 +102,11 @@ public class SQLLexer {
             return Long.parseLong(signed + new String(Arrays.copyOfRange(data, start + (hasSigned ? 3 : 2), pos)), 2);
         } else if (isDouble || hasExponent) {
             return Double.valueOf(new String(Arrays.copyOfRange(data, start, pos)));
+        } else if (isHex) {
+            String signed = hasSigned ? data[start] + "" : "";
+            return Long.parseLong(signed + new String(Arrays.copyOfRange(data, start + (hasSigned ? 3 : 2), pos)), 16);
         } else {
-            return Long.decode(new String(Arrays.copyOfRange(data, start, pos)));
+            return Long.parseLong(new String(Arrays.copyOfRange(data, start, pos)));
         }
     }
 
