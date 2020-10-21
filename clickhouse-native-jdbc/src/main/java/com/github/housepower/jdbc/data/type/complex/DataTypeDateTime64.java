@@ -8,7 +8,6 @@ import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.settings.SettingKey;
-import org.joda.time.DateTimeZone;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -40,7 +39,7 @@ public class DataTypeDateTime64 implements IDataType {
         if (!Boolean.TRUE.equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
             timeZone = serverInfo.timeZone();
         } else {
-            timeZone = DateTimeZone.getDefault().toTimeZone();
+            timeZone = TimeZone.getDefault();
         }
         return timeZone;
     }
