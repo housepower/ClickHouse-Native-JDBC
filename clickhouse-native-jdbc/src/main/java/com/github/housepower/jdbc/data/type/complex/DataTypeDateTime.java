@@ -9,8 +9,6 @@ import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.settings.SettingKey;
 
-import org.joda.time.DateTimeZone;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -19,6 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class DataTypeDateTime implements IDataType {
 
@@ -33,7 +32,7 @@ public class DataTypeDateTime implements IDataType {
             .equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
             dateTimeFormat.setTimeZone(serverInfo.timeZone());
         } else {
-            dateTimeFormat.setTimeZone(DateTimeZone.getDefault().toTimeZone());
+            dateTimeFormat.setTimeZone(TimeZone.getDefault());
         }
     }
 

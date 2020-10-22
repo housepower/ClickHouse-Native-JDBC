@@ -8,8 +8,6 @@ import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.settings.SettingKey;
 
-import org.joda.time.DateTimeZone;
-
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -17,22 +15,22 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class DataTypeDate implements IDataType {
 
     private static final Date DEFAULT_VALUE = new Date(0);
-    private final DateTimeZone dateTimeZone;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
 
-
     public DataTypeDate(PhysicalInfo.ServerInfo serverInfo) {
+        TimeZone dateTimeZone;
         if (!java.lang.Boolean.TRUE
                  .equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
-            this.dateTimeZone = DateTimeZone.forTimeZone(serverInfo.timeZone());
+            dateTimeZone = serverInfo.timeZone();
         } else {
-            this.dateTimeZone = DateTimeZone.getDefault();
+            dateTimeZone = TimeZone.getDefault();
         }
-        this.dateFormat.setTimeZone(this.dateTimeZone.toTimeZone());
+        this.dateFormat.setTimeZone(dateTimeZone);
     }
 
     @Override
