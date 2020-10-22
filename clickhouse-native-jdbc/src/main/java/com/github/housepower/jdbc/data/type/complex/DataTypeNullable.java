@@ -51,6 +51,16 @@ public class DataTypeNullable implements IDataType {
         return true;
     }
 
+	@Override
+	public int getPrecision() {
+		return 0;
+	}
+
+    @Override
+    public int getScale() {
+        return 0;
+    }
+
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         if (lexer.isCharacter('n') || lexer.isCharacter('N')) {

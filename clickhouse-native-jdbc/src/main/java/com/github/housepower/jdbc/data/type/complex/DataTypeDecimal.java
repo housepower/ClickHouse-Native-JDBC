@@ -66,6 +66,16 @@ public class DataTypeDecimal implements IDataType {
         return false;
     }
 
+	@Override
+	public int getPrecision() {
+		return precision;
+	}
+
+    @Override
+    public int getScale() {
+        return precision;
+    }
+
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         BigDecimal result = null;

@@ -45,6 +45,16 @@ public class DataTypeInt8 implements IDataType {
         return false;
     }
 
+	@Override
+	public int getPrecision() {
+		return isUnsigned ? 3 : 4;
+	}
+
+    @Override
+    public int getScale() {
+        return 0;
+    }
+
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeByte(((Number)data).byteValue());

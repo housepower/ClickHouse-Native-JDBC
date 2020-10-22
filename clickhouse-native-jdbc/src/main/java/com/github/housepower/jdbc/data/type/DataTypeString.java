@@ -36,6 +36,16 @@ public class DataTypeString implements IDataType {
         return false;
     }
 
+	@Override
+	public int getPrecision() {
+		return 0;
+	}
+
+    @Override
+    public int getScale() {
+        return 0;
+    }
+
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeStringBinary((String) data);
