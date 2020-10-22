@@ -87,6 +87,16 @@ public class DataTypeDateTime64 implements IDataType {
         return false;
     }
 
+	@Override
+	public int getPrecision() {
+		return 0;
+	}
+
+    @Override
+    public int getScale() {
+        return 19;
+    }
+
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         StringView dataTypeName = lexer.bareWord();

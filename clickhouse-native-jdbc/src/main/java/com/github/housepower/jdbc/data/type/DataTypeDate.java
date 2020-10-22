@@ -59,6 +59,16 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
+    public int getPrecision() {
+        return 10;
+    }
+
+    @Override
+    public int getScale() {
+        return 0;
+    }
+
+    @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
         throws SQLException, IOException {
         long mills = ((Date) data).getTime();

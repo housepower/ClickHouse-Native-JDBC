@@ -39,6 +39,16 @@ public class DataTypeFloat32 implements IDataType {
     }
 
     @Override
+    public int getPrecision() {
+        return 8;
+    }
+
+    @Override
+    public int getScale() {
+        return 8;
+    }
+
+    @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeFloat((Float) data);
     }

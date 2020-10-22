@@ -37,6 +37,16 @@ public class DataTypeUUID implements IDataType {
         return false;
     }
 
+	@Override
+	public int getPrecision() {
+		return 36;
+	}
+
+    @Override
+    public int getScale() {
+        return 0;
+    }
+
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return String.valueOf(lexer.stringLiteral());

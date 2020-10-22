@@ -49,6 +49,16 @@ public class DataTypeInt64 implements IDataType {
         return false;
     }
 
+	@Override
+	public int getPrecision() {
+		return isUnsigned ? 19 : 20;
+	}
+
+    @Override
+    public int getScale() {
+        return 0;
+    }
+
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
         throws SQLException, IOException {

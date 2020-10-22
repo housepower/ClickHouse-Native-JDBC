@@ -18,6 +18,8 @@ public interface IDataType {
     Class javaTypeClass();
 
     boolean nullable();
+    int getPrecision();
+    int getScale();
 
     Object deserializeTextQuoted(SQLLexer lexer) throws SQLException;
     Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;

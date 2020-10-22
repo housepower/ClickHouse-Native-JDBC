@@ -75,9 +75,18 @@ public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {
 
     @Override
     public boolean isSigned(int index) throws SQLException {
-        return header.getByPosition(index).name().startsWith("U");
+        return header.getByPosition(index - 1).name().startsWith("U");
     }
 
+    @Override
+    public int getPrecision(int column) throws SQLException {
+        return header.getByPosition(column - 1).type().getPrecision();
+    }
+
+    @Override
+    public int getScale(int column) throws SQLException {
+        return header.getByPosition(column - 1).type().getScale();
+    }
 
     /*=========================================================*/
 
