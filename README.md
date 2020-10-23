@@ -31,7 +31,7 @@ mvn clean package
 </dependency>
 ```
 
-## Support Java8 or above
+## Support Java 8 or above
 
 ## Differences from [Yandex/Clickhouse-JDBC](https://github.com/yandex/clickhouse-jdbc)
 
