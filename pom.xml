@@ -136,15 +136,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <profiles>
-        <profile>
-            <id>release</id>
-        </profile>
-        <profile>
-            <id>benchmark</id>
-        </profile>
-    </profiles>
-
     <build>
         <pluginManagement>
             <plugins>
@@ -195,5 +186,97 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>de.thetaphi</groupId>
+                <artifactId>forbiddenapis</artifactId>
+                <configuration>
+                    <failOnUnsupportedJava>false</failOnUnsupportedJava>
+                    <bundledSignatures>
+                        <bundledSignature>jdk-unsafe</bundledSignature>
+                        <!-- disallow deprecated methods from Java 8 -->
+                        <bundledSignature>jdk-deprecated</bundledSignature>
+                        <!-- disallow undocumented classes like sun.misc.Unsafe: -->
+                        <bundledSignature>jdk-non-portable</bundledSignature>
+                        <!-- disallow unsafe reflective access: -->
+                        <bundledSignature>jdk-reflection</bundledSignature>
+                    </bundledSignatures>
+                    <excludes>**/*jmhTest.class</excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                            <goal>testCheck</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>benchmark</id>
+        </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-release-plugin</artifactId>
+                        <configuration>
+                            <mavenExecutorId>forked-path</mavenExecutorId>
+                            <useReleaseProfile>false</useReleaseProfile>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
