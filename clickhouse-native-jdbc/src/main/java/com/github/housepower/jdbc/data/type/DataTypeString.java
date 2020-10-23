@@ -57,8 +57,7 @@ public class DataTypeString implements IDataType {
     }
 
     @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
-        throws SQLException, IOException {
+    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         String[] data = new String[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = deserializer.readStringBinary();

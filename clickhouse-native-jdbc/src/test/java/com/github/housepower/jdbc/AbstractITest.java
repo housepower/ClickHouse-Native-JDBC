@@ -7,13 +7,10 @@ import java.util.Enumeration;
 
 public abstract class AbstractITest {
 
-    private static final int
-        SERVER_PORT =
-        Integer.valueOf(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
+    private static final int SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
 
-    protected void withNewConnection(WithConnection withConnection, Object... args)
-        throws Exception {
-        // deregisterDriver other jdbc drivers
+    protected void withNewConnection(WithConnection withConnection, Object... args) throws Exception {
+        // remove all registered jdbc drivers
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
             DriverManager.deregisterDriver(drivers.nextElement());
@@ -28,14 +25,12 @@ public abstract class AbstractITest {
                 connectionStr += "?use_client_time_zone=true";
             }
         }
-        Connection connection = DriverManager.getConnection(connectionStr);
-        try {
+        try (Connection connection = DriverManager.getConnection(connectionStr)) {
             withConnection.apply(connection);
-        } finally {
-            connection.close();
         }
     }
 
+    @FunctionalInterface
     interface WithConnection {
         void apply(Connection connection) throws Exception;
     }

@@ -14,6 +14,14 @@ import java.sql.Types;
 
 public class DataTypeFixedString implements IDataType {
 
+    public static IDataType createFixedStringType(SQLLexer lexer,
+                                                  PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        Number fixedStringN = lexer.numberLiteral();
+        Validate.isTrue(lexer.character() == ')');
+        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue());
+    }
+
     private final int n;
     private final String name;
     private final String defaultValue;
@@ -54,10 +62,10 @@ public class DataTypeFixedString implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return n;
-	}
+    @Override
+    public int getPrecision() {
+        return n;
+    }
 
     @Override
     public int getScale() {
@@ -71,12 +79,12 @@ public class DataTypeFixedString implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
-        throws SQLException, IOException {
+            throws SQLException, IOException {
         writeBytes(((String) data).getBytes(StandardCharsets.UTF_8), serializer);
     }
 
     private void writeBytes(byte[] bs, BinarySerializer serializer)
-        throws IOException, SQLException {
+            throws IOException, SQLException {
         byte[] res;
         if (bs.length > n) {
             throw new SQLException("The size of FixString column is too large, got " + bs.length);
@@ -91,28 +99,16 @@ public class DataTypeFixedString implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer)
-        throws SQLException, IOException {
+    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         return new String(deserializer.readBytes(n), StandardCharsets.UTF_8);
     }
 
     @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
-        throws SQLException, IOException {
+    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         String[] data = new String[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = new String(deserializer.readBytes(n), StandardCharsets.UTF_8);
         }
         return data;
-    }
-
-    public static IDataType createFixedStringType(SQLLexer lexer,
-                                                  PhysicalInfo.ServerInfo serverInfo)
-        throws SQLException {
-        Validate.isTrue(lexer.character() == '(');
-        Number fixedStringN = lexer.numberLiteral();
-        Validate.isTrue(lexer.character() == ')');
-        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")",
-                                       fixedStringN.intValue());
     }
 }

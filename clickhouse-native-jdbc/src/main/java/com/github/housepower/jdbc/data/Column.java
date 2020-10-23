@@ -72,7 +72,7 @@ public class Column {
         serializer.writeStringBinary(name);
         serializer.writeStringBinary(type.name());
 
-        //writer offsets
+        // writer offsets
         if (offsets != null) {
             for (List<Integer> offsetList : offsets) {
                 for (int offset : offsetList) {

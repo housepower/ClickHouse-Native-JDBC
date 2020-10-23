@@ -30,5 +30,4 @@ public class DataRequest extends RequestOrResponse {
         block.writeTo(serializer);
         serializer.maybeDisableCompressed();
     }
-
 }

@@ -20,6 +20,26 @@ import java.util.TimeZone;
 
 public class DataTypeDateTime64 implements IDataType {
 
+    public static DataTypeDateTime64 createDateTime64Type(SQLLexer lexer, ServerInfo serverInfo) throws SQLException {
+        if (lexer.isCharacter('(')) {
+            Validate.isTrue(lexer.character() == '(');
+            int precision = lexer.numberLiteral().intValue();
+            if (lexer.isCharacter(',')) {
+                Validate.isTrue(lexer.character() == ',');
+                Validate.isTrue(lexer.isWhitespace());
+                StringView dataTimeZone = lexer.stringLiteral();
+                Validate.isTrue(lexer.character() == ')');
+                return new DataTypeDateTime64("DateTime64(" + precision + ", '" + dataTimeZone + "')", serverInfo);
+            }
+
+            Validate.isTrue(lexer.character() == ')');
+            return new DataTypeDateTime64("DateTime64(" + precision + ")", serverInfo);
+        }
+        return new DataTypeDateTime64("DateTime64", serverInfo);
+    }
+
+    // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
+    // we should ensure DON'T modify it anywhere.
     public static final Timestamp DEFAULT_VALUE = new Timestamp(0);
     public static final int NANOS_IN_SECOND = 1_000_000_000;
     public static final int MILLIS_IN_SECOND = 1000;
@@ -42,24 +62,6 @@ public class DataTypeDateTime64 implements IDataType {
             timeZone = TimeZone.getDefault();
         }
         return timeZone;
-    }
-
-    public static DataTypeDateTime64 createDateTime64Type(SQLLexer lexer, ServerInfo serverInfo) throws SQLException {
-        if (lexer.isCharacter('(')) {
-            Validate.isTrue(lexer.character() == '(');
-            int precision = lexer.numberLiteral().intValue();
-            if (lexer.isCharacter(',')) {
-                Validate.isTrue(lexer.character() == ',');
-                Validate.isTrue(lexer.isWhitespace());
-                StringView dataTimeZone = lexer.stringLiteral();
-                Validate.isTrue(lexer.character() == ')');
-                return new DataTypeDateTime64("DateTime64(" + precision + ", '" + dataTimeZone + "')", serverInfo);
-            }
-
-            Validate.isTrue(lexer.character() == ')');
-            return new DataTypeDateTime64("DateTime64(" + precision + ")", serverInfo);
-        }
-        return new DataTypeDateTime64("DateTime64", serverInfo);
     }
 
     @Override

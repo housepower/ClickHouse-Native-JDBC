@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClickHouseStruct extends SQLStruct {
-    private static final Pattern REGEX = Pattern.compile("\\_(\\d+)");
+    private static final Pattern REGEX = Pattern.compile("_(\\d+)");
 
     private final String type;
     private final Object[] attributes;

@@ -13,6 +13,15 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class DataTypeNullable implements IDataType {
+
+    public static IDataType createNullableType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        IDataType nestedType = DataTypeFactory.get(lexer, serverInfo);
+        Validate.isTrue(lexer.character() == ')');
+        return new DataTypeNullable(
+                "Nullable(" + nestedType.name() + ")", nestedType, DataTypeFactory.get("UInt8", serverInfo));
+    }
+
     private static final Short IS_NULL = 1;
     private static final Short NON_NULL = 0;
 
@@ -110,13 +119,5 @@ public class DataTypeNullable implements IDataType {
             }
         }
         return data;
-    }
-
-    public static IDataType createNullableType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
-        Validate.isTrue(lexer.character() == '(');
-        IDataType nestedType = DataTypeFactory.get(lexer, serverInfo);
-        Validate.isTrue(lexer.character() == ')');
-        return new DataTypeNullable(
-            "Nullable(" + nestedType.name() + ")", nestedType, DataTypeFactory.get("UInt8", serverInfo));
     }
 }

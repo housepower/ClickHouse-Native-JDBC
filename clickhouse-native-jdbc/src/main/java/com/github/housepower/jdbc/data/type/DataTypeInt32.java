@@ -13,7 +13,7 @@ public class DataTypeInt32 implements IDataType {
 
     private static final Integer DEFAULT_VALUE = 0;
     private final String name;
-    private boolean isUnsigned;
+    private final boolean isUnsigned;
 
     public DataTypeInt32(String name) {
         this.name = name;
@@ -56,14 +56,12 @@ public class DataTypeInt32 implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer)
-        throws SQLException, IOException {
+    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeInt(((Number) data).intValue());
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer)
-        throws SQLException, IOException {
+    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         int res = deserializer.readInt();
         if (isUnsigned) {
             return 0xffffffffL & res;
@@ -85,5 +83,4 @@ public class DataTypeInt32 implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue() & 0xffffffff;
     }
-
 }

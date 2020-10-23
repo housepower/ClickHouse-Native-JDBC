@@ -17,14 +17,20 @@ import java.util.Locale;
 
 public class DataTypeDecimal implements IDataType {
 
+    public static IDataType createDecimalType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        Number precision = lexer.numberLiteral();
+        Validate.isTrue(lexer.character() == ',');
+        Number scale = lexer.numberLiteral();
+        Validate.isTrue(lexer.character() == ')');
+        return new DataTypeDecimal("Decimal(" + precision.intValue() + "," + scale.intValue() + ")",
+                precision.intValue(), scale.intValue());
+    }
+
     private final String name;
-
     private final int precision;
-
     private final int scale;
-
     private final BigDecimal scaleFactor;
-
     private final int nobits;
 
     public DataTypeDecimal(String name, int precision, int scale) {
@@ -37,7 +43,8 @@ public class DataTypeDecimal implements IDataType {
         } else if (this.precision <= 18) {
             this.nobits = 64;
         } else {
-            throw new IllegalArgumentException(String.format(Locale.ENGLISH, "Precision[%d] is out of boundary.", precision));
+            throw new IllegalArgumentException(String.format(Locale.ENGLISH,
+                    "Precision[%d] is out of boundary.", precision));
         }
     }
 
@@ -66,10 +73,10 @@ public class DataTypeDecimal implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return precision;
-	}
+    @Override
+    public int getPrecision() {
+        return precision;
+    }
 
     @Override
     public int getScale() {
@@ -78,7 +85,7 @@ public class DataTypeDecimal implements IDataType {
 
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        BigDecimal result = null;
+        BigDecimal result;
         if (lexer.isCharacter('\'')) {
             StringView v = lexer.stringLiteral();
             result = new BigDecimal(v.toString());
@@ -103,7 +110,8 @@ public class DataTypeDecimal implements IDataType {
                 break;
             }
             default: {
-                throw new RuntimeException(String.format(Locale.ENGLISH, "Unknown precision[%d] & scale[%d]", precision, scale));
+                throw new RuntimeException(String.format(Locale.ENGLISH,
+                        "Unknown precision[%d] & scale[%d]", precision, scale));
             }
         }
     }
@@ -125,7 +133,8 @@ public class DataTypeDecimal implements IDataType {
                 break;
             }
             default: {
-                throw new RuntimeException(String.format(Locale.ENGLISH, "Unknown precision[%d] & scale[%d]", precision, scale));
+                throw new RuntimeException(String.format(Locale.ENGLISH,
+                        "Unknown precision[%d] & scale[%d]", precision, scale));
             }
         }
         value = value.setScale(scale, RoundingMode.HALF_UP);
@@ -139,14 +148,5 @@ public class DataTypeDecimal implements IDataType {
             data[row] = (BigDecimal) this.deserializeBinary(deserializer);
         }
         return data;
-    }
-
-    public static IDataType createDecimalType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
-        Validate.isTrue(lexer.character() == '(');
-        Number precision = lexer.numberLiteral();
-        Validate.isTrue(lexer.character() == ',');
-        Number scale = lexer.numberLiteral();
-        Validate.isTrue(lexer.character() == ')');
-        return new DataTypeDecimal("Decimal(" + precision.intValue() + "," + scale.intValue() + ")", precision.intValue(), scale.intValue());
     }
 }

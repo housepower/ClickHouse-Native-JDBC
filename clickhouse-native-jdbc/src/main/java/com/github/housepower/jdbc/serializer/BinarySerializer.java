@@ -13,7 +13,7 @@ public class BinarySerializer {
     private final boolean enableCompress;
 
     public BinarySerializer(BuffedWriter writer, boolean enableCompress) {
-        this.enableCompress =enableCompress;
+        this.enableCompress = enableCompress;
         BuffedWriter compressBuffer = null;
         if (enableCompress) {
             compressBuffer = new CompressedBuffedWriter(ClickHouseDefines.SOCKET_BUFFER_SIZE, writer);
@@ -70,7 +70,7 @@ public class BinarySerializer {
     }
 
     public void writeStringBinary(String binary) throws IOException {
-        byte []bs = binary.getBytes(StandardCharsets.UTF_8);
+        byte[] bs = binary.getBytes(StandardCharsets.UTF_8);
         writeVarInt(bs.length);
         container.get().writeBinary(bs);
     }

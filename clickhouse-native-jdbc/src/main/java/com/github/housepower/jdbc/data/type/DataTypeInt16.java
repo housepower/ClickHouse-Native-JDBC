@@ -13,7 +13,7 @@ public class DataTypeInt16 implements IDataType {
 
     private static final Short DEFAULT_VALUE = 0;
     private final String name;
-    private boolean isUnsigned;
+    private final boolean isUnsigned;
 
     public DataTypeInt16(String name) {
         this.name = name;
@@ -82,5 +82,4 @@ public class DataTypeInt16 implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().shortValue();
     }
-
 }

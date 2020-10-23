@@ -157,12 +157,9 @@ public class SQLLexer {
     }
 
     private void skipAnyWhitespace() {
-        for (; pos < data.length; pos++) {
-            if (!(data[pos] == ' ' || data[pos] == '\t' || data[pos] == '\n' || data[pos] == '\r'
-                    || data[pos] == '\f')) {
+        for (; pos < data.length; pos++)
+            if (data[pos] != ' ' && data[pos] != '\t' && data[pos] != '\n' && data[pos] != '\r' && data[pos] != '\f')
                 return;
-            }
-        }
     }
 
     private StringView stringLiteralWithQuoted(char quoted) throws SQLException {

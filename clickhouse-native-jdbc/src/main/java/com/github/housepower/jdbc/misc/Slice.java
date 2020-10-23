@@ -110,12 +110,10 @@ public class Slice implements Iterable<Object>{
 
         @Override
         public void remove() {
-            return;
         }
 
         @Override
         public void forEachRemaining(Consumer<? super Object> action) {
-            return;
         }
     }
 

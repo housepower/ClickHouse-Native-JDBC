@@ -21,6 +21,19 @@ import java.util.TimeZone;
 
 public class DataTypeDateTime implements IDataType {
 
+    public static IDataType createDateTimeType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+        if (lexer.isCharacter('(')) {
+            Validate.isTrue(lexer.character() == '(');
+            StringView dataTimeZone = lexer.stringLiteral();
+            Validate.isTrue(lexer.character() == ')');
+            return new DataTypeDateTime("DateTime('" +
+                    dataTimeZone + "')", serverInfo);
+        }
+        return new DataTypeDateTime("DateTime", serverInfo);
+    }
+
+    // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
+    // we should ensure DON'T modify it anywhere.
     private static final Timestamp DEFAULT_VALUE = new Timestamp(0);
     private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT);
 
@@ -114,16 +127,5 @@ public class DataTypeDateTime implements IDataType {
             data[row] = new Timestamp(deserializer.readInt() * 1000L);
         }
         return data;
-    }
-
-    public static IDataType createDateTimeType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
-        if (lexer.isCharacter('(')) {
-            Validate.isTrue(lexer.character() == '(');
-            StringView dataTimeZone = lexer.stringLiteral();
-            Validate.isTrue(lexer.character() == ')');
-            return new DataTypeDateTime("DateTime('" +
-                                        dataTimeZone + "')", serverInfo);
-        }
-        return new DataTypeDateTime("DateTime", serverInfo);
     }
 }

@@ -19,6 +19,15 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DataTypeArray implements IDataType {
+
+    public static IDataType createArrayType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        IDataType arrayNestedType = DataTypeFactory.get(lexer, serverInfo);
+        Validate.isTrue(lexer.character() == ')');
+        return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
+                arrayNestedType, DataTypeFactory.get("UInt64", serverInfo));
+    }
+
     private final String name;
     private final Array defaultValue;
     private final IDataType elemDataType;
@@ -28,7 +37,7 @@ public class DataTypeArray implements IDataType {
         this.name = name;
         this.elemDataType = elemDataType;
         this.offsetIDataType = offsetIDataType;
-        this.defaultValue = new ClickHouseArray(new Object[] {elemDataType.defaultValue()});
+        this.defaultValue = new ClickHouseArray(new Object[]{elemDataType.defaultValue()});
     }
 
     @Override
@@ -56,10 +65,10 @@ public class DataTypeArray implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return 0;
-	}
+    @Override
+    public int getPrecision() {
+        return 0;
+    }
 
     @Override
     public int getScale() {
@@ -69,7 +78,7 @@ public class DataTypeArray implements IDataType {
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '[');
-        List<Object> arrayData = new ArrayList<Object>();
+        List<Object> arrayData = new ArrayList<>();
         for (; ; ) {
             if (lexer.isCharacter(']')) {
                 lexer.character();
@@ -90,14 +99,14 @@ public class DataTypeArray implements IDataType {
             offset.add(dataOffset);
             offsets.add(offset);
         } else {
-            int lastIdx =  offsets.get(level - 1).size() - 1;
-            int lastOffset =  offsets.get(level - 1).get(lastIdx);
+            int lastIdx = offsets.get(level - 1).size() - 1;
+            int lastOffset = offsets.get(level - 1).get(lastIdx);
             offsets.get(level - 1).add(lastOffset + dataOffset);
         }
 
         for (Object v : ((Object[]) ((Array) data).getArray())) {
             if (elemDataType.sqlTypeId() == Types.ARRAY) {
-                ((DataTypeArray)(elemDataType)).serializeBinary(v, dataBinarySerializer, offsets, level + 1);
+                ((DataTypeArray) (elemDataType)).serializeBinary(v, dataBinarySerializer, offsets, level + 1);
             } else {
                 elemDataType.serializeBinary(v, dataBinarySerializer);
             }
@@ -105,19 +114,19 @@ public class DataTypeArray implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException{
+    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         throw new SQLException("DataTypeArray serializeBinary not supported");
     }
 
     @Override
     public void serializeBinaryBulk(Iterator<Object> data, BinarySerializer serializer)
-        throws SQLException, IOException {
+            throws SQLException, IOException {
         throw new SQLException("DataTypeArray serializeBinaryBulk not supported");
     }
 
     @Override
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer)
-        throws SQLException, IOException {
+            throws SQLException, IOException {
         throw new SQLException("DataTypeArray serializeBinaryBulk not supported");
     }
 
@@ -127,7 +136,6 @@ public class DataTypeArray implements IDataType {
         return elemDataType.deserializeBinaryBulk(offset.intValue(), deserializer);
     }
 
-
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
         ClickHouseArray[] data = new ClickHouseArray[rows];
@@ -136,8 +144,8 @@ public class DataTypeArray implements IDataType {
         }
 
         Object[] offsets = offsetIDataType.deserializeBinaryBulk(rows, deserializer);
-        ClickHouseArray res =  new ClickHouseArray(
-            elemDataType.deserializeBinaryBulk(((BigInteger) offsets[rows - 1]).intValue() , deserializer));
+        ClickHouseArray res = new ClickHouseArray(
+                elemDataType.deserializeBinaryBulk(((BigInteger) offsets[rows - 1]).intValue(), deserializer));
 
         for (int row = 0, lastOffset = 0; row < rows; row++) {
             BigInteger offset = (BigInteger) offsets[row];
@@ -145,14 +153,5 @@ public class DataTypeArray implements IDataType {
             lastOffset = offset.intValue();
         }
         return data;
-    }
-
-
-    public static IDataType createArrayType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
-        Validate.isTrue(lexer.character() == '(');
-        IDataType arrayNestedType = DataTypeFactory.get(lexer, serverInfo);
-        Validate.isTrue(lexer.character() == ')');
-        return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
-                                 arrayNestedType, DataTypeFactory.get("UInt64", serverInfo));
     }
 }

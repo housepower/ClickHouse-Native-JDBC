@@ -15,9 +15,38 @@ import java.util.List;
 
 public class DataTypeEnum16 implements IDataType {
 
-    private String name;
-    private Short[] values;
-    private String[] names;
+    public static IDataType createEnum16Type(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        List<Short> enumValues = new ArrayList<>();
+        List<String> enumNames = new ArrayList<>();
+
+        for (int i = 0; i < 65535; i++) {
+            enumNames.add(String.valueOf(lexer.stringLiteral()));
+            Validate.isTrue(lexer.character() == '=');
+            enumValues.add(lexer.numberLiteral().shortValue());
+
+            char character = lexer.character();
+            Validate.isTrue(character == ',' || character == ')');
+
+            if (character == ')') {
+                StringBuilder builder = new StringBuilder("Enum16(");
+                for (int index = 0; index < enumNames.size(); index++) {
+                    if (index > 0)
+                        builder.append(",");
+                    builder.append("'").append(enumNames.get(index)).append("'")
+                            .append(" = ").append(enumValues.get(index));
+                }
+                builder.append(")");
+                return new DataTypeEnum16(builder.toString(),
+                        enumNames.toArray(new String[0]), enumValues.toArray(new Short[0]));
+            }
+        }
+        throw new SQLException("DataType Enum16 size must be less than 65535");
+    }
+
+    private final String name;
+    private final Short[] values;
+    private final String[] names;
 
     public DataTypeEnum16(String name, String[] names, Short[] values) {
         this.name = name;
@@ -74,14 +103,15 @@ public class DataTypeEnum16 implements IDataType {
             }
         }
 
-        String message = "Expected ";
+        StringBuilder message = new StringBuilder("Expected ");
         for (int i = 0; i < names.length; i++) {
             if (i > 0)
-                message += " OR ";
-            message += names[i];
+                message.append(" OR ");
+            message.append(names[i]);
         }
+        message.append(", but was ").append(data);
 
-        throw new SQLException(message + " , but was " + String.valueOf(data));
+        throw new SQLException(message.toString());
     }
 
     @Override
@@ -102,33 +132,5 @@ public class DataTypeEnum16 implements IDataType {
             data[row] = (String) deserializeBinary(deserializer);
         }
         return data;
-    }
-
-    public static IDataType createEnum16Type(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
-        Validate.isTrue(lexer.character() == '(');
-        List<Short> enumValues = new ArrayList<Short>();
-        List<String> enumNames = new ArrayList<String>();
-
-        for (int i = 0; i < 65535; i++) {
-            enumNames.add(String.valueOf(lexer.stringLiteral()));
-            Validate.isTrue(lexer.character() == '=');
-            enumValues.add(lexer.numberLiteral().shortValue());
-
-            char character = lexer.character();
-            Validate.isTrue(character == ',' || character == ')');
-
-            if (character == ')') {
-                StringBuilder builder = new StringBuilder("Enum16(");
-                for (int index = 0; index < enumNames.size(); index++) {
-                    if (index > 0)
-                        builder.append(",");
-                    builder.append("'").append(enumNames.get(index)).append("'")
-                        .append(" = ").append(enumValues.get(index));
-                }
-                return new DataTypeEnum16(builder.append(")").toString(),
-                    enumNames.toArray(new String[enumNames.size()]), enumValues.toArray(new Short[enumValues.size()]));
-            }
-        }
-        throw new SQLException("DataType Enum16 size must be less than 65535");
     }
 }

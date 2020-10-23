@@ -19,7 +19,14 @@ import java.util.TimeZone;
 
 public class DataTypeDate implements IDataType {
 
+    public static IDataType createDateType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) {
+        return new DataTypeDate(serverInfo);
+    }
+
+    // Since `Date` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
+    // we should ensure DON'T modify it anywhere.
     private static final Date DEFAULT_VALUE = new Date(0);
+
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
 
     public DataTypeDate(PhysicalInfo.ServerInfo serverInfo) {
@@ -69,8 +76,7 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer)
-        throws SQLException, IOException {
+    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         long mills = ((Date) data).getTime();
         long daysSinceEpoch = mills / 1000 / 3600 / 24;
         serializer.writeShort((short) daysSinceEpoch);
@@ -110,9 +116,5 @@ public class DataTypeDate implements IDataType {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static IDataType createDateType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) {
-        return new DataTypeDate(serverInfo);
     }
 }
