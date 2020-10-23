@@ -107,6 +107,24 @@ public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {
         return "";
     }
 
+    @Override
+    public boolean isDefinitelyWritable(int column) throws SQLException {
+        return false;
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        if (isWrapperFor(iface)) {
+            return (T) this;
+        }
+        throw new SQLException("Unable to unwrap to " + iface.toString());
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) {
+        return iface != null && iface.isAssignableFrom(getClass());
+    }
+
     /*=========================================================*/
 
     @Override
