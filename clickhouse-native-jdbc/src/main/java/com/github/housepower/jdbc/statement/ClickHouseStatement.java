@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 public class ClickHouseStatement extends SQLStatement {
     private static final Pattern VALUES_REGEX = Pattern.compile("[V|v][A|a][L|l][U|u][E|e][S|s]\\s*\\(");
+    private static final Pattern SELECT_DB_TABLE = Pattern.compile("(?i)FROM\\s+(\\S+\\.)?(\\S+)");
 
     private ResultSet lastResultSet;
     protected Block block;
@@ -27,10 +28,13 @@ public class ClickHouseStatement extends SQLStatement {
 
     private long maxRows;
     private ClickHouseConfig cfg;
+    private String db;
+    private String table = "unknown";
 
     public ClickHouseStatement(ClickHouseConnection connection) {
         this.connection = connection;
         this.cfg = connection.getConfigure().copy();
+        this.db = cfg.database();
     }
 
     @Override
@@ -48,8 +52,10 @@ public class ClickHouseStatement extends SQLStatement {
     public int executeUpdate(String query) throws SQLException {
         cfg.settings().put(SettingKey.max_result_rows, maxRows);
 
+        extractDBAndTableName(query);
         Matcher matcher = VALUES_REGEX.matcher(query);
-        if (matcher.find()) {
+
+        if (matcher.find() && query.toUpperCase().startsWith("INSERT")) {
             lastResultSet = null;
             String insertQuery = query.substring(0, matcher.end() - 1);
             block = getSampleBlock(insertQuery);
@@ -59,9 +65,31 @@ public class ClickHouseStatement extends SQLStatement {
         }
 
         QueryResponse response = connection.sendQueryRequest(query, cfg);
-        lastResultSet = new ClickHouseResultSet(response.header(), response.data().get(), this);
+        lastResultSet = new ClickHouseResultSet(response.header(), db, table, response.data().get(), this);
         return 0;
     }
+
+    private void extractDBAndTableName(String sql) {
+        String upperSQL = sql.trim().toUpperCase();
+        if (upperSQL.startsWith("SELECT")) {
+            Matcher m = SELECT_DB_TABLE.matcher(sql);
+            if (m.find()) {
+                if (m.groupCount() == 2) {
+                    if (m.group(1) != null) {
+                        db = m.group(1);
+                    }
+                    table = m.group(2);
+                }
+            }
+        } else if (upperSQL.startsWith("DESC")) {
+            db = "system";
+            table = "columns";
+        } else if (upperSQL.startsWith("SHOW")) {
+            db = "system";
+            table = upperSQL.contains("TABLES") ? "tables" : "databases";
+        }
+    }
+
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         return connection.getSampleBlock(insertQuery);

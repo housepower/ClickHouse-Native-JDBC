@@ -28,11 +28,18 @@ public class ClickHouseResultSet extends SQLResultSet {
     private Block lastFetchBlock = null;
 
     private final Block header;
+    private final String db;
+    private final String table;
     private final ClickHouseStatement statement;
     private final CheckedIterator<DataResponse, SQLException> iterator;
 
-    public ClickHouseResultSet(Block header, CheckedIterator<DataResponse, SQLException> iterator, ClickHouseStatement statement) {
+    public ClickHouseResultSet(Block header, String db,
+                               String table,
+                               CheckedIterator<DataResponse, SQLException> iterator,
+                               ClickHouseStatement statement) {
         this.header = header;
+        this.db = db;
+        this.table = table;
         this.iterator = iterator;
         this.statement = statement;
     }
@@ -243,7 +250,7 @@ public class ClickHouseResultSet extends SQLResultSet {
 
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
-        return new ClickHouseResultSetMetaData(header);
+        return new ClickHouseResultSetMetaData(header, db, table);
     }
 
     @Override

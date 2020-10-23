@@ -131,6 +131,9 @@ public class ClickHouseConfig {
                 throw new URISyntaxException("wrong database name path: '" + database + "'", jdbcUrl);
             }
         }
+        if (database != null && database.isEmpty()) {
+            database = "default";
+        }
         return database;
     }
 

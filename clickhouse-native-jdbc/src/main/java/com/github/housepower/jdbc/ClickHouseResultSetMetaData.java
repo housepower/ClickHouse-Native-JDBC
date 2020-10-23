@@ -11,9 +11,13 @@ import java.sql.SQLException;
 public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {
 
     private final Block header;
+    private final String db;
+    private final String table;
 
-    public ClickHouseResultSetMetaData(Block header) {
+    public ClickHouseResultSetMetaData(Block header, String db, String table) {
         this.header = header;
+        this.db = db;
+        this.table = table;
     }
 
     @Override
@@ -86,6 +90,21 @@ public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {
     @Override
     public int getScale(int column) throws SQLException {
         return header.getByPosition(column - 1).type().getScale();
+    }
+
+    @Override
+    public String getTableName(int column) throws SQLException {
+        return table;
+    }
+
+    @Override
+    public String getCatalogName(int column) throws SQLException {
+        return db;
+    }
+
+    @Override
+    public String getSchemaName(int column) throws SQLException {
+        return "";
     }
 
     /*=========================================================*/

@@ -73,7 +73,7 @@ public class DataTypeDecimal implements IDataType {
 
     @Override
     public int getScale() {
-        return precision;
+        return scale;
     }
 
     @Override

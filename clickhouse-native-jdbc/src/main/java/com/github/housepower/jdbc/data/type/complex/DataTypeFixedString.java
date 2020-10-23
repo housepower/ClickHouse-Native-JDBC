@@ -56,7 +56,7 @@ public class DataTypeFixedString implements IDataType {
 
 	@Override
 	public int getPrecision() {
-		return -1;
+		return n;
 	}
 
     @Override
