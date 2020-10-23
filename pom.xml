@@ -45,6 +45,11 @@
     </modules>
 
     <properties>
+        <deploy.repo.snapshots.id>sonatype-nexus-snapshots</deploy.repo.snapshots.id>
+        <deploy.repo.snapshots.url>https://oss.sonatype.org/content/repositories/snapshots</deploy.repo.snapshots.url>
+        <deploy.repo.release.id>sonatype-nexus-staging</deploy.repo.release.id>
+        <deploy.repo.release.url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</deploy.repo.release.url>
+
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -77,12 +82,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>${deploy.repo.snapshots.id}</id>
+            <url>${deploy.repo.snapshots.url}</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype-nexus-staging</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>${deploy.repo.release.id}</id>
+            <url>${deploy.repo.release.url}</url>
         </repository>
     </distributionManagement>
 
