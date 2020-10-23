@@ -55,7 +55,7 @@ public class ClickHouseStatement extends SQLStatement {
         extractDBAndTableName(query);
         Matcher matcher = VALUES_REGEX.matcher(query);
 
-        if (matcher.find() && query.toUpperCase().startsWith("INSERT")) {
+        if (matcher.find() && query.toUpperCase(Locale.ROOT).startsWith("INSERT")) {
             lastResultSet = null;
             String insertQuery = query.substring(0, matcher.end() - 1);
             block = getSampleBlock(insertQuery);
@@ -70,7 +70,7 @@ public class ClickHouseStatement extends SQLStatement {
     }
 
     private void extractDBAndTableName(String sql) {
-        String upperSQL = sql.trim().toUpperCase();
+        String upperSQL = sql.trim().toUpperCase(Locale.ROOT);
         if (upperSQL.startsWith("SELECT")) {
             Matcher m = SELECT_DB_TABLE.matcher(sql);
             if (m.find()) {
