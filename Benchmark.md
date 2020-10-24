@@ -1,7 +1,7 @@
 ## benchmarks
 
 Benchmarks are run by the `github-workflow` docker integration-test, eg [here](https://pipelines.actions.githubusercontent.com/QbHe5hNOfFaRrXVIS27533x1xALCRW60s95Fnk3uNRnLoX4ScD/_apis/pipelines/1/runs/12/signedlogcontent/3?urlExpires=2020-08-02T12%3A52%3A27.0078520Z&urlSigningMethod=HMACV1&urlSignature=Zn3fh71kxFaHRNgjA8OZZVGUz0It45KTCe7DR8MeVtU%3D)
-- All benchmark codes could be seen in the [test code directory](https://github.com/housepower/Clickhouse-Native-JDBC/tree/master/src/test/java/com/github/housepower/jdbc/benchmark), you can do the bench on your machine too.
+- All benchmark codes could be seen in the [test code directory](./clickhouse-native-jdbc/src/test/java/com/github/housepower/jdbc/benchmark), you can do the bench on your machine too.
 - Both  `Clickhouse-Native-JDBC` and `clickhouse-jdbc` are good jdbc clients. And `clickhouse-jdbc` are maintained better, 
     this benchmarks only show your some difference, users could choose freely according to their needs.
 - The result's score means the avg_time to process one operation, lower is better.
