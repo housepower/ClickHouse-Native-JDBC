@@ -15,6 +15,7 @@ before_install:
   - docker-compose up -d
 
 script:
+  - mvn -B -X clean package --file pom.xml
   - mvn -B clean verify -Dmaven.skip.integration=false
   - echo "benchmark TODO"
 
