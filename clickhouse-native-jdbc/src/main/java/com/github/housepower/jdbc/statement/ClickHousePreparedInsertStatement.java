@@ -122,7 +122,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         sb.append(super.toString());
         sb.append(": ");
         try {
-            sb.append(insertQuery + " (");
+            sb.append(insertQuery).append(" (");
             for (int i = 0; i < block.columns(); i++) {
                 Object obj = block.getObject(i);
                 if (obj == null) {
@@ -130,7 +130,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
                 } else if (obj instanceof Number) {
                     sb.append(obj);
                 } else {
-                    sb.append("'" + obj + "'");
+                    sb.append("'").append(obj).append("'");
                 }
                 if (i < block.columns() - 1) {
                     sb.append(",");

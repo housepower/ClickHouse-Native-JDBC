@@ -2,35 +2,33 @@ package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.settings.SettingKey;
 
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 public class DataTypeDate implements IDataType {
 
+    public static IDataType createDateType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) {
+        return new DataTypeDate(serverInfo);
+    }
+
+    // Since `Date` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
+    // we should ensure DON'T modify it anywhere.
     private static final Date DEFAULT_VALUE = new Date(0);
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
+
+    private final ZoneId tz;
 
     public DataTypeDate(PhysicalInfo.ServerInfo serverInfo) {
-        TimeZone dateTimeZone;
-        if (!java.lang.Boolean.TRUE
-                 .equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
-            dateTimeZone = serverInfo.timeZone();
-        } else {
-            dateTimeZone = TimeZone.getDefault();
-        }
-        this.dateFormat.setTimeZone(dateTimeZone);
+        this.tz = DateTimeHelper.chooseTimeZone(serverInfo);
     }
 
     @Override
@@ -69,8 +67,7 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer)
-        throws SQLException, IOException {
+    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         long mills = ((Date) data).getTime();
         long daysSinceEpoch = mills / 1000 / 3600 / 24;
         serializer.writeShort((short) daysSinceEpoch);
@@ -83,8 +80,7 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
-        throws IOException {
+    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
         Date[] data = new Date[rows];
         for (int row = 0; row < rows; row++) {
             short daysSinceEpoch = deserializer.readShort();
@@ -103,16 +99,7 @@ public class DataTypeDate implements IDataType {
         int day = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '\'');
 
-        String timeStr = String.format(Locale.ROOT, "%04d-%02d-%02d", year, month, day);
-        try {
-            java.util.Date date = dateFormat.parse(timeStr);
-            return new Date(date.getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static IDataType createDateType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) {
-        return new DataTypeDate(serverInfo);
+        ZonedDateTime zdt = ZonedDateTime.of(year, month, day, 0, 0, 0, 0, tz);
+        return new Date(zdt.toInstant().toEpochMilli());
     }
 }

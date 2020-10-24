@@ -3,7 +3,6 @@ package com.github.housepower.jdbc;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.SettingKey;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,6 +14,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Enumeration;
 import java.util.Properties;
+
+import static org.junit.Assert.*;
 
 public class ConnectionParamITest {
 
@@ -37,7 +38,7 @@ public class ConnectionParamITest {
         while (rs.next()) {
             ++rowsRead;
         }
-        Assert.assertEquals(1, rowsRead); // not reached
+        assertEquals(1, rowsRead); // not reached
     }
 
     @Test
@@ -51,50 +52,50 @@ public class ConnectionParamITest {
         while (rs.next()) {
             ++rowsRead;
         }
-        Assert.assertEquals(400, rowsRead);
+        assertEquals(400, rowsRead);
     }
 
     @Test
     public void successfullyUrlParser() throws Exception {
         String url = "jdbc:clickhouse://127.0.0.1/system?min_insert_block_size_rows=1000&connect_timeout=50";
         ClickHouseConfig config = new ClickHouseConfig(url, new Properties());
-        Assert.assertEquals(config.database(), "system");
-        Assert.assertEquals(config.settings().get(SettingKey.min_insert_block_size_rows), 1000L);
+        assertEquals("system", config.database());
+        assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
 
-        Assert.assertEquals(config.connectTimeout(), 50000);
+        assertEquals(50000, config.connectTimeout());
     }
 
     @Test
     public void successfullyHostNameOnly() throws Exception {
         String url = "jdbc:clickhouse://my_clickhouse_sever_host_name/system?min_insert_block_size_rows=1000&connect_timeout=50";
         ClickHouseConfig config = new ClickHouseConfig(url, new Properties());
-        Assert.assertEquals(config.address(), "my_clickhouse_sever_host_name");
-        Assert.assertEquals(config.port(), 9000);
-        Assert.assertEquals(config.database(), "system");
-        Assert.assertEquals(config.settings().get(SettingKey.min_insert_block_size_rows), 1000L);
-        Assert.assertEquals(config.connectTimeout(), 50000);
+        assertEquals("my_clickhouse_sever_host_name", config.address());
+        assertEquals(9000, config.port());
+        assertEquals("system", config.database());
+        assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
+        assertEquals(50000, config.connectTimeout());
     }
 
     @Test
     public void successfullyHostNameWithDefaultPort() throws Exception {
         String url = "jdbc:clickhouse://my_clickhouse_sever_host_name:9000/system?min_insert_block_size_rows=1000&connect_timeout=50";
         ClickHouseConfig config = new ClickHouseConfig(url, new Properties());
-        Assert.assertEquals(config.address(), "my_clickhouse_sever_host_name");
-        Assert.assertEquals(config.port(), 9000);
-        Assert.assertEquals(config.database(), "system");
-        Assert.assertEquals(config.settings().get(SettingKey.min_insert_block_size_rows), 1000L);
-        Assert.assertEquals(config.connectTimeout(), 50000);
+        assertEquals("my_clickhouse_sever_host_name", config.address());
+        assertEquals(9000, config.port());
+        assertEquals("system", config.database());
+        assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
+        assertEquals(50000, config.connectTimeout());
     }
 
     @Test
     public void successfullyHostNameWithCustomPort() throws Exception {
         String url = "jdbc:clickhouse://my_clickhouse_sever_host_name:1940/system?min_insert_block_size_rows=1000&connect_timeout=50";
         ClickHouseConfig config = new ClickHouseConfig(url, new Properties());
-        Assert.assertEquals(config.address(), "my_clickhouse_sever_host_name");
-        Assert.assertEquals(config.port(), 1940);
-        Assert.assertEquals(config.database(), "system");
-        Assert.assertEquals(config.settings().get(SettingKey.min_insert_block_size_rows), 1000L);
-        Assert.assertEquals(config.connectTimeout(), 50000);
+        assertEquals("my_clickhouse_sever_host_name", config.address());
+        assertEquals(1940, config.port());
+        assertEquals("system", config.database());
+        assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
+        assertEquals(50000, config.connectTimeout());
     }
 
 }

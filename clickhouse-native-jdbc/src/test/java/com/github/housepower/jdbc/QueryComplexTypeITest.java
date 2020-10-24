@@ -1,6 +1,5 @@
 package com.github.housepower.jdbc;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.Array;
@@ -13,6 +12,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static org.junit.Assert.*;
+
 public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
@@ -24,25 +25,24 @@ public class QueryComplexTypeITest extends AbstractITest {
             Statement statement = connection.createStatement();
             ResultSet rs =
                 statement.executeQuery("select toDate('2020-01-01') as dateValue");
-            Assert.assertTrue(rs.next());
+            assertTrue(rs.next());
 
             dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
             java.util.Date date = dateFormat.parse("2020-01-01 08:00:00");
-            Assert.assertEquals(rs.getDate(1).getTime(), date.getTime());
-            Assert.assertFalse(rs.next());
+            assertEquals(date.getTime(), rs.getDate(1).getTime());
+            assertFalse(rs.next());
         }, true);
 
         // use server timezone, UTC
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
-            ResultSet rs =
-                statement.executeQuery("select toDate('2020-01-01') as dateValue");
-            Assert.assertTrue(rs.next());
+            ResultSet rs = statement.executeQuery("select toDate('2020-01-01') as dateValue");
+            assertTrue(rs.next());
 
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             java.util.Date date = dateFormat.parse("2020-01-01 00:00:00");
-            Assert.assertEquals(rs.getDate(1).getTime(), date.getTime());
-            Assert.assertFalse(rs.next());
+            assertEquals(date.getTime(), rs.getDate(1).getTime());
+            assertFalse(rs.next());
         }, false);
     }
 
@@ -53,9 +53,9 @@ public class QueryComplexTypeITest extends AbstractITest {
             long ts = 946659723 * 1000L;
             ResultSet rs =
                 statement.executeQuery("SELECT nullIf(toDateTime(946659723), toDateTime(0))");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getTimestamp(1).getTime(), ts);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(ts, rs.getTimestamp(1).getTime());
+            assertFalse(rs.next());
         });
     }
 
@@ -68,9 +68,9 @@ public class QueryComplexTypeITest extends AbstractITest {
                 rs =
                 statement.executeQuery("SELECT toFixedString('abc',3),toFixedString('abc',4)");
 
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), "abc");
-            Assert.assertEquals(rs.getString(2), "abc\u0000");
+            assertTrue(rs.next());
+            assertEquals("abc", rs.getString(1));
+            assertEquals("abc\u0000", rs.getString(2));
         });
     }
 
@@ -81,11 +81,11 @@ public class QueryComplexTypeITest extends AbstractITest {
 
             ResultSet rs = statement.executeQuery("SELECT arrayJoin([NULL,1])");
 
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getByte(1), 0);
-            Assert.assertTrue(rs.wasNull());
-            Assert.assertTrue(rs.next());
-            Assert.assertNotNull(rs.getObject(1));
+            assertTrue(rs.next());
+            assertEquals(0, rs.getByte(1));
+            assertTrue(rs.wasNull());
+            assertTrue(rs.next());
+            assertNotNull(rs.getObject(1));
         });
     }
 
@@ -98,12 +98,12 @@ public class QueryComplexTypeITest extends AbstractITest {
                 rs =
                 statement.executeQuery("SELECT arrayJoin([NULL,toFixedString('abc',3)])");
 
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), null);
-            Assert.assertTrue(rs.wasNull());
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), "abc");
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertNull(rs.getString(1));
+            assertTrue(rs.wasNull());
+            assertTrue(rs.next());
+            assertEquals("abc", rs.getString(1));
+            assertFalse(rs.next());
         });
     }
 
@@ -116,22 +116,22 @@ public class QueryComplexTypeITest extends AbstractITest {
             ResultSet rs = statement.executeQuery("SELECT [[1], [2], [3], [4,5,6]] from numbers(10)");
 
             for (int i = 0; i < 10; i ++) {
-                Assert.assertTrue(rs.next());
+                assertTrue(rs.next());
                 Array array1 = rs.getArray(1);
                 Object[] objects = (Object[]) array1.getArray();
-                Assert.assertEquals(objects.length, 4);
+                assertEquals(4, objects.length);
 
                 ClickHouseArray a1 = (ClickHouseArray)(objects[0]);
                 ClickHouseArray a2 = (ClickHouseArray)(objects[1]);
                 ClickHouseArray a3 = (ClickHouseArray)(objects[2]);
                 ClickHouseArray a4 = (ClickHouseArray)(objects[3]);
 
-                Assert.assertArrayEquals((Object[]) a1.getArray(), new Short[]{(short) 1});
-                Assert.assertArrayEquals((Object[]) a2.getArray(), new Short[]{(short) 2});
-                Assert.assertArrayEquals((Object[]) a3.getArray(), new Short[]{(short) 3});
-                Assert.assertArrayEquals((Object[]) a4.getArray(), new Short[]{(short) 4, (short)5, (short)6});
+                assertArrayEquals(new Short[]{(short) 1}, (Object[]) a1.getArray());
+                assertArrayEquals(new Short[]{(short) 2}, (Object[]) a2.getArray());
+                assertArrayEquals(new Short[]{(short) 3}, (Object[]) a3.getArray());
+                assertArrayEquals(new Short[]{(short) 4, (short)5, (short)6}, (Object[]) a4.getArray());
             }
-            Assert.assertFalse(rs.next());
+            assertFalse(rs.next());
         });
     }
 
@@ -143,17 +143,15 @@ public class QueryComplexTypeITest extends AbstractITest {
             // Array(UInt8)
             ResultSet rs = statement.executeQuery("SELECT arrayJoin([[1,2,3],[4,5]])");
 
-            Assert.assertTrue(rs.next());
+            assertTrue(rs.next());
             Array array1 = rs.getArray(1);
-            Assert.assertNotNull(array1);
-            Assert.assertArrayEquals((Object[]) (array1.getArray()),
-                                     new Short[]{(short) 1, (short) 2, (short) 3});
+            assertNotNull(array1);
+            assertArrayEquals(new Short[]{(short) 1, (short) 2, (short) 3}, (Object[]) (array1.getArray()));
 
-            Assert.assertTrue(rs.next());
+            assertTrue(rs.next());
             Array array2 = rs.getArray(1);
-            Assert.assertNotNull(array2);
-            Assert.assertArrayEquals((Object[]) array2.getArray(),
-                                     new Number[]{(short) 4, (short) 5});
+            assertNotNull(array2);
+            assertArrayEquals(new Number[]{(short) 4, (short) 5}, (Object[]) array2.getArray());
         });
     }
 
@@ -166,29 +164,26 @@ public class QueryComplexTypeITest extends AbstractITest {
                 rs =
                 statement.executeQuery("SELECT arrayJoin([[(1,'3'), (2,'4')],[(3,'5')]])");
 
-            Assert.assertTrue(rs.next());
+            assertTrue(rs.next());
             Array array1 = rs.getArray(1);
-            Assert.assertNotNull(array1);
+            assertNotNull(array1);
 
             Object[] row1 = (Object[]) array1.getArray();
-            Assert.assertTrue(row1.length == 2);
-            Assert.assertEquals(
-                ((Short) (((ClickHouseStruct) row1[0]).getAttributes()[0])).intValue(), 1);
-            Assert.assertEquals(((ClickHouseStruct) row1[0]).getAttributes()[1], "3");
+            assertEquals(2, row1.length);
+            assertEquals(1, ((Short) (((ClickHouseStruct) row1[0]).getAttributes()[0])).intValue());
+            assertEquals("3", ((ClickHouseStruct) row1[0]).getAttributes()[1]);
 
-            Assert.assertEquals(
-                ((Short) (((ClickHouseStruct) row1[1]).getAttributes()[0])).intValue(), 2);
-            Assert.assertEquals(((ClickHouseStruct) row1[1]).getAttributes()[1], "4");
+            assertEquals(2, ((Short) (((ClickHouseStruct) row1[1]).getAttributes()[0])).intValue());
+            assertEquals("4", ((ClickHouseStruct) row1[1]).getAttributes()[1]);
 
-            Assert.assertTrue(rs.next());
+            assertTrue(rs.next());
             Array array2 = rs.getArray(1);
             Object[] row2 = (Object[]) array2.getArray();
-            Assert.assertTrue(row2.length == 1);
-            Assert.assertEquals(
-                ((Short) (((ClickHouseStruct) row2[0]).getAttributes()[0])).intValue(), 3);
-            Assert.assertEquals((((ClickHouseStruct) row2[0]).getAttributes()[1]), "5");
+            assertEquals(1, row2.length);
+            assertEquals(3, ((Short) (((ClickHouseStruct) row2[0]).getAttributes()[0])).intValue());
+            assertEquals("5", (((ClickHouseStruct) row2[0]).getAttributes()[1]));
 
-            Assert.assertFalse(rs.next());
+            assertFalse(rs.next());
         });
     }
 
@@ -203,22 +198,19 @@ public class QueryComplexTypeITest extends AbstractITest {
                     "SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v) from numbers(10)");
 
             for (int i = 0; i < 10; i++) {
-                Assert.assertTrue(rs.next());
+                assertTrue(rs.next());
                 Array array1 = rs.getArray(1);
-                Assert.assertNotNull(array1);
+                assertNotNull(array1);
 
                 Double[][] res = new Double[][]{{1.1, 1.2}, {2.1, 2.2}, {3.1, 3.2}};
 
                 Object[] arr = (Object[]) (rs.getArray(1).getArray());
-                Assert.assertArrayEquals((Object[]) ((ClickHouseArray) (arr[0])).getArray(),
-                                         res[0]);
-                Assert.assertArrayEquals((Object[]) ((ClickHouseArray) (arr[1])).getArray(),
-                                         res[1]);
-                Assert.assertArrayEquals((Object[]) ((ClickHouseArray) (arr[2])).getArray(),
-                                         res[2]);
-                Assert.assertEquals(rs.getString(2), "Array(Array(Float64))");
+                assertArrayEquals(res[0], (Object[]) ((ClickHouseArray) (arr[0])).getArray());
+                assertArrayEquals(res[1], (Object[]) ((ClickHouseArray) (arr[1])).getArray());
+                assertArrayEquals(res[2], (Object[]) ((ClickHouseArray) (arr[2])).getArray());
+                assertEquals("Array(Array(Float64))", rs.getString(2));
             }
-            Assert.assertFalse(rs.next());
+            assertFalse(rs.next());
 
         });
     }
@@ -231,8 +223,8 @@ public class QueryComplexTypeITest extends AbstractITest {
             long ts = 946659723 * 1000L;
             ResultSet rs = statement.executeQuery("SELECT toDateTime(946659723)");
 
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getTimestamp(1).getTime(), ts);
+            assertTrue(rs.next());
+            assertEquals(ts, rs.getTimestamp(1).getTime());
         });
     }
 
@@ -242,15 +234,14 @@ public class QueryComplexTypeITest extends AbstractITest {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("SELECT (toUInt32(1),'2')");
 
-            Assert.assertTrue(rs.next());
+            assertTrue(rs.next());
             Struct struct = (Struct) rs.getObject(1);
-            Assert.assertEquals(struct.getAttributes(), new Object[]{(long) 1, "2"});
+            assertArrayEquals(new Object[]{(long) 1, "2"}, struct.getAttributes());
 
-            Map<String, Class<?>> attrNameWithClass = new LinkedHashMap<String, Class<?>>();
+            Map<String, Class<?>> attrNameWithClass = new LinkedHashMap<>();
             attrNameWithClass.put("_2", String.class);
             attrNameWithClass.put("_1", Long.class);
-            Assert.assertEquals(struct.getAttributes(attrNameWithClass),
-                                new Object[]{"2", (long) 1});
+            assertArrayEquals(new Object[]{"2", (long) 1}, struct.getAttributes(attrNameWithClass));
         });
     }
 
@@ -263,9 +254,9 @@ public class QueryComplexTypeITest extends AbstractITest {
             statement.execute("INSERT INTO test VALUES('a')");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
 
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), "a");
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals("a", rs.getString(1));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -279,9 +270,9 @@ public class QueryComplexTypeITest extends AbstractITest {
             statement.execute("INSERT INTO test VALUES('a')");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
 
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), "a");
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals("a", rs.getString(1));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }

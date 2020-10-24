@@ -22,11 +22,9 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class AbstractIBenchmark {
     private static final int
-        SERVER_PORT =
-        Integer.valueOf(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
+        SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
     private static final int
-        SERVER_HTTP_PORT =
-        Integer.valueOf(System.getProperty("CLICK_HOUSE_SERVER_HTTP_PORT", "8123"));
+        SERVER_HTTP_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_HTTP_PORT", "8123"));
 
     private final Driver httpDriver = new ru.yandex.clickhouse.ClickHouseDriver();
     private final Driver nativeDriver = new com.github.housepower.jdbc.ClickHouseDriver();
@@ -64,11 +62,8 @@ public class AbstractIBenchmark {
                 DriverManager.registerDriver(nativeDriver);
                 break;
         }
-        Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:" + port);
-        try {
+        try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:" + port)) {
             withConnection.apply(connection);
-        } finally {
-            connection.close();
         }
     }
 

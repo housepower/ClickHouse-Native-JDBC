@@ -2,38 +2,42 @@ package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.settings.SettingKey;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 public class DataTypeDateTime implements IDataType {
 
+    public static IDataType createDateTimeType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+        if (lexer.isCharacter('(')) {
+            Validate.isTrue(lexer.character() == '(');
+            StringView dataTimeZone = lexer.stringLiteral();
+            Validate.isTrue(lexer.character() == ')');
+            return new DataTypeDateTime("DateTime('" + dataTimeZone + "')", serverInfo);
+        }
+        return new DataTypeDateTime("DateTime", serverInfo);
+    }
+
+    // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
+    // we should ensure DON'T modify it anywhere.
     private static final Timestamp DEFAULT_VALUE = new Timestamp(0);
-    private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT);
+    private final ZoneId tz;
 
     private final String name;
 
     public DataTypeDateTime(String name, PhysicalInfo.ServerInfo serverInfo) {
         this.name = name;
-        if (!java.lang.Boolean.TRUE
-            .equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
-            dateTimeFormat.setTimeZone(serverInfo.timeZone());
-        } else {
-            dateTimeFormat.setTimeZone(TimeZone.getDefault());
-        }
+        this.tz = DateTimeHelper.chooseTimeZone(serverInfo);
     }
 
     @Override
@@ -61,10 +65,10 @@ public class DataTypeDateTime implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return 0;
-	}
+    @Override
+    public int getPrecision() {
+        return 0;
+    }
 
     @Override
     public int getScale() {
@@ -87,14 +91,8 @@ public class DataTypeDateTime implements IDataType {
         int seconds = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '\'');
 
-        String timeStr = String.format(Locale.ROOT, "%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hours, minutes, seconds);
-
-        try {
-            Date date = dateTimeFormat.parse(timeStr);
-            return new Timestamp(date.getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hours, minutes, seconds, 0, tz);
+        return Timestamp.from(zdt.toInstant());
     }
 
     @Override
@@ -114,16 +112,5 @@ public class DataTypeDateTime implements IDataType {
             data[row] = new Timestamp(deserializer.readInt() * 1000L);
         }
         return data;
-    }
-
-    public static IDataType createDateTimeType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
-        if (lexer.isCharacter('(')) {
-            Validate.isTrue(lexer.character() == '(');
-            StringView dataTimeZone = lexer.stringLiteral();
-            Validate.isTrue(lexer.character() == ')');
-            return new DataTypeDateTime("DateTime('" +
-                                        dataTimeZone + "')", serverInfo);
-        }
-        return new DataTypeDateTime("DateTime", serverInfo);
     }
 }

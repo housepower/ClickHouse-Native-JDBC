@@ -14,7 +14,7 @@ import ru.yandex.clickhouse.domain.ClickHouseFormat;
 /**
  */
 public class RowBinaryIntIBenchmark extends AbstractInsertIBenchmark {
-    private String columnType = "Int32";
+    private final String columnType = "Int32";
 
     @Benchmark
     @Test

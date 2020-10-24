@@ -13,7 +13,7 @@ public class DataTypeInt8 implements IDataType {
 
     private static final Byte DEFAULT_VALUE = 0;
     private final String name;
-    private boolean isUnsigned;
+    private final boolean isUnsigned;
 
     public DataTypeInt8(String name) {
         this.name = name;

@@ -34,23 +34,20 @@ public class WideColumnStringInsertIBenchmark extends AbstractInsertIBenchmark {
         withConnection(benchInsert, ConnectionType.HTTP);
     }
 
-    public WithConnection benchInsert = new WithConnection(){
-        @Override
-        public void apply(Connection connection) throws Exception {
-            wideColumnPrepare(connection, "String");
-            String params = Strings.repeat("?, ", columnNum);
-            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO "  + getTableName() +" values("   + params.substring(0, params.length()-2) + ")");
+    public WithConnection benchInsert = connection -> {
+        wideColumnPrepare(connection, "String");
+        String params = Strings.repeat("?, ", columnNum);
+        PreparedStatement pstmt = connection.prepareStatement("INSERT INTO "  + getTableName() +" values("   + params.substring(0, params.length()-2) + ")");
 
-            for (int i = 0; i < batchSize; i++) {
-                for (int j = 0; j < columnNum; j++ ) {
-                    pstmt.setString(j + 1, j + 1 + "");
-                }
-                pstmt.addBatch();
+        for (int i = 0; i < batchSize; i++) {
+            for (int j = 0; j < columnNum; j++ ) {
+                pstmt.setString(j + 1, j + 1 + "");
             }
-            int []res = pstmt.executeBatch();
-            Assert.assertEquals(res.length, batchSize);
-            wideColumnAfter(connection);
+            pstmt.addBatch();
         }
+        int []res = pstmt.executeBatch();
+        Assert.assertEquals(res.length, batchSize);
+        wideColumnAfter(connection);
     };
 
 }

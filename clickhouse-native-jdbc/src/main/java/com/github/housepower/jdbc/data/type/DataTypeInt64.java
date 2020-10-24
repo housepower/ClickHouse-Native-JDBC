@@ -15,7 +15,7 @@ public class DataTypeInt64 implements IDataType {
 
     private static final Long DEFAULT_VALUE = 0L;
     private final String name;
-    private boolean isUnsigned;
+    private final boolean isUnsigned;
 
     private static final BigInteger TWO_COMPL_REF = BigInteger.ONE.shiftLeft(64);
 
@@ -70,19 +70,18 @@ public class DataTypeInt64 implements IDataType {
         throws SQLException, IOException {
         long l = deserializer.readLong();
         if (isUnsigned) {
-            BigInteger unsigned = new BigInteger(1, longToBytes(l));
-            return unsigned;
+            return new BigInteger(1, longToBytes(l));
         }
         return l;
     }
 
-    private static byte[] longToBytes(long x) {
+    private byte[] longToBytes(long x) {
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.putLong(x);
         return buffer.array();
     }
 
-    public static BigInteger parseBigIntegerPositive(String num, int bitlen) {
+    public BigInteger parseBigIntegerPositive(String num, int bitlen) {
         BigInteger b = new BigInteger(num);
         if (b.compareTo(BigInteger.ZERO) < 0) {
             b = b.add(BigInteger.ONE.shiftLeft(bitlen));

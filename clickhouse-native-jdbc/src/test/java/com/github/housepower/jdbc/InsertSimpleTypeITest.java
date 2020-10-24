@@ -1,6 +1,5 @@
 package com.github.housepower.jdbc;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -10,6 +9,8 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.*;
 
 public class InsertSimpleTypeITest extends AbstractITest {
 
@@ -24,11 +25,11 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("INSERT INTO test VALUES(" + 255 + "," + Byte.MIN_VALUE + ")");
 
             ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_uInt8");
-            Assert.assertTrue(rs.next());
+            assertTrue(rs.next());
             int aa = rs.getInt(1);
-            Assert.assertEquals(aa, 255);
-            Assert.assertEquals(rs.getByte(2), Byte.MIN_VALUE);
-            Assert.assertFalse(rs.next());
+            assertEquals(255, aa);
+            assertEquals(Byte.MIN_VALUE, rs.getByte(2));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -42,10 +43,10 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(test_uInt16 UInt16, test_Int16 Int16)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Short.MAX_VALUE + "," + Short.MIN_VALUE + ")");
             ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_uInt16");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getShort(1), Short.MAX_VALUE);
-            Assert.assertEquals(rs.getShort(2), Short.MIN_VALUE);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(Short.MAX_VALUE, rs.getShort(1));
+            assertEquals(Short.MIN_VALUE, rs.getShort(2));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -59,10 +60,10 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(test_uInt32 UInt32, test_Int32 Int32)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Integer.MAX_VALUE + "," + Integer.MIN_VALUE + ")");
             ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_uInt32");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getInt(1), Integer.MAX_VALUE);
-            Assert.assertEquals(rs.getInt(2), Integer.MIN_VALUE);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(Integer.MAX_VALUE, rs.getInt(1));
+            assertEquals(Integer.MIN_VALUE, rs.getInt(2));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -71,8 +72,8 @@ public class InsertSimpleTypeITest extends AbstractITest {
     public void successfullyIPv4DataType() throws Exception {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
-            Long minIp = 0l;
-            Long maxIp = (1l << 32) - 1;
+            long minIp = 0L;
+            long maxIp = (1L << 32) - 1;
 
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(min_ip IPv4,max_ip IPv4)ENGINE=Log");
@@ -84,10 +85,10 @@ public class InsertSimpleTypeITest extends AbstractITest {
             }
             pstmt.executeBatch();
             ResultSet rs = statement.executeQuery("SELECT min_ip,max_ip FROM test");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getLong(1), minIp.longValue());
-            Assert.assertEquals(rs.getLong(2), maxIp.longValue());
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(minIp, rs.getLong(1));
+            assertEquals(maxIp, rs.getLong(2));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -101,10 +102,10 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(test_uInt64 UInt64, test_Int64 Int64)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Long.MAX_VALUE + "," + Long.MIN_VALUE + ")");
             ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_uInt64");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getLong(1), Long.MAX_VALUE);
-            Assert.assertEquals(rs.getLong(2), Long.MIN_VALUE);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(Long.MAX_VALUE, rs.getLong(1));
+            assertEquals(Long.MIN_VALUE, rs.getLong(2));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -118,9 +119,9 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(test String)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES('test_string')");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), "test_string");
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals("test_string", rs.getString(1));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -134,13 +135,15 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(test Date, test2 Date)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES('2000-01-01', '2000-01-31')");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1),
-                    LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toEpochDay());
-            Assert.assertEquals(rs.getDate(2).getTime() / TimeUnit.DAYS.toMillis(1),
-                    LocalDate.of(2000, 1, 31).atStartOfDay(ZoneOffset.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toEpochDay());
+            assertTrue(rs.next());
+            assertEquals(
+                    LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toEpochDay(),
+                    rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1));
+            assertEquals(
+                    LocalDate.of(2000, 1, 31).atStartOfDay(ZoneOffset.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toEpochDay(),
+                    rs.getDate(2).getTime() / TimeUnit.DAYS.toMillis(1));
 
-            Assert.assertFalse(rs.next());
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         }, true);
     }
@@ -154,11 +157,11 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(test_float32 Float32)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Float.MIN_VALUE + ")(" + Float.MAX_VALUE + ")");
             ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_float32");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getFloat(1), Float.MIN_VALUE, 0.000000000001);
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getFloat(1), Float.MAX_VALUE, 0.000000000001);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(Float.MIN_VALUE, rs.getFloat(1), 0.000000000001);
+            assertTrue(rs.next());
+            assertEquals(Float.MAX_VALUE, rs.getFloat(1), 0.000000000001);
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -173,11 +176,11 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(test_float64 Float64)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Double.MIN_VALUE + ")(" + Double.MAX_VALUE + ")");
             ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY test_float64");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getDouble(1), Double.MIN_VALUE, 0.000000000001);
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getDouble(1), Double.MAX_VALUE, 0.000000000001);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(Double.MIN_VALUE, rs.getDouble(1), 0.000000000001);
+            assertTrue(rs.next());
+            assertEquals(Double.MAX_VALUE, rs.getDouble(1), 0.000000000001);
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -191,9 +194,9 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(test UUID)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES('01234567-89ab-cdef-0123-456789abcdef')");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), "01234567-89ab-cdef-0123-456789abcdef");
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals("01234567-89ab-cdef-0123-456789abcdef", rs.getString(1));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -206,11 +209,11 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.execute("CREATE TABLE test(id Int32) ENGINE = Log");
             statement.execute("INSERT INTO test VALUES (1), (2)");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getInt(1), 1);
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getInt(1), 2);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(1, rs.getInt(1));
+            assertTrue(rs.next());
+            assertEquals(2, rs.getInt(1));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
@@ -230,19 +233,19 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery(insertSQL);
 
             ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY i8");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getByte(1), -1);
-            Assert.assertEquals(rs.getShort(1), (1 << 8) - 1);
+            assertTrue(rs.next());
+            assertEquals(-1, rs.getByte(1));
+            assertEquals((1 << 8) - 1, rs.getShort(1));
 
-            Assert.assertEquals(rs.getShort(2), -1);
-            Assert.assertEquals(rs.getInt(2), (1 << 16) - 1);
+            assertEquals(-1, rs.getShort(2));
+            assertEquals((1 << 16) - 1, rs.getInt(2));
 
-            Assert.assertEquals(rs.getInt(3), -1);
-            Assert.assertEquals(rs.getLong(3), 4294967295L);
+            assertEquals(-1, rs.getInt(3));
+            assertEquals(4294967295L, rs.getLong(3));
 
-            Assert.assertEquals(rs.getLong(4), -9223372036854775808L);
-            Assert.assertEquals(rs.getBigDecimal(4), new BigDecimal("9223372036854775808"));
-            Assert.assertFalse(rs.next());
+            assertEquals(-9223372036854775808L, rs.getLong(4));
+            assertEquals(new BigDecimal("9223372036854775808"), rs.getBigDecimal(4));
+            assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }

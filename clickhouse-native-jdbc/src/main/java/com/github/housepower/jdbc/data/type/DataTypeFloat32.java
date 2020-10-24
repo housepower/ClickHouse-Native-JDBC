@@ -71,5 +71,4 @@ public class DataTypeFloat32 implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().floatValue();
     }
-
 }

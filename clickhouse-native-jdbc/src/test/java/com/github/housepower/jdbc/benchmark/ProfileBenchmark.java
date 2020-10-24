@@ -1,8 +1,5 @@
 package com.github.housepower.jdbc.benchmark;
 
-/**
- */
-
 import org.junit.Test;
 
 import java.sql.ResultSet;
@@ -12,8 +9,8 @@ import java.util.Locale;
 /**
  */
 public class ProfileBenchmark extends AbstractIBenchmark{
-    private static long n = 10000000;
-    private static long statsOutputFrequency = 10;
+    private static final long n = 10000000;
+    private static final long statsOutputFrequency = 10;
 
     public WithConnection benchSelectSumInt = connection -> {
         Statement statement = connection.createStatement();

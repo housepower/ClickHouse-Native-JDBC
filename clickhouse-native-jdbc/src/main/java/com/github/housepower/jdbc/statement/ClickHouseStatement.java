@@ -105,7 +105,7 @@ public class ClickHouseStatement extends SQLStatement {
         if (max < 0) {
             throw new SQLException(String.format(Locale.ROOT, "Illegal maxRows value: %d", max));
         }
-        maxRows = max * 1L;
+        maxRows = max;
     }
 
     @Override

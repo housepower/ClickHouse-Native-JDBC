@@ -2,47 +2,21 @@ package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.connect.PhysicalInfo.ServerInfo;
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.settings.SettingKey;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 public class DataTypeDateTime64 implements IDataType {
-
-    public static final Timestamp DEFAULT_VALUE = new Timestamp(0);
-    public static final int NANOS_IN_SECOND = 1_000_000_000;
-    public static final int MILLIS_IN_SECOND = 1000;
-    private final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS", Locale.ROOT);
-    private final String name;
-    private final TimeZone timeZone;
-
-    public DataTypeDateTime64(String name, ServerInfo serverInfo) {
-        TimeZone timeZone1 = chooseTimeZone(serverInfo);
-        this.name = name;
-        this.timeZone = timeZone1;
-        this.dateTimeFormat.withZone(timeZone1.toZoneId());
-    }
-
-    private static TimeZone chooseTimeZone(ServerInfo serverInfo) {
-        TimeZone timeZone;
-        if (!Boolean.TRUE.equals(serverInfo.getConfigure().settings().get(SettingKey.use_client_time_zone))) {
-            timeZone = serverInfo.timeZone();
-        } else {
-            timeZone = TimeZone.getDefault();
-        }
-        return timeZone;
-    }
 
     public static DataTypeDateTime64 createDateTime64Type(SQLLexer lexer, ServerInfo serverInfo) throws SQLException {
         if (lexer.isCharacter('(')) {
@@ -60,6 +34,19 @@ public class DataTypeDateTime64 implements IDataType {
             return new DataTypeDateTime64("DateTime64(" + precision + ")", serverInfo);
         }
         return new DataTypeDateTime64("DateTime64", serverInfo);
+    }
+
+    // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
+    // we should ensure DON'T modify it anywhere.
+    public static final Timestamp DEFAULT_VALUE = new Timestamp(0);
+    public static final int NANOS_IN_SECOND = 1_000_000_000;
+    public static final int MILLIS_IN_SECOND = 1000;
+    private final String name;
+    private final ZoneId tz;
+
+    public DataTypeDateTime64(String name, ServerInfo serverInfo) {
+        this.name = name;
+        this.tz = DateTimeHelper.chooseTimeZone(serverInfo);
     }
 
     @Override
@@ -87,10 +74,10 @@ public class DataTypeDateTime64 implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return 0;
-	}
+    @Override
+    public int getPrecision() {
+        return 0;
+    }
 
     @Override
     public int getScale() {
@@ -119,9 +106,8 @@ public class DataTypeDateTime64 implements IDataType {
         Validate.isTrue(lexer.character() == '\'');
         Validate.isTrue(lexer.character() == ')');
 
-        String timeStr = String.format(Locale.ROOT, "%04d-%02d-%02d %02d:%02d:%02d.%09d", year, month, day, hours, minutes, seconds, nanos);
-        LocalDateTime dateTime = LocalDateTime.parse(timeStr, dateTimeFormat);
-        return Timestamp.valueOf(dateTime);
+        ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hours, minutes, seconds, nanos, tz);
+        return Timestamp.from(zdt.toInstant());
     }
 
     @Override

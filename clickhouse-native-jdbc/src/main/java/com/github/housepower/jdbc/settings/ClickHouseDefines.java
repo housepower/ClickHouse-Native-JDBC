@@ -10,8 +10,8 @@ public class ClickHouseDefines {
     public static final Integer DBMS_MIN_REVISION_WITH_SERVER_TIMEZONE = 54058;
     public static final Integer DBMS_MIN_REVISION_WITH_SERVER_DISPLAY_NAME = 54372;
 
-    public static final int MAX_BLOCK_SIZE = 1048576 * 10;
-    public static int SOCKET_BUFFER_SIZE = 1048576;
+    public static final int MAX_BLOCK_SIZE = 1024 * 1024 * 10;
+    public static int SOCKET_BUFFER_SIZE = 1024 * 1024;
 
-    public static int COLUMN_BUFFER = 1048576;
+    public static int COLUMN_BUFFER = 1024 * 1024;
 }

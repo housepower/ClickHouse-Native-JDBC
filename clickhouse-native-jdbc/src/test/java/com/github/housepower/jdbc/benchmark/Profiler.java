@@ -6,9 +6,9 @@ import java.util.Locale;
  * From https://gist.github.com/gothug/3b35fe0cec302efe6f8314a9cab8865e
  */
 public class Profiler {
-    public class ElapsedTime {
-        private long elapsedTimeMillis;
-        private long elapsedTimeDeltaMillis;
+    public static class ElapsedTime {
+        private final long elapsedTimeMillis;
+        private final long elapsedTimeDeltaMillis;
 
         public long getElapsedTimeMillis() { return elapsedTimeMillis; }
         public long getElapsedTimeDeltaMillis() { return elapsedTimeDeltaMillis; }
@@ -76,6 +76,7 @@ public class Profiler {
         String totalElapsedMillisStr = fixedLengthString(String.valueOf(elapsedMillis), 6);
         String millisPassedFromLastLogStr = fixedLengthString(String.valueOf(elapsedDeltaMillis), 6);
         System.out.println(percentCompleteStr + " Total memory (MB): " + totalMemoryStr + ", used memory (MB): "
-                           + usedMemoryStr + ", time elapsed: " + totalElapsedMillisStr + "(+" + millisPassedFromLastLogStr + " ms)");
+                           + usedMemoryStr + ", time elapsed: " + totalElapsedMillisStr
+                           + "(+" + millisPassedFromLastLogStr + " ms)");
     }
 }

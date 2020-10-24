@@ -64,7 +64,7 @@ public class DataTypeFactory {
     }
 
     private static Map<String, IDataType> initialDataTypes() {
-        Map<String, IDataType> creators = new HashMap<String, IDataType>();
+        Map<String, IDataType> creators = new HashMap<>();
         
         creators.put("IPv4", new DataTypeIPv4());
         creators.put("UUID", new DataTypeUUID());

@@ -72,5 +72,4 @@ public class DataTypeUUID implements IDataType {
         }
         return data;
     }
-
 }

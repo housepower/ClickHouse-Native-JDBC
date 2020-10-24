@@ -2,88 +2,87 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.misc.SQLLexer;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class SQLLexerITest extends AbstractITest {
 
     @Test
     public void successfullyNumber() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "123");
-        Assert.assertEquals(sqlLexer.numberLiteral(), 123L);
+        assertEquals(123L, sqlLexer.numberLiteral());
     }
 
     @Test
     public void successfullyNegativeNumber() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "-123");
-        Assert.assertEquals(sqlLexer.numberLiteral(), -123L);
+        assertEquals(-123L, sqlLexer.numberLiteral());
     }
 
     @Test
     public void successfullyDoubleNumber() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "-123.0 3E2");
-        Assert.assertEquals(sqlLexer.numberLiteral(), -123.0);
-        Assert.assertEquals(sqlLexer.numberLiteral(), 300.0);
+        assertEquals(-123.0, sqlLexer.numberLiteral());
+        assertEquals(300.0, sqlLexer.numberLiteral());
     }
 
     @Test
     public void successfullyNumberInHexa() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "-0xfp2 0xfp2 0xfp1 0xfp0 0xf -0xf");
-        Assert.assertEquals(sqlLexer.numberLiteral(), -60.0);
-        Assert.assertEquals(sqlLexer.numberLiteral(), 60.0d);
-        Assert.assertEquals(sqlLexer.numberLiteral(), 30.0);
-        Assert.assertEquals(sqlLexer.numberLiteral(), 15.0);
-        Assert.assertEquals(sqlLexer.numberLiteral(), 15L);
-        Assert.assertEquals(sqlLexer.numberLiteral(), -15L);
+        assertEquals(-60.0, sqlLexer.numberLiteral());
+        assertEquals(60.0d, sqlLexer.numberLiteral());
+        assertEquals(30.0, sqlLexer.numberLiteral());
+        assertEquals(15.0, sqlLexer.numberLiteral());
+        assertEquals(15L, sqlLexer.numberLiteral());
+        assertEquals(-15L, sqlLexer.numberLiteral());
     }
 
     @Test
     public void successfullyNumberInBinary() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "0b111 -0b111 +0b111");
-        Assert.assertEquals(sqlLexer.numberLiteral(), 7L);
-        Assert.assertEquals(sqlLexer.numberLiteral(), -7L);
-        Assert.assertEquals(sqlLexer.numberLiteral(), 7L);
+        assertEquals(7L, sqlLexer.numberLiteral());
+        assertEquals(-7L, sqlLexer.numberLiteral());
+        assertEquals(7L, sqlLexer.numberLiteral());
     }
 
     @Test
     public void successfullyLong() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "123 +123  -123    -1");
-        Assert.assertEquals(sqlLexer.longLiteral(), 123L);
-        Assert.assertEquals(sqlLexer.longLiteral(), 123L);
-        Assert.assertEquals(sqlLexer.longLiteral(), -123L);
-        Assert.assertEquals(sqlLexer.longLiteral(), -1L);
+        assertEquals(123L, sqlLexer.longLiteral());
+        assertEquals(123L, sqlLexer.longLiteral());
+        assertEquals(-123L, sqlLexer.longLiteral());
+        assertEquals(-1L, sqlLexer.longLiteral());
     }
 
     @Test
     public void successfullyStringLiteral() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "'this is a quoted message'");
-        Assert.assertEquals(sqlLexer.stringLiteral().toString(), "this is a quoted message");
-
+        assertEquals("this is a quoted message", sqlLexer.stringLiteral().toString());
     }
 
     @Test
     public void successfullyStringLiteralWithSingleQuote() throws Exception {
-        String s =  "'this is a message with \\' char'";
-        SQLLexer sqlLexer = new SQLLexer(0,s);
+        String s = "'this is a message with \\' char'";
+        SQLLexer sqlLexer = new SQLLexer(0, s);
         System.out.println(s);
-        Assert.assertEquals("this is a message with \\' char", sqlLexer.stringLiteral().toString());
+        assertEquals("this is a message with \\' char", sqlLexer.stringLiteral().toString());
     }
 
     @Test
     public void successfullyBareWord() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "_askes String");
-        Assert.assertEquals(sqlLexer.bareWord().toString(), "_askes");
-        Assert.assertEquals(sqlLexer.bareWord().toString(), "String");
-
+        assertEquals("_askes", sqlLexer.bareWord().toString());
+        assertEquals("String", sqlLexer.bareWord().toString());
     }
 
     @Test
     public void successfullyDateTime() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "h DateTime('Asia/Shanghai')");
-        Assert.assertEquals(sqlLexer.bareWord().toString(), "h");
-        Assert.assertEquals(sqlLexer.bareWord().toString(), "DateTime");
-        Assert.assertEquals(sqlLexer.character(), '(');
-        Assert.assertEquals(sqlLexer.stringLiteral().toString(), "Asia/Shanghai");
-        Assert.assertEquals(sqlLexer.character(), ')');
+        assertEquals("h", sqlLexer.bareWord().toString());
+        assertEquals("DateTime", sqlLexer.bareWord().toString());
+        assertEquals('(', sqlLexer.character());
+        assertEquals("Asia/Shanghai", sqlLexer.stringLiteral().toString());
+        assertEquals(')', sqlLexer.character());
     }
 }

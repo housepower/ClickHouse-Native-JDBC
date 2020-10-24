@@ -22,9 +22,7 @@ public class ClickHouseArray extends SQLArray {
 
     public ClickHouseArray slice(int offset, int length) {
         Object []result = new Object[length];
-        for (int i = 0 ; i < length; i ++) {
-            result[i] = data[i+offset];
-        }
+        if (length >= 0) System.arraycopy(data, offset, result, 0, length);
         return new ClickHouseArray(result);
     }
 }

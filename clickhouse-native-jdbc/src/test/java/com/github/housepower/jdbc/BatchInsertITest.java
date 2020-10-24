@@ -1,9 +1,7 @@
 package com.github.housepower.jdbc;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,11 +10,13 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 public class BatchInsertITest extends AbstractITest {
 
     void assertBatchInsertResult(int[] result, int expectedRowCount) {
-        Assert.assertEquals(result.length, expectedRowCount);
-        Assert.assertEquals(Arrays.stream(result).sum(), expectedRowCount);
+        assertEquals(expectedRowCount, result.length);
+        assertEquals(expectedRowCount, Arrays.stream(result).sum());
     }
 
     @Test
@@ -42,12 +42,12 @@ public class BatchInsertITest extends AbstractITest {
             boolean hasResult = false;
             for (int i = 0; i < Byte.MAX_VALUE && rs.next(); i++) {
                 hasResult = true;
-                Assert.assertEquals(rs.getByte(1), i);
-                Assert.assertEquals(rs.getByte(2), 1);
-                Assert.assertEquals(rs.getString(3), "Zhang San" + i);
-                Assert.assertEquals(rs.getString(4), "张三" + i);
+                assertEquals(i, rs.getByte(1));
+                assertEquals(1, rs.getByte(2));
+                assertEquals("Zhang San" + i, rs.getString(3));
+                assertEquals("张三" + i, rs.getString(4));
             }
-            Assert.assertTrue(hasResult);
+            assertTrue(hasResult);
         });
 
     }
@@ -112,22 +112,21 @@ public class BatchInsertITest extends AbstractITest {
                 String name2 = rs.getString(2);
 
                 if (i * 2 >= insertBatchSize) {
-                    Assert.assertEquals(name1, null);
-                    Assert.assertEquals(name1, null);
+                    assertNull(name1);
                 } else {
-                    Assert.assertEquals(name1, "String");
-                    Assert.assertTrue(name2.contains("String"));
-                    Assert.assertTrue(name2.length() == 10);
+                    assertEquals("String", name1);
+                    assertTrue(name2.contains("String"));
+                    assertEquals(10, name2.length());
                 }
                 i++;
             }
 
             rs = stmt.executeQuery(
                     "select countIf(isNull(name)), countIf(isNotNull(name)), countIf(isNotNull(name2))  from test;");
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(insertBatchSize / 2, rs.getInt(1));
-            Assert.assertEquals(insertBatchSize / 2, rs.getInt(2));
-            Assert.assertEquals(insertBatchSize / 2, rs.getInt(3));
+            assertTrue(rs.next());
+            assertEquals(insertBatchSize / 2, rs.getInt(1));
+            assertEquals(insertBatchSize / 2, rs.getInt(2));
+            assertEquals(insertBatchSize / 2, rs.getInt(3));
 
             stmt.executeQuery("DROP TABLE IF EXISTS test");
         });
@@ -160,8 +159,8 @@ public class BatchInsertITest extends AbstractITest {
 
             ResultSet rs = statement.executeQuery("select * from test");
             while (rs.next()) {
-                Assert.assertArrayEquals((Object[]) rs.getArray(1).getArray(), array.toArray());
-                Assert.assertArrayEquals((Object[]) rs.getArray(2).getArray(), array2.toArray());
+                assertArrayEquals(array.toArray(), (Object[]) rs.getArray(1).getArray());
+                assertArrayEquals(array2.toArray(), (Object[]) rs.getArray(2).getArray());
             }
         });
 
@@ -188,9 +187,9 @@ public class BatchInsertITest extends AbstractITest {
             assertBatchInsertResult(preparedStatement.executeBatch(), 24);
 
             long selectTime = time;
-            ResultSet rs = statement.executeQuery("SELECT  * FROM test ORDER BY time ASC");
+            ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY time ASC");
             while (rs.next()) {
-                Assert.assertEquals(rs.getTimestamp(1).getTime(), selectTime * 1000);
+                assertEquals(selectTime * 1000, rs.getTimestamp(1).getTime());
                 selectTime += 3600;
             }
         });

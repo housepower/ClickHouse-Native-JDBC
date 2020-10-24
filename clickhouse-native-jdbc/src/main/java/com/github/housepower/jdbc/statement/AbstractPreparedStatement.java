@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Struct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Matcher;
 
@@ -106,9 +107,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement {
 
     @Override
     public void clearParameters() throws SQLException {
-        for (int i = 0; i < parameters.length; i++) {
-            parameters[i] = null;
-        }
+        Arrays.fill(parameters, null);
     }
 
     protected String assembleQueryPartsAndParameters() throws SQLException {

@@ -12,7 +12,7 @@ import java.sql.Types;
 public class DataTypeIPv4 implements IDataType {
 
     private static final Integer DEFAULT_VALUE = 0;
-    private boolean isUnsigned = true;
+    private final boolean isUnsigned = true;
 
     @Override
     public String name() {
@@ -50,8 +50,7 @@ public class DataTypeIPv4 implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer)
-        throws SQLException, IOException {
+    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeInt(((Long) data).intValue());
     }
 
@@ -66,8 +65,7 @@ public class DataTypeIPv4 implements IDataType {
     }
 
     @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
-        throws SQLException, IOException {
+    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = this.deserializeBinary(deserializer);
@@ -79,5 +77,4 @@ public class DataTypeIPv4 implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue() & 0xffffffff;
     }
-
 }

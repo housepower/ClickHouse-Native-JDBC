@@ -1,14 +1,14 @@
 package com.github.housepower.jdbc;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
+
+import static org.junit.Assert.*;
 
 public class QueryRandomITest extends AbstractITest {
 
@@ -33,19 +33,17 @@ public class QueryRandomITest extends AbstractITest {
                 Object time = rs.getObject(5);
                 Object dc = rs.getObject(6);
 
-                Assert.assertEquals(name.getClass(), String.class);
-                Assert.assertEquals(value.getClass(), Long.class);
-                Assert.assertEquals(arr.getClass(), ClickHouseArray.class);
-                Assert.assertEquals(day.getClass(), Date.class);
-                Assert.assertEquals(time.getClass(), Timestamp.class);
-                Assert.assertEquals(dc.getClass(), BigDecimal.class);
+                assertEquals(String.class, name.getClass());
+                assertEquals(Long.class, value.getClass());
+                assertEquals(ClickHouseArray.class, arr.getClass());
+                assertEquals(Date.class, day.getClass());
+                assertEquals(Timestamp.class, time.getClass());
+                assertEquals(BigDecimal.class, dc.getClass());
 
                 i ++;
             }
-            Assert.assertEquals(i , 10000);
+            assertEquals(i , 10000);
             statement.executeQuery("DROP TABLE IF EXISTS test_random");
         }, true);
     }
-
-
 }

@@ -13,12 +13,34 @@ import java.util.Map;
 
 public class Block {
 
+    public static Block readFrom(BinaryDeserializer deserializer,
+                                 PhysicalInfo.ServerInfo serverInfo)
+            throws IOException, SQLException {
+        BlockSettings info = BlockSettings.readFrom(deserializer);
+
+        int columns = (int) deserializer.readVarInt();
+        int rows = (int) deserializer.readVarInt();
+
+        Column[] cols = new Column[columns];
+
+        for (int i = 0; i < columns; i++) {
+            String name = deserializer.readStringBinary();
+            String type = deserializer.readStringBinary();
+
+            IDataType dataType = DataTypeFactory.get(type, serverInfo);
+            Object[] arr = dataType.deserializeBinaryBulk(rows, deserializer);
+            cols[i] = new Column(name, dataType, arr);
+        }
+
+        return new Block(rows, cols, info);
+    }
+
     private final Column[] columns;
     private final BlockSettings settings;
     private final Map<String, Integer> nameWithPosition;
 
-    private Object[]  objects;
-    private int[] columnIndexAdds;
+    private final Object[] objects;
+    private final int[] columnIndexAdds;
     private int rows;
 
     public Block() {
@@ -44,16 +66,14 @@ public class Block {
     }
 
     public void appendRow() throws SQLException {
-    	int i=0;
+        int i = 0;
         try {
             for (i = 0; i < columns.length; i++) {
                 columns[i].write(objects[i]);
             }
-            rows ++;
-        } catch (IOException e) {
-            throw new SQLException("Exception processing value "+objects[i]+" for column : "+columns[i].name(),e);
-        } catch (ClassCastException e) {
-            throw new SQLException("Exception processing value "+objects[i]+" for column : "+columns[i].name(),e);
+            rows++;
+        } catch (IOException | ClassCastException e) {
+            throw new SQLException("Exception processing value " + objects[i] + " for column: " + columns[i].name(), e);
         }
     }
 
@@ -92,45 +112,21 @@ public class Block {
 
     public Column getByPosition(int column) throws SQLException {
         Validate.isTrue(column < columns.length,
-                        "Position " + column
-                        + " is out of bound in Block.getByPosition, max position = " + (
-                            columns.length - 1));
+                "Position " + column +
+                        " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
         return columns[column];
     }
 
     public int getPositionByName(String name) throws SQLException {
-        Validate.isTrue(nameWithPosition.containsKey(name),"Column '" + name + "' does not exist");
+        Validate.isTrue(nameWithPosition.containsKey(name), "Column '" + name + "' does not exist");
         return nameWithPosition.get(name);
     }
-    
+
     public Object getObject(int index) throws SQLException {
-    	Validate.isTrue(index < columns.length,
-                "Position " + index 
-                + " is out of bound in Block.getByPosition, max position = " + (
-                    columns.length - 1));
-    	return objects[index];
-    }
-
-    public static Block readFrom(BinaryDeserializer deserializer,
-                                 PhysicalInfo.ServerInfo serverInfo)
-        throws IOException, SQLException {
-        BlockSettings info = BlockSettings.readFrom(deserializer);
-
-        int columns = (int) deserializer.readVarInt();
-        int rows = (int) deserializer.readVarInt();
-
-        Column[] cols = new Column[columns];
-
-        for (int i = 0; i < columns; i++) {
-            String name = deserializer.readStringBinary();
-            String type = deserializer.readStringBinary();
-
-            IDataType dataType = DataTypeFactory.get(type, serverInfo);
-            Object[] arr = dataType.deserializeBinaryBulk(rows, deserializer);
-            cols[i] = new Column(name, dataType, arr);
-        }
-
-        return new Block(rows, cols, info);
+        Validate.isTrue(index < columns.length,
+                "Position " + index +
+                        " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
+        return objects[index];
     }
 
     public void initWriteBuffer() {

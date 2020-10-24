@@ -61,8 +61,8 @@ public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement 
                 }
             }
         }
-        queryParts.add(query.substring(lastPos, query.length()));
-        return queryParts.toArray(new String[queryParts.size()]);
+        queryParts.add(query.substring(lastPos));
+        return queryParts.toArray(new String[0]);
     }
     
     public String toString(){

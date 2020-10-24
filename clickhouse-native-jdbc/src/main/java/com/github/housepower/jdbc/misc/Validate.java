@@ -8,7 +8,6 @@ public class Validate {
         isTrue(expression, null);
     }
 
-
     public static void isTrue(boolean expression, String message) throws SQLException {
         if (!expression) {
             throw new SQLException(message);

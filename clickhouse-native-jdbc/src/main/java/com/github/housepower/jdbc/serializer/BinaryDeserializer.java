@@ -15,7 +15,7 @@ public class BinaryDeserializer {
 
     public BinaryDeserializer(Socket socket) throws IOException {
         SocketBuffedReader socketReader = new SocketBuffedReader(socket);
-        container = new Container<BuffedReader>(socketReader, new CompressedBuffedReader(socketReader));
+        container = new Container<>(socketReader, new CompressedBuffedReader(socketReader));
     }
 
     public long readVarInt() throws IOException {

@@ -18,6 +18,27 @@ import java.util.List;
 
 public class DataTypeTuple implements IDataType {
 
+    public static DataTypeTuple createTupleType(SQLLexer lexer,
+                                                PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+        Validate.isTrue(lexer.character() == '(');
+        List<IDataType> nestedDataTypes = new ArrayList<>();
+
+        for (; ; ) {
+            nestedDataTypes.add(DataTypeFactory.get(lexer, serverInfo));
+            char delimiter = lexer.character();
+            Validate.isTrue(delimiter == ',' || delimiter == ')');
+            if (delimiter == ')') {
+                StringBuilder builder = new StringBuilder("Tuple(");
+                for (int i = 0; i < nestedDataTypes.size(); i++) {
+                    if (i > 0)
+                        builder.append(",");
+                    builder.append(nestedDataTypes.get(i).name());
+                }
+                return new DataTypeTuple(builder.append(")").toString(), nestedDataTypes.toArray(new IDataType[0]));
+            }
+        }
+    }
+
     private final String name;
     private final IDataType[] nestedTypes;
 
@@ -55,10 +76,10 @@ public class DataTypeTuple implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return 0;
-	}
+    @Override
+    public int getPrecision() {
+        return 0;
+    }
 
     @Override
     public int getScale() {
@@ -127,26 +148,5 @@ public class DataTypeTuple implements IDataType {
         }
         Validate.isTrue(lexer.character() == ')');
         return new ClickHouseStruct("Tuple", tupleData);
-    }
-
-    public static DataTypeTuple createTupleType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
-        Validate.isTrue(lexer.character() == '(');
-        List<IDataType> nestedDataTypes = new ArrayList<IDataType>();
-
-        for (; ; ) {
-            nestedDataTypes.add(DataTypeFactory.get(lexer, serverInfo));
-            char delimiter = lexer.character();
-            Validate.isTrue(delimiter == ',' || delimiter == ')');
-            if (delimiter == ')') {
-                StringBuilder builder = new StringBuilder("Tuple(");
-                for (int i = 0; i < nestedDataTypes.size(); i++) {
-                    if (i > 0)
-                        builder.append(",");
-                    builder.append(nestedDataTypes.get(i).name());
-                }
-                return new DataTypeTuple(builder.append(")").toString(),
-                    nestedDataTypes.toArray(new IDataType[nestedDataTypes.size()]));
-            }
-        }
     }
 }
