@@ -3,7 +3,7 @@ package com.github.housepower.jdbc.connect;
 import com.github.housepower.jdbc.protocol.QueryRequest.ClientInfo;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 
-import java.util.TimeZone;
+import java.time.ZoneId;
 
 public class PhysicalInfo {
 
@@ -31,11 +31,11 @@ public class PhysicalInfo {
 
     public static class ServerInfo {
         private final long reversion;
-        private final TimeZone timeZone;
+        private final ZoneId timeZone;
         private final String displayName;
         private final ClickHouseConfig configure;
 
-        public ServerInfo(ClickHouseConfig configure, long reversion, TimeZone timeZone, String displayName) {
+        public ServerInfo(ClickHouseConfig configure, long reversion, ZoneId timeZone, String displayName) {
             this.configure = configure;
             this.reversion = reversion;
             this.timeZone = timeZone;
@@ -46,7 +46,7 @@ public class PhysicalInfo {
             return reversion;
         }
 
-        public TimeZone timeZone() {
+        public ZoneId timeZone() {
             return timeZone;
         }
 

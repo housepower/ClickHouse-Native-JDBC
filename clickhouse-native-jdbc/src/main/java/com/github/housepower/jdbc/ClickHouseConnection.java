@@ -22,6 +22,7 @@ import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.time.ZoneId;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -74,7 +75,7 @@ public class ClickHouseConnection extends SQLConnection {
         Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, because the connection is closed.");
         Matcher matcher = VALUES_REGEX.matcher(query);
         return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this) :
-            new ClickHousePreparedQueryStatement(this, query);
+                new ClickHousePreparedQueryStatement(this, query);
     }
 
     @Override
@@ -130,7 +131,7 @@ public class ClickHouseConnection extends SQLConnection {
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
-        this.state=ConnectionState.WAITING_INSERT;
+        this.state = ConnectionState.WAITING_INSERT;
         return connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
     }
 
@@ -147,7 +148,7 @@ public class ClickHouseConnection extends SQLConnection {
     // when sendInsertRequest we must ensure the connection is healthy
     // the sampleblock mus be called before this method
     public Integer sendInsertRequest(Block block)
-        throws SQLException {
+            throws SQLException {
         if (this.state != ConnectionState.WAITING_INSERT) {
             throw new RuntimeException("Call getSampleBlock before insert.");
         }
@@ -198,7 +199,7 @@ public class ClickHouseConnection extends SQLConnection {
             physical.sendHello("client", reversion, configure.database(), configure.username(), configure.password());
 
             HelloResponse response = physical.receiveHello(configure.queryTimeout(), null);
-            TimeZone timeZone = TimeZone.getTimeZone(response.serverTimeZone());
+            ZoneId timeZone = ZoneId.of(response.serverTimeZone());
             return new PhysicalInfo.ServerInfo(configure, response.reversion(), timeZone, response.serverDisplayName());
         } catch (SQLException rethrows) {
             physical.disPhysicalConnection();
