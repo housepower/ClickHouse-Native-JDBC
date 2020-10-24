@@ -41,7 +41,6 @@ public class DataTypeDateTime64 implements IDataType {
     public static final Timestamp DEFAULT_VALUE = new Timestamp(0);
     public static final int NANOS_IN_SECOND = 1_000_000_000;
     public static final int MILLIS_IN_SECOND = 1000;
-    //    private final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS", Locale.ROOT);
     private final String name;
     private final ZoneId tz;
 
