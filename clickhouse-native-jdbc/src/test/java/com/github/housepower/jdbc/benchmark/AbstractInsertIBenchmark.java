@@ -31,11 +31,11 @@ public class AbstractInsertIBenchmark extends AbstractIBenchmark{
         String testTable = "test_" + tableId;
         Statement stmt = connection.createStatement();
         stmt.executeQuery("DROP TABLE IF EXISTS " + testTable);
-        String createSQL = "CREATE TABLE " + testTable + " (";
+        StringBuilder createSQL = new StringBuilder("CREATE TABLE " + testTable + " (");
         for (int i = 0; i < columnNum; i++) {
-            createSQL += "col_" + i + " "  + columnType ;
+            createSQL.append("col_").append(i).append(" ").append(columnType);
             if (i + 1 != columnNum) {
-                createSQL += ",\n";
+                createSQL.append(",\n");
             }
         }
         stmt.executeQuery(createSQL + ")Engine = Log");

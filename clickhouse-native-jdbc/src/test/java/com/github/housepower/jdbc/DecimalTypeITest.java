@@ -1,9 +1,9 @@
 package com.github.housepower.jdbc;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 
 import static org.junit.Assert.assertEquals;
@@ -14,11 +14,14 @@ public class DecimalTypeITest extends AbstractITest {
     public void testDecimalType() throws Exception {
         withNewConnection(connection -> {
             BigDecimal value32 = BigDecimal.valueOf(1.32);
-            value32 = value32.setScale(2);
+            value32 = value32.setScale(2, RoundingMode.HALF_UP);
             BigDecimal value64 = BigDecimal.valueOf(12343143412341.21D);
-            value64 = value64.setScale(5);
+            value64 = value64.setScale(5, RoundingMode.HALF_UP);
 
-            BigDecimal[] valueArray = new BigDecimal[]{BigDecimal.valueOf(412341.21D).setScale(3), BigDecimal.valueOf(512341.25D).setScale(3)};
+            BigDecimal[] valueArray = new BigDecimal[]{
+                    BigDecimal.valueOf(412341.21D).setScale(3, RoundingMode.HALF_UP),
+                    BigDecimal.valueOf(512341.25D).setScale(3, RoundingMode.HALF_UP)
+            };
             Statement statement = connection.createStatement();
             statement.execute("DROP TABLE IF EXISTS decimal_test");
             statement.execute("CREATE TABLE IF NOT EXISTS decimal_test (value32 Decimal(7,2), value64 Decimal(15,5), value_array Array(Decimal(5,3))) Engine=Memory();");
@@ -41,7 +44,6 @@ public class DecimalTypeITest extends AbstractITest {
                 BigDecimal rsValue64 = rs.getBigDecimal(2);
                 assertEquals(value64, rsValue64);
                 ClickHouseArray rsValueArray = (ClickHouseArray) rs.getArray(3);
-                Object v = rsValueArray.getArray();
                 Object[] decimalArray = (Object[]) rsValueArray.getArray();
                 assertEquals(decimalArray.length, valueArray.length);
                 for (int i = 0; i < valueArray.length; i++) {

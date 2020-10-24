@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 public class SocketBuffedReaderTest {
@@ -37,19 +36,16 @@ public class SocketBuffedReaderTest {
         final AtomicInteger position = new AtomicInteger(0);
 
         Mockito.when(in.read(Mockito.any(byte[].class), Mockito.anyInt(), Mockito.anyInt()))
-            .thenAnswer(new Answer<Integer>() {
-                @Override
-                public Integer answer(InvocationOnMock invocation) throws Throwable {
-                    int offset = invocation.getArgumentAt(1, int.class);
-                    byte[] bytes = invocation.getArgumentAt(0, byte[].class);
+            .thenAnswer((Answer<Integer>) invocation -> {
+                int offset = invocation.getArgumentAt(1, int.class);
+                byte[] bytes = invocation.getArgumentAt(0, byte[].class);
 
-                    byte[] fragment = fragments[position.getAndIncrement()];
-                    if (bytes.length < fragment.length) {
-                        throw new IOException("Failed test case.");
-                    }
-                    System.arraycopy(fragment, 0, bytes, offset, fragment.length);
-                    return fragment.length;
+                byte[] fragment = fragments[position.getAndIncrement()];
+                if (bytes.length < fragment.length) {
+                    throw new IOException("Failed test case.");
                 }
+                System.arraycopy(fragment, 0, bytes, offset, fragment.length);
+                return fragment.length;
             });
 
         return in;

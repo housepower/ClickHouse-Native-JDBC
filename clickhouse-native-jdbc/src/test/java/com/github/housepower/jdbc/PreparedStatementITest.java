@@ -1,14 +1,15 @@
 package com.github.housepower.jdbc;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.*;
 
 public class PreparedStatementITest extends AbstractITest {
 
@@ -20,10 +21,10 @@ public class PreparedStatementITest extends AbstractITest {
             preparedStatement.setByte(1, (byte) 1);
             preparedStatement.setByte(2, (byte) 2);
             ResultSet rs = preparedStatement.executeQuery();
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getByte(1), 1);
-            Assert.assertEquals(rs.getByte(2), 2);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(1, rs.getByte(1));
+            assertEquals(2, rs.getByte(2));
+            assertFalse(rs.next());
         });
     }
 
@@ -35,10 +36,10 @@ public class PreparedStatementITest extends AbstractITest {
             preparedStatement.setShort(1, (short) 1);
             preparedStatement.setShort(2, (short) 2);
             ResultSet rs = preparedStatement.executeQuery();
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getShort(1), 1);
-            Assert.assertEquals(rs.getShort(2), 2);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(1, rs.getShort(1));
+            assertEquals(2, rs.getShort(2));
+            assertFalse(rs.next());
         });
     }
 
@@ -50,10 +51,10 @@ public class PreparedStatementITest extends AbstractITest {
             preparedStatement.setInt(1, 1);
             preparedStatement.setInt(2, 2);
             ResultSet rs = preparedStatement.executeQuery();
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getInt(1), 1);
-            Assert.assertEquals(rs.getInt(2), 2);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(1, rs.getInt(1));
+            assertEquals(2, rs.getInt(2));
+            assertFalse(rs.next());
         });
     }
 
@@ -65,10 +66,10 @@ public class PreparedStatementITest extends AbstractITest {
             preparedStatement.setLong(1, 1);
             preparedStatement.setLong(2, 2);
             ResultSet rs = preparedStatement.executeQuery();
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getLong(1), 1);
-            Assert.assertEquals(rs.getLong(2), 2);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(1, rs.getLong(1));
+            assertEquals(2, rs.getLong(2));
+            assertFalse(rs.next());
         });
     }
 
@@ -80,10 +81,10 @@ public class PreparedStatementITest extends AbstractITest {
             preparedStatement.setString(1, "test1");
             preparedStatement.setString(2, "test2");
             ResultSet rs = preparedStatement.executeQuery();
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), "test1");
-            Assert.assertEquals(rs.getString(2), "test2");
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals("test1", rs.getString(1));
+            assertEquals("test2", rs.getString(2));
+            assertFalse(rs.next());
         });
     }
 
@@ -95,12 +96,12 @@ public class PreparedStatementITest extends AbstractITest {
             preparedStatement.setString(1, null);
             preparedStatement.setString(2, "test2");
             ResultSet rs = preparedStatement.executeQuery();
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), null);
-            Assert.assertTrue(rs.wasNull());
-            Assert.assertTrue(rs.next());
-            Assert.assertEquals(rs.getString(1), "test2");
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertNull(rs.getString(1));
+            assertTrue(rs.wasNull());
+            assertTrue(rs.next());
+            assertEquals("test2", rs.getString(1));
+            assertFalse(rs.next());
         });
     }
 
@@ -112,10 +113,10 @@ public class PreparedStatementITest extends AbstractITest {
             long now = System.currentTimeMillis();
             preparedStatement.setDate(1, new Date(now));
             ResultSet rs = preparedStatement.executeQuery();
-            Assert.assertTrue(rs.next());
-//                Assert.assertEquals(rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1),
-//                    now / TimeUnit.DAYS.toMillis(1) - 1);
-            Assert.assertFalse(rs.next());
+            assertTrue(rs.next());
+            assertEquals(now / TimeUnit.DAYS.toMillis(1),
+                    rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1));
+            assertFalse(rs.next());
         }, true);
     }
 
@@ -128,15 +129,15 @@ public class PreparedStatementITest extends AbstractITest {
             statement.execute("CREATE TABLE test(id UInt8, day Date, time DateTime)ENGINE = Log");
 
             PreparedStatement preparedStatement =
-                connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?)");
+                    connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?)");
 
             // 2018-07-01 19:00:00  Asia/Shanghai
             long time = 1530374400 + 19 * 3600;
 
-            preparedStatement.setByte(1, (byte)1);
+            preparedStatement.setByte(1, (byte) 1);
             preparedStatement.setDate(2, new Date(time * 1000));
             preparedStatement.setTimestamp(3, new Timestamp(time * 1000));
-            Assert.assertEquals(preparedStatement.executeUpdate(), 1);
+            assertEquals(1, preparedStatement.executeUpdate());
         });
     }
 
