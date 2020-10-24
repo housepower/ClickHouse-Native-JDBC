@@ -74,18 +74,18 @@ public class GenericSimpleInsertITest extends AbstractITest {
                                     (rows) -> rows * 6.0));
 
         types.add(
-            new DataTypeApply(() -> "String", (i) -> "00" + i, (col) -> "sum(toInt64(" + col + ") % 4)",
+            new DataTypeApply(() -> "String", (i) -> "00" + i,
+                              (col) -> "sum(toInt64(" + col + ") % 4)",
                               (rows) -> (rows / 4.0 * (1 + 2 + 3))));
 
         types.add(
             new DataTypeApply(() -> "DateTime", (i) -> new Timestamp(i / 1000 * 1000), maxExpr,
-                              (rows) ->  new Timestamp(rows).getTime() / 1000 * 1.0 ));
+                              (rows) -> new Timestamp(rows).getTime() / 1000 * 1.0));
 
     }
 
     public void create() throws Exception {
-        StringBuilder sql = new StringBuilder("CREATE TABLE " + tableName +  " (");
-
+        StringBuilder sql = new StringBuilder("CREATE TABLE " + tableName + " (");
         for (int i = 0; i < types.size(); i++) {
             if (i != 0) {
                 sql.append(",\n");
@@ -112,8 +112,11 @@ public class GenericSimpleInsertITest extends AbstractITest {
             quotas.add("?");
         }
 
-        String sql = String.format(Locale.ROOT, "INSERT INTO %s (%s) VALUES (%s)", tableName, Joiner.on(",").join(cols),
-                                   Joiner.on(",").join(quotas));
+        String
+            sql =
+            String.format(Locale.ROOT, "INSERT INTO %s (%s) VALUES (%s)", tableName,
+                          Joiner.on(",").join(cols),
+                          Joiner.on(",").join(quotas));
 
         withNewConnection(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql);
@@ -157,16 +160,20 @@ public class GenericSimpleInsertITest extends AbstractITest {
             while (rs.next()) {
                 for (int i = 0; i < types.size(); i++) {
                     if (types.get(i).data.apply(r) instanceof Number) {
-                        Number expected = (Number)(types.get(i).data.apply(r));
-                        Number actually = (Number)(types.get(i).data.apply(r));
+                        Number expected = (Number) (types.get(i).data.apply(r));
+                        Number actually = (Number) (rs.getObject(i + 1));
 
-                        Assert.assertEquals("Check Item Error Type: " + types.get(i).name.get(), expected.intValue(), actually.intValue());
+                        Assert.assertEquals(
+                            "Check Item Error Type: " + types.get(i).name.get() + ", at row: " + r,
+                            expected.intValue(), actually.intValue());
                         continue;
                     }
-                    Assert.assertEquals("Check Item Error Type: " + types.get(i).name.get(), types.get(i).data.apply(r),
-                                        rs.getObject(i + 1));
+                    Assert.assertEquals(
+                        "Check Item Error Type: " + types.get(i).name.get() + ", at row: " + r,
+                        types.get(i).data.apply(r),
+                        rs.getObject(i + 1));
                 }
-                r ++;
+                r++;
             }
         });
     }
@@ -183,20 +190,8 @@ public class GenericSimpleInsertITest extends AbstractITest {
         return tableName;
     }
 
-    static Function<String, String> sumExpr = new Function<String, String>() {
-        @Override
-        public String apply(String s) {
-            return "sum(" + s + ")";
-        }
-    };
-
-    static Function<String, String> maxExpr = new Function<String, String>() {
-        @Override
-        public String apply(String s) {
-            return "max(" + s + ")";
-        }
-    };
-
+    static Function<String, String> sumExpr = s -> "sum(" + s + ")";
+    static Function<String, String> maxExpr = s -> "max(" + s + ")";
 
     class DataTypeApply {
 
