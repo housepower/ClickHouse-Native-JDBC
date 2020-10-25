@@ -14,7 +14,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: [8]
+          java-version: 8
       - name: Start clickhouse-server
         run: docker-compose up -d
       - name: Run benchmarks
