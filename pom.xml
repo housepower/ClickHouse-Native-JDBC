@@ -29,11 +29,19 @@
             <id>sundy-li</id>
             <name>Sundy Li</name>
             <email>543950155@qq.com</email>
+            <timezone>8</timezone>
         </developer>
         <developer>
             <id>zhang2014</id>
             <name>Winter Zhang</name>
             <email>coswde@gmail.com</email>
+            <timezone>8</timezone>
+        </developer>
+        <developer>
+            <id>pan3793</id>
+            <name>Cheng Pan</name>
+            <email>379377944@qq.com</email>
+            <timezone>8</timezone>
         </developer>
     </developers>
 

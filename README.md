@@ -13,21 +13,21 @@ cd ClickHouse-Native-JDBC
 mvn clean package
 ```
 
-## Maven central
+## Maven Central
 
 ```xml
+<!-- (recommended) shaded version, available since 2.3-stable -->
+<dependency>
+    <groupId>com.github.housepower</groupId>
+    <artifactId>clickhouse-native-jdbc-shaded</artifactId>
+    <version>2.3-stable</version>
+</dependency>
+
 <!-- normal version -->
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc</artifactId>
-    <version>2.2-stable</version>
-</dependency>
-
-<!-- shaded version, available since 2.3-stable -->
-<dependency>
-    <groupId>com.github.housepower</groupId>
-    <artifactId>clickhouse-native-jdbc-shaded</artifactId>
-    <version>2.2-stable</version>
+    <version>2.3-stable</version>
 </dependency>
 ```
 
