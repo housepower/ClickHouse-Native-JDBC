@@ -34,8 +34,8 @@ package com.github.housepower.jdbc.misc;
 
 /**
  * @author tamtam180 - kirscheless at gmail.com
- * @see <a href="http://google-opensource.blogspot.jp/2011/04/introducing-cityhash.html"/>
- * @see <a href="http://code.google.com/p/cityhash"/>
+ * @see <a href="http://google-opensource.blogspot.jp/2011/04/introducing-cityhash.html"></a>
+ * @see <a href="http://code.google.com/p/cityhash"></a>
  *
  * NOTE: The code is modified to be compatible with CityHash128 used in ClickHouse
  */
