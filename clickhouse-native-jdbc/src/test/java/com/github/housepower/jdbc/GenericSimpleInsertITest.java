@@ -193,7 +193,7 @@ public class GenericSimpleInsertITest extends AbstractITest {
     static Function<String, String> sumExpr = s -> "sum(" + s + ")";
     static Function<String, String> maxExpr = s -> "max(" + s + ")";
 
-    class DataTypeApply {
+    static class DataTypeApply {
 
         Supplier<String> name;
         Function<Integer, Object> data;
