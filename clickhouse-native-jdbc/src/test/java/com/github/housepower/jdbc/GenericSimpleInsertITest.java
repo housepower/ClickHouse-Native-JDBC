@@ -5,6 +5,7 @@ import com.google.common.base.Joiner;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -36,7 +37,8 @@ public class GenericSimpleInsertITest extends AbstractITest {
         clean();
         create();
         insert();
-        check();
+        checkItem();
+        checkAggr();
         clean();
     }
 
@@ -82,6 +84,10 @@ public class GenericSimpleInsertITest extends AbstractITest {
             new DataTypeApply(() -> "DateTime", (i) -> new Timestamp(i / 1000 * 1000), maxExpr,
                               (rows) -> new Timestamp(rows).getTime() / 1000 * 1.0));
 
+        types.add(
+            new DataTypeApply(() -> "Array(String)", (i) -> new Object[]{"00" + i},
+                              (col) -> "sum(toInt64(" + col + "[1]) % 4)",
+                              (rows) -> (rows / 4.0 * (1 + 2 + 3))));
     }
 
     public void create() throws Exception {
@@ -104,25 +110,20 @@ public class GenericSimpleInsertITest extends AbstractITest {
     }
 
     public void insert() throws Exception {
-        List<String> cols = new ArrayList<>();
-        List<String> quotas = new ArrayList<>();
-
-        for (int i = 0; i < types.size(); i++) {
-            cols.add("col_" + i);
-            quotas.add("?");
-        }
-
-        String
-            sql =
-            String.format(Locale.ROOT, "INSERT INTO %s (%s) VALUES (%s)", tableName,
-                          Joiner.on(",").join(cols),
-                          Joiner.on(",").join(quotas));
-
+        String sql = insertSQL();
         withNewConnection(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql);
             for (int row = 0; row < insertRows; row++) {
                 for (int i = 0; i < types.size(); i++) {
-                    stmt.setObject(i + 1, types.get(i).data.apply(row));
+                    if (types.get(i).name.get().startsWith("Array(")) {
+                        Array
+                            array =
+                            connection
+                                .createArrayOf("text", (Object[]) types.get(i).data.apply(row));
+                        stmt.setObject(i + 1, array);
+                    } else {
+                        stmt.setObject(i + 1, types.get(i).data.apply(row));
+                    }
                 }
                 stmt.addBatch();
             }
@@ -130,7 +131,7 @@ public class GenericSimpleInsertITest extends AbstractITest {
         });
     }
 
-    public void check() throws Exception {
+    public void checkAggr() throws Exception {
         StringBuilder sql = new StringBuilder("SELECT ");
         Double[] results = new Double[types.size()];
 
@@ -155,7 +156,13 @@ public class GenericSimpleInsertITest extends AbstractITest {
                 Assert.assertEquals("Check Aggr Error Type: " + types.get(i).name.get(), results[i],
                                     result);
             }
-            rs = stmt.executeQuery("SELECT * FROM " + tableName);
+        });
+    }
+
+    public void checkItem() throws Exception {
+        withNewConnection(connection -> {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName);
             int r = 0;
             while (rs.next()) {
                 for (int i = 0; i < types.size(); i++) {
@@ -166,6 +173,14 @@ public class GenericSimpleInsertITest extends AbstractITest {
                         Assert.assertEquals(
                             "Check Item Error Type: " + types.get(i).name.get() + ", at row: " + r,
                             expected.intValue(), actually.intValue());
+                        continue;
+                    } else if (types.get(i).data.apply(r) instanceof Object[]) {
+                        Object[] expected = (Object[]) types.get(i).data.apply(r);
+                        Object[] actually = (Object[]) rs.getArray(i + 1).getArray();
+
+                        Assert.assertEquals(
+                            "Check Item Error Type: " + types.get(i).name.get() + ", at row: " + r,
+                            expected, actually);
                         continue;
                     }
                     Assert.assertEquals(
@@ -186,14 +201,37 @@ public class GenericSimpleInsertITest extends AbstractITest {
         });
     }
 
+    public void removeType(String typeName) throws Exception {
+        types.removeIf((item) -> item.name.get().equals(typeName));
+    }
+
     public String getTableName() {
         return tableName;
+    }
+
+    public List<DataTypeApply> getTypes() {
+        return types;
+    }
+
+    public String insertSQL() {
+        List<String> cols = new ArrayList<>();
+        List<String> quotas = new ArrayList<>();
+
+        for (int i = 0; i < types.size(); i++) {
+            cols.add("col_" + i);
+            quotas.add("?");
+        }
+
+        return String.format(Locale.ROOT, "INSERT INTO %s (%s) VALUES (%s)", tableName,
+                             Joiner.on(",").join(cols),
+                             Joiner.on(",").join(quotas));
     }
 
     static Function<String, String> sumExpr = s -> "sum(" + s + ")";
     static Function<String, String> maxExpr = s -> "max(" + s + ")";
 
-    static class DataTypeApply {
+
+    public static class DataTypeApply {
 
         Supplier<String> name;
         Function<Integer, Object> data;
