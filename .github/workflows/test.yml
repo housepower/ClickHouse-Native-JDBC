@@ -9,12 +9,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [8, 9, 10]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 1.8
+      - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: [8 9 10]
+          java-version: ${{ matrix.java }}
       - name: Start clickhouse-server
         run: docker-compose up -d
       - name: Run integration-tests with maven
