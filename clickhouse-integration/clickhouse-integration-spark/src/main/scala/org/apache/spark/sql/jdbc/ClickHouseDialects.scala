@@ -9,6 +9,9 @@ import org.apache.spark.sql.types._
 
 import scala.util.matching.Regex
 
+/**
+ * ClickHouseDialects
+ */
 object ClickHouseDialects extends JdbcDialect with Logging {
 
   private val arrayTypePattern: Regex = "^Array\\((.*)\\)$".r
