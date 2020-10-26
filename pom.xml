@@ -82,6 +82,7 @@
 
         <maven.assembly.plugin.version>3.1.1</maven.assembly.plugin.version>
         <maven.compiler.plugin.version>3.5</maven.compiler.plugin.version>
+        <maven.scala.plugin.version>4.3.0</maven.scala.plugin.version>
         <maven.exec.plugin.version>1.4.0</maven.exec.plugin.version>
         <maven.forbiddenapis.plugin.version>3.0.1</maven.forbiddenapis.plugin.version>
         <maven.gpg.plugin.version>1.5</maven.gpg.plugin.version>
@@ -97,6 +98,7 @@
         <yandex-clickhouse-jdbc.version>0.2</yandex-clickhouse-jdbc.version>
         <mockito.version>1.10.19</mockito.version>
         <slf4j.version>1.7.28</slf4j.version>
+        <scala.version>2.11.12</scala.version>
         <scala.compat.version>2.11</scala.compat.version>
         <spark.version>2.4.7</spark.version>
         <junit.version>4.13.1</junit.version>
@@ -156,6 +158,21 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-compiler</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-reflect</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-core_${scala.compat.version}</artifactId>
                 <version>${spark.version}</version>
@@ -186,6 +203,63 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>net.alchim31.maven</groupId>
+                    <artifactId>scala-maven-plugin</artifactId>
+                    <version>${maven.scala.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>eclipse-add-source</id>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>scala-compile-first</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>scala-test-compile-first</id>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>attach-scaladocs</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>doc-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <scalaVersion>${scala.version}</scalaVersion>
+                        <checkMultipleScalaVersions>true</checkMultipleScalaVersions>
+                        <failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
+                        <recompileMode>incremental</recompileMode>
+                        <args>
+                            <arg>-unchecked</arg>
+                            <arg>-deprecation</arg>
+                            <arg>-feature</arg>
+                            <arg>-explaintypes</arg>
+                            <arg>-target:jvm-1.8</arg>
+                        </args>
+                        <jvmArgs>
+                            <jvmArg>-Xms1024m</jvmArg>
+                            <jvmArg>-Xmx1024m</jvmArg>
+                            <jvmArg>-XX:ReservedCodeCacheSize=1g</jvmArg>
+                        </jvmArgs>
+                        <javacArgs>
+                            <javacArg>-source</javacArg>
+                            <javacArg>${java.version}</javacArg>
+                            <javacArg>-target</javacArg>
+                            <javacArg>${java.version}</javacArg>
+                            <javacArg>-Xlint:all,-serial,-path,-try</javacArg>
+                        </javacArgs>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
