@@ -28,10 +28,14 @@ import scala.util.matching.Regex
 
 /**
  * ClickHouseDialects
+ * TODO: support Nullable Type
  */
-object ClickHouseDialects extends JdbcDialect with Logging {
+object ClickHouseDialect extends JdbcDialect with Logging {
 
-  private val arrayTypePattern: Regex = "^Array\\((.*)\\)$".r
+  val arrayTypePattern: Regex = "^Array\\((.*)\\)$".r
+  // TODO Decimal32(S), Decimal64(S), Decimal128(S), Decimal256(S)
+  val decimalTypePattern: Regex = "^Decimal(\\((\\d+),\\s*(\\d+)\\))?$".r
+  val dateTimeTypePattern: Regex = "^DateTime(64)?(\\((.*)\\))?$".r
 
   override def canHandle(url: String): Boolean =
     url.toLowerCase(Locale.ROOT).startsWith("jdbc:clickhouse")
@@ -43,18 +47,31 @@ object ClickHouseDialects extends JdbcDialect with Logging {
       case Types.ARRAY =>
         logDebug(s"sqlType: $sqlType, typeName: $typeName, size: $size")
         typeName match {
-          case arrayTypePattern(nestType) if nestType == "String" => Some(ArrayType(StringType))
-          // TODO
           case arrayTypePattern(nestType) =>
-            logWarning(s"Not implemented nestType: $nestType")
-            None
+            val scale = md.build.getLong("scale").toInt
+            toCatalystType(nestType, size, scale).map(ArrayType(_, containsNull = false))
           case _ => None
         }
       case _ => None
     }
   }
 
-  // TODO consider nullable
+  private def toCatalystType(typeName: String,
+                             precision: Int,
+                             scale: Int): Option[DataType] = typeName match {
+    case "String" => Some(StringType)
+    case "UInt8" | "Int8" => Some(ByteType)
+    case "UInt16" | "Int16" => Some(ShortType)
+    case "UInt32" | "Int32" => Some(IntegerType)
+    case "UInt64" | "Int64" => Some(LongType)
+    case "Float32" => Some(FloatType)
+    case "Float64" => Some(DoubleType)
+    case decimalTypePattern(precision, scale, _) => Some(DecimalType(precision.toInt, scale.toInt))
+    case "Date" => Some(DateType)
+    case dateTimeTypePattern() => Some(TimestampType)
+    case _ => None
+  }
+
   override def getJDBCType(dt: DataType): Option[JdbcType] = dt match {
     case StringType => Some(JdbcType("String", Types.VARCHAR))
     // ClickHouse doesn't have the concept of encodings. Strings can contain an arbitrary set of bytes,

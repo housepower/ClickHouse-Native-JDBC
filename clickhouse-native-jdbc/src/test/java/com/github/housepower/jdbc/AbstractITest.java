@@ -45,7 +45,7 @@ public abstract class AbstractITest implements Serializable {
     }
 
     @FunctionalInterface
-    interface WithConnection {
+    public interface WithConnection {
         void apply(Connection connection) throws Exception;
     }
 }
