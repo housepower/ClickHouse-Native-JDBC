@@ -275,6 +275,7 @@
                         <recompileMode>incremental</recompileMode>
                         <args>
                             <arg>-unchecked</arg>
+                            <arg>-nobootcp</arg>
                             <arg>-deprecation</arg>
                             <arg>-feature</arg>
                             <arg>-explaintypes</arg>
