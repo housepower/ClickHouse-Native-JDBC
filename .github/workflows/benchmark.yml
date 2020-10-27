@@ -1,4 +1,4 @@
-name: benchmark-tests
+name: benchmark
 
 on:
   push:
@@ -18,4 +18,4 @@ jobs:
       - name: Start clickhouse-server
         run: docker-compose up -d
       - name: Run benchmarks
-        run: mvn -B -Pbenchmark clean integration-test
+        run: mvn -B -Pbenchmark clean integration-test -DskipITs

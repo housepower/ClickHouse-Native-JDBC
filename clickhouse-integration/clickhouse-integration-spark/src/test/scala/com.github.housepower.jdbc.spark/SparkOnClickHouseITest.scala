@@ -30,6 +30,8 @@ class SparkOnClickHouseITest extends AbstractITest {
     // make sure register `ClickHouseDialects` before we use it
     JdbcDialects.registerDialect(ClickHouseDialects)
     doSparkJdbcWrite()
+    // helper.checkItem()
+    // helper.checkAggr()
     helper.clean()
   }
 

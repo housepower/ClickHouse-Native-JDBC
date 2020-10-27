@@ -80,18 +80,22 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
+        <build.testJarPhase>none</build.testJarPhase>
+
         <maven.assembly.plugin.version>3.1.1</maven.assembly.plugin.version>
-        <maven.compiler.plugin.version>3.5</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
+        <maven.checkstyle.plugin.version>3.1.1</maven.checkstyle.plugin.version>
         <maven.scala.plugin.version>4.3.0</maven.scala.plugin.version>
-        <maven.exec.plugin.version>1.4.0</maven.exec.plugin.version>
+        <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
         <maven.forbiddenapis.plugin.version>3.0.1</maven.forbiddenapis.plugin.version>
         <maven.gpg.plugin.version>1.5</maven.gpg.plugin.version>
         <maven.jar.plugin.version>3.1.2</maven.jar.plugin.version>
-        <maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
-        <maven.shade.plugin.version>3.1.0</maven.shade.plugin.version>
-        <maven.source.plugin.version>2.2.1</maven.source.plugin.version>
-        <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
-        <maven.release.plugin.version>2.1</maven.release.plugin.version>
+        <maven.javadoc.plugin.version>3.1.1</maven.javadoc.plugin.version>
+        <maven.shade.plugin.version>3.2.1</maven.shade.plugin.version>
+        <maven.source.plugin.version>3.1.0</maven.source.plugin.version>
+        <maven.surefire.plugin.version>3.0.0-M3</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>3.0.0-M3</maven.failsafe.plugin.version>
+        <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
 
         <lz4.version>1.3.0</lz4.version>
         <jmh.version>1.21</jmh.version>
@@ -225,6 +229,15 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
                     <version>${maven.scala.plugin.version}</version>
@@ -283,11 +296,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven.compiler.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
                     <version>${maven.source.plugin.version}</version>
                 </plugin>
@@ -300,6 +308,33 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>**/*ITest*</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven.failsafe.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>integration-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>verify</id>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <includes>**/*ITest*</includes>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -325,41 +360,68 @@
                     <groupId>de.thetaphi</groupId>
                     <artifactId>forbiddenapis</artifactId>
                     <version>${maven.forbiddenapis.plugin.version}</version>
+                    <configuration>
+                        <failOnUnsupportedJava>false</failOnUnsupportedJava>
+                        <bundledSignatures>
+                            <bundledSignature>jdk-unsafe</bundledSignature>
+                            <!-- disallow deprecated methods from Java 8 -->
+                            <bundledSignature>jdk-deprecated</bundledSignature>
+                            <!-- disallow undocumented classes like sun.misc.Unsafe: -->
+                            <bundledSignature>jdk-non-portable</bundledSignature>
+                            <!-- disallow unsafe reflective access: -->
+                            <bundledSignature>jdk-reflection</bundledSignature>
+                        </bundledSignatures>
+                        <excludes>**/*jmhTest.class</excludes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                                <goal>testCheck</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven.assembly.plugin.version}</version>
+                    <configuration>
+                        <tarLongFileMode>posix</tarLongFileMode>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>prepare-test-jar</id>
+                            <phase>${build.testJarPhase}</phase>
+                            <goals>
+                                <goal>test-jar</goal>
+                            </goals>
+                            <configuration>
+                                <excludes>
+                                    <exclude>log4j.properties</exclude>
+                                </excludes>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <fork>true</fork>
-                </configuration>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>de.thetaphi</groupId>
                 <artifactId>forbiddenapis</artifactId>
-                <configuration>
-                    <failOnUnsupportedJava>false</failOnUnsupportedJava>
-                    <bundledSignatures>
-                        <bundledSignature>jdk-unsafe</bundledSignature>
-                        <!-- disallow deprecated methods from Java 8 -->
-                        <bundledSignature>jdk-deprecated</bundledSignature>
-                        <!-- disallow undocumented classes like sun.misc.Unsafe: -->
-                        <bundledSignature>jdk-non-portable</bundledSignature>
-                        <!-- disallow unsafe reflective access: -->
-                        <bundledSignature>jdk-reflection</bundledSignature>
-                    </bundledSignatures>
-                    <excludes>**/*jmhTest.class</excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                            <goal>testCheck</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
@@ -375,11 +437,15 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
+                        <configuration>
+                            <attach>true</attach>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
                                 <goals>
                                     <goal>jar-no-fork</goal>
+                                    <goal>test-jar-no-fork</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -414,7 +480,8 @@
                         <artifactId>maven-release-plugin</artifactId>
                         <configuration>
                             <mavenExecutorId>forked-path</mavenExecutorId>
-                            <useReleaseProfile>false</useReleaseProfile>
+                            <useReleaseProfile>true</useReleaseProfile>
+                            <releaseProfiles>release</releaseProfiles>
                         </configuration>
                     </plugin>
                 </plugins>
