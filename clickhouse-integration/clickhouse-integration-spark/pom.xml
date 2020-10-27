@@ -31,6 +31,23 @@
             <artifactId>spark-sql_${scala.compat.version}</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.housepower</groupId>
+            <artifactId>clickhouse-native-jdbc</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.housepower</groupId>
+            <artifactId>clickhouse-native-jdbc-shaded</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

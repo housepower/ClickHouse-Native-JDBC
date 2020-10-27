@@ -4,6 +4,8 @@ import com.google.common.base.Joiner;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
@@ -21,6 +23,8 @@ import java.util.function.Supplier;
  * implements to test all supported datatypes
  */
 public class GenericSimpleInsertITest extends AbstractITest {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     final int insertRows = (1 << 17);
     final String tableName;
@@ -91,21 +95,20 @@ public class GenericSimpleInsertITest extends AbstractITest {
     }
 
     public void create() throws Exception {
-        StringBuilder sql = new StringBuilder("CREATE TABLE " + tableName + " (");
+        StringBuilder sb = new StringBuilder("CREATE TABLE " + tableName + " (");
         for (int i = 0; i < types.size(); i++) {
             if (i != 0) {
-                sql.append(",\n");
+                sb.append(",\n");
             }
-            sql.append("col_" + i);
-            sql.append(" ");
-            sql.append(types.get(i).name.get());
+            sb.append("col_").append(i).append(" ").append(types.get(i).name.get());
         }
-
-        sql.append(" ) Engine=Memory");
+        sb.append(" ) Engine=Memory");
+        String sql = sb.toString();
+        log.info("CREATE TABLE DDL: \n{}", sql);
 
         withNewConnection(connection -> {
             Statement stmt = connection.createStatement();
-            stmt.execute(sql.toString());
+            stmt.execute(sql);
         });
     }
 

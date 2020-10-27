@@ -39,9 +39,7 @@ public class SparkITest extends AbstractITest implements Serializable {
                 "CREATE TABLE test as " + genericSimpleInsertITest.tableName + " Engine = Memory");
         });
 
-        String
-            connectionStr =
-            "jdbc:clickhouse://127.0.0.1:" + System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000");
+        String connectionStr = getJdbcUrl();
         SparkSession spark = SparkSession
                                  .builder()
                                  .appName("spark-jdbc-test")
@@ -91,9 +89,7 @@ public class SparkITest extends AbstractITest implements Serializable {
                 "CREATE TABLE test as " + genericSimpleInsertITest.tableName + " Engine = Memory");
         });
 
-        String
-            connectionStr =
-            "jdbc:clickhouse://127.0.0.1:" + System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000");
+        String connectionStr = getJdbcUrl();
         SparkSession spark = SparkSession
                                  .builder()
                                  .appName("spark-jdbc-test")

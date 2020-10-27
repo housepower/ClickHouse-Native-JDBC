@@ -122,12 +122,33 @@
         <dependencies>
             <dependency>
                 <groupId>com.github.housepower</groupId>
+                <artifactId>clickhouse-integration</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.housepower</groupId>
+                <artifactId>clickhouse-integration-spark_${scala.compat.version}</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.housepower</groupId>
                 <artifactId>clickhouse-native-jdbc</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.housepower</groupId>
+                <artifactId>clickhouse-native-jdbc</artifactId>
+                <type>test-jar</type>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.housepower</groupId>
                 <artifactId>clickhouse-native-jdbc-shaded</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.housepower</groupId>
+                <artifactId>examples</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
