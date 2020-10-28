@@ -56,8 +56,7 @@ public class SparkITest extends AbstractITest implements Serializable {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
             statement.executeQuery("DROP TABLE IF EXISTS test");
-            statement.executeQuery(
-                    "CREATE TABLE test as " + helper.getTableName() + " Engine = Memory");
+            statement.executeQuery("CREATE TABLE test as " + helper.getTableName() + " Engine = Memory");
         });
 
         String connectionStr = getJdbcUrl();
@@ -66,10 +65,8 @@ public class SparkITest extends AbstractITest implements Serializable {
                 .appName("spark-jdbc-test")
                 .master("local")
                 .getOrCreate();
-        Dataset<Row>
-                rows =
-                spark.read()
-                        .jdbc(connectionStr, helper.getTableName(), new Properties());
+        Dataset<Row> rows = spark.read()
+                .jdbc(connectionStr, helper.getTableName(), new Properties());
 
         Properties properties = new Properties();
         properties.put("user", "default");
@@ -83,8 +80,7 @@ public class SparkITest extends AbstractITest implements Serializable {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
             statement.executeQuery("TRUNCATE TABLE " + helper.getTableName());
-            statement.executeQuery(
-                    "INSERT INTO " + helper.getTableName() + " SELECT * FROM test");
+            statement.executeQuery("INSERT INTO " + helper.getTableName() + " SELECT * FROM test");
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
         helper.checkItem();
@@ -104,8 +100,7 @@ public class SparkITest extends AbstractITest implements Serializable {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
             statement.executeQuery("DROP TABLE IF EXISTS test");
-            statement.executeQuery(
-                    "CREATE TABLE test as " + helper.getTableName() + " Engine = Memory");
+            statement.executeQuery("CREATE TABLE test as " + helper.getTableName() + " Engine = Memory");
         });
 
         String connectionStr = getJdbcUrl();
