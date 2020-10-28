@@ -60,10 +60,10 @@ object ClickHouseDialect extends JdbcDialect with Logging {
                              precision: Int,
                              scale: Int): Option[DataType] = typeName match {
     case "String" => Some(StringType)
-    case "UInt8" | "Int8" => Some(ByteType)
-    case "UInt16" | "Int16" => Some(ShortType)
-    case "UInt32" | "Int32" => Some(IntegerType)
-    case "UInt64" | "Int64" => Some(LongType)
+    case "Int8" => Some(ByteType)
+    case "UInt8" | "Int16" => Some(ShortType)
+    case "UInt16" | "Int32" => Some(IntegerType)
+    case "UInt32" | "UInt64" | "Int64" => Some(LongType)
     case "Float32" => Some(FloatType)
     case "Float64" => Some(DoubleType)
     case decimalTypePattern(precision, scale, _) => Some(DecimalType(precision.toInt, scale.toInt))
