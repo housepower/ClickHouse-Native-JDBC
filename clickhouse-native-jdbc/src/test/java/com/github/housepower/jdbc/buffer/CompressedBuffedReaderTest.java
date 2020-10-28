@@ -15,11 +15,12 @@
 package com.github.housepower.jdbc.buffer;
 
 import com.github.housepower.jdbc.tool.FragmentBuffedReader;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CompressedBuffedReaderTest {
 
@@ -30,18 +31,18 @@ public class CompressedBuffedReaderTest {
             new FragmentBuffedReader(compressedData(new byte[] {1, 2, 3}), compressedData(new byte[] {4, 5, 6, 7}))
         );
 
-        Assert.assertEquals(compressedBuffed.readBinary(), 1);
+        assertEquals(compressedBuffed.readBinary(), 1);
 
         byte[] bytes = new byte[5];
         compressedBuffed.readBinary(bytes);
 
-        Assert.assertEquals(bytes[0], 2);
-        Assert.assertEquals(bytes[1], 3);
-        Assert.assertEquals(bytes[2], 4);
-        Assert.assertEquals(bytes[3], 5);
-        Assert.assertEquals(bytes[4], 6);
+        assertEquals(bytes[0], 2);
+        assertEquals(bytes[1], 3);
+        assertEquals(bytes[2], 4);
+        assertEquals(bytes[3], 5);
+        assertEquals(bytes[4], 6);
 
-        Assert.assertEquals(compressedBuffed.readBinary(), 7);
+        assertEquals(compressedBuffed.readBinary(), 7);
     }
 
 

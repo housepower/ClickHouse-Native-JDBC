@@ -15,12 +15,12 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.tool.EmbeddedDriver;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.DriverManager;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ClickhouseDriverRegisterTest {
 

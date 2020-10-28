@@ -15,8 +15,8 @@
 package org.apache.spark.sql.jdbc
 
 import org.apache.spark.sql.jdbc.ClickHouseDialect.{arrayTypePattern, dateTimeTypePattern, decimalTypePattern}
-import org.junit.Assert._
-import org.junit.Test
+import org.junit.jupiter.api.Assertions._
+import org.junit.jupiter.api.Test
 
 class ClickHouseDialectTest {
 
@@ -39,7 +39,7 @@ class ClickHouseDialectTest {
 
     "Array(String" match {
       case arrayTypePattern(_) => fail()
-      case _ => assertTrue("not match", true)
+      case _ => assertTrue(true)
     }
   }
 

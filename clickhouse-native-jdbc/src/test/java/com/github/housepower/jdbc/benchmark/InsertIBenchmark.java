@@ -14,8 +14,7 @@
 
 package com.github.housepower.jdbc.benchmark;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 
 import java.sql.Date;
@@ -23,6 +22,8 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  */
@@ -51,7 +52,7 @@ public class InsertIBenchmark extends AbstractInsertIBenchmark {
             pstmt.addBatch();
         }
         int []res = pstmt.executeBatch();
-        Assert.assertEquals(res.length, batchSize);
+        assertEquals(res.length, batchSize);
         stmt.executeQuery("DROP TABLE " + testTable);
     };
 

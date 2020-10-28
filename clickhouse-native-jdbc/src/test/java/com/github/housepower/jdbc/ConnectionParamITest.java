@@ -16,24 +16,19 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.SettingKey;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ConnectionParamITest {
 
-    @Before
+    @BeforeEach
     public void init() throws SQLException {
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
@@ -42,17 +37,19 @@ public class ConnectionParamITest {
         DriverManager.registerDriver(new ClickHouseDriver());
     }
 
-    @Test(expected = SQLException.class)
+    @Test
     public void successfullyMaxRowsToRead() throws Exception {
-        Connection connection = DriverManager
-                .getConnection("jdbc:clickhouse://127.0.0.1?max_rows_to_read=1&connect_timeout=10");
-        Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
-        int rowsRead = 0;
-        while (rs.next()) {
-            ++rowsRead;
-        }
-        assertEquals(1, rowsRead); // not reached
+        assertThrows(SQLException.class, () -> {
+            Connection connection = DriverManager
+                    .getConnection("jdbc:clickhouse://127.0.0.1?max_rows_to_read=1&connect_timeout=10");
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
+            int rowsRead = 0;
+            while (rs.next()) {
+                ++rowsRead;
+            }
+            assertEquals(1, rowsRead); // not reached
+        });
     }
 
     @Test

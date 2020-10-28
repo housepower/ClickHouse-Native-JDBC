@@ -16,14 +16,15 @@ package com.github.housepower.jdbc.benchmark;
 
 import com.google.common.base.Strings;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 
 import java.sql.PreparedStatement;
 
 import ru.yandex.clickhouse.ClickHouseStatement;
 import ru.yandex.clickhouse.domain.ClickHouseFormat;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  */
@@ -45,7 +46,7 @@ public class RowBinaryIntIBenchmark extends AbstractInsertIBenchmark {
                 pstmt.addBatch();
             }
             int []res = pstmt.executeBatch();
-            Assert.assertEquals(res.length, batchSize);
+            assertEquals(res.length, batchSize);
 
             wideColumnAfter(connection);
         }, ConnectionType.NATIVE);

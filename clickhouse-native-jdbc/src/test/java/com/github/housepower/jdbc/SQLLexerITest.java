@@ -16,9 +16,9 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.misc.SQLLexer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SQLLexerITest extends AbstractITest {
 

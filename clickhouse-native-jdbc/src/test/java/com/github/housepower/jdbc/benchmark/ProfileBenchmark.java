@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.benchmark;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
