@@ -21,12 +21,12 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.to_timestamp
 import org.apache.spark.sql.jdbc.{ClickHouseDialect, JdbcDialects}
 import org.apache.spark.sql.types.{ArrayType, DataTypes, StructField, StructType}
-import org.junit.{BeforeClass, Test}
+import org.junit.jupiter.api.{BeforeAll, Test}
 
 import scala.collection.Seq
 
 object SparkOnClickHouseITest {
-  @BeforeClass
+  @BeforeAll
   def beforeAll(): Unit = {
     // make sure register `ClickHouseDialects` before we use it
     JdbcDialects.registerDialect(ClickHouseDialect)

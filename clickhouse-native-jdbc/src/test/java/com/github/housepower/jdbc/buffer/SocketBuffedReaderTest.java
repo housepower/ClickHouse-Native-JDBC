@@ -18,10 +18,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SocketBuffedReaderTest {
 
@@ -30,18 +31,18 @@ public class SocketBuffedReaderTest {
         SocketBuffedReader buffedReader = new SocketBuffedReader(
             fragmentInput(new byte[] {1, 0, 0, 0, 2}, new byte[] {0, 3, 4}), 6);
 
-        Assert.assertEquals(buffedReader.readBinary(), 1);
+        assertEquals(buffedReader.readBinary(), 1);
 
         byte[] bytes = new byte[5];
         buffedReader.readBinary(bytes);
 
-        Assert.assertEquals(bytes[0], 0);
-        Assert.assertEquals(bytes[1], 0);
-        Assert.assertEquals(bytes[2], 0);
-        Assert.assertEquals(bytes[3], 2);
-        Assert.assertEquals(bytes[4], 0);
-        Assert.assertEquals(buffedReader.readBinary(), 3);
-        Assert.assertEquals(buffedReader.readBinary(), 4);
+        assertEquals(bytes[0], 0);
+        assertEquals(bytes[1], 0);
+        assertEquals(bytes[2], 0);
+        assertEquals(bytes[3], 2);
+        assertEquals(bytes[4], 0);
+        assertEquals(buffedReader.readBinary(), 3);
+        assertEquals(buffedReader.readBinary(), 4);
     }
 
 

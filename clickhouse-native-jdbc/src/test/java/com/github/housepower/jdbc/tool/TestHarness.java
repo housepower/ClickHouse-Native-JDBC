@@ -27,8 +27,7 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestHarness extends AbstractITest {
     static final Logger LOG = LoggerFactory.getLogger(TestHarness.class);
@@ -206,10 +205,10 @@ public class TestHarness extends AbstractITest {
 
             assertTrue(rs.next());
             for (int i = 0; i < types.size(); i++) {
+                String typeName = types.get(i).name.get();
                 Double result = rs.getDouble(i + 1);
-                assertEquals("Check Aggr Error Type: " + types.get(i).name.get(),
-                        results[i],
-                        result);
+                assertEquals(results[i], result,
+                        () -> "Check Aggr Error Type: " + typeName);
             }
         });
     }
@@ -218,33 +217,29 @@ public class TestHarness extends AbstractITest {
         withNewConnection(connection -> {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName);
-            int r = 0;
+            int[] r = {0};
             while (rs.next()) {
                 for (int i = 0; i < types.size(); i++) {
-                    if (types.get(i).data.apply(r) instanceof Number) {
-                        Number expected = (Number) (types.get(i).data.apply(r));
+                    String typeName = types.get(i).name.get();
+                    if (types.get(i).data.apply(r[0]) instanceof Number) {
+                        Number expected = (Number) (types.get(i).data.apply(r[0]));
                         Number actually = (Number) (rs.getObject(i + 1));
 
-                        assertEquals("Check Item Error Type: " + types.get(i).name.get() + ", at row: " + r,
-                                expected.intValue(),
-                                actually.intValue());
+                        assertEquals(expected.intValue(), actually.intValue(),
+                                () -> "Check Item Error Type: " + typeName + ", at row: " + r[0]);
                         continue;
-                    } else if (types.get(i).data.apply(r) instanceof Object[]) {
-                        Object[] expected = (Object[]) types.get(i).data.apply(r);
+                    } else if (types.get(i).data.apply(r[0]) instanceof Object[]) {
+                        Object[] expected = (Object[]) types.get(i).data.apply(r[0]);
                         Object[] actually = (Object[]) rs.getArray(i + 1).getArray();
 
-                        assertArrayEquals(
-                                "Check Item Error Type: " + types.get(i).name.get() + ", at row: " + r,
-                                expected,
-                                actually);
+                        assertArrayEquals(expected, actually,
+                                () -> "Check Item Error Type: " + typeName + ", at row: " + r[0]);
                         continue;
                     }
-                    assertEquals(
-                            "Check Item Error Type: " + types.get(i).name.get() + ", at row: " + r,
-                            types.get(i).data.apply(r),
-                            rs.getObject(i + 1));
+                    assertEquals(types.get(i).data.apply(r[0]), rs.getObject(i + 1),
+                            () -> "Check Item Error Type: " + typeName + ", at row: " + r[0]);
                 }
-                r++;
+                r[0]++;
             }
         });
     }

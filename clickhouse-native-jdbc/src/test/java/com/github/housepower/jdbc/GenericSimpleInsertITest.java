@@ -15,7 +15,7 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.tool.TestHarness;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Implements to test all supported DataTypes

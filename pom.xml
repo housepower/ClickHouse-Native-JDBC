@@ -106,7 +106,7 @@
         <scala.version>2.11.12</scala.version>
         <scala.compat.version>2.11</scala.compat.version>
         <spark.version>2.4.7</spark.version>
-        <junit.version>4.13.1</junit.version>
+        <jupiter.version>5.7.0</jupiter.version>
 
         <ClickHousePort>9000</ClickHousePort>
         <ClickHouseHTTPPort>8123</ClickHouseHTTPPort>
@@ -224,9 +224,9 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${jupiter.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -23,8 +23,8 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.jdbc.ClickHouseDialect$;
 import org.apache.spark.sql.jdbc.JdbcDialects;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import scala.Serializable;
 import scala.collection.mutable.WrappedArray;
 
@@ -39,7 +39,7 @@ import java.util.Properties;
 // helper table check
 public class SparkITest extends AbstractITest implements Serializable {
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeAll() {
         // make sure register `ClickHouseDialects$.MODULE$` before we use it
         JdbcDialects.registerDialect(ClickHouseDialect$.MODULE$);

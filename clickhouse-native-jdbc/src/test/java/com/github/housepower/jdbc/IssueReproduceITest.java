@@ -16,13 +16,13 @@ package com.github.housepower.jdbc;
 
 import com.google.common.base.Strings;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *

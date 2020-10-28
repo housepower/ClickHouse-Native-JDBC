@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -24,7 +24,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class InsertSimpleTypeITest extends AbstractITest {
 

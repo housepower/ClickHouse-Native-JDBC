@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Array;
 import java.sql.ResultSet;
@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class QueryComplexTypeITest extends AbstractITest {
 
