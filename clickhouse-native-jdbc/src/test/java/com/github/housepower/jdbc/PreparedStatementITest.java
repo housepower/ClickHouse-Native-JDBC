@@ -7,6 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
@@ -106,15 +109,14 @@ public class PreparedStatementITest extends AbstractITest {
     }
 
     @Test
-    public void successfullyDate() throws Exception {
+    public void successfullyDateWithClientTz() throws Exception {
         withNewConnection(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT toDate(?)");
-
-            long now = System.currentTimeMillis();
-            preparedStatement.setDate(1, new Date(now));
+            ZonedDateTime zdt = ZonedDateTime.now(ZoneId.systemDefault());
+            preparedStatement.setDate(1, new Date(zdt.toInstant().toEpochMilli()));
             ResultSet rs = preparedStatement.executeQuery();
             assertTrue(rs.next());
-            assertEquals(now / TimeUnit.DAYS.toMillis(1),
+            assertEquals(zdt.toLocalDate().toEpochDay(),
                     rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1));
             assertFalse(rs.next());
         }, true);

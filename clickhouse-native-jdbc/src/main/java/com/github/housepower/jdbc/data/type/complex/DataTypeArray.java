@@ -92,7 +92,10 @@ public class DataTypeArray implements IDataType {
         return new ClickHouseArray(arrayData.toArray());
     }
 
-    public void serializeBinary(Object data, BinarySerializer dataBinarySerializer, List<List<Integer>> offsets, int level) throws SQLException, IOException {
+    public void serializeBinary(Object data,
+                                BinarySerializer dataBinarySerializer,
+                                List<List<Integer>> offsets,
+                                int level) throws SQLException, IOException {
         int dataOffset = ((Object[]) ((Array) data).getArray()).length;
         if (offsets.size() < level) {
             List<Integer> offset = new ArrayList<>();
