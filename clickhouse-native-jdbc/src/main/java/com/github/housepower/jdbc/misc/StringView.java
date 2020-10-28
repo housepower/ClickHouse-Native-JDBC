@@ -39,24 +39,19 @@ public class StringView {
         return values;
     }
 
-    @Override
-    public String toString() {
-        return new String(Arrays.copyOfRange(values, start, end));
+    public boolean checkEquals(String expectString) {
+        if (expectString == null || expectString.length() != end - start)
+            return false;
+
+        for (int i = 0; i < expectString.length(); i++) {
+            if (expectString.charAt(i) != values[start + i])
+                return false;
+        }
+        return true;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof String) {
-            String expectString = (String) obj;
-            if (expectString.length() == end - start) {
-                for (int i = 0; i < expectString.length(); i++) {
-                    if (expectString.charAt(i) != values[start + i])
-                        return false;
-                }
-                return true;
-            }
-            return false;
-        }
-        return super.equals(obj);
+    public String toString() {
+        return new String(Arrays.copyOfRange(values, start, end));
     }
 }

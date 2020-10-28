@@ -101,7 +101,7 @@ public class DataTypeDateTime64 implements IDataType {
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         StringView dataTypeName = lexer.bareWord();
-        Validate.isTrue(dataTypeName.equals("toDateTime64"));
+        Validate.isTrue(dataTypeName.checkEquals("toDateTime64"));
         Validate.isTrue(lexer.character() == '(');
         Validate.isTrue(lexer.character() == '\'');
         int year = lexer.numberLiteral().intValue();
