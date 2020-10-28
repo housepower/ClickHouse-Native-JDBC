@@ -52,8 +52,8 @@ public class SocketBuffedReaderTest {
 
         Mockito.when(in.read(Mockito.any(byte[].class), Mockito.anyInt(), Mockito.anyInt()))
             .thenAnswer((Answer<Integer>) invocation -> {
-                int offset = invocation.getArgumentAt(1, int.class);
-                byte[] bytes = invocation.getArgumentAt(0, byte[].class);
+                int offset = invocation.getArgument(1, Integer.class);
+                byte[] bytes = invocation.getArgument(0, byte[].class);
 
                 byte[] fragment = fragments[position.getAndIncrement()];
                 if (bytes.length < fragment.length) {
