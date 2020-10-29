@@ -14,18 +14,18 @@
 
 package org.apache.spark.sql.jdbc
 
-import java.sql.Types
+import java.sql.{Date, Timestamp, Types}
 import java.util.Locale
 
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils
+import org.apache.spark.sql.execution.datasources.jdbc.JDBCRDD
 import org.apache.spark.sql.types._
 
 import scala.util.matching.Regex
 
 /**
  * ClickHouseDialects
- * TODO: support Nullable Type
  */
 object ClickHouseDialect extends JdbcDialect with Logging {
 
@@ -37,6 +37,10 @@ object ClickHouseDialect extends JdbcDialect with Logging {
   override def canHandle(url: String): Boolean =
     url.toLowerCase(Locale.ROOT).startsWith("jdbc:clickhouse")
 
+  /**
+   * Inferred schema always nullable, should we handle it?
+   * see [[JDBCRDD.resolveTable(JDBCOptions)]]
+   */
   override def getCatalystType(sqlType: Int,
                                typeName: String,
                                size: Int, md: MetadataBuilder): Option[DataType] = {
@@ -95,4 +99,12 @@ object ClickHouseDialect extends JdbcDialect with Logging {
   override def quoteIdentifier(colName: String): String = s"`$colName`"
 
   override def isCascadingTruncateTable: Option[Boolean] = Some(false)
+
+  override def compileValue(value: Any): Any = value match {
+    case stringValue: String => s"'${escapeSql(stringValue)}'"
+    case timestampValue: Timestamp => "'" + timestampValue + "'"
+    case dateValue: Date => "'" + dateValue + "'"
+    case arrayValue: Array[Any] => arrayValue.map(compileValue).mkString("[", ", ", "]")
+    case _ => value
+  }
 }
