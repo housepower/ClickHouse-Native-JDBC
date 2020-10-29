@@ -68,6 +68,7 @@ Select query, see also [SimpleQuery](./examples/src/main/java/examples/SimpleQue
     while (rs.next()) {
         System.out.println(rs.getInt(1) + "\t" + rs.getLong(2));
     }
+    // ... close resources
 
 All DDL,DML queries, see also [ExecuteQuery](./examples/src/main/java/examples/ExecuteQuery.java)
 
@@ -77,6 +78,7 @@ All DDL,DML queries, see also [ExecuteQuery](./examples/src/main/java/examples/E
     stmt.executeQuery("create table test_jdbc_example(day default toDate(toDateTime(timestamp)), timestamp UInt32, name String, impressions UInt32) Engine=MergeTree()");
     stmt.executeQuery("alter table test_jdbc_example add column costs Float32");
     stmt.executeQuery("drop table test_jdbc_example");
+    // ... close resources
 
 Batch insert query, see also [BatchQuery](./examples/src/main/java/examples/BatchQuery.java)
 
@@ -90,6 +92,7 @@ Batch insert query, see also [BatchQuery](./examples/src/main/java/examples/Batc
     }
     pstmt.executeBatch();
     stmt.executeQuery("drop table test_jdbc_example");
+    // ... close resources
 
 ## Integration with Spark
 
