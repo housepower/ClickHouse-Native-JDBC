@@ -72,7 +72,7 @@ public class SQLLexerITest extends AbstractITest {
     @Test
     public void successfullyStringLiteral() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "'this is a quoted message'");
-        assertEquals("this is a quoted message", sqlLexer.stringLiteral().toString());
+        assertEquals("this is a quoted message", sqlLexer.stringLiteral());
     }
 
     @Test
@@ -80,23 +80,23 @@ public class SQLLexerITest extends AbstractITest {
         String s = "'this is a message with \\' char'";
         SQLLexer sqlLexer = new SQLLexer(0, s);
         System.out.println(s);
-        assertEquals("this is a message with \\' char", sqlLexer.stringLiteral().toString());
+        assertEquals("this is a message with \\' char", sqlLexer.stringLiteral());
     }
 
     @Test
     public void successfullyBareWord() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "_askes String");
-        assertEquals("_askes", sqlLexer.bareWord().toString());
-        assertEquals("String", sqlLexer.bareWord().toString());
+        assertEquals("_askes", sqlLexer.bareWord());
+        assertEquals("String", sqlLexer.bareWord());
     }
 
     @Test
     public void successfullyDateTime() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "h DateTime('Asia/Shanghai')");
-        assertEquals("h", sqlLexer.bareWord().toString());
-        assertEquals("DateTime", sqlLexer.bareWord().toString());
+        assertEquals("h", sqlLexer.bareWord());
+        assertEquals("DateTime", sqlLexer.bareWord());
         assertEquals('(', sqlLexer.character());
-        assertEquals("Asia/Shanghai", sqlLexer.stringLiteral().toString());
+        assertEquals("Asia/Shanghai", sqlLexer.stringLiteral());
         assertEquals(')', sqlLexer.character());
     }
 }

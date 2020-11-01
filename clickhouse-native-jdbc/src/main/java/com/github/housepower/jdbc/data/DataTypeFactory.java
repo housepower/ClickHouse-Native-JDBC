@@ -27,7 +27,6 @@ import com.github.housepower.jdbc.data.type.DataTypeString;
 import com.github.housepower.jdbc.data.type.DataTypeUUID;
 import com.github.housepower.jdbc.data.type.complex.*;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 
 import java.sql.SQLException;
@@ -47,33 +46,33 @@ public class DataTypeFactory {
     private static final Map<String, IDataType> dataTypes = initialDataTypes();
 
     public static IDataType get(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
-        StringView dataTypeName = lexer.bareWord();
+        String dataTypeName = lexer.bareWord();
 
-        if (dataTypeName.checkEquals("Date")) {
-            return DataTypeDate.createDateType(lexer, serverInfo);
-        } else if (dataTypeName.checkEquals("Tuple")) {
-            return DataTypeTuple.createTupleType(lexer, serverInfo);
-        } else if (dataTypeName.checkEquals("Array")) {
-            return DataTypeArray.createArrayType(lexer, serverInfo);
-        } else if (dataTypeName.checkEquals("Enum8")) {
-            return DataTypeEnum8.createEnum8Type(lexer, serverInfo);
-        } else if (dataTypeName.checkEquals("Enum16")) {
-            return DataTypeEnum16.createEnum16Type(lexer, serverInfo);
-        } else if (dataTypeName.checkEquals("DateTime")) {
-            return DataTypeDateTime.createDateTimeType(lexer, serverInfo);
-        } else if (dataTypeName.checkEquals("DateTime64")) {
-            return DataTypeDateTime64.createDateTime64Type(lexer, serverInfo);
-        } else if (dataTypeName.checkEquals("Nullable")) {
-            return DataTypeNullable.createNullableType(lexer, serverInfo);
-        } else if (dataTypeName.checkEquals("FixedString")) {
-            return DataTypeFixedString.createFixedStringType(lexer, serverInfo);
-        } else if (dataTypeName.checkEquals("Decimal")) {
-            return DataTypeDecimal.createDecimalType(lexer, serverInfo);
-        } else {
-            String name = String.valueOf(dataTypeName);
-            IDataType dataType = dataTypes.get(name);
-            Validate.isTrue(dataType != null, "Unknown data type family:" + name);
-            return dataType;
+        switch (dataTypeName) {
+            case "Date":
+                return DataTypeDate.createDateType(lexer, serverInfo);
+            case "Tuple":
+                return DataTypeTuple.createTupleType(lexer, serverInfo);
+            case "Array":
+                return DataTypeArray.createArrayType(lexer, serverInfo);
+            case "Enum8":
+                return DataTypeEnum8.createEnum8Type(lexer, serverInfo);
+            case "Enum16":
+                return DataTypeEnum16.createEnum16Type(lexer, serverInfo);
+            case "DateTime":
+                return DataTypeDateTime.createDateTimeType(lexer, serverInfo);
+            case "DateTime64":
+                return DataTypeDateTime64.createDateTime64Type(lexer, serverInfo);
+            case "Nullable":
+                return DataTypeNullable.createNullableType(lexer, serverInfo);
+            case "FixedString":
+                return DataTypeFixedString.createFixedStringType(lexer, serverInfo);
+            case "Decimal":
+                return DataTypeDecimal.createDecimalType(lexer, serverInfo);
+            default:
+                IDataType dataType = dataTypes.get(dataTypeName);
+                Validate.isTrue(dataType != null, "Unknown data type family:" + dataTypeName);
+                return dataType;
         }
     }
 

@@ -18,7 +18,6 @@ import com.github.housepower.jdbc.connect.PhysicalInfo.ServerInfo;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
@@ -39,7 +38,7 @@ public class DataTypeDateTime64 implements IDataType {
             if (lexer.isCharacter(',')) {
                 Validate.isTrue(lexer.character() == ',');
                 Validate.isTrue(lexer.isWhitespace());
-                StringView dataTimeZone = lexer.stringLiteral();
+                String dataTimeZone = lexer.stringLiteral();
                 Validate.isTrue(lexer.character() == ')');
                 return new DataTypeDateTime64("DateTime64(" + precision + ", '" + dataTimeZone + "')", serverInfo);
             }
@@ -100,8 +99,8 @@ public class DataTypeDateTime64 implements IDataType {
 
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        StringView dataTypeName = lexer.bareWord();
-        Validate.isTrue(dataTypeName.checkEquals("toDateTime64"));
+        String dataTypeName = lexer.bareWord();
+        Validate.isTrue("toDateTime64".equals(dataTypeName));
         Validate.isTrue(lexer.character() == '(');
         Validate.isTrue(lexer.character() == '\'');
         int year = lexer.numberLiteral().intValue();

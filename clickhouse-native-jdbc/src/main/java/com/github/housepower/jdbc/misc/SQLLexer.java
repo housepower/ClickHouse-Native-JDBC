@@ -21,7 +21,7 @@ public class SQLLexer {
     private int pos;
     private final char[] data;
 
-    public SQLLexer(int pos, String data) throws SQLException {
+    public SQLLexer(int pos, String data) {
         this.pos = pos;
         this.data = data.toCharArray();
     }
@@ -124,10 +124,10 @@ public class SQLLexer {
         }
     }
 
-    public StringView stringLiteral() throws SQLException {
+    public String stringLiteral() throws SQLException {
         skipAnyWhitespace();
         Validate.isTrue(isCharacter('\''));
-        return stringLiteralWithQuoted('\'');
+        return stringLiteralWithQuoted('\'').toString();
     }
 
     public boolean eof() {
@@ -139,12 +139,12 @@ public class SQLLexer {
         return !eof() && data[pos] == ch;
     }
 
-    public StringView bareWord() throws SQLException {
+    public String bareWord() throws SQLException {
         skipAnyWhitespace();
         if (isCharacter('`')) {
-            return stringLiteralWithQuoted('`');
+            return stringLiteralWithQuoted('`').toString();
         } else if (isCharacter('"')) {
-            return stringLiteralWithQuoted('"');
+            return stringLiteralWithQuoted('"').toString();
         } else if ('_' == data[pos] || (data[pos] >= 'a' && data[pos] <= 'z')
                 || (data[pos] >= 'A' && data[pos] <= 'Z')) {
             int start = pos;
@@ -153,7 +153,7 @@ public class SQLLexer {
                         || (data[pos] >= 'A' && data[pos] <= 'Z') || (data[pos] >= '0' && data[pos] <= '9')))
                     break;
             }
-            return new StringView(start, pos, data);
+            return new StringView(start, pos, data).toString();
         }
         throw new SQLException("Expect Bare Token.");
     }
@@ -186,5 +186,34 @@ public class SQLLexer {
                 return new StringView(start + 1, pos++, data);
         }
         throw new SQLException("The String Literal is no Closed.");
+    }
+
+    private static class StringView {
+        private final int start;
+        private final int end;
+        private final char[] values;
+
+        public StringView(int start, int end, char[] values) {
+            this.start = start;
+            this.end = end;
+            this.values = values;
+        }
+
+        public int start() {
+            return start;
+        }
+
+        public int end() {
+            return end;
+        }
+
+        public char[] values() {
+            return values;
+        }
+
+        @Override
+        public String toString() {
+            return new String(values, start, end - start);
+        }
     }
 }
