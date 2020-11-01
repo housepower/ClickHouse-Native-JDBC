@@ -14,7 +14,7 @@
 
 package org.apache.spark.sql.jdbc
 
-import org.apache.spark.sql.jdbc.ClickHouseDialect.{arrayTypePattern, dateTimeTypePattern, decimalTypePattern}
+import org.apache.spark.sql.jdbc.ClickHouseDialect._
 import org.junit.jupiter.api.Assertions._
 import org.junit.jupiter.api.Test
 
@@ -100,5 +100,11 @@ class ClickHouseDialectTest {
       case dateTimeTypePattern(_) => fail()
       case _ => assertTrue(true)
     }
+  }
+
+  @Test
+  def testNullableTypeRegex(): Unit = {
+    assertEquals((true, "String"), unwrapNullable("Nullable(String)"))
+    assertEquals((false, "String"), unwrapNullable("String"))
   }
 }

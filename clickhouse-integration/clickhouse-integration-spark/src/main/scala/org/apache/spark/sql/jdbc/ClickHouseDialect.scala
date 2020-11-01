@@ -18,8 +18,7 @@ import java.sql.{Date, Timestamp, Types}
 import java.util.Locale
 
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils
-import org.apache.spark.sql.execution.datasources.jdbc.JDBCRDD
+import org.apache.spark.sql.execution.datasources.jdbc.{JDBCRDD, JdbcUtils}
 import org.apache.spark.sql.types._
 
 import scala.util.matching.Regex
@@ -29,10 +28,11 @@ import scala.util.matching.Regex
  */
 object ClickHouseDialect extends JdbcDialect with Logging {
 
-  val arrayTypePattern: Regex = "^Array\\((.*)\\)$".r
+  private[jdbc] val arrayTypePattern: Regex = "^Array\\((.*)\\)$".r
   // TODO Decimal32(S), Decimal64(S), Decimal128(S), Decimal256(S)
-  val decimalTypePattern: Regex = "^Decimal(\\((\\d+),\\s*(\\d+)\\))?$".r
-  val dateTimeTypePattern: Regex = "^DateTime(64)?(\\((.*)\\))?$".r
+  private[jdbc] val decimalTypePattern: Regex = "^Decimal(\\((\\d+),\\s*(\\d+)\\))?$".r
+  private[jdbc] val dateTimeTypePattern: Regex = "^DateTime(64)?(\\((.*)\\))?$".r
+  private[jdbc] val nullableTypePattern: Regex = "^Nullable\\((.*)\\)".r
 
   override def canHandle(url: String): Boolean =
     url.toLowerCase(Locale.ROOT).startsWith("jdbc:clickhouse")
@@ -44,33 +44,42 @@ object ClickHouseDialect extends JdbcDialect with Logging {
   override def getCatalystType(sqlType: Int,
                                typeName: String,
                                size: Int, md: MetadataBuilder): Option[DataType] = {
+    val scale = md.build.getLong("scale").toInt
+    logDebug(s"sqlType: $sqlType, typeName: $typeName, precision: $size, scale: $scale")
     sqlType match {
       case Types.ARRAY =>
-        logDebug(s"sqlType: $sqlType, typeName: $typeName, size: $size")
-        typeName match {
-          case arrayTypePattern(nestType) =>
-            val scale = md.build.getLong("scale").toInt
-            toCatalystType(nestType, size, scale).map(ArrayType(_, containsNull = false))
+        unwrapNullable(typeName) match {
+          case (_, arrayTypePattern(nestType)) =>
+            toCatalystType(nestType, size, scale).map { case (nullable, dataType) => ArrayType(dataType, nullable) }
           case _ => None
         }
       case _ => None
     }
   }
 
-  private def toCatalystType(typeName: String,
-                             precision: Int,
-                             scale: Int): Option[DataType] = typeName match {
-    case "String" => Some(StringType)
-    case "Int8" => Some(ByteType)
-    case "UInt8" | "Int16" => Some(ShortType)
-    case "UInt16" | "Int32" => Some(IntegerType)
-    case "UInt32" | "UInt64" | "Int64" => Some(LongType)
-    case "Float32" => Some(FloatType)
-    case "Float64" => Some(DoubleType)
-    case decimalTypePattern(precision, scale, _) => Some(DecimalType(precision.toInt, scale.toInt))
-    case "Date" => Some(DateType)
-    case dateTimeTypePattern() => Some(TimestampType)
-    case _ => None
+  private[jdbc] def toCatalystType(typeName: String,
+                                   precision: Int,
+                                   scale: Int): Option[(Boolean, DataType)] = {
+    val (nullable, _typeName) = unwrapNullable(typeName)
+    val dataType = _typeName match {
+      case "String" => Some(StringType)
+      case "Int8" => Some(ByteType)
+      case "UInt8" | "Int16" => Some(ShortType)
+      case "UInt16" | "Int32" => Some(IntegerType)
+      case "UInt32" | "UInt64" | "Int64" => Some(LongType)
+      case "Float32" => Some(FloatType)
+      case "Float64" => Some(DoubleType)
+      case decimalTypePattern(precision, scale, _) => Some(DecimalType(precision.toInt, scale.toInt))
+      case "Date" => Some(DateType)
+      case dateTimeTypePattern() => Some(TimestampType)
+      case _ => None
+    }
+    dataType.map((nullable, _))
+  }
+
+  private[jdbc] def unwrapNullable(maybeNullableTypeName: String): (Boolean, String) = maybeNullableTypeName match {
+    case nullableTypePattern(typeName) => (true, typeName)
+    case _ => (false, maybeNullableTypeName)
   }
 
   override def getJDBCType(dt: DataType): Option[JdbcType] = dt match {
