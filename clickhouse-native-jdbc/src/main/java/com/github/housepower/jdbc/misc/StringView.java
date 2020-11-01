@@ -14,8 +14,6 @@
 
 package com.github.housepower.jdbc.misc;
 
-import java.util.Arrays;
-
 public class StringView {
     private final int start;
     private final int end;
@@ -52,6 +50,6 @@ public class StringView {
 
     @Override
     public String toString() {
-        return new String(Arrays.copyOfRange(values, start, end));
+        return new String(values, start, end - start);
     }
 }
