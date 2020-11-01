@@ -136,13 +136,13 @@ public class DataTypeDecimal implements IDataType {
             case 32: {
                 int v = deserializer.readInt();
                 value = BigDecimal.valueOf(v);
-                value = value.divide(scaleFactor);
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
             case 64: {
                 long v = deserializer.readLong();
                 value = BigDecimal.valueOf(v);
-                value = value.divide(scaleFactor);
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
             default: {
@@ -150,7 +150,6 @@ public class DataTypeDecimal implements IDataType {
                         "Unknown precision[%d] & scale[%d]", precision, scale));
             }
         }
-        value = value.setScale(scale, RoundingMode.HALF_UP);
         return value;
     }
 
