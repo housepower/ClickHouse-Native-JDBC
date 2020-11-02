@@ -15,10 +15,10 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.misc.SQLLexer;
-
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SQLLexerITest extends AbstractITest {
 
@@ -86,15 +86,15 @@ public class SQLLexerITest extends AbstractITest {
     @Test
     public void successfullyBareWord() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "_askes String");
-        assertEquals("_askes", sqlLexer.bareWord());
-        assertEquals("String", sqlLexer.bareWord());
+        assertTrue(sqlLexer.bareWord().checkEquals("_askes"));
+        assertTrue(sqlLexer.bareWord().checkEquals("String"));
     }
 
     @Test
     public void successfullyDateTime() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "h DateTime('Asia/Shanghai')");
-        assertEquals("h", sqlLexer.bareWord());
-        assertEquals("DateTime", sqlLexer.bareWord());
+        assertTrue(sqlLexer.bareWord().checkEquals("h"));
+        assertTrue(sqlLexer.bareWord().checkEquals("DateTime"));
         assertEquals('(', sqlLexer.character());
         assertEquals("Asia/Shanghai", sqlLexer.stringLiteral());
         assertEquals(')', sqlLexer.character());
