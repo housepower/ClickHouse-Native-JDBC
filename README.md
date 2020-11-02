@@ -171,7 +171,7 @@ Compile and run Unit Tests
 Run Integration Tests
 
     docker-compose up -d
-    mvn clean verify -DskipTests
+    mvn clean verify
     
 Run Benchmark
 
