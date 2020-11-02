@@ -39,7 +39,7 @@ public class DataTypeDateTime64 implements IDataType {
             if (lexer.isCharacter(',')) {
                 Validate.isTrue(lexer.character() == ',');
                 Validate.isTrue(lexer.isWhitespace());
-                StringView dataTimeZone = lexer.stringLiteral();
+                String dataTimeZone = lexer.stringLiteral();
                 Validate.isTrue(lexer.character() == ')');
                 return new DataTypeDateTime64("DateTime64(" + precision + ", '" + dataTimeZone + "')", serverInfo);
             }
@@ -114,9 +114,9 @@ public class DataTypeDateTime64 implements IDataType {
         Validate.isTrue(lexer.character() == ':');
         int minutes = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == ':');
-        int seconds = lexer.longLiteral().intValue();
+        int seconds = lexer.intLiteral();
         Validate.isTrue(lexer.character() == '.');
-        int nanos = lexer.longLiteral().intValue();
+        int nanos = lexer.intLiteral();
         Validate.isTrue(lexer.character() == '\'');
         Validate.isTrue(lexer.character() == ')');
 

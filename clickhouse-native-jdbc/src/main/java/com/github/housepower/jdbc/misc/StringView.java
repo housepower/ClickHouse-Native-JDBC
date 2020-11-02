@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.misc;
 
-import java.util.Arrays;
+import java.nio.CharBuffer;
 
 public class StringView {
     private final int start;
@@ -50,8 +50,12 @@ public class StringView {
         return true;
     }
 
+    public CharBuffer toCharBuffer() {
+        return CharBuffer.wrap(values, start, end - start);
+    }
+
     @Override
     public String toString() {
-        return new String(Arrays.copyOfRange(values, start, end));
+        return new String(values, start, end - start);
     }
 }

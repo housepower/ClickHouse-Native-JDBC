@@ -17,7 +17,6 @@ package com.github.housepower.jdbc.data.type.complex;
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
@@ -101,8 +100,8 @@ public class DataTypeDecimal implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         BigDecimal result;
         if (lexer.isCharacter('\'')) {
-            StringView v = lexer.stringLiteral();
-            result = new BigDecimal(v.toString());
+            String v = lexer.stringLiteral();
+            result = new BigDecimal(v);
         } else {
             Number v = lexer.numberLiteral();
             result = BigDecimal.valueOf(v.doubleValue());
@@ -137,13 +136,13 @@ public class DataTypeDecimal implements IDataType {
             case 32: {
                 int v = deserializer.readInt();
                 value = BigDecimal.valueOf(v);
-                value = value.divide(scaleFactor);
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
             case 64: {
                 long v = deserializer.readLong();
                 value = BigDecimal.valueOf(v);
-                value = value.divide(scaleFactor);
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
             default: {
@@ -151,7 +150,6 @@ public class DataTypeDecimal implements IDataType {
                         "Unknown precision[%d] & scale[%d]", precision, scale));
             }
         }
-        value = value.setScale(scale, RoundingMode.HALF_UP);
         return value;
     }
 

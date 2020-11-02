@@ -29,17 +29,10 @@ import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
 
 import java.net.InetSocketAddress;
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Struct;
+import java.sql.*;
 import java.time.ZoneId;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -125,20 +118,11 @@ public class ClickHouseConnection extends SQLConnection {
     public boolean isValid(int timeout) throws SQLException {
         ClickHouseConfig validConfigure = configure.copy();
         validConfigure.setQueryTimeout(timeout * 1000);
-        Connection connection = null;
-        Statement statement = null;
-        try {
-            connection = new ClickHouseConnection(validConfigure, atomicInfo.get());
-            statement = connection.createStatement();
+        try (Connection connection = new ClickHouseConnection(validConfigure, atomicInfo.get());
+             Statement statement = connection.createStatement()) {
             statement.execute("SELECT 1");
             statement.close();
             return true;
-        } finally {
-            if (statement != null)
-                statement.close();
-
-            if (connection != null)
-                connection.close();
         }
     }
 

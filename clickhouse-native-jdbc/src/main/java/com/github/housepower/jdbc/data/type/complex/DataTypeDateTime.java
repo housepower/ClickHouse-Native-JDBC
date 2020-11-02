@@ -18,7 +18,6 @@ import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
@@ -35,7 +34,7 @@ public class DataTypeDateTime implements IDataType {
     public static IDataType createDateTimeType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
         if (lexer.isCharacter('(')) {
             Validate.isTrue(lexer.character() == '(');
-            StringView dataTimeZone = lexer.stringLiteral();
+            String dataTimeZone = lexer.stringLiteral();
             Validate.isTrue(lexer.character() == ')');
             return new DataTypeDateTime("DateTime('" + dataTimeZone + "')", serverInfo);
         }

@@ -17,9 +17,11 @@ package com.github.housepower.jdbc.serializer;
 import com.github.housepower.jdbc.buffer.BuffedWriter;
 import com.github.housepower.jdbc.buffer.CompressedBuffedWriter;
 import com.github.housepower.jdbc.misc.Container;
+import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class BinarySerializer {
@@ -87,6 +89,12 @@ public class BinarySerializer {
         byte[] bs = binary.getBytes(StandardCharsets.UTF_8);
         writeVarInt(bs.length);
         container.get().writeBinary(bs);
+    }
+
+    public void writeStringViewBinary(StringView data) throws IOException {
+        writeVarInt(data.end() - data.start());
+        ByteBuffer buf = StandardCharsets.UTF_8.encode(data.toCharBuffer());
+        container.get().writeBinary(buf.array(), buf.position(), buf.limit() - buf.position());
     }
 
     public void flushToTarget(boolean force) throws IOException {

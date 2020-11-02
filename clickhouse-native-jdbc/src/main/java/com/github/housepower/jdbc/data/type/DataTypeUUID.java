@@ -63,7 +63,7 @@ public class DataTypeUUID implements IDataType {
 
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return String.valueOf(lexer.stringLiteral());
+        return lexer.stringLiteral();
     }
 
     @Override

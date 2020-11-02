@@ -15,13 +15,12 @@
 package com.github.housepower.jdbc.misc;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 
 public class SQLLexer {
     private int pos;
     private final char[] data;
 
-    public SQLLexer(int pos, String data) throws SQLException {
+    public SQLLexer(int pos, String data) {
         this.pos = pos;
         this.data = data.toCharArray();
     }
@@ -30,30 +29,20 @@ public class SQLLexer {
         return eof() ? 0 : data[pos++];
     }
 
-    public Number longLiteral() {
+    // only support dec
+    public int intLiteral() {
         skipAnyWhitespace();
 
         int start = pos;
-        boolean isHex = false;
 
         if (isCharacter('-') || isCharacter('+'))
             pos++;
 
-        if (pos + 2 < data.length) {
-            if (data[pos] == '0'
-                    && (Character.toLowerCase(data[pos + 1]) == 'x' || Character.toLowerCase(data[pos + 1]) == 'b')) {
-                pos += 2;
-                isHex = Character.toLowerCase(data[pos + 1]) == 'x';
-            }
-        }
-
-        for (; pos < data.length; pos++) {
-            if (isHex ? !isHexDigit(data[pos]) : !isNumericASCII(data[pos])) {
+        for (; pos < data.length; pos++)
+            if (!isNumericASCII(data[pos]))
                 break;
-            }
-        }
 
-        return Long.valueOf(String.valueOf(new StringView(start, pos, data)));
+        return Integer.parseInt(new StringView(start, pos, data).toString());
     }
 
     public Number numberLiteral() {
@@ -73,9 +62,9 @@ public class SQLLexer {
 
         if (pos + 2 < data.length) {
             if (data[pos] == '0'
-                    && (Character.toLowerCase(data[pos + 1]) == 'x' || Character.toLowerCase(data[pos + 1]) == 'b')) {
-                isHex = Character.toLowerCase(data[pos + 1]) == 'x';
-                isBinary = Character.toLowerCase(data[pos + 1]) == 'b';
+                    && (data[pos + 1] == 'x' || data[pos + 1] == 'X' || data[pos + 1] == 'b' || data[pos + 1] == 'B')) {
+                isHex = data[pos + 1] == 'x' || data[pos + 1] == 'X';
+                isBinary = data[pos + 1] == 'b' || data[pos + 1] == 'B';
                 pos += 2;
             }
         }
@@ -95,7 +84,7 @@ public class SQLLexer {
         }
 
         if (pos + 1 < data.length
-                && (isHex ? (Character.toLowerCase(data[pos]) == 'p') : (Character.toLowerCase(data[pos]) == 'e'))) {
+                && (isHex ? (data[pos] == 'p' || data[pos] == 'P') : (data[pos] == 'e' || data[pos] == 'E'))) {
             hasExponent = true;
             pos++;
 
@@ -113,18 +102,24 @@ public class SQLLexer {
 
         if (isBinary) {
             String signed = hasSigned ? data[start] + "" : "";
-            return Long.parseLong(signed + new String(Arrays.copyOfRange(data, start + (hasSigned ? 3 : 2), pos)), 2);
+            int begin = start + (hasSigned ? 3 : 2);
+            return Long.parseLong(signed + new String(data, begin, pos - begin), 2);
         } else if (isDouble || hasExponent) {
-            return Double.valueOf(new String(Arrays.copyOfRange(data, start, pos)));
+            return Double.valueOf(new String(data, start, pos - start));
         } else if (isHex) {
             String signed = hasSigned ? data[start] + "" : "";
-            return Long.parseLong(signed + new String(Arrays.copyOfRange(data, start + (hasSigned ? 3 : 2), pos)), 16);
+            int begin = start + (hasSigned ? 3 : 2);
+            return Long.parseLong(signed + new String(data, begin, pos - begin), 16);
         } else {
-            return Long.parseLong(new String(Arrays.copyOfRange(data, start, pos)));
+            return Long.parseLong(new String(data, start, pos - start));
         }
     }
 
-    public StringView stringLiteral() throws SQLException {
+    public String stringLiteral() throws SQLException {
+        return stringView().toString();
+    }
+
+    public StringView stringView() throws SQLException {
         skipAnyWhitespace();
         Validate.isTrue(isCharacter('\''));
         return stringLiteralWithQuoted('\'');

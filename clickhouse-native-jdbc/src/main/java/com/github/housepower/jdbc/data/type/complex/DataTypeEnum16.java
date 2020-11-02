@@ -35,7 +35,7 @@ public class DataTypeEnum16 implements IDataType {
         List<String> enumNames = new ArrayList<>();
 
         for (int i = 0; i < 65535; i++) {
-            enumNames.add(String.valueOf(lexer.stringLiteral()));
+            enumNames.add(lexer.stringLiteral());
             Validate.isTrue(lexer.character() == '=');
             enumValues.add(lexer.numberLiteral().shortValue());
 

@@ -16,6 +16,7 @@ package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
+import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
@@ -50,10 +51,10 @@ public class DataTypeString implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return 0;
-	}
+    @Override
+    public int getPrecision() {
+        return 0;
+    }
 
     @Override
     public int getScale() {
@@ -62,7 +63,13 @@ public class DataTypeString implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeStringBinary((String) data);
+        if (data instanceof StringView) { // should always be StringView
+            serializer.writeStringViewBinary((StringView) data);
+        } else if (data instanceof String) {
+            serializer.writeStringBinary((String) data);
+        } else {
+            throw new SQLException("Expected String Parameter, but was " + data.getClass().getSimpleName());
+        }
     }
 
     @Override
@@ -81,6 +88,6 @@ public class DataTypeString implements IDataType {
 
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return String.valueOf(lexer.stringLiteral());
+        return lexer.stringView();
     }
 }
