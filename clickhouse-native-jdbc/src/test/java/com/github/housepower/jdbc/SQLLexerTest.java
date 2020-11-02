@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SQLLexerITest extends AbstractITest {
+public class SQLLexerTest {
 
     @Test
     public void successfullyNumber() throws Exception {
@@ -61,15 +61,6 @@ public class SQLLexerITest extends AbstractITest {
     }
 
     @Test
-    public void successfullyLong() throws Exception {
-        SQLLexer sqlLexer = new SQLLexer(0, "123 +123  -123    -1");
-        assertEquals(123L, sqlLexer.longLiteral());
-        assertEquals(123L, sqlLexer.longLiteral());
-        assertEquals(-123L, sqlLexer.longLiteral());
-        assertEquals(-1L, sqlLexer.longLiteral());
-    }
-
-    @Test
     public void successfullyStringLiteral() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "'this is a quoted message'");
         assertEquals("this is a quoted message", sqlLexer.stringLiteral());
@@ -79,7 +70,6 @@ public class SQLLexerITest extends AbstractITest {
     public void successfullyStringLiteralWithSingleQuote() throws Exception {
         String s = "'this is a message with \\' char'";
         SQLLexer sqlLexer = new SQLLexer(0, s);
-        System.out.println(s);
         assertEquals("this is a message with \\' char", sqlLexer.stringLiteral());
     }
 

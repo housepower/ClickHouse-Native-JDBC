@@ -29,32 +29,6 @@ public class SQLLexer {
         return eof() ? 0 : data[pos++];
     }
 
-    public Number longLiteral() {
-        skipAnyWhitespace();
-
-        int start = pos;
-        boolean isHex = false;
-
-        if (isCharacter('-') || isCharacter('+'))
-            pos++;
-
-        if (pos + 2 < data.length) {
-            if (data[pos] == '0'
-                    && (data[pos + 1] == 'x' || data[pos + 1] == 'X' || data[pos + 1] == 'b' || data[pos + 1] == 'B')) {
-                pos += 2;
-                isHex = data[pos + 1] == 'x' || data[pos + 1] == 'X';
-            }
-        }
-
-        for (; pos < data.length; pos++) {
-            if (isHex ? !isHexDigit(data[pos]) : !isNumericASCII(data[pos])) {
-                break;
-            }
-        }
-
-        return Long.valueOf(new StringView(start, pos, data).toString());
-    }
-
     public Number numberLiteral() {
         skipAnyWhitespace();
 

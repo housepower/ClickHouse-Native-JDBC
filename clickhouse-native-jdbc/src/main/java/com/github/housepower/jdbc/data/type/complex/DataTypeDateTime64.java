@@ -114,9 +114,9 @@ public class DataTypeDateTime64 implements IDataType {
         Validate.isTrue(lexer.character() == ':');
         int minutes = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == ':');
-        int seconds = lexer.longLiteral().intValue();
+        int seconds = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '.');
-        int nanos = lexer.longLiteral().intValue();
+        int nanos = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '\'');
         Validate.isTrue(lexer.character() == ')');
 
