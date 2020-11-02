@@ -29,6 +29,22 @@ public class SQLLexer {
         return eof() ? 0 : data[pos++];
     }
 
+    // only support dec
+    public int intLiteral() {
+        skipAnyWhitespace();
+
+        int start = pos;
+
+        if (isCharacter('-') || isCharacter('+'))
+            pos++;
+
+        for (; pos < data.length; pos++)
+            if (!isNumericASCII(data[pos]))
+                break;
+
+        return Integer.parseInt(new StringView(start, pos, data).toString());
+    }
+
     public Number numberLiteral() {
         skipAnyWhitespace();
 

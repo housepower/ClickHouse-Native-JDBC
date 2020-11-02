@@ -61,6 +61,15 @@ public class SQLLexerTest {
     }
 
     @Test
+    public void successfullyInt() throws Exception {
+        SQLLexer sqlLexer = new SQLLexer(0, "123 +123  -123    -1");
+        assertEquals(123, sqlLexer.intLiteral());
+        assertEquals(123, sqlLexer.intLiteral());
+        assertEquals(-123, sqlLexer.intLiteral());
+        assertEquals(-1, sqlLexer.intLiteral());
+    }
+
+    @Test
     public void successfullyStringLiteral() throws Exception {
         SQLLexer sqlLexer = new SQLLexer(0, "'this is a quoted message'");
         assertEquals("this is a quoted message", sqlLexer.stringLiteral());
