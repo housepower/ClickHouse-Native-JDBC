@@ -22,7 +22,7 @@ import java.util.List;
 /**
  *
  */
-public class ByteArrayWriter implements BuffedWriter{
+public class ByteArrayWriter implements BuffedWriter {
     private final int blockSize;
     private ByteBuffer buffer;
 
@@ -70,25 +70,6 @@ public class ByteArrayWriter implements BuffedWriter{
         buffer = ByteBuffer.allocate(blockSize);
         byteBufferList.add(buffer);
     }
-
-    @Deprecated
-    private void expend() throws IOException {
-        if (buffer.hasRemaining()) {
-            return;
-        }
-        int newCapacity = (int) (buffer.capacity() * expandFactor);
-        while (newCapacity < (buffer.capacity() + 1)) {
-            newCapacity *= expandFactor;
-        }
-        ByteBuffer expanded = ByteBuffer.allocate(newCapacity);
-        expanded.order(buffer.order());
-        buffer.flip();
-        expanded.put(buffer);
-        buffer = expanded;
-        byteBufferList.set(0, buffer);
-    }
-
-    private static final float expandFactor = 1.5f;
 
     public List<ByteBuffer> getBufferList() {
         return byteBufferList;
