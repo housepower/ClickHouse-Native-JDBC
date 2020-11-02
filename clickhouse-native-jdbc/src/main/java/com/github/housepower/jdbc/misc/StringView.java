@@ -14,6 +14,8 @@
 
 package com.github.housepower.jdbc.misc;
 
+import java.nio.CharBuffer;
+
 public class StringView {
     private final int start;
     private final int end;
@@ -46,6 +48,10 @@ public class StringView {
                 return false;
         }
         return true;
+    }
+
+    public CharBuffer toCharBuffer() {
+        return CharBuffer.wrap(values, start, end - start);
     }
 
     @Override

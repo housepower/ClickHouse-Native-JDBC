@@ -116,9 +116,13 @@ public class SQLLexer {
     }
 
     public String stringLiteral() throws SQLException {
+        return stringView().toString();
+    }
+
+    public StringView stringView() throws SQLException {
         skipAnyWhitespace();
         Validate.isTrue(isCharacter('\''));
-        return stringLiteralWithQuoted('\'').toString();
+        return stringLiteralWithQuoted('\'');
     }
 
     public boolean eof() {
