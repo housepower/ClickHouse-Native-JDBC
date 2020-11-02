@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 
 public class ClickHouseConnection extends SQLConnection {
 
-    private static final Pattern VALUES_REGEX = Pattern.compile("[V|v][A|a][L|l][U|u][E|e][S|s]\\s*\\(");
+    private static final Pattern VALUES_REGEX = Pattern.compile("[Vv][Aa][Ll][Uu][Ee][Ss]\\s*\\(");
 
     // Just to be variable
     private final AtomicBoolean isClosed;
@@ -51,7 +51,7 @@ public class ClickHouseConnection extends SQLConnection {
     protected ClickHouseConnection(ClickHouseConfig configure, PhysicalInfo info) {
         this.isClosed = new AtomicBoolean(false);
         this.configure = configure;
-        this.atomicInfo = new AtomicReference<PhysicalInfo>(info);
+        this.atomicInfo = new AtomicReference<>(info);
     }
 
     public ClickHouseConfig getConfigure() {

@@ -29,9 +29,12 @@ import scala.util.matching.Regex
 object ClickHouseDialect extends JdbcDialect with Logging {
 
   private[jdbc] val arrayTypePattern: Regex = "^Array\\((.*)\\)$".r
-  // TODO Decimal32(S), Decimal64(S), Decimal128(S), Decimal256(S)
-  private[jdbc] val decimalTypePattern: Regex = "^Decimal(\\((\\d+),\\s*(\\d+)\\))?$".r
-  private[jdbc] val dateTimeTypePattern: Regex = "^DateTime(64)?(\\((.*)\\))?$".r
+  private[jdbc] val dateTypePattern: Regex = "^[dD][aA][tT][eE]$".r
+  private[jdbc] val dateTimeTypePattern: Regex = "^[dD][aA][tT][eE][tT][iI][mM][eE](64)?(\\((.*)\\))?$".r
+  private[jdbc] val decimalTypePattern: Regex = "^[dD][eE][cC][iI][mM][aA][lL]\\((\\d+),\\s*(\\d+)\\)$".r
+  private[jdbc] val decimalTypePattern2: Regex = "^[dD][eE][cC][iI][mM][aA][lL](32|64|128|256)\\((\\d+)\\)$".r
+  private[jdbc] val enumTypePattern: Regex = "^Enum(8|16)$".r
+  private[jdbc] val fixedStringTypePattern: Regex = "^FixedString\\((\\d+)\\)$".r
   private[jdbc] val nullableTypePattern: Regex = "^Nullable\\((.*)\\)".r
 
   override def canHandle(url: String): Boolean =
@@ -43,7 +46,8 @@ object ClickHouseDialect extends JdbcDialect with Logging {
    */
   override def getCatalystType(sqlType: Int,
                                typeName: String,
-                               size: Int, md: MetadataBuilder): Option[DataType] = {
+                               size: Int,
+                               md: MetadataBuilder): Option[DataType] = {
     val scale = md.build.getLong("scale").toInt
     logDebug(s"sqlType: $sqlType, typeName: $typeName, precision: $size, scale: $scale")
     sqlType match {
@@ -62,16 +66,23 @@ object ClickHouseDialect extends JdbcDialect with Logging {
                                    scale: Int): Option[(Boolean, DataType)] = {
     val (nullable, _typeName) = unwrapNullable(typeName)
     val dataType = _typeName match {
-      case "String" => Some(StringType)
+      case "String" | "UUID" | fixedStringTypePattern() | enumTypePattern(_) => Some(StringType)
       case "Int8" => Some(ByteType)
       case "UInt8" | "Int16" => Some(ShortType)
       case "UInt16" | "Int32" => Some(IntegerType)
-      case "UInt32" | "UInt64" | "Int64" => Some(LongType)
+      case "UInt32" | "Int64" | "UInt64" | "IPv4" => Some(LongType) // UInt64 is not fully support
+      case "Int128" | "Int256" | "UInt256" => None // not support
       case "Float32" => Some(FloatType)
       case "Float64" => Some(DoubleType)
-      case decimalTypePattern(precision, scale, _) => Some(DecimalType(precision.toInt, scale.toInt))
-      case "Date" => Some(DateType)
+      case dateTypePattern() => Some(DateType)
       case dateTimeTypePattern() => Some(TimestampType)
+      case decimalTypePattern(precision, scale) => Some(DecimalType(precision.toInt, scale.toInt))
+      case decimalTypePattern2(w, scale) => w match {
+        case "32" => Some(DecimalType(9, scale.toInt))
+        case "64" => Some(DecimalType(18, scale.toInt))
+        case "128" => Some(DecimalType(38, scale.toInt))
+        case "256" => Some(DecimalType(76, scale.toInt)) // throw exception, spark support precision up to 38
+      }
       case _ => None
     }
     dataType.map((nullable, _))
@@ -113,7 +124,7 @@ object ClickHouseDialect extends JdbcDialect with Logging {
     case stringValue: String => s"'${escapeSql(stringValue)}'"
     case timestampValue: Timestamp => "'" + timestampValue + "'"
     case dateValue: Date => "'" + dateValue + "'"
-    case arrayValue: Array[Any] => arrayValue.map(compileValue).mkString("[", ", ", "]")
+    case arrayValue: Array[Any] => arrayValue.map(compileValue).mkString("[", ",", "]")
     case _ => value
   }
 }
