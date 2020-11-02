@@ -94,7 +94,7 @@ public class BinarySerializer {
     public void writeStringViewBinary(StringView data) throws IOException {
         writeVarInt(data.end() - data.start());
         ByteBuffer buf = StandardCharsets.UTF_8.encode(data.toCharBuffer());
-        container.get().writeBinary(buf.array(), buf.arrayOffset(), data.end() - data.start());
+        container.get().writeBinary(buf.array(), buf.position(), buf.limit() - buf.position());
     }
 
     public void flushToTarget(boolean force) throws IOException {
