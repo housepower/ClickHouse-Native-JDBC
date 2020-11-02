@@ -61,6 +61,15 @@ class SparkOnClickHouseITest extends AbstractITest with Logging {
     sourceHelper.clean()
   }
 
+  // TODO
+  @Test
+  def testAutoCreateTable(): Unit = {
+    // df.write
+    //  .format("jdbc")
+    //  .mode("errorifexists")
+    //  .option("createTableOptions", "NONE")
+  }
+
   @transient lazy implicit val spark: SparkSession = {
     SparkSession.builder()
       .master("local[2]")
