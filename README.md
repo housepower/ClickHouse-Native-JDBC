@@ -10,6 +10,8 @@ ClickHouse Native JDBC
 A Native JDBC library for accessing [ClickHouse](https://clickhouse.yandex/) in Java, also provide a library for 
 integrating with [Apache Spark](https://github.com/apache/spark/).
 
+Supported by [JetBrains Open Source License](https://www.jetbrains.com/?from=ClickHouse-Native-JDBC) 2020-2021. 
+
 ## JDBC Driver
 
 ### Requirements
