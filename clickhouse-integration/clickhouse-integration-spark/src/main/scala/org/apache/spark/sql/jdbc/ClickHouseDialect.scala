@@ -41,7 +41,7 @@ object ClickHouseDialect extends JdbcDialect with Logging {
     url.toLowerCase(Locale.ROOT).startsWith("jdbc:clickhouse")
 
   /**
-   * Inferred schema always nullable, should we handle it?
+   * Inferred schema always nullable.
    * see [[JDBCRDD.resolveTable(JDBCOptions)]]
    */
   override def getCatalystType(sqlType: Int,
@@ -57,10 +57,12 @@ object ClickHouseDialect extends JdbcDialect with Logging {
             toCatalystType(nestType, size, scale).map { case (nullable, dataType) => ArrayType(dataType, nullable) }
           case _ => None
         }
-      case _ => None
+      case _ => toCatalystType(typeName, size, scale).map(_._2)
     }
   }
 
+  // Spark use a widening conversion both ways.
+  // see https://github.com/apache/spark/pull/26301#discussion_r347725332
   private[jdbc] def toCatalystType(typeName: String,
                                    precision: Int,
                                    scale: Int): Option[(Boolean, DataType)] = {
@@ -93,6 +95,8 @@ object ClickHouseDialect extends JdbcDialect with Logging {
     case _ => (false, maybeNullableTypeName)
   }
 
+  // NOT recommend auto create ClickHouse table by Spark JDBC, the reason is it's hard to handle nullable because
+  // ClickHouse use `T` to represent ANSI SQL `T NOT NULL` and  `Nullable(T)` to represent ANSI SQL `T NULL`,
   override def getJDBCType(dt: DataType): Option[JdbcType] = dt match {
     case StringType => Some(JdbcType("String", Types.VARCHAR))
     // ClickHouse doesn't have the concept of encodings. Strings can contain an arbitrary set of bytes,
@@ -102,17 +106,17 @@ object ClickHouseDialect extends JdbcDialect with Logging {
     case BooleanType => Some(JdbcType("UInt8", Types.BOOLEAN))
     case ByteType => Some(JdbcType("Int8", Types.TINYINT))
     case ShortType => Some(JdbcType("Int16", Types.SMALLINT))
-    case IntegerType => Option(JdbcType("Int32", Types.INTEGER))
-    case LongType => Option(JdbcType("Int64", Types.BIGINT))
+    case IntegerType => Some(JdbcType("Int32", Types.INTEGER))
+    case LongType => Some(JdbcType("Int64", Types.BIGINT))
     case FloatType => Some(JdbcType("Float32", Types.FLOAT))
     case DoubleType => Some(JdbcType("Float64", Types.DOUBLE))
     case t: DecimalType => Some(JdbcType(s"Decimal(${t.precision},${t.scale})", Types.DECIMAL))
-    case DateType => Option(JdbcType("Date", Types.DATE))
-    case TimestampType => Option(JdbcType("DateTime", Types.TIMESTAMP))
+    case DateType => Some(JdbcType("Date", Types.DATE))
+    case TimestampType => Some(JdbcType("DateTime", Types.TIMESTAMP))
     case ArrayType(et, _) if et.isInstanceOf[AtomicType] =>
       getJDBCType(et)
         .orElse(JdbcUtils.getCommonJDBCType(et))
-        .map(jdbcType => JdbcType(s"${jdbcType.databaseTypeDefinition}[]", Types.ARRAY))
+        .map(jdbcType => JdbcType(s"Array(${jdbcType.databaseTypeDefinition})", Types.ARRAY))
     case _ => None
   }
 
