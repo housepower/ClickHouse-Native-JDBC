@@ -19,11 +19,7 @@ import com.github.housepower.jdbc.misc.Validate;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Date;
-import java.sql.SQLException;
-import java.sql.Struct;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Locale;

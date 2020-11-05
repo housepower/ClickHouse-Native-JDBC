@@ -24,8 +24,13 @@ public class Profiler {
         private final long elapsedTimeMillis;
         private final long elapsedTimeDeltaMillis;
 
-        public long getElapsedTimeMillis() { return elapsedTimeMillis; }
-        public long getElapsedTimeDeltaMillis() { return elapsedTimeDeltaMillis; }
+        public long getElapsedTimeMillis() {
+            return elapsedTimeMillis;
+        }
+
+        public long getElapsedTimeDeltaMillis() {
+            return elapsedTimeDeltaMillis;
+        }
 
         public ElapsedTime(long etMillis, long etDeltaMillis) {
             elapsedTimeMillis = etMillis;
@@ -40,7 +45,7 @@ public class Profiler {
     }
 
     public static String fixedLengthString(String string, int length) {
-        return String.format(Locale.ROOT, "%1$"+length+ "s", string);
+        return String.format(Locale.ROOT, "%1$" + length + "s", string);
     }
 
 
@@ -90,7 +95,7 @@ public class Profiler {
         String totalElapsedMillisStr = fixedLengthString(String.valueOf(elapsedMillis), 6);
         String millisPassedFromLastLogStr = fixedLengthString(String.valueOf(elapsedDeltaMillis), 6);
         System.out.println(percentCompleteStr + " Total memory (MB): " + totalMemoryStr + ", used memory (MB): "
-                           + usedMemoryStr + ", time elapsed: " + totalElapsedMillisStr
-                           + "(+" + millisPassedFromLastLogStr + " ms)");
+                + usedMemoryStr + ", time elapsed: " + totalElapsedMillisStr
+                + "(+" + millisPassedFromLastLogStr + " ms)");
     }
 }

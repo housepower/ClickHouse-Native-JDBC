@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+
+    <module name="FileTabCharacter"/>
+
+    <module name="Header">
+        <property name="headerFile" value="dev/license.header"/>
+        <property name="ignoreLines" value="2,3,4,5,6,7"/>
+        <property name="fileExtensions" value="java,scala"/>
+        <!--<property name="excludedClasses" value="Examples"/>-->
+        <!--<property name="excludedFilesRegex" value="io/annotation/.*"/>-->
+    </module>
+
+    <module name="TreeWalker">
+        <module name="RedundantImport"/>
+        <module name="UnusedImports"/>
+        <module name="EqualsHashCode"/>
+        <module name="IllegalInstantiation"/>
+
+        <module name="PackageAnnotation"/>
+        <module name="CovariantEquals"/>
+        <module name="OneStatementPerLine"/>
+        <module name="EmptyStatement"/>
+        <module name="DefaultComesLast"/>
+        <module name="TypecastParenPad"/>
+        <module name="CovariantEquals"/>
+
+        <module name="MissingOverride"/>
+
+        <module name="WhitespaceAfter"/>
+        <module name="WhitespaceAround">
+            <property name="tokens" value="LCURLY,QUESTION,COLON,SLIST"/>
+            <property name="allowEmptyLambdas" value="true"/>
+        </module>
+
+        <!-- Checks for blocks. You know, those {}'s -->
+        <module name="LeftCurly">
+            <property name="option" value="eol"/>
+        </module>
+
+        <module name="ParenPad">
+            <property name="tokens" value="CTOR_CALL, SUPER_CTOR_CALL"/>
+            <property name="option" value="nospace"/>
+        </module>
+
+        <!--
+       <module name="RegexpSinglelineJava">
+           <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
+           <property name="message"
+                     value="Not allowed to print to System.out: if you're damn sure you want it, disable Checkstyle on this line. [not required for tests]"/>
+           <property name="ignoreComments" value="true"/>
+       </module>
+       -->
+
+        <module name="RegexpSinglelineJava">
+            <property name="format" value=" StringBuffer"/>
+            <property name="message" value="Nobody should be using StringBuffer anymore"/>
+        </module>
+        <module name="IllegalInstantiation">
+            <property name="classes" value="java.lang.Boolean"/>
+        </module>
+
+        <!--
+        Allow for suppressing sections of code using a starting and ending comment:
+        // CHECKSTYLE\:OFF
+        // CHECKSTYLE\:ON
+        -->
+        <module name="SuppressionCommentFilter"/>
+
+        <module name="SuppressWithNearbyCommentFilter">
+            <property name="commentFormat" value="CHECKSTYLE IGNORE (\w+) FOR NEXT (\d+) LINES"/>
+            <property name="checkFormat" value="$1"/>
+            <property name="influenceFormat" value="$2"/>
+        </module>
+
+        <module name="MethodParamPad">
+            <property name="option" value="nospace"/>
+            <property name="allowLineBreaks" value="false"/>
+        </module>
+    </module>
+
+    <module name="SuppressionFilter">
+        <property name="file" value="${checkstyle.suppression.file}"/>
+    </module>
+
+</module>

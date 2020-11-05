@@ -93,10 +93,10 @@ public class DataTypeEnum8 implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return 0;
-	}
+    @Override
+    public int getPrecision() {
+        return 0;
+    }
 
     @Override
     public int getScale() {

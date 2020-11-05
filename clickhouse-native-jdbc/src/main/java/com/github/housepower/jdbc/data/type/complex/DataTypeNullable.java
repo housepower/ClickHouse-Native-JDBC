@@ -74,10 +74,10 @@ public class DataTypeNullable implements IDataType {
         return true;
     }
 
-	@Override
-	public int getPrecision() {
-		return 0;
-	}
+    @Override
+    public int getPrecision() {
+        return 0;
+    }
 
     @Override
     public int getScale() {
@@ -102,7 +102,7 @@ public class DataTypeNullable implements IDataType {
     }
 
     public void serializeBinary(Object data, BinarySerializer serializer, List<Byte> offset) throws SQLException, IOException {
-        offset.add(data == null ? (byte)1 : 0);
+        offset.add(data == null ? (byte) 1 : 0);
         this.nestedDataType.serializeBinary(data == null ? nestedDataType.defaultValue() : data, serializer);
     }
 

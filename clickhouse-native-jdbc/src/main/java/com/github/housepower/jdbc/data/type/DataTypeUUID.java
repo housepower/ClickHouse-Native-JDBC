@@ -51,10 +51,10 @@ public class DataTypeUUID implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return 36;
-	}
+    @Override
+    public int getPrecision() {
+        return 36;
+    }
 
     @Override
     public int getScale() {

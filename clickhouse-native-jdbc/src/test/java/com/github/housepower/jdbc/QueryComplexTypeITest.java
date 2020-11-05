@@ -37,8 +37,7 @@ public class QueryComplexTypeITest extends AbstractITest {
         // use client timezone, Asia/Shanghai in traivs-ci
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
-            ResultSet rs =
-                statement.executeQuery("select toDate('2020-01-01') as dateValue");
+            ResultSet rs = statement.executeQuery("select toDate('2020-01-01') as dateValue");
             assertTrue(rs.next());
 
             dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
@@ -65,8 +64,7 @@ public class QueryComplexTypeITest extends AbstractITest {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
             long ts = 946659723 * 1000L;
-            ResultSet rs =
-                statement.executeQuery("SELECT nullIf(toDateTime(946659723), toDateTime(0))");
+            ResultSet rs = statement.executeQuery("SELECT nullIf(toDateTime(946659723), toDateTime(0))");
             assertTrue(rs.next());
             assertEquals(ts, rs.getTimestamp(1).getTime());
             assertFalse(rs.next());
@@ -78,9 +76,7 @@ public class QueryComplexTypeITest extends AbstractITest {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
 
-            ResultSet
-                rs =
-                statement.executeQuery("SELECT toFixedString('abc',3),toFixedString('abc',4)");
+            ResultSet rs = statement.executeQuery("SELECT toFixedString('abc',3),toFixedString('abc',4)");
 
             assertTrue(rs.next());
             assertEquals("abc", rs.getString(1));
@@ -108,9 +104,7 @@ public class QueryComplexTypeITest extends AbstractITest {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
 
-            ResultSet
-                rs =
-                statement.executeQuery("SELECT arrayJoin([NULL,toFixedString('abc',3)])");
+            ResultSet rs = statement.executeQuery("SELECT arrayJoin([NULL,toFixedString('abc',3)])");
 
             assertTrue(rs.next());
             assertNull(rs.getString(1));
@@ -129,21 +123,21 @@ public class QueryComplexTypeITest extends AbstractITest {
             // Array(UInt8)
             ResultSet rs = statement.executeQuery("SELECT [[1], [2], [3], [4,5,6]] from numbers(10)");
 
-            for (int i = 0; i < 10; i ++) {
+            for (int i = 0; i < 10; i++) {
                 assertTrue(rs.next());
                 Array array1 = rs.getArray(1);
                 Object[] objects = (Object[]) array1.getArray();
                 assertEquals(4, objects.length);
 
-                ClickHouseArray a1 = (ClickHouseArray)(objects[0]);
-                ClickHouseArray a2 = (ClickHouseArray)(objects[1]);
-                ClickHouseArray a3 = (ClickHouseArray)(objects[2]);
-                ClickHouseArray a4 = (ClickHouseArray)(objects[3]);
+                ClickHouseArray a1 = (ClickHouseArray) (objects[0]);
+                ClickHouseArray a2 = (ClickHouseArray) (objects[1]);
+                ClickHouseArray a3 = (ClickHouseArray) (objects[2]);
+                ClickHouseArray a4 = (ClickHouseArray) (objects[3]);
 
                 assertArrayEquals(new Short[]{(short) 1}, (Object[]) a1.getArray());
                 assertArrayEquals(new Short[]{(short) 2}, (Object[]) a2.getArray());
                 assertArrayEquals(new Short[]{(short) 3}, (Object[]) a3.getArray());
-                assertArrayEquals(new Short[]{(short) 4, (short)5, (short)6}, (Object[]) a4.getArray());
+                assertArrayEquals(new Short[]{(short) 4, (short) 5, (short) 6}, (Object[]) a4.getArray());
             }
             assertFalse(rs.next());
         });
@@ -174,9 +168,7 @@ public class QueryComplexTypeITest extends AbstractITest {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
 
-            ResultSet
-                rs =
-                statement.executeQuery("SELECT arrayJoin([[(1,'3'), (2,'4')],[(3,'5')]])");
+            ResultSet rs = statement.executeQuery("SELECT arrayJoin([[(1,'3'), (2,'4')],[(3,'5')]])");
 
             assertTrue(rs.next());
             Array array1 = rs.getArray(1);
@@ -206,9 +198,7 @@ public class QueryComplexTypeITest extends AbstractITest {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
 
-            ResultSet
-                rs =
-                statement.executeQuery(
+            ResultSet rs = statement.executeQuery(
                     "SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v) from numbers(10)");
 
             for (int i = 0; i < 10; i++) {

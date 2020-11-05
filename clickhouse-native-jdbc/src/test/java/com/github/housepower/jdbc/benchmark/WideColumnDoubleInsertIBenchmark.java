@@ -15,16 +15,15 @@
 package com.github.housepower.jdbc.benchmark;
 
 import com.google.common.base.Strings;
-
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
+ *
  */
 public class WideColumnDoubleInsertIBenchmark extends AbstractInsertIBenchmark {
     @Benchmark
@@ -43,16 +42,16 @@ public class WideColumnDoubleInsertIBenchmark extends AbstractInsertIBenchmark {
         wideColumnPrepare(connection, "Float64");
 
         String params = Strings.repeat("?, ", columnNum);
-        PreparedStatement pstmt = connection.prepareStatement("INSERT INTO "  + getTableName() +" values("   + params.substring(0, params.length()-2) + ")");
+        PreparedStatement pstmt = connection.prepareStatement("INSERT INTO " + getTableName() + " values(" + params.substring(0, params.length() - 2) + ")");
 
 
         for (int i = 0; i < batchSize; i++) {
-            for (int j = 0; j < columnNum; j++ ) {
+            for (int j = 0; j < columnNum; j++) {
                 pstmt.setDouble(j + 1, j + 1.2);
             }
             pstmt.addBatch();
         }
-        int []res = pstmt.executeBatch();
+        int[] res = pstmt.executeBatch();
         assertEquals(res.length, batchSize);
 
         wideColumnAfter(connection);

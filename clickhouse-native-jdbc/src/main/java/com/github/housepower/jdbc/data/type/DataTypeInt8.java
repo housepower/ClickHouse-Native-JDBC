@@ -59,10 +59,10 @@ public class DataTypeInt8 implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return isUnsigned ? 3 : 4;
-	}
+    @Override
+    public int getPrecision() {
+        return isUnsigned ? 3 : 4;
+    }
 
     @Override
     public int getScale() {
@@ -71,14 +71,14 @@ public class DataTypeInt8 implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeByte(((Number)data).byteValue());
+        serializer.writeByte(((Number) data).byteValue());
     }
 
     @Override
     public Number deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         byte b = deserializer.readByte();
         if (isUnsigned) {
-            return (short)(b & 0xff);
+            return (short) (b & 0xff);
         }
         return b;
     }
