@@ -14,7 +14,7 @@
 
 package org.apache.spark.sql.jdbc
 
-import org.apache.spark.sql.jdbc.ClickHouseDialect.{arrayTypePattern, dateTimeTypePattern, decimalTypePattern}
+import org.apache.spark.sql.jdbc.ClickHouseDialect._
 import org.junit.jupiter.api.Assertions._
 import org.junit.jupiter.api.Test
 
@@ -37,6 +37,11 @@ class ClickHouseDialectTest {
       case _ => fail()
     }
 
+    "array(String)" match {
+      case arrayTypePattern(_) => fail()
+      case _ => assertTrue(true)
+    }
+
     "Array(String" match {
       case arrayTypePattern(_) => fail()
       case _ => assertTrue(true)
@@ -44,30 +49,19 @@ class ClickHouseDialectTest {
   }
 
   @Test
-  def testDecimalTypeRegex(): Unit = {
-    "Decimal" match {
-      case decimalTypePattern(_, _, _) => assertTrue(true)
+  def testDateTypeRegex(): Unit = {
+    "Date" match {
+      case dateTypePattern() => assertTrue(true)
       case _ => fail()
     }
 
-    "Decimal(1,2)" match {
-      case decimalTypePattern(_, p, s) =>
-        assertEquals("1", p)
-        assertEquals("2", s)
+    "dAtE" match {
+      case dateTypePattern() => assertTrue(true)
       case _ => fail()
     }
 
-    "Decimal(1, 2)" match {
-      case decimalTypePattern(_, p, s) =>
-        assertEquals("1", p)
-        assertEquals("2", s)
-      case _ => fail()
-    }
-
-    // TODO Decimal32(S), Decimal64(S), Decimal128(S), Decimal256(S)
-
-    "Decimal(String" match {
-      case decimalTypePattern(_) => fail()
+    "DT" match {
+      case dateTypePattern(_) => fail()
       case _ => assertTrue(true)
     }
   }
@@ -79,7 +73,7 @@ class ClickHouseDialectTest {
       case _ => fail()
     }
 
-    "DateTime(Asia/Shanghai)" match {
+    "dAtEtiMe(Asia/Shanghai)" match {
       case dateTimeTypePattern(_, _, tz) => assertEquals("Asia/Shanghai", tz)
       case _ => fail()
     }
@@ -89,7 +83,7 @@ class ClickHouseDialectTest {
       case _ => fail()
     }
 
-    "DateTime64(Europe/Moscow)" match {
+    "DaTeTiMe64(Europe/Moscow)" match {
       case dateTimeTypePattern(_64, _, tz) =>
         assertEquals("64", _64)
         assertEquals("Europe/Moscow", tz)
@@ -100,5 +94,118 @@ class ClickHouseDialectTest {
       case dateTimeTypePattern(_) => fail()
       case _ => assertTrue(true)
     }
+  }
+
+  @Test
+  def testDecimalTypeRegex(): Unit = {
+    "Decimal(1,2)" match {
+      case decimalTypePattern(p, s) =>
+        assertEquals("1", p)
+        assertEquals("2", s)
+      case _ => fail()
+    }
+
+    "DeCiMaL(1, 2)" match {
+      case decimalTypePattern(p, s) =>
+        assertEquals("1", p)
+        assertEquals("2", s)
+      case _ => fail()
+    }
+
+    "Decimal" match {
+      case decimalTypePattern(_, _) => fail()
+      case _ => assertTrue(true)
+    }
+
+    "Decimal(String" match {
+      case decimalTypePattern(_, _) => fail()
+      case _ => assertTrue(true)
+    }
+  }
+
+  @Test
+  def testDecimalTypeRegex2(): Unit = {
+    "Decimal32(5)" match {
+      case decimalTypePattern2(a, s) => assertEquals(("32", "5"), (a, s))
+      case _ => fail()
+    }
+
+    "decimal64(5)" match {
+      case decimalTypePattern2(a, s) => assertEquals(("64", "5"), (a, s))
+      case _ => fail()
+    }
+
+    "DeCiMaL128(5)" match {
+      case decimalTypePattern2(a, s) => assertEquals(("128", "5"), (a, s))
+      case _ => fail()
+    }
+
+    "DeCiMaL256(5)" match {
+      case decimalTypePattern2(a, s) => assertEquals(("256", "5"), (a, s))
+      case _ => fail()
+    }
+
+    "Decimal32(5" match {
+      case decimalTypePattern2(a, s) => fail()
+      case _ => assertTrue(true)
+    }
+  }
+
+  @Test
+  def testEnumTypeRegex(): Unit = {
+    "Enum8" match {
+      case enumTypePattern(w) => assertEquals("8", w)
+      case _ => fail()
+    }
+
+    "Enum16" match {
+      case enumTypePattern(w) => assertEquals("16", w)
+      case _ => fail()
+    }
+
+    "Enum" match {
+      case enumTypePattern(w) => fail()
+      case _ => assertTrue(true)
+    }
+
+    "Enum(8)" match {
+      case enumTypePattern(_) => fail()
+      case _ => assertTrue(true)
+    }
+
+    "enum8" match {
+      case enumTypePattern(_) => fail()
+      case _ => assertTrue(true)
+    }
+
+    "String" match {
+      case enumTypePattern(_) => fail()
+      case _ => assertTrue(true)
+    }
+  }
+
+  @Test
+  def testFixedStringTypeRegex(): Unit = {
+    "FixedString(5)" match {
+      case fixedStringTypePattern(l) => assertEquals("5", l)
+      case _ => fail()
+    }
+
+    "fixedString(5)" match {
+      case fixedStringTypePattern(_) => fail()
+      case _ => assertTrue(true)
+    }
+
+    "String" match {
+      case decimalTypePattern2(a, s) => fail()
+      case _ => assertTrue(true)
+    }
+  }
+
+  @Test
+  def testNullableTypeRegex(): Unit = {
+    assertEquals((true, "String"), unwrapNullable("Nullable(String)"))
+    assertEquals((false, "nullable(String)"), unwrapNullable("nullable(String)"))
+    assertEquals((false, "String"), unwrapNullable("String"))
   }
 }

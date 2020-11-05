@@ -26,7 +26,6 @@ import java.sql.Types;
 public class DataTypeIPv4 implements IDataType {
 
     private static final Integer DEFAULT_VALUE = 0;
-    private final boolean isUnsigned = true;
 
     @Override
     public String name() {
@@ -53,10 +52,10 @@ public class DataTypeIPv4 implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
-		return 0;
-	}
+    @Override
+    public int getPrecision() {
+        return 0;
+    }
 
     @Override
     public int getScale() {
@@ -69,13 +68,8 @@ public class DataTypeIPv4 implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer)
-        throws SQLException, IOException {
-        int res = deserializer.readInt();
-        if (isUnsigned) {
-            return 0xffffffffL & res;
-        }
-        return res;
+    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        return deserializer.readInt() & 0xffffffffL;
     }
 
     @Override
@@ -89,6 +83,6 @@ public class DataTypeIPv4 implements IDataType {
 
     @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.numberLiteral().longValue() & 0xffffffff;
+        return lexer.numberLiteral().longValue() & 0xffffffffL;
     }
 }
