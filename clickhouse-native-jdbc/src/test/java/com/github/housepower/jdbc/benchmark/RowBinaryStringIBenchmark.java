@@ -15,20 +15,19 @@
 package com.github.housepower.jdbc.benchmark;
 
 import com.google.common.base.Strings;
-
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
-
-import java.sql.PreparedStatement;
-
 import ru.yandex.clickhouse.ClickHouseStatement;
 import ru.yandex.clickhouse.domain.ClickHouseFormat;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.sql.PreparedStatement;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
+ *
  */
-public class RowBinaryStringIBenchmark extends AbstractInsertIBenchmark{
+public class RowBinaryStringIBenchmark extends AbstractInsertIBenchmark {
     private final String columnType = "String";
 
     @Benchmark
@@ -38,14 +37,14 @@ public class RowBinaryStringIBenchmark extends AbstractInsertIBenchmark{
             wideColumnPrepare(connection, columnType);
             String params = Strings.repeat("?, ", columnNum);
             PreparedStatement
-                pstmt = connection.prepareStatement("INSERT INTO " + getTableName() + " values(" + params.substring(0, params.length() - 2) + ")");
+                    pstmt = connection.prepareStatement("INSERT INTO " + getTableName() + " values(" + params.substring(0, params.length() - 2) + ")");
             for (int i = 0; i < batchSize; i++) {
-                for (int j = 0; j < columnNum; j++ ) {
+                for (int j = 0; j < columnNum; j++) {
                     pstmt.setObject(j + 1, j + 1 + "");
                 }
                 pstmt.addBatch();
             }
-            int []res = pstmt.executeBatch();
+            int[] res = pstmt.executeBatch();
             assertEquals(res.length, batchSize);
             wideColumnAfter(connection);
         }, ConnectionType.NATIVE);
@@ -59,7 +58,7 @@ public class RowBinaryStringIBenchmark extends AbstractInsertIBenchmark{
             ClickHouseStatement sth = (ClickHouseStatement) connection.createStatement();
             sth.write().send("INSERT INTO " + getTableName(), stream -> {
                 for (int i = 0; i < batchSize; i++) {
-                    for (int j = 0; j < columnNum; j++ ) {
+                    for (int j = 0; j < columnNum; j++) {
                         stream.writeString(j + 1 + "");
                     }
                 }

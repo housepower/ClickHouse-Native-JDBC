@@ -96,6 +96,7 @@
         <maven.surefire.plugin.version>3.0.0-M3</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.0.0-M3</maven.failsafe.plugin.version>
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
+        <maven.checkstyle.plugin.version>3.1.1</maven.checkstyle.plugin.version>
 
         <lz4.java.version>1.7.1</lz4.java.version>
         <jmh.version>1.26</jmh.version>
@@ -364,6 +365,30 @@
                     <version>${maven.exec.plugin.version}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven.checkstyle.plugin.version}</version>
+                    <configuration>
+                        <configLocation>dev/checkstyle.xml</configLocation>
+                        <suppressionsLocation>dev/checkstyle-suppression.xml</suppressionsLocation>
+                        <suppressionsFileExpression>checkstyle.suppression.file</suppressionsFileExpression>
+                        <consoleOutput>true</consoleOutput>
+                        <failsOnError>true</failsOnError>
+                        <linkXRef>false</linkXRef>
+                        <violationSeverity>error</violationSeverity>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>check-style</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>checkstyle</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>de.thetaphi</groupId>
                     <artifactId>forbiddenapis</artifactId>
                     <version>${maven.forbiddenapis.plugin.version}</version>
@@ -425,6 +450,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>de.thetaphi</groupId>

@@ -31,15 +31,15 @@ public class Main {
     public static void main(String[] args) throws RunnerException {
         URLClassLoader classLoader = (URLClassLoader) Main.class.getClassLoader();
         StringBuilder classpath = new StringBuilder();
-        for(URL url : classLoader.getURLs())
+        for (URL url : classLoader.getURLs())
             classpath.append(url.getPath()).append(File.pathSeparator);
         System.setProperty("java.class.path", classpath.toString());
 
         Options options = new OptionsBuilder().include(Main.class.getSimpleName())
-                              .forks(1).mode(Mode.AverageTime)
-                              .include("./*IBenchmark")
-                              .warmupIterations(0).measurementIterations(1)
-                              .build();
+                .forks(1).mode(Mode.AverageTime)
+                .include("./*IBenchmark")
+                .warmupIterations(0).measurementIterations(1)
+                .build();
         new Runner(options).run();
     }
 }

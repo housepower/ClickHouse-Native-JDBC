@@ -59,10 +59,10 @@ public class DataTypeInt16 implements IDataType {
         return false;
     }
 
-	@Override
-	public int getPrecision() {
+    @Override
+    public int getPrecision() {
         return isUnsigned ? 5 : 6;
-	}
+    }
 
     @Override
     public int getScale() {

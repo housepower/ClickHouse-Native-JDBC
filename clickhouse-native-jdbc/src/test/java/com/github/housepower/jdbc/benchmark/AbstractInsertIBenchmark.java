@@ -14,12 +14,7 @@
 
 package com.github.housepower.jdbc.benchmark;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -31,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Thread)
-public class AbstractInsertIBenchmark extends AbstractIBenchmark{
+public class AbstractInsertIBenchmark extends AbstractIBenchmark {
     @Param({"20", "50"})
     protected int columnNum = 20;
     @Param({"200000", "500000"})

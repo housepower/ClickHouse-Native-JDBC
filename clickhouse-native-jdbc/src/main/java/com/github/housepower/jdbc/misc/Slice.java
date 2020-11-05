@@ -22,8 +22,8 @@ import java.util.function.Consumer;
 /**
  * Slice Object just like the slice of Go
  */
-public class Slice implements Iterable<Object>{
-    private Object []array;
+public class Slice implements Iterable<Object> {
+    private Object[] array;
 
     private int capacity;
     private int offset;
@@ -37,7 +37,7 @@ public class Slice implements Iterable<Object>{
         this.capacity = capacity;
     }
 
-    public Slice(Object []array) {
+    public Slice(Object[] array) {
         this.offset = 0;
         this.pos = array.length;
 
@@ -71,7 +71,7 @@ public class Slice implements Iterable<Object>{
             grow(capacity);
         }
         array[pos] = object;
-        pos ++;
+        pos++;
     }
 
     public void set(int index, Object object) {
@@ -98,13 +98,14 @@ public class Slice implements Iterable<Object>{
         if (minCapacity < 0) // overflow
             throw new OutOfMemoryError();
         return (minCapacity > MAX_ARRAY_SIZE) ?
-               Integer.MAX_VALUE :
-               MAX_ARRAY_SIZE;
+                Integer.MAX_VALUE :
+                MAX_ARRAY_SIZE;
     }
 
-    public static class SliceIterator implements Iterator<Object>{
+    public static class SliceIterator implements Iterator<Object> {
         int current;
         Slice slice;
+
         SliceIterator(Slice slice) {
             this.slice = slice;
             this.current = slice.offset;
@@ -118,7 +119,7 @@ public class Slice implements Iterable<Object>{
         @Override
         public Object next() {
             Object obj = slice.array[current];
-            current ++;
+            current++;
             return obj;
         }
 
