@@ -46,7 +46,7 @@ public class ClickHouseConnection extends SQLConnection {
     private final AtomicBoolean isClosed;
     private final ClickHouseConfig configure;
     private final AtomicReference<PhysicalInfo> atomicInfo;
-    private ConnectionState state = ConnectionState.IDLE;
+    private final AtomicReference<ConnectionState> state = new AtomicReference<>(ConnectionState.IDLE);
 
     protected ClickHouseConnection(ClickHouseConfig configure, PhysicalInfo info) {
         this.isClosed = new AtomicBoolean(false);
@@ -128,14 +128,14 @@ public class ClickHouseConnection extends SQLConnection {
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
-        this.state = ConnectionState.WAITING_INSERT;
+        Validate.isTrue(this.state.compareAndSet(ConnectionState.IDLE, ConnectionState.WAITING_INSERT),
+                "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         return connection.receiveSampleBlock(configure.queryTimeout(), atomicInfo.get().server());
     }
 
     public QueryResponse sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
-        if (this.state == ConnectionState.WAITING_INSERT) {
-            throw new RuntimeException("Connection is currently waiting for an insert operation, check your previous InsertStatement.");
-        }
+        Validate.isTrue(this.state.get() == ConnectionState.IDLE,
+                "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(query, atomicInfo.get().client(), cfg.settings());
 
@@ -145,15 +145,14 @@ public class ClickHouseConnection extends SQLConnection {
     // when sendInsertRequest we must ensure the connection is healthy
     // the #getSampleBlock() must be called before this method
     public int sendInsertRequest(Block block) throws SQLException {
-        if (this.state != ConnectionState.WAITING_INSERT) {
-            throw new RuntimeException("Call getSampleBlock before insert.");
-        }
+        Validate.isTrue(this.state.get() == ConnectionState.WAITING_INSERT,
+                "Call getSampleBlock before insert.");
 
         PhysicalConnection connection = getPhysicalConnection();
         connection.sendData(block);
         connection.sendData(new Block());
         connection.receiveEndOfStream(configure.queryTimeout(), atomicInfo.get().server());
-        this.state = ConnectionState.IDLE;
+        Validate.isTrue(this.state.compareAndSet(ConnectionState.WAITING_INSERT, ConnectionState.IDLE));
         return block.rows();
     }
 
@@ -168,7 +167,7 @@ public class ClickHouseConnection extends SQLConnection {
         return atomicInfo.get().connection();
     }
 
-    private PhysicalConnection getPhysicalConnection() throws SQLException {
+    private PhysicalConnection getPhysicalConnection() {
         return atomicInfo.get().connection();
     }
 
