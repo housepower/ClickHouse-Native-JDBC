@@ -192,8 +192,8 @@ public class ClickHouseConnection extends SQLConnection {
 
     private static PhysicalInfo.ServerInfo serverInfo(PhysicalConnection physical, ClickHouseConfig configure) throws SQLException {
         try {
-            long reversion = ClickHouseDefines.CLIENT_REVERSION;
-            physical.sendHello("client", reversion, configure.database(), configure.username(), configure.password());
+            long revision = ClickHouseDefines.CLIENT_REVISION;
+            physical.sendHello("client", revision, configure.database(), configure.username(), configure.password());
 
             HelloResponse response = physical.receiveHello(configure.queryTimeout(), null);
             ZoneId timeZone = ZoneId.of(response.serverTimeZone());

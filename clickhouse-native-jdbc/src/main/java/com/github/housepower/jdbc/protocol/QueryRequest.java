@@ -35,7 +35,7 @@ public class QueryRequest extends RequestOrResponse {
     private final Map<SettingKey, Object> settings;
 
     public QueryRequest(String queryId, ClientInfo clientInfo, int stage, boolean compression, String queryString) {
-        this(queryId, clientInfo, stage, compression, queryString, new HashMap<SettingKey, Object>());
+        this(queryId, clientInfo, stage, compression, queryString, new HashMap<>());
     }
 
     public QueryRequest(String queryId, ClientInfo clientInfo, int stage, boolean compression, String queryString,
@@ -98,7 +98,7 @@ public class QueryRequest extends RequestOrResponse {
             serializer.writeStringBinary(clientName);
             serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
             serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
-            serializer.writeVarInt(ClickHouseDefines.CLIENT_REVERSION);
+            serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
             serializer.writeStringBinary("");
         }
     }
