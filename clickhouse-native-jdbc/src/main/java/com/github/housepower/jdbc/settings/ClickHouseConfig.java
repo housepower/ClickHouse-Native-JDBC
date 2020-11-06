@@ -28,26 +28,28 @@ import java.util.regex.Pattern;
 
 public class ClickHouseConfig {
 
-    private int port;
-
-    private String address;
-
-    private String database;
-
-    private String username;
-
-    private String password;
-
-    private int soTimeout;
-
-    private int connectTimeout;
-
-    private Map<SettingKey, Object> settings;
-
     public static final Pattern DB_PATH_PATTERN = Pattern.compile("/([a-zA-Z0-9_]+)");
     public static final Pattern HOST_PORT_PATH_PATTERN = Pattern.compile("//(?<host>[^/:\\s]+)(:(?<port>\\d+))?");
 
-    private ClickHouseConfig() {
+    private final int port;
+    private final String address;
+    private final String database;
+    private final String username;
+    private final String password;
+    private int soTimeout;
+    private final int connectTimeout;
+    private final Map<SettingKey, Object> settings;
+
+    private ClickHouseConfig(int port, String address, String database, String username, String password,
+                             int soTimeout, int connectTimeout, Map<SettingKey, Object> settings) {
+        this.port = port;
+        this.address = address;
+        this.database = database;
+        this.username = username;
+        this.password = password;
+        this.soTimeout = soTimeout;
+        this.connectTimeout = connectTimeout;
+        this.settings = settings;
     }
 
     public ClickHouseConfig(String url, Properties properties) throws SQLException {
@@ -55,8 +57,7 @@ public class ClickHouseConfig {
         this.settings.putAll(parseJDBCProperties(properties));
 
         Object obj;
-        this.port = (obj = settings.remove(SettingKey.port)) == null ? 9000
-                : ((Integer) obj) == -1 ? 9000 : (Integer) obj;
+        this.port = (obj = settings.remove(SettingKey.port)) == null ? 9000 : ((int) obj) == -1 ? 9000 : (int) obj;
         this.address = (obj = settings.remove(SettingKey.address)) == null ? "127.0.0.1" : String.valueOf(obj);
         this.password = (obj = settings.remove(SettingKey.password)) == null ? "" : String.valueOf(obj);
         this.username = (obj = settings.remove(SettingKey.user)) == null ? "default" : String.valueOf(obj);
@@ -64,8 +65,8 @@ public class ClickHouseConfig {
 
         // Java use time unit mills @
         // https://docs.oracle.com/javase/7/docs/api/java/net/Socket.html#connect(java.net.SocketAddress,%20int)
-        this.soTimeout = (obj = settings.remove(SettingKey.query_timeout)) == null ? 0 : (Integer) obj * 1000;
-        this.connectTimeout = (obj = settings.remove(SettingKey.connect_timeout)) == null ? 0 : (Integer) obj * 1000;
+        this.soTimeout = (obj = settings.remove(SettingKey.query_timeout)) == null ? 0 : (int) obj * 1000;
+        this.connectTimeout = (obj = settings.remove(SettingKey.connect_timeout)) == null ? 0 : (int) obj * 1000;
     }
 
     public int port() {
@@ -101,7 +102,7 @@ public class ClickHouseConfig {
     }
 
     public Map<SettingKey, Object> parseJDBCProperties(Properties properties) {
-        Map<SettingKey, Object> settings = new HashMap<SettingKey, Object>();
+        Map<SettingKey, Object> settings = new HashMap<>();
 
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             for (SettingKey settingKey : SettingKey.values()) {
@@ -122,7 +123,7 @@ public class ClickHouseConfig {
             String host = parseHost(jdbcUrl);
             Integer port = parsePort(jdbcUrl);
             String database = parseDatabase(jdbcUrl);
-            Map<SettingKey, Object> settings = new HashMap<SettingKey, Object>();
+            Map<SettingKey, Object> settings = new HashMap<>();
             settings.put(SettingKey.address, host);
             settings.put(SettingKey.port, port);
             settings.put(SettingKey.database, database);
@@ -166,7 +167,7 @@ public class ClickHouseConfig {
         return host;
     }
 
-    private Integer parsePort(String jdbcUrl) throws URISyntaxException {
+    private int parsePort(String jdbcUrl) throws URISyntaxException {
         String uriStr = jdbcUrl.substring(5);
         URI uri = new URI(uriStr);
         int port = uri.getPort();
@@ -180,7 +181,7 @@ public class ClickHouseConfig {
     }
 
     private Map<SettingKey, Object> extractQueryParameters(String queryParameters) throws SQLException {
-        Map<SettingKey, Object> parameters = new HashMap<SettingKey, Object>();
+        Map<SettingKey, Object> parameters = new HashMap<>();
         StringTokenizer tokenizer = new StringTokenizer(queryParameters == null ? "" : queryParameters, "&");
 
         while (tokenizer.hasMoreTokens()) {
@@ -202,16 +203,7 @@ public class ClickHouseConfig {
     }
 
     public ClickHouseConfig copy() {
-        ClickHouseConfig configure = new ClickHouseConfig();
-        configure.port = this.port;
-        configure.address = this.address;
-        configure.database = this.database;
-        configure.username = this.username;
-        configure.password = this.password;
-        configure.soTimeout = this.soTimeout;
-        configure.connectTimeout = this.connectTimeout;
-        configure.settings = new HashMap<>(this.settings);
-
-        return configure;
+        return new ClickHouseConfig(port, address, database, username, password,
+                soTimeout, connectTimeout, new HashMap<>(this.settings));
     }
 }
