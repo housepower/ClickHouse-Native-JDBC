@@ -29,7 +29,6 @@ import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class DataTypeArray implements IDataType {
@@ -132,14 +131,10 @@ public class DataTypeArray implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+
         throw new SQLException("DataTypeArray serializeBinary not supported");
     }
 
-    @Override
-    public void serializeBinaryBulk(Iterator<Object> data, BinarySerializer serializer)
-            throws SQLException, IOException {
-        throw new SQLException("DataTypeArray serializeBinaryBulk not supported");
-    }
 
     @Override
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer)

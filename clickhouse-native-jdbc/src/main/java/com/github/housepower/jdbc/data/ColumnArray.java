@@ -14,54 +14,67 @@
 
 package com.github.housepower.jdbc.data;
 
+import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Column extends AbstractColumn {
-    protected Object[] values;
+public class ColumnArray extends AbstractColumn {
+    private List<Long> offsets;
+    // data represents netsted column in ColumnArray
+    private List<Column> data;
 
-    public Column(String name, IDataType type, Object[] values) {
+    public ColumnArray(String name, DataTypeArray type, Object[] values) {
         super(name, type);
-        this.values = values;
-    }
+        offsets = new ArrayList<>(values.length);
+        data = new ArrayList<>(values.length);
 
-    public String name() {
-        return this.name;
-    }
+        long offset = 0;
+        for (int i = 0; i < values.length; i++) {
+            offsets.set(i, offset);
+            Object []nestData = (Object[])(values[i]);
+            data.set(i, ColumnFactory.createColumn(name, type, nestData));
 
-    public IDataType type() {
-        return this.type;
-    }
-
-    @Override
-    public Object values(int idx) {
-        return values[idx];
+            offset += nestData.length;
+        }
     }
 
     @Override
     public void write(Object object) throws IOException, SQLException {
         type().serializeBinary(object, buffer.column);
+
+        Object []arr = (Object[])object;
+        offsets.add(offsets.isEmpty() ? arr.length : offsets.get((int) (size() - 1)) + arr.length);
     }
 
     @Override
     public void serializeBinaryBulk(BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeStringBinary(name);
         serializer.writeStringBinary(type.name());
+
+        for (long offsetList : offsets) {
+            serializer.writeLong(offsetList);
+        }
+
         buffer.writeTo(serializer);
     }
 
     @Override
     public void clear() {
-        values = new Object[0];
+        offsets.clear();
+        data.clear();
     }
 
+    @Override
     public long size() {
-        return values.length;
+        return 0;
     }
 
-    public ColumnWriterBuffer getBuffer() {
-        return buffer;
+    @Override
+    public Object values(int idx) {
+        return data.get(idx);
     }
 }

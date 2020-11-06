@@ -14,54 +14,51 @@
 
 package com.github.housepower.jdbc.data;
 
+import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Column extends AbstractColumn {
-    protected Object[] values;
+public class ColumnNullable extends Column{
+    private List<Byte> nullableSign;
+    // data represents netsted column in ColumnArray
+    private Column data;
 
-    public Column(String name, IDataType type, Object[] values) {
-        super(name, type);
-        this.values = values;
-    }
-
-    public String name() {
-        return this.name;
-    }
-
-    public IDataType type() {
-        return this.type;
-    }
-
-    @Override
-    public Object values(int idx) {
-        return values[idx];
+    public ColumnNullable(String name, DataTypeNullable type, Object[] values) {
+        super(name, type, values);
+        nullableSign = new ArrayList<>(values.length);
+        for (int i = 0; i < values.length; i++) {
+            nullableSign.set(i, values[i] == null ? (byte) 1 : 0);
+        }
+        data = ColumnFactory.createColumn(name, type, values);
     }
 
     @Override
     public void write(Object object) throws IOException, SQLException {
-        type().serializeBinary(object, buffer.column);
+        nullableSign.add(object == null ? (byte) 1 : 0);
+        data.write(object);
     }
 
     @Override
     public void serializeBinaryBulk(BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeStringBinary(name);
         serializer.writeStringBinary(type.name());
+
+        for (byte sign : nullableSign) {
+            serializer.writeByte(sign);
+        }
+
+        data.serializeBinaryBulk(serializer);
         buffer.writeTo(serializer);
     }
 
     @Override
     public void clear() {
-        values = new Object[0];
-    }
-
-    public long size() {
-        return values.length;
-    }
-
-    public ColumnWriterBuffer getBuffer() {
-        return buffer;
+        super.clear();
+        nullableSign.clear();
+        data.clear();
     }
 }

@@ -35,7 +35,7 @@ public class Block {
         int columns = (int) deserializer.readVarInt();
         int rows = (int) deserializer.readVarInt();
 
-        Column[] cols = new Column[columns];
+        IColumn[] cols = new IColumn[columns];
 
         for (int i = 0; i < columns; i++) {
             String name = deserializer.readStringBinary();
@@ -43,13 +43,13 @@ public class Block {
 
             IDataType dataType = DataTypeFactory.get(type, serverInfo);
             Object[] arr = dataType.deserializeBinaryBulk(rows, deserializer);
-            cols[i] = new Column(name, dataType, arr);
+            cols[i] = ColumnFactory.createColumn(name, dataType, arr);
         }
 
         return new Block(rows, cols, info);
     }
 
-    private final Column[] columns;
+    private final IColumn[] columns;
     private final BlockSettings settings;
     private final Map<String, Integer> nameWithPosition;
 
@@ -58,14 +58,14 @@ public class Block {
     private int rows;
 
     public Block() {
-        this(0, new Column[0]);
+        this(0, new IColumn[0]);
     }
 
-    public Block(int rows, Column[] columns) {
+    public Block(int rows, IColumn[] columns) {
         this(rows, columns, new BlockSettings(Setting.values()));
     }
 
-    public Block(int rows, Column[] columns, BlockSettings settings) {
+    public Block(int rows, IColumn[] columns, BlockSettings settings) {
         this.rows = rows;
         this.columns = columns;
         this.settings = settings;
@@ -111,7 +111,7 @@ public class Block {
         serializer.writeVarInt(columns.length);
         serializer.writeVarInt(rows);
 
-        for (Column column : columns) {
+        for (IColumn column : columns) {
             column.serializeBinaryBulk(serializer);
         }
     }
@@ -124,7 +124,7 @@ public class Block {
         return columns.length;
     }
 
-    public Column getByPosition(int column) throws SQLException {
+    public IColumn getByPosition(int column) throws SQLException {
         Validate.isTrue(column < columns.length,
                 "Position " + column +
                         " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
@@ -144,7 +144,7 @@ public class Block {
     }
 
     public void initWriteBuffer() {
-        for (Column column : columns) {
+        for (IColumn column : columns) {
             column.initWriteBuffer();
         }
     }

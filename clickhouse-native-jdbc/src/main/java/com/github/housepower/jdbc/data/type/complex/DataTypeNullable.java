@@ -98,7 +98,12 @@ public class DataTypeNullable implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        throw new SQLException("DataTypeNullable serializeBinary not supported");
+        if (data == null) {
+            serializer.writeByte((byte) 1);
+        } else {
+            serializer.writeByte((byte) 0);
+            this.nestedDataType.serializeBinary(data, serializer);
+        }
     }
 
     public void serializeBinary(Object data, BinarySerializer serializer, List<Byte> offset) throws SQLException, IOException {
@@ -108,7 +113,11 @@ public class DataTypeNullable implements IDataType {
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        throw new SQLException("DataTypeNullable deserializeBinary not supported");
+        boolean isNull = (deserializer.readByte() == (byte)1);
+        if (isNull) {
+            return null;
+        }
+        return this.nestedDataType.deserializeBinary(deserializer);
     }
 
     @Override
