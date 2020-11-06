@@ -121,7 +121,6 @@ public class ClickHouseConnection extends SQLConnection {
         try (Connection connection = new ClickHouseConnection(validConfigure, atomicInfo.get());
              Statement statement = connection.createStatement()) {
             statement.execute("SELECT 1");
-            statement.close();
             return true;
         }
     }
