@@ -92,7 +92,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     @Override
     public int[] executeBatch() throws SQLException {
-        Integer rows = connection.sendInsertRequest(block);
+        int rows = connection.sendInsertRequest(block);
         int[] result = new int[rows];
         Arrays.fill(result, 1);
         clearBatch();

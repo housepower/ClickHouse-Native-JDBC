@@ -143,9 +143,8 @@ public class ClickHouseConnection extends SQLConnection {
     }
 
     // when sendInsertRequest we must ensure the connection is healthy
-    // the sampleblock mus be called before this method
-    public Integer sendInsertRequest(Block block)
-            throws SQLException {
+    // the #getSampleBlock() must be called before this method
+    public int sendInsertRequest(Block block) throws SQLException {
         if (this.state != ConnectionState.WAITING_INSERT) {
             throw new RuntimeException("Call getSampleBlock before insert.");
         }
