@@ -23,12 +23,12 @@ public interface IColumn {
     void write(Object object) throws IOException, SQLException;
     void serializeBinaryBulk(BinarySerializer serializer) throws SQLException, IOException;
     void clear();
-    long size();
 
-    void initWriteBuffer();
+    void setColumnWriterBuffer(ColumnWriterBuffer buffer);
 
     String name();
     IDataType type();
+    boolean isExported();
     Object values(int idx);
 }
 
@@ -36,11 +36,19 @@ public interface IColumn {
 abstract class AbstractColumn implements IColumn {
     protected final String name;
     protected final IDataType type;
+
+    protected Object []values;
     protected ColumnWriterBuffer buffer;
 
-    public AbstractColumn(String name, IDataType type) {
+    public AbstractColumn(String name, IDataType type, Object []values) {
         this.name = name;
         this.type = type;
+        this.values = values;
+    }
+
+    @Override
+    public boolean isExported() {
+        return name != null;
     }
 
     @Override
@@ -54,7 +62,17 @@ abstract class AbstractColumn implements IColumn {
     }
 
     @Override
-    public void initWriteBuffer() {
-        this.buffer = new ColumnWriterBuffer();
+    public Object values(int idx) {
+        return values[idx];
+    }
+
+    @Override
+    public void clear() {
+        values = new Object[0];
+    }
+
+    @Override
+    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
+        this.buffer = buffer;
     }
 }

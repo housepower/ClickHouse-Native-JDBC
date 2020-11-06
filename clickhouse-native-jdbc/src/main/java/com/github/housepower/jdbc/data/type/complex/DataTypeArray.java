@@ -43,6 +43,15 @@ public class DataTypeArray implements IDataType {
 
     private final String name;
     private final Array defaultValue;
+
+    public IDataType getElemDataType() {
+        return elemDataType;
+    }
+
+    public IDataType getOffsetIDataType() {
+        return offsetIDataType;
+    }
+
     private final IDataType elemDataType;
     private final IDataType offsetIDataType;
 

@@ -22,43 +22,42 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColumnNullable extends Column{
+public class ColumnNullable extends AbstractColumn {
     private List<Byte> nullableSign;
     // data represents netsted column in ColumnArray
-    private Column data;
+    private IColumn data;
 
-    public ColumnNullable(String name, DataTypeNullable type, Object[] values) {
+    public ColumnNullable(String name, DataTypeNullable type, Object []values) {
         super(name, type, values);
-        nullableSign = new ArrayList<>(values.length);
-        for (int i = 0; i < values.length; i++) {
-            nullableSign.set(i, values[i] == null ? (byte) 1 : 0);
-        }
-        data = ColumnFactory.createColumn(name, type, values);
+        nullableSign = new ArrayList<>();
+        data = ColumnFactory.createColumn(null, type.getNestedDataType(), null);
     }
 
     @Override
     public void write(Object object) throws IOException, SQLException {
         nullableSign.add(object == null ? (byte) 1 : 0);
-        data.write(object);
+        data.write(object == null ? type.defaultValue() : object);
     }
 
     @Override
     public void serializeBinaryBulk(BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeStringBinary(name);
-        serializer.writeStringBinary(type.name());
+        if (isExported()) {
+            serializer.writeStringBinary(name);
+            serializer.writeStringBinary(type.name());
+        }
 
         for (byte sign : nullableSign) {
             serializer.writeByte(sign);
         }
 
-        data.serializeBinaryBulk(serializer);
-        buffer.writeTo(serializer);
+        if (isExported()) {
+            buffer.writeTo(serializer);
+        }
     }
 
     @Override
-    public void clear() {
-        super.clear();
-        nullableSign.clear();
-        data.clear();
+    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
+        super.setColumnWriterBuffer(buffer);
+        data.setColumnWriterBuffer(buffer);
     }
 }

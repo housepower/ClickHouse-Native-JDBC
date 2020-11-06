@@ -20,24 +20,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class Column extends AbstractColumn {
-    protected Object[] values;
 
     public Column(String name, IDataType type, Object[] values) {
-        super(name, type);
+        super(name, type, values);
         this.values = values;
-    }
-
-    public String name() {
-        return this.name;
-    }
-
-    public IDataType type() {
-        return this.type;
-    }
-
-    @Override
-    public Object values(int idx) {
-        return values[idx];
     }
 
     @Override
@@ -47,21 +33,10 @@ public class Column extends AbstractColumn {
 
     @Override
     public void serializeBinaryBulk(BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeStringBinary(name);
-        serializer.writeStringBinary(type.name());
-        buffer.writeTo(serializer);
-    }
-
-    @Override
-    public void clear() {
-        values = new Object[0];
-    }
-
-    public long size() {
-        return values.length;
-    }
-
-    public ColumnWriterBuffer getBuffer() {
-        return buffer;
+        if (isExported()) {
+            serializer.writeStringBinary(name);
+            serializer.writeStringBinary(type.name());
+            buffer.writeTo(serializer);
+        }
     }
 }

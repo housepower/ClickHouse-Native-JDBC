@@ -41,6 +41,11 @@ public class DataTypeNullable implements IDataType {
 
     private final String name;
     private final IDataType nestedDataType;
+
+    public IDataType getNestedDataType() {
+        return nestedDataType;
+    }
+
     private final IDataType nullMapDataType;
 
     public DataTypeNullable(String name, IDataType nestedDataType, IDataType nullMapIDataType) throws SQLException {
@@ -98,12 +103,7 @@ public class DataTypeNullable implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data == null) {
-            serializer.writeByte((byte) 1);
-        } else {
-            serializer.writeByte((byte) 0);
-            this.nestedDataType.serializeBinary(data, serializer);
-        }
+        this.nestedDataType.serializeBinary(data, serializer);
     }
 
     public void serializeBinary(Object data, BinarySerializer serializer, List<Byte> offset) throws SQLException, IOException {
@@ -113,7 +113,7 @@ public class DataTypeNullable implements IDataType {
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        boolean isNull = (deserializer.readByte() == (byte)1);
+        boolean isNull = (deserializer.readByte() == (byte) 1);
         if (isNull) {
             return null;
         }

@@ -145,7 +145,7 @@ public class Block {
 
     public void initWriteBuffer() {
         for (IColumn column : columns) {
-            column.initWriteBuffer();
+            column.setColumnWriterBuffer(new ColumnWriterBuffer());
         }
     }
 }

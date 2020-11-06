@@ -20,11 +20,11 @@ import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
 import java.sql.Types;
 
 public class ColumnFactory {
-    public static Column createColumn(String name, IDataType type, Object[] values) {
+    public static IColumn createColumn(String name, IDataType type, Object[] values) {
         if (type.sqlTypeId() == Types.ARRAY) {
-            return new ColumnArray(name, (DataTypeArray)type, values);
+            return new ColumnArray(name, (DataTypeArray) type, values);
         } else if (type.nullable()) {
-            return new ColumnNullable(name, (DataTypeNullable)type, values);
+            return new ColumnNullable(name, (DataTypeNullable) type, values);
         }
         return new Column(name, type, values);
     }
