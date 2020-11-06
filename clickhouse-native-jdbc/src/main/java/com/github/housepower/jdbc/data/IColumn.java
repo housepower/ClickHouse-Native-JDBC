@@ -37,6 +37,7 @@ abstract class AbstractColumn implements IColumn {
     protected final String name;
     protected final IDataType type;
 
+    // Note: values is only for reading
     protected Object []values;
     protected ColumnWriterBuffer buffer;
 

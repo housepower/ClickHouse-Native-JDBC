@@ -199,7 +199,7 @@ public class QueryComplexTypeITest extends AbstractITest {
             Statement statement = connection.createStatement();
 
             ResultSet rs = statement.executeQuery(
-                    "SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v) from numbers(10)");
+                    "SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v), [toNullable(10000), toNullable(10001)] from numbers(10)");
 
             for (int i = 0; i < 10; i++) {
                 assertTrue(rs.next());
@@ -213,6 +213,10 @@ public class QueryComplexTypeITest extends AbstractITest {
                 assertArrayEquals(res[1], (Object[]) ((ClickHouseArray) (arr[1])).getArray());
                 assertArrayEquals(res[2], (Object[]) ((ClickHouseArray) (arr[2])).getArray());
                 assertEquals("Array(Array(Float64))", rs.getString(2));
+
+                arr = (Object[]) (rs.getArray(3).getArray());
+                assertEquals(10000, arr[0]);
+                assertEquals(10001, arr[1]);
             }
             assertFalse(rs.next());
 

@@ -29,14 +29,18 @@ public class InsertComplexTypeITest extends AbstractITest {
             Statement statement = connection.createStatement();
 
             statement.executeQuery("DROP TABLE IF EXISTS test");
-            statement.executeQuery("CREATE TABLE test(test_Array Array(UInt8), test_Array2 Array(Array(String)))ENGINE=Log");
-            statement.executeQuery("INSERT INTO test VALUES ([1, 2, 3, 4], [ ['1', '2'] ])");
+            statement.executeQuery("CREATE TABLE test(test_Array Array(UInt8), test_Array2 Array(Array(String)), n3 Array(Nullable(UInt8)) )ENGINE=Log");
+            statement.executeQuery("INSERT INTO test VALUES ([1, 2, 3, 4], [ ['1', '2'] ], [1, 2, NULL] )");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
             assertTrue(rs.next());
             assertArrayEquals(new Short[]{1, 2, 3, 4}, (Object[]) rs.getArray(1).getArray());
             Object[] objects = (Object[]) rs.getArray(2).getArray();
             ClickHouseArray array = (ClickHouseArray) objects[0];
             assertArrayEquals(new Object[]{"1", "2"}, (Object[]) array.getArray());
+
+            objects = (Object[]) rs.getArray(3).getArray();
+            assertArrayEquals(new Short[]{1, 2, null}, objects);
+
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
