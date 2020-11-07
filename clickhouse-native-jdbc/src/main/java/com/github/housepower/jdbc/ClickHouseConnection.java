@@ -74,15 +74,15 @@ public class ClickHouseConnection extends SQLConnection {
     @Override
     public Statement createStatement() throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create Statement, because the connection is closed.");
-        return new ClickHouseStatement(this);
+        return new ClickHouseStatement(this, atomicInfo.get());
     }
 
     @Override
     public PreparedStatement prepareStatement(String query) throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, because the connection is closed.");
         Matcher matcher = VALUES_REGEX.matcher(query);
-        return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this) :
-                new ClickHousePreparedQueryStatement(this, query);
+        return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this, atomicInfo.get()) :
+                new ClickHousePreparedQueryStatement(this, atomicInfo.get(), query);
     }
 
     @Override

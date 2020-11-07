@@ -18,9 +18,13 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.time.ZoneId;
 import java.util.Enumeration;
 
 public abstract class AbstractITest implements Serializable {
+
+    protected static ZoneId clientTz = ZoneId.systemDefault();
+    protected static ZoneId serverTz = ZoneId.of("UTC");
 
     protected static final int SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
 

@@ -15,7 +15,7 @@
 package com.github.housepower.jdbc.protocol;
 
 import java.io.IOException;
-import java.util.TimeZone;
+import java.time.ZoneId;
 
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
@@ -86,7 +86,7 @@ public class HelloResponse extends RequestOrResponse {
 
     private static String getTimeZone(BinaryDeserializer deserializer, long serverReversion) throws IOException {
         return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_TIMEZONE ?
-            deserializer.readStringBinary() : TimeZone.getDefault().getID();
+            deserializer.readStringBinary() : ZoneId.systemDefault().getId();
     }
 
     private static String getDisplayName(BinaryDeserializer deserializer, long serverReversion) throws IOException {

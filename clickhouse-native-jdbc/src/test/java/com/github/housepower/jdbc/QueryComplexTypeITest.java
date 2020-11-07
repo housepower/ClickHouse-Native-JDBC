@@ -20,11 +20,9 @@ import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Struct;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,17 +30,14 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyDate() throws Exception {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ROOT);
+        LocalDate date = LocalDate.of(2020, 1, 1);
 
-        // use client timezone, Asia/Shanghai in traivs-ci
+        // use client timezone, Asia/Shanghai
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("select toDate('2020-01-01') as dateValue");
             assertTrue(rs.next());
-
-            dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
-            java.util.Date date = dateFormat.parse("2020-01-01 08:00:00");
-            assertEquals(date.getTime(), rs.getDate(1).getTime());
+            assertEquals(date, rs.getDate(1).toLocalDate());
             assertFalse(rs.next());
         }, true);
 
@@ -51,10 +46,7 @@ public class QueryComplexTypeITest extends AbstractITest {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("select toDate('2020-01-01') as dateValue");
             assertTrue(rs.next());
-
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            java.util.Date date = dateFormat.parse("2020-01-01 00:00:00");
-            assertEquals(date.getTime(), rs.getDate(1).getTime());
+            assertEquals(date, rs.getDate(1).toLocalDate());
             assertFalse(rs.next());
         }, false);
     }

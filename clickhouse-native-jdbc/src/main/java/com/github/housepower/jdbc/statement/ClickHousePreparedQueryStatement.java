@@ -16,6 +16,7 @@ package com.github.housepower.jdbc.statement;
 
 
 import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,12 +26,12 @@ import java.util.List;
 
 public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement {
 
-    public ClickHousePreparedQueryStatement(ClickHouseConnection conn, String query) {
-        this(conn, splitQueryByQuestionMark(query));
+    public ClickHousePreparedQueryStatement(ClickHouseConnection conn, PhysicalInfo physicalInfo, String query) {
+        this(conn, physicalInfo, splitQueryByQuestionMark(query));
     }
 
-    private ClickHousePreparedQueryStatement(ClickHouseConnection conn, String[] parts) {
-        super(conn, parts);
+    private ClickHousePreparedQueryStatement(ClickHouseConnection conn, PhysicalInfo physicalInfo, String[] parts) {
+        super(conn, physicalInfo, parts);
     }
 
     @Override

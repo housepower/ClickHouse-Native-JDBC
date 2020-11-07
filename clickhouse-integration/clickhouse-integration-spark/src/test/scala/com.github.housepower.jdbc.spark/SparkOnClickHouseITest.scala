@@ -17,8 +17,8 @@ package com.github.housepower.jdbc.spark
 import com.github.housepower.jdbc.AbstractITest
 import com.github.housepower.jdbc.tool.TestHarness
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.{to_timestamp, translate}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.to_timestamp
 import org.apache.spark.sql.jdbc.{ClickHouseDialect, JdbcDialects}
 import org.apache.spark.sql.types.{ArrayType, DataTypes, StructField, StructType}
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -210,6 +210,5 @@ class SparkOnClickHouseITest extends AbstractITest with Logging {
       .option("isolationLevel", "NONE")
       .save
 
-    println()
   }
 }

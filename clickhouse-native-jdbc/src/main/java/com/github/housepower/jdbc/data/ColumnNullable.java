@@ -23,11 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ColumnNullable extends AbstractColumn {
-    private List<Byte> nullableSign;
-    // data represents netsted column in ColumnArray
-    private IColumn data;
+    private final List<Byte> nullableSign;
+    // data represents nested column in ColumnArray
+    private final IColumn data;
 
-    public ColumnNullable(String name, DataTypeNullable type, Object []values) {
+    public ColumnNullable(String name, DataTypeNullable type, Object[] values) {
         super(name, type, values);
         nullableSign = new ArrayList<>();
         data = ColumnFactory.createColumn(null, type.getNestedDataType(), null);

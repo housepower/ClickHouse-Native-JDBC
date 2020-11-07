@@ -15,12 +15,15 @@
 package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.Validate;
 
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -28,16 +31,20 @@ import java.util.regex.Matcher;
 public abstract class AbstractPreparedStatement extends ClickHouseStatement {
 
     private final String[] queryParts;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
-    private final SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT);
+    private final DateTimeFormatter dateFmt;
+    private final DateTimeFormatter timestampFmt;
 
     protected Object[] parameters;
 
-    public AbstractPreparedStatement(ClickHouseConnection connection, String[] queryParts) {
-        super(connection);
+    public AbstractPreparedStatement(ClickHouseConnection connection, PhysicalInfo physicalInfo, String[] queryParts) {
+        super(connection, physicalInfo);
         this.queryParts = queryParts;
         if (queryParts != null && queryParts.length > 0)
             this.parameters = new Object[queryParts.length];
+
+        ZoneId tz = DateTimeHelper.chooseTimeZone(physicalInfo.server());
+        this.dateFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ROOT).withZone(tz);
+        this.timestampFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ROOT).withZone(tz);
     }
 
     @Override
@@ -146,9 +153,10 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement {
             return assembleWithoutQuotedParameter(queryBuilder, parameter);
         } else if (parameter instanceof String) {
             return assembleQuotedParameter(queryBuilder, String.valueOf(parameter));
-        } else if (parameter instanceof Date || parameter instanceof Timestamp) {
-            SimpleDateFormat format = parameter instanceof Date ? dateFormat : timestampFormat;
-            return assembleQuotedParameter(queryBuilder, format.format(parameter));
+        } else if (parameter instanceof Date) {
+            return assembleQuotedParameter(queryBuilder, dateFmt.format(((Date) parameter).toLocalDate()));
+        } else if (parameter instanceof Timestamp) {
+            return assembleQuotedParameter(queryBuilder, timestampFmt.format(((Timestamp) parameter).toInstant()));
         }
         return false;
     }
