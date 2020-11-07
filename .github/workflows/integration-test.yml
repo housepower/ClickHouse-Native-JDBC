@@ -20,10 +20,14 @@ jobs:
           java-version: ${{ matrix.java }}
       - name: Start clickhouse-server
         run: docker-compose up -d
-      - name: Run integration-tests with maven
+      - name: Run integration tests with Scala 2.11 & Spark 2.4.7
         run: mvn -B clean verify
       - name: upload code coverage report
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: bash <(curl -s https://codecov.io/bash)
+      - name: Run integration tests with Scala 2.12 & Spark 2.4.7
+        run: mvn clean package -pl :clickhouse-integration-spark_2.12 -am -Dscala.version=2.12.10 -Dscala.compat.version=2.12
+      - name: Run integration tests with Scala 2.12 & Spark 3.0.1
+        run: mvn clean package -pl :clickhouse-integration-spark_2.12 -am -Dscala.version=2.12.10 -Dscala.compat.version=2.12 -Dspark.version=3.0.1
 
