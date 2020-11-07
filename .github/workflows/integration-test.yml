@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [8, 11]
+        java: [ 8, 11 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
@@ -21,4 +21,9 @@ jobs:
       - name: Start clickhouse-server
         run: docker-compose up -d
       - name: Run integration-tests with maven
-        run:  mvn -B clean verify
+        run: mvn -B clean verify
+      - name: upload code coverage report
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: bash <(curl -s https://codecov.io/bash)
+
