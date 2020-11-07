@@ -14,16 +14,15 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.misc.DateTimeHelper;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.concurrent.TimeUnit;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -122,15 +121,61 @@ public class PreparedStatementITest extends AbstractITest {
     }
 
     @Test
-    public void successfullyDateWithClientTz() throws Exception {
+    public void successfullyDateIndependentWithTz() throws Exception {
+        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ROOT);
+        DateTimeFormatter dateTimeFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ROOT);
+        LocalDate date = LocalDate.of(2020, 11, 7);
+        LocalDateTime clientDateTime = date.atTime(17, 43, 12);
+        ZoneId clientTz = ZoneId.of("Asia/Shanghai");
+        ZoneId serverTz = ZoneId.of("UTC");
+        LocalDateTime serverDateTime = DateTimeHelper.convertTimeZone(clientDateTime, clientTz, serverTz);
+        String dateLiteral = date.format(dateFmt);
+        String clientDateTimeLiteral = clientDateTime.format(dateTimeFmt);
+        String serverDateTimeLiteral = serverDateTime.format(dateTimeFmt);
+        assertEquals(18573, date.toEpochDay());
+        assertEquals("2020-11-07", dateLiteral);
+        assertEquals(1604742192, clientDateTime.atZone(clientTz).toEpochSecond());
+        assertEquals(1604742192, serverDateTime.atZone(serverTz).toEpochSecond());
+        assertEquals("2020-11-07 17:43:12", clientDateTimeLiteral);
+        assertEquals("2020-11-07 09:43:12", serverDateTimeLiteral);
+
+        // use server_time_zone
         withNewConnection(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT toDate(?)");
-            ZonedDateTime zdt = ZonedDateTime.now(ZoneId.systemDefault());
-            preparedStatement.setDate(1, new Date(zdt.toInstant().toEpochMilli()));
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT " +
+                    "toDate('2020-11-07'),              toDate(?),     toDate(?), " +
+                    "toDateTime('2020-11-07 09:43:12'), toDateTime(?), toDateTime(?)");
+            preparedStatement.setDate(1, Date.valueOf(date));
+            preparedStatement.setString(2, dateLiteral);
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(clientDateTime));
+            preparedStatement.setString(4, serverDateTimeLiteral);
             ResultSet rs = preparedStatement.executeQuery();
             assertTrue(rs.next());
-            assertEquals(zdt.toLocalDate().toEpochDay(),
-                    rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1));
+            assertEquals(date.toEpochDay(), rs.getDate(1).toLocalDate().toEpochDay());
+            assertEquals(date.toEpochDay(), rs.getDate(2).toLocalDate().toEpochDay());
+            assertEquals(date.toEpochDay(), rs.getDate(3).toLocalDate().toEpochDay());
+            assertEquals(clientDateTime, rs.getTimestamp(4).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(5).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(6).toLocalDateTime());
+            assertFalse(rs.next());
+        }, false);
+
+        // use client_time_zone
+        withNewConnection(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT " +
+                    "toDate('2020-11-07'),              toDate(?),     toDate(?), " +
+                    "toDateTime('2020-11-07 09:43:12'), toDateTime(?), toDateTime(?)");
+            preparedStatement.setDate(1, Date.valueOf(date));
+            preparedStatement.setString(2, dateLiteral);
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(serverDateTime));
+            preparedStatement.setString(4, serverDateTimeLiteral);
+            ResultSet rs = preparedStatement.executeQuery();
+            assertTrue(rs.next());
+            assertEquals(date.toEpochDay(), rs.getDate(1).toLocalDate().toEpochDay());
+            assertEquals(date.toEpochDay(), rs.getDate(2).toLocalDate().toEpochDay());
+            assertEquals(date.toEpochDay(), rs.getDate(3).toLocalDate().toEpochDay());
+            assertEquals(clientDateTime, rs.getTimestamp(4).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(5).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(6).toLocalDateTime());
             assertFalse(rs.next());
         }, true);
     }
@@ -143,11 +188,11 @@ public class PreparedStatementITest extends AbstractITest {
             statement.execute("DROP TABLE IF EXISTS test");
             statement.execute("CREATE TABLE test(id UInt8, day Date, time DateTime)ENGINE = Log");
 
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?)");
 
-            // 2018-07-01 19:00:00  Asia/Shanghai
-            long time = 1530374400 + 19 * 3600;
+            // 2018-07-01 19:00:00  GMT
+            // 2018-07-02 03:00:00  Asia/Shanghai
+            long time = 1530403200 + 19 * 3600;
 
             preparedStatement.setByte(1, (byte) 1);
             preparedStatement.setDate(2, new Date(time * 1000));

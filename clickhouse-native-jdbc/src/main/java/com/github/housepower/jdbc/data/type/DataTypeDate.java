@@ -16,7 +16,6 @@ package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
@@ -26,23 +25,19 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 
 public class DataTypeDate implements IDataType {
 
     public static IDataType createDateType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) {
-        return new DataTypeDate(serverInfo);
+        return new DataTypeDate();
     }
 
     // Since `Date` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
     // we should ensure DON'T modify it anywhere.
-    private static final Date DEFAULT_VALUE = new Date(0);
+    private static final Date DEFAULT_VALUE = Date.valueOf(LocalDate.ofEpochDay(0));
 
-    private final ZoneId tz;
-
-    public DataTypeDate(PhysicalInfo.ServerInfo serverInfo) {
-        this.tz = DateTimeHelper.chooseTimeZone(serverInfo);
+    public DataTypeDate() {
     }
 
     @Override
@@ -82,9 +77,8 @@ public class DataTypeDate implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        long mills = ((Date) data).getTime();
-        long daysSinceEpoch = mills / 1000 / 3600 / 24;
-        serializer.writeShort((short) daysSinceEpoch);
+        long epochDay = ((Date) data).toLocalDate().toEpochDay();
+        serializer.writeShort((short) epochDay);
     }
 
     @Override
@@ -98,7 +92,7 @@ public class DataTypeDate implements IDataType {
         Date[] data = new Date[rows];
         for (int row = 0; row < rows; row++) {
             short daysSinceEpoch = deserializer.readShort();
-            data[row] = new Date(3600L * 24 * 1000 * daysSinceEpoch);
+            data[row] = Date.valueOf(LocalDate.ofEpochDay(daysSinceEpoch));
         }
         return data;
     }
@@ -113,7 +107,7 @@ public class DataTypeDate implements IDataType {
         int day = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '\'');
 
-        ZonedDateTime zdt = ZonedDateTime.of(year, month, day, 0, 0, 0, 0, tz);
-        return new Date(zdt.toInstant().toEpochMilli());
+        LocalDate date = LocalDate.of(year, month, day);
+        return Date.valueOf(date);
     }
 }

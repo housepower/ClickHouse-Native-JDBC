@@ -15,6 +15,7 @@
 package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
@@ -30,9 +31,11 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     private final String insertQuery;
     private boolean blockInit;
 
-    public ClickHousePreparedInsertStatement(int posOfData, String fullQuery, ClickHouseConnection conn)
-            throws SQLException {
-        super(conn, null);
+    public ClickHousePreparedInsertStatement(int posOfData,
+                                             String fullQuery,
+                                             ClickHouseConnection conn,
+                                             PhysicalInfo physicalInfo) throws SQLException {
+        super(conn, physicalInfo, null);
         this.blockInit = false;
         this.posOfData = posOfData;
         this.fullQuery = fullQuery;

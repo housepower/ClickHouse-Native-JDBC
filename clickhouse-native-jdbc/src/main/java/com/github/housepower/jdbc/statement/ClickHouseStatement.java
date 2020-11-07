@@ -16,6 +16,7 @@ package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseResultSet;
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.protocol.QueryResponse;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
@@ -39,14 +40,16 @@ public class ClickHouseStatement extends SQLStatement {
     private ResultSet lastResultSet;
     protected Block block;
     protected final ClickHouseConnection connection;
+    protected final PhysicalInfo physicalInfo;
 
+    private final ClickHouseConfig cfg;
     private long maxRows;
-    private ClickHouseConfig cfg;
     private String db;
     private String table = "unknown";
 
-    public ClickHouseStatement(ClickHouseConnection connection) {
+    public ClickHouseStatement(ClickHouseConnection connection, PhysicalInfo physicalInfo) {
         this.connection = connection;
+        this.physicalInfo = physicalInfo;
         this.cfg = connection.getConfigure().copy();
         this.db = cfg.database();
     }

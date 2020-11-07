@@ -31,8 +31,6 @@ public class DataTypeInt64 implements IDataType {
     private final String name;
     private final boolean isUnsigned;
 
-    private static final BigInteger TWO_COMPL_REF = BigInteger.ONE.shiftLeft(64);
-
     public DataTypeInt64(String name) {
         this.name = name;
         this.isUnsigned = name.startsWith("U");

@@ -28,8 +28,7 @@ import java.util.Map;
 public class Block {
 
     public static Block readFrom(BinaryDeserializer deserializer,
-                                 PhysicalInfo.ServerInfo serverInfo)
-            throws IOException, SQLException {
+                                 PhysicalInfo.ServerInfo serverInfo) throws IOException, SQLException {
         BlockSettings info = BlockSettings.readFrom(deserializer);
 
         int columns = (int) deserializer.readVarInt();
