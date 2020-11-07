@@ -16,6 +16,7 @@ package com.github.housepower.jdbc.data;
 
 import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
 import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
+import com.github.housepower.jdbc.data.type.complex.DataTypeTuple;
 
 import java.sql.Types;
 
@@ -25,6 +26,8 @@ public class ColumnFactory {
             return new ColumnArray(name, (DataTypeArray) type, values);
         } else if (type.nullable()) {
             return new ColumnNullable(name, (DataTypeNullable) type, values);
+        } else if (type.sqlTypeId() == Types.STRUCT) {
+            return new ColumnTuple(name, (DataTypeTuple) type, values);
         }
         return new Column(name, type, values);
     }

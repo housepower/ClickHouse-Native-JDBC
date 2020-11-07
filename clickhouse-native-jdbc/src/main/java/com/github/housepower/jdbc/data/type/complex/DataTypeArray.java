@@ -48,10 +48,6 @@ public class DataTypeArray implements IDataType {
         return elemDataType;
     }
 
-    public IDataType getOffsetIDataType() {
-        return offsetIDataType;
-    }
-
     private final IDataType elemDataType;
     private final IDataType offsetIDataType;
 
@@ -114,41 +110,20 @@ public class DataTypeArray implements IDataType {
         return new ClickHouseArray(arrayData.toArray());
     }
 
-    public void serializeBinary(Object data,
-                                BinarySerializer dataBinarySerializer,
-                                List<List<Integer>> offsets,
-                                int level) throws SQLException, IOException {
-        int dataOffset = ((Object[]) ((Array) data).getArray()).length;
-        if (offsets.size() < level) {
-            List<Integer> offset = new ArrayList<>();
-            offset.add(dataOffset);
-            offsets.add(offset);
-        } else {
-            int lastIdx = offsets.get(level - 1).size() - 1;
-            int lastOffset = offsets.get(level - 1).get(lastIdx);
-            offsets.get(level - 1).add(lastOffset + dataOffset);
-        }
-
-        for (Object v : ((Object[]) ((Array) data).getArray())) {
-            if (elemDataType.sqlTypeId() == Types.ARRAY) {
-                ((DataTypeArray) (elemDataType)).serializeBinary(v, dataBinarySerializer, offsets, level + 1);
-            } else {
-                elemDataType.serializeBinary(v, dataBinarySerializer);
-            }
-        }
-    }
-
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-
-        throw new SQLException("DataTypeArray serializeBinary not supported");
+        Object []arr = (Object[]) data;
+        for (Object f : arr) {
+            getElemDataType().serializeBinary(f, serializer);
+        }
     }
 
 
     @Override
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer)
             throws SQLException, IOException {
-        throw new SQLException("DataTypeArray serializeBinaryBulk not supported");
+        offsetIDataType.serializeBinary(data.length, serializer);
+        getElemDataType().serializeBinaryBulk(data, serializer);
     }
 
     @Override

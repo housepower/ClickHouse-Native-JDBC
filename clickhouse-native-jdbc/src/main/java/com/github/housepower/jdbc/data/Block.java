@@ -112,7 +112,7 @@ public class Block {
         serializer.writeVarInt(rows);
 
         for (IColumn column : columns) {
-            column.serializeBinaryBulk(serializer);
+            column.flushToSerializer(serializer, true);
         }
     }
 

@@ -21,10 +21,19 @@ import java.sql.SQLException;
 
 public interface IColumn {
     void write(Object object) throws IOException, SQLException;
-    void serializeBinaryBulk(BinarySerializer serializer) throws SQLException, IOException;
+
+    /**
+     *
+     * @param serializer is serializer wrapper of tcp socket
+     * @param now means we should flush all the buffer to serializer now
+     * @throws SQLException
+     * @throws IOException
+     */
+    void flushToSerializer(BinarySerializer serializer, boolean now) throws SQLException, IOException;
     void clear();
 
     void setColumnWriterBuffer(ColumnWriterBuffer buffer);
+    ColumnWriterBuffer getColumnWriterBuffer();
 
     String name();
     IDataType type();
@@ -75,5 +84,10 @@ abstract class AbstractColumn implements IColumn {
     @Override
     public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
         this.buffer = buffer;
+    }
+
+    @Override
+    public ColumnWriterBuffer getColumnWriterBuffer() {
+        return buffer;
     }
 }

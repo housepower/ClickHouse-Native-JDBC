@@ -14,33 +14,32 @@
 
 package com.github.housepower.jdbc.data;
 
-import com.github.housepower.jdbc.ClickHouseArray;
-import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
+import com.github.housepower.jdbc.ClickHouseStruct;
+import com.github.housepower.jdbc.data.type.complex.DataTypeTuple;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
-public class ColumnArray extends AbstractColumn {
-    private List<Long> offsets;
+public class ColumnTuple extends AbstractColumn {
     // data represents netsted column in ColumnArray
-    private IColumn data;
+    private IColumn []datas;
 
-    public ColumnArray(String name, DataTypeArray type, Object []values) {
+    public ColumnTuple(String name, DataTypeTuple type, Object []values) {
         super(name, type, values);
-        offsets = new ArrayList<>();
-        data = ColumnFactory.createColumn(null, type.getElemDataType(), null);
+
+        IDataType []types = type.getNestedTypes();
+        datas = new IColumn[types.length];
+        for (int i = 0; i < types.length; i++) {
+            datas[i] = ColumnFactory.createColumn(null, types[i], null);
+        }
     }
 
     @Override
     public void write(Object object) throws IOException, SQLException {
-        Object []arr = (Object[]) ((ClickHouseArray) object).getArray();
-
-        offsets.add(offsets.isEmpty() ? arr.length : offsets.get((offsets.size() - 1)) + arr.length);
-        for (Object field : arr) {
-            data.write(field);
+        ClickHouseStruct tuple = (ClickHouseStruct) object;
+        for (int i = 0; i < datas.length; i ++) {
+            datas[i].write(tuple.getAttributes()[i]);
         }
     }
 
@@ -51,29 +50,27 @@ public class ColumnArray extends AbstractColumn {
             serializer.writeStringBinary(type.name());
         }
 
-        flushOffsets(serializer);
-        data.flushToSerializer(serializer, false);
+        // we should to flush all the nested data to serializer
+        // because they are using separate buffers.
+        for (int i = 0; i < datas.length; i ++) {
+            datas[i].flushToSerializer(serializer, true);
+        }
 
         if (now) {
             buffer.writeTo(serializer);
         }
     }
 
-    public void flushOffsets(BinarySerializer serializer) throws SQLException, IOException {
-        for (long offsetList : offsets) {
-            serializer.writeLong(offsetList);
+    @Override
+    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
+        super.setColumnWriterBuffer(buffer);
+
+        for (int i = 0; i < datas.length; i ++) {
+            datas[i].setColumnWriterBuffer(new ColumnWriterBuffer());
         }
     }
 
     @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        super.setColumnWriterBuffer(buffer);
-        data.setColumnWriterBuffer(buffer);
-    }
-
-    @Override
     public void clear() {
-        offsets.clear();
-        data.clear();
     }
 }
