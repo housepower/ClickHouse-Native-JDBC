@@ -17,7 +17,7 @@ Supported by [JetBrains Open Source License](https://www.jetbrains.com/?from=Cli
 
 ### Requirements
 
-- Java 8 or Java 11. 
+- Java 8/11. 
 
 **Notes:** We only do test with Java LTS versions.
 
@@ -101,9 +101,10 @@ Batch insert query, see also [BatchQuery](./examples/src/main/java/examples/Batc
 
 ### Requirements
 
-- Java 8, Scala 2.11, Spark 2.4.x. 
+- Java 8, Scala 2.11/2.12, Spark 2.4.x
+- Or Java 8/11, Scala 2.12, Spark 3.0.x
 
-**Notes:** Spark 2.3.x should also work fine. Actually we do test on both Java 8 and Java 11, 
+**Notes:** Spark 2.3.x(EOL) should also work fine. Actually we do test on both Java 8 and Java 11, 
 but Spark official support on Java 11 since 3.0.0.
 
 ### Using
