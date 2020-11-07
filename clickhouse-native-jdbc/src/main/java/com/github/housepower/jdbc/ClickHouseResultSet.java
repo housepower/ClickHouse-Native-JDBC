@@ -15,7 +15,7 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.data.Column;
+import com.github.housepower.jdbc.data.IColumn;
 import com.github.housepower.jdbc.misc.CheckedIterator;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.DataResponse;
@@ -215,7 +215,7 @@ public class ClickHouseResultSet extends SQLResultSet {
     public Object getObject(int index) throws SQLException {
         Validate.isTrue(row >= 0 && row < current.rows(),
             "No row information was obtained.You must call ResultSet.next() before that.");
-        Column column = (lastFetchBlock = current).getByPosition((lastFetchColumn = index - 1));
+        IColumn column = (lastFetchBlock = current).getByPosition((lastFetchColumn = index - 1));
         return column.values((lastFetchRow = row));
     }
 

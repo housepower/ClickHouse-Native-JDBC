@@ -14,21 +14,29 @@
 
 package com.github.housepower.jdbc.data;
 
+import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Column extends AbstractColumn {
+public class ColumnNullable extends AbstractColumn {
+    private List<Byte> nullableSign;
+    // data represents netsted column in ColumnArray
+    private IColumn data;
 
-    public Column(String name, IDataType type, Object[] values) {
+    public ColumnNullable(String name, DataTypeNullable type, Object []values) {
         super(name, type, values);
-        this.values = values;
+        nullableSign = new ArrayList<>();
+        data = ColumnFactory.createColumn(null, type.getNestedDataType(), null);
     }
 
     @Override
     public void write(Object object) throws IOException, SQLException {
-        type().serializeBinary(object, buffer.column);
+        nullableSign.add(object == null ? (byte) 1 : 0);
+        data.write(object == null ? type.defaultValue() : object);
     }
 
     @Override
@@ -38,8 +46,17 @@ public class Column extends AbstractColumn {
             serializer.writeStringBinary(type.name());
         }
 
-        if (now) {
-            buffer.writeTo(serializer);
+        for (byte sign : nullableSign) {
+            serializer.writeByte(sign);
         }
+
+        if (now)
+            buffer.writeTo(serializer);
+    }
+
+    @Override
+    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
+        super.setColumnWriterBuffer(buffer);
+        data.setColumnWriterBuffer(buffer);
     }
 }

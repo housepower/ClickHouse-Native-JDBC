@@ -20,7 +20,6 @@ import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Iterator;
 
 // It would be nice if we introduce a Generic Type, `IDataType<T>`, then we can avoid using `Object` and type cast.
 // Unfortunately Java not support unsigned number, UInt8(u_byte) must be represented by Int16(short), which will
@@ -46,12 +45,6 @@ public interface IDataType {
     Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;
 
     void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException;
-
-    default void serializeBinaryBulk(Iterator<Object> data, BinarySerializer serializer) throws SQLException, IOException {
-        while (data.hasNext()) {
-            serializeBinary(data.next(), serializer);
-        }
-    }
 
     default void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
         for (Object d : data) {

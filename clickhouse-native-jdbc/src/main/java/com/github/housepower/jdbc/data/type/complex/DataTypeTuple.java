@@ -53,6 +53,10 @@ public class DataTypeTuple implements IDataType {
         }
     }
 
+    public IDataType[] getNestedTypes() {
+        return nestedTypes;
+    }
+
     private final String name;
     private final IDataType[] nestedTypes;
 

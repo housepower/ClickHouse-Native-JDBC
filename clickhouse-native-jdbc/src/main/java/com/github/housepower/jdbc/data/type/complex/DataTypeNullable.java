@@ -24,7 +24,6 @@ import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 
 public class DataTypeNullable implements IDataType {
 
@@ -41,6 +40,11 @@ public class DataTypeNullable implements IDataType {
 
     private final String name;
     private final IDataType nestedDataType;
+
+    public IDataType getNestedDataType() {
+        return nestedDataType;
+    }
+
     private final IDataType nullMapDataType;
 
     public DataTypeNullable(String name, IDataType nestedDataType, IDataType nullMapIDataType) throws SQLException {
@@ -98,17 +102,16 @@ public class DataTypeNullable implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        throw new SQLException("DataTypeNullable serializeBinary not supported");
-    }
-
-    public void serializeBinary(Object data, BinarySerializer serializer, List<Byte> offset) throws SQLException, IOException {
-        offset.add(data == null ? (byte) 1 : 0);
-        this.nestedDataType.serializeBinary(data == null ? nestedDataType.defaultValue() : data, serializer);
+        this.nestedDataType.serializeBinary(data, serializer);
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        throw new SQLException("DataTypeNullable deserializeBinary not supported");
+        boolean isNull = (deserializer.readByte() == (byte) 1);
+        if (isNull) {
+            return null;
+        }
+        return this.nestedDataType.deserializeBinary(deserializer);
     }
 
     @Override

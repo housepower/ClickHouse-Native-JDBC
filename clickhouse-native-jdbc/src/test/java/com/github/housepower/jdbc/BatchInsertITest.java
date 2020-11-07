@@ -155,16 +155,18 @@ public class BatchInsertITest extends AbstractITest {
 
             statement.execute("DROP TABLE IF EXISTS test");
             statement.execute(
-                    "CREATE TABLE test(name Array(String), value Array(Float64), value2 Array(Array(Int32)))ENGINE=Log");
+                    "CREATE TABLE test(value0 Array(String), value1 Array(Float64), value2 Array(Array(Int32)), array3 Array(Nullable(Float64)))ENGINE=Log");
             PreparedStatement preparedStatement = connection
-                    .prepareStatement("INSERT INTO test VALUES(?, ?, [[1,2,3]])");
+                    .prepareStatement("INSERT INTO test VALUES(?, ?, [[1,2,3]], ?)");
 
-            List<String> array = Arrays.asList("aa", "bb", "cc");
-            List<Double> array2 = Arrays.asList(1.2, 2.2, 3.2);
+            List<String> array0 = Arrays.asList("aa", "bb", "cc");
+            List<Double> array1 = Arrays.asList(1.2, 2.2, 3.2);
+            List<Double> array3 = Arrays.asList(1.2, 2.2, 3.2, null);
 
             for (int i = 0; i < Byte.MAX_VALUE; i++) {
-                preparedStatement.setArray(1, connection.createArrayOf("text", array.toArray()));
-                preparedStatement.setArray(2, connection.createArrayOf("text", array2.toArray()));
+                preparedStatement.setArray(1, connection.createArrayOf("text", array0.toArray()));
+                preparedStatement.setArray(2, connection.createArrayOf("text", array1.toArray()));
+                preparedStatement.setArray(3, connection.createArrayOf("text", array3.toArray()));
 
                 preparedStatement.addBatch();
             }
@@ -173,8 +175,9 @@ public class BatchInsertITest extends AbstractITest {
 
             ResultSet rs = statement.executeQuery("select * from test");
             while (rs.next()) {
-                assertArrayEquals(array.toArray(), (Object[]) rs.getArray(1).getArray());
-                assertArrayEquals(array2.toArray(), (Object[]) rs.getArray(2).getArray());
+                assertArrayEquals(array0.toArray(), (Object[]) rs.getArray(1).getArray());
+                assertArrayEquals(array1.toArray(), (Object[]) rs.getArray(2).getArray());
+                assertArrayEquals(array3.toArray(), (Object[]) rs.getArray(4).getArray());
             }
         });
 
