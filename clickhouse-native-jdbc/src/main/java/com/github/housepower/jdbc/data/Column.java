@@ -32,7 +32,7 @@ public class Column extends AbstractColumn {
     }
 
     @Override
-    public void flushToSerializer(BinarySerializer serializer, boolean now) throws SQLException, IOException {
+    public void flushToSerializer(BinarySerializer serializer, boolean now) throws IOException, SQLException {
         if (isExported()) {
             serializer.writeStringBinary(name);
             serializer.writeStringBinary(type.name());

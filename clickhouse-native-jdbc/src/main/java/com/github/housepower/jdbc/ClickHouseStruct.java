@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ClickHouseStruct extends SQLStruct {
+public class ClickHouseStruct implements SQLStruct {
     private static final Pattern REGEX = Pattern.compile("_(\\d+)");
 
     private final String type;

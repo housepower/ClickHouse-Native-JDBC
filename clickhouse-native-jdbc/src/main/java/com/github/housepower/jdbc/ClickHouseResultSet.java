@@ -25,15 +25,9 @@ import com.github.housepower.jdbc.wrapper.SQLResultSet;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Date;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.Calendar;
+import java.sql.*;
 
-public class ClickHouseResultSet extends SQLResultSet {
+public class ClickHouseResultSet implements SQLResultSet {
     private int row = -1;
     private Block current = new Block();
 
@@ -159,11 +153,6 @@ public class ClickHouseResultSet extends SQLResultSet {
     }
 
     @Override
-    public Date getDate(int index, Calendar cal) throws SQLException {
-        return super.getDate(index, cal);
-    }
-
-    @Override
     public long getLong(int index) throws SQLException {
         Object data = getObject(index);
         if (data == null) {
@@ -214,7 +203,7 @@ public class ClickHouseResultSet extends SQLResultSet {
     @Override
     public Object getObject(int index) throws SQLException {
         Validate.isTrue(row >= 0 && row < current.rows(),
-            "No row information was obtained.You must call ResultSet.next() before that.");
+                "No row information was obtained.You must call ResultSet.next() before that.");
         IColumn column = (lastFetchBlock = current).getByPosition((lastFetchColumn = index - 1));
         return column.values((lastFetchRow = row));
     }

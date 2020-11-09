@@ -20,74 +20,30 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public interface IColumn {
+
+    boolean isExported();
+
+    String name();
+
+    IDataType type();
+
+    Object values(int idx);
+
     void write(Object object) throws IOException, SQLException;
 
     /**
+     * Flush to socket output stream
      *
      * @param serializer is serializer wrapper of tcp socket
-     * @param now means we should flush all the buffer to serializer now
-     * @throws SQLException
-     * @throws IOException
+     * @param now        means we should flush all the buffer to serializer now
      */
-    void flushToSerializer(BinarySerializer serializer, boolean now) throws SQLException, IOException;
+    void flushToSerializer(BinarySerializer serializer, boolean now) throws IOException, SQLException;
+
     void clear();
 
     void setColumnWriterBuffer(ColumnWriterBuffer buffer);
+
     ColumnWriterBuffer getColumnWriterBuffer();
-
-    String name();
-    IDataType type();
-    boolean isExported();
-    Object values(int idx);
 }
 
 
-abstract class AbstractColumn implements IColumn {
-    protected final String name;
-    protected final IDataType type;
-
-    // Note: values is only for reading
-    protected Object []values;
-    protected ColumnWriterBuffer buffer;
-
-    public AbstractColumn(String name, IDataType type, Object []values) {
-        this.name = name;
-        this.type = type;
-        this.values = values;
-    }
-
-    @Override
-    public boolean isExported() {
-        return name != null;
-    }
-
-    @Override
-    public String name() {
-        return name;
-    }
-
-    @Override
-    public IDataType type() {
-        return type;
-    }
-
-    @Override
-    public Object values(int idx) {
-        return values[idx];
-    }
-
-    @Override
-    public void clear() {
-        values = new Object[0];
-    }
-
-    @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        this.buffer = buffer;
-    }
-
-    @Override
-    public ColumnWriterBuffer getColumnWriterBuffer() {
-        return buffer;
-    }
-}
