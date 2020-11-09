@@ -4,6 +4,5 @@
         "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-    <!--we're only including the PG driver temporarily (hopefully) so we don't want to checkstyle it...-->
-    <!--<suppress checks="." files="[\\/]org[\\/]postgresql[\\/].*\.java$"/>-->
+    <suppress checks="." files="[\\/]jmh_generated[\\/].*\.java$"/>
 </suppressions>
