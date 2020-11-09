@@ -96,7 +96,7 @@ public class InsertComplexTypeITest extends AbstractITest {
             Statement statement = connection.createStatement();
 
             statement.executeQuery("DROP TABLE IF EXISTS test");
-            statement.executeQuery("CREATE TABLE test(test_datetime DateTime('UTC'), test_datetme2 DateTime('Asia/Shanghai') )ENGINE=Log");
+            statement.executeQuery("CREATE TABLE test(test_datetime DateTime('UTC'), test_datetime2 DateTime('Asia/Shanghai') )ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES('2000-01-01 08:01:01', '2000-01-01 08:01:01')");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
             assertTrue(rs.next());

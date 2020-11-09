@@ -24,11 +24,9 @@ public class ValuesWithParametersInputFormat implements InputFormat {
 
     private final SQLLexer lexer;
 
-    public ValuesWithParametersInputFormat(String query, int pos)
-        throws SQLException {
+    public ValuesWithParametersInputFormat(String query, int pos) throws SQLException {
         this.lexer = new SQLLexer(pos, query);
     }
-
 
     @Override
     public void fillBlock(Block block) throws SQLException {
