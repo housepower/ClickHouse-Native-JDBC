@@ -270,7 +270,6 @@
                         </execution>
                         <execution>
                             <id>attach-scaladocs</id>
-                            <phase>verify</phase>
                             <goals>
                                 <goal>doc-jar</goal>
                             </goals>
