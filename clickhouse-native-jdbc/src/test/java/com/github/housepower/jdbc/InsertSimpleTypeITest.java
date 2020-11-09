@@ -151,11 +151,11 @@ public class InsertSimpleTypeITest extends AbstractITest {
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
             assertTrue(rs.next());
             assertEquals(
-                    LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toEpochDay(),
-                    rs.getDate(1).getTime() / TimeUnit.DAYS.toMillis(1));
+                    LocalDate.of(2000, 1, 1).toEpochDay(),
+                    rs.getDate(1).toLocalDate().toEpochDay());
             assertEquals(
-                    LocalDate.of(2000, 1, 31).atStartOfDay(ZoneOffset.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDate().toEpochDay(),
-                    rs.getDate(2).getTime() / TimeUnit.DAYS.toMillis(1));
+                    LocalDate.of(2000, 1, 31).toEpochDay(),
+                    rs.getDate(2).toLocalDate().toEpochDay());
 
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
