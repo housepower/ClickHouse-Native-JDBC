@@ -58,6 +58,11 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement {
     }
 
     @Override
+    public void setBoolean(int index, boolean x) throws SQLException {
+        setObject(index, x ? (byte) 1 : (byte) 0);
+    }
+
+    @Override
     public void setByte(int index, byte x) throws SQLException {
         setObject(index, x);
     }
