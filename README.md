@@ -36,7 +36,7 @@ Supported by [JetBrains Open Source License](https://www.jetbrains.com/?from=Cli
 
 - Gradle
 ```groovy
-// (recommended) shaded version, available since 2.4.0
+// (recommended) shaded version, available since 2.3-stable
 compile "com.github.housepower:clickhouse-native-jdbc-shaded:${clickhouse_native_jdbc_version}"
 
 // normal version
@@ -46,7 +46,7 @@ compile "com.github.housepower:clickhouse-native-jdbc:${clickhouse_native_jdbc_v
 - Maven
 
 ```xml
-<!-- (recommended) shaded version, available since 2.4.0 -->
+<!-- (recommended) shaded version, available since 2.3-stable -->
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc-shaded</artifactId>
