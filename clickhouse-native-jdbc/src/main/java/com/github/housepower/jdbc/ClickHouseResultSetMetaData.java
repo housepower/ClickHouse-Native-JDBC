@@ -22,7 +22,7 @@ import com.github.housepower.jdbc.wrapper.SQLResultSetMetaData;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {
+public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
 
     private final Block header;
     private final String db;
@@ -127,6 +127,7 @@ public class ClickHouseResultSetMetaData extends SQLResultSetMetaData {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T unwrap(Class<T> iface) throws SQLException {
         if (isWrapperFor(iface)) {
             return (T) this;

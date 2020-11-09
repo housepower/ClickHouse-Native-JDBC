@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ColumnNullable extends AbstractColumn {
+
     private final List<Byte> nullableSign;
     // data represents nested column in ColumnArray
     private final IColumn data;
@@ -40,7 +41,7 @@ public class ColumnNullable extends AbstractColumn {
     }
 
     @Override
-    public void flushToSerializer(BinarySerializer serializer, boolean now) throws SQLException, IOException {
+    public void flushToSerializer(BinarySerializer serializer, boolean now) throws IOException, SQLException {
         if (isExported()) {
             serializer.writeStringBinary(name);
             serializer.writeStringBinary(type.name());

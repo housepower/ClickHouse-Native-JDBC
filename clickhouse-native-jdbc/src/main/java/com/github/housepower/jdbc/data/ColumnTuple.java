@@ -22,24 +22,25 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class ColumnTuple extends AbstractColumn {
-    // data represents netsted column in ColumnArray
-    private IColumn []datas;
 
-    public ColumnTuple(String name, DataTypeTuple type, Object []values) {
+    // data represents nested column in ColumnArray
+    private final IColumn[] columndataArray;
+
+    public ColumnTuple(String name, DataTypeTuple type, Object[] values) {
         super(name, type, values);
 
-        IDataType []types = type.getNestedTypes();
-        datas = new IColumn[types.length];
+        IDataType[] types = type.getNestedTypes();
+        columndataArray = new IColumn[types.length];
         for (int i = 0; i < types.length; i++) {
-            datas[i] = ColumnFactory.createColumn(null, types[i], null);
+            columndataArray[i] = ColumnFactory.createColumn(null, types[i], null);
         }
     }
 
     @Override
     public void write(Object object) throws IOException, SQLException {
         ClickHouseStruct tuple = (ClickHouseStruct) object;
-        for (int i = 0; i < datas.length; i ++) {
-            datas[i].write(tuple.getAttributes()[i]);
+        for (int i = 0; i < columndataArray.length; i++) {
+            columndataArray[i].write(tuple.getAttributes()[i]);
         }
     }
 
@@ -52,8 +53,8 @@ public class ColumnTuple extends AbstractColumn {
 
         // we should to flush all the nested data to serializer
         // because they are using separate buffers.
-        for (int i = 0; i < datas.length; i ++) {
-            datas[i].flushToSerializer(serializer, true);
+        for (IColumn data : columndataArray) {
+            data.flushToSerializer(serializer, true);
         }
 
         if (now) {
@@ -65,8 +66,8 @@ public class ColumnTuple extends AbstractColumn {
     public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
         super.setColumnWriterBuffer(buffer);
 
-        for (int i = 0; i < datas.length; i ++) {
-            datas[i].setColumnWriterBuffer(new ColumnWriterBuffer());
+        for (IColumn data : columndataArray) {
+            data.setColumnWriterBuffer(new ColumnWriterBuffer());
         }
     }
 

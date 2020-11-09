@@ -20,60 +20,60 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Map;
 
-public class SQLArray implements Array {
+public interface SQLArray extends Array {
 
     @Override
-    public String getBaseTypeName() throws SQLException {
+    default String getBaseTypeName() throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public int getBaseType() throws SQLException {
+    default int getBaseType() throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public Object getArray() throws SQLException {
+    default Object getArray() throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public Object getArray(Map<String, Class<?>> map) throws SQLException {
+    default Object getArray(Map<String, Class<?>> map) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public Object getArray(long index, int count) throws SQLException {
+    default Object getArray(long index, int count) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public Object getArray(long index, int count, Map<String, Class<?>> map) throws SQLException {
+    default Object getArray(long index, int count, Map<String, Class<?>> map) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public ResultSet getResultSet() throws SQLException {
+    default ResultSet getResultSet() throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public ResultSet getResultSet(Map<String, Class<?>> map) throws SQLException {
+    default ResultSet getResultSet(Map<String, Class<?>> map) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public ResultSet getResultSet(long index, int count) throws SQLException {
+    default ResultSet getResultSet(long index, int count) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public ResultSet getResultSet(long index, int count, Map<String, Class<?>> map) throws SQLException {
+    default ResultSet getResultSet(long index, int count, Map<String, Class<?>> map) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public void free() throws SQLException {
+    default void free() throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 }

@@ -18,6 +18,7 @@ import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -28,7 +29,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Matcher;
 
-public abstract class AbstractPreparedStatement extends ClickHouseStatement {
+public abstract class AbstractPreparedStatement extends ClickHouseStatement implements SQLPreparedStatement {
 
     private final String[] queryParts;
     private final DateTimeFormatter dateFmt;
@@ -45,6 +46,11 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement {
         ZoneId tz = DateTimeHelper.chooseTimeZone(physicalInfo.server());
         this.dateFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ROOT).withZone(tz);
         this.timestampFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ROOT).withZone(tz);
+    }
+
+    @Override
+    public ResultSetMetaData getMetaData() throws SQLException {
+        return getResultSet().getMetaData();
     }
 
     @Override

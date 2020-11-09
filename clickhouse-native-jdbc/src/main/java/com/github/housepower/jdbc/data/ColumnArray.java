@@ -24,11 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ColumnArray extends AbstractColumn {
-    private List<Long> offsets;
-    // data represents netsted column in ColumnArray
-    private IColumn data;
 
-    public ColumnArray(String name, DataTypeArray type, Object []values) {
+    private final List<Long> offsets;
+    // data represents nested column in ColumnArray
+    private final IColumn data;
+
+    public ColumnArray(String name, DataTypeArray type, Object[] values) {
         super(name, type, values);
         offsets = new ArrayList<>();
         data = ColumnFactory.createColumn(null, type.getElemDataType(), null);
@@ -36,7 +37,7 @@ public class ColumnArray extends AbstractColumn {
 
     @Override
     public void write(Object object) throws IOException, SQLException {
-        Object []arr = (Object[]) ((ClickHouseArray) object).getArray();
+        Object[] arr = (Object[]) ((ClickHouseArray) object).getArray();
 
         offsets.add(offsets.isEmpty() ? arr.length : offsets.get((offsets.size() - 1)) + arr.length);
         for (Object field : arr) {
@@ -59,7 +60,7 @@ public class ColumnArray extends AbstractColumn {
         }
     }
 
-    public void flushOffsets(BinarySerializer serializer) throws SQLException, IOException {
+    public void flushOffsets(BinarySerializer serializer) throws IOException, SQLException {
         for (long offsetList : offsets) {
             serializer.writeLong(offsetList);
         }

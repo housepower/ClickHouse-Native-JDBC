@@ -26,8 +26,8 @@ public class ByteArrayWriter implements BuffedWriter {
     private final int blockSize;
     private ByteBuffer buffer;
 
-    //TODO pooling
-    private List<ByteBuffer> byteBufferList = new LinkedList<>();
+    // TODO pooling
+    private final List<ByteBuffer> byteBufferList = new LinkedList<>();
 
     public ByteArrayWriter(int blockSize) {
         this.blockSize = blockSize;

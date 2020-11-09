@@ -18,7 +18,7 @@ import com.github.housepower.jdbc.wrapper.SQLArray;
 
 import java.sql.SQLException;
 
-public class ClickHouseArray extends SQLArray {
+public class ClickHouseArray implements SQLArray {
     private final Object[] data;
 
     public ClickHouseArray(Object[] data) {
@@ -35,7 +35,7 @@ public class ClickHouseArray extends SQLArray {
     }
 
     public ClickHouseArray slice(int offset, int length) {
-        Object []result = new Object[length];
+        Object[] result = new Object[length];
         if (length >= 0) System.arraycopy(data, offset, result, 0, length);
         return new ClickHouseArray(result);
     }
