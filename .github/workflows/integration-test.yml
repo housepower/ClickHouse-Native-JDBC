@@ -2,9 +2,9 @@ name: integration-test
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, 2.4 ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, 2.4 ]
 
 jobs:
   build:
