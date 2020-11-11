@@ -26,7 +26,7 @@ public class ClickhouseJdbcUrlParser {
 
     private static final Logger LOG = LogManager.getLogManager().getLogger(ClickhouseJdbcUrlParser.class.getName());
 
-    public static Map<SettingKey, Object> parseJDBCProperties(Properties properties) {
+    public static Map<SettingKey, Object> parseProperties(Properties properties) {
         Map<SettingKey, Object> settings = new HashMap<>();
 
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -41,7 +41,7 @@ public class ClickhouseJdbcUrlParser {
         return settings;
     }
 
-    public static Map<SettingKey, Object> parseJDBCUrl(String jdbcUrl) throws SQLException {
+    public static Map<SettingKey, Object> parseJdbcUrl(String jdbcUrl) throws SQLException {
         try {
             URI uri = new URI(jdbcUrl.substring(5));
 

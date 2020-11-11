@@ -36,8 +36,8 @@ public class ClickHouseConfig {
         if (url.isEmpty())
             this.settings = new HashMap<>();
         else
-            this.settings = ClickhouseJdbcUrlParser.parseJDBCUrl(url);
-        this.settings.putAll(ClickhouseJdbcUrlParser.parseJDBCProperties(properties));
+            this.settings = ClickhouseJdbcUrlParser.parseJdbcUrl(url);
+        this.settings.putAll(ClickhouseJdbcUrlParser.parseProperties(properties));
 
         int _port = (int) settings.getOrDefault(SettingKey.port, 9000);
         this.port = _port == -1 ? 9000 : _port;

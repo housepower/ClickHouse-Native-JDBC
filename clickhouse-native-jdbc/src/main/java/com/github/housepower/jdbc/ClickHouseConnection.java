@@ -93,7 +93,7 @@ public class ClickHouseConnection implements SQLConnection {
     @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
         // TODO merge into configure
-        ClickhouseJdbcUrlParser.parseJDBCProperties(properties);
+        ClickhouseJdbcUrlParser.parseProperties(properties);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class ClickHouseConnection implements SQLConnection {
         // TODO merge into configure
         Properties properties = new Properties();
         properties.put(name, value);
-        ClickhouseJdbcUrlParser.parseJDBCProperties(properties);
+        ClickhouseJdbcUrlParser.parseProperties(properties);
     }
 
     @Override
