@@ -25,6 +25,8 @@
 
     <artifactId>examples</artifactId>
 
+    <url>https://github.com/housepower/ClickHouse-Native-JDBC</url>
+
     <dependencies>
         <dependency>
             <groupId>com.github.housepower</groupId>

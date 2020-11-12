@@ -25,6 +25,8 @@
 
     <artifactId>clickhouse-native-jdbc</artifactId>
 
+    <url>https://github.com/housepower/ClickHouse-Native-JDBC</url>
+
     <properties>
         <build.testJarPhase>prepare-package</build.testJarPhase>
     </properties>

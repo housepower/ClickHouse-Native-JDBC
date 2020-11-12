@@ -25,6 +25,8 @@
 
     <artifactId>clickhouse-integration-spark_${scala.compat.version}</artifactId>
 
+    <url>https://github.com/housepower/ClickHouse-Native-JDBC</url>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.spark</groupId>
