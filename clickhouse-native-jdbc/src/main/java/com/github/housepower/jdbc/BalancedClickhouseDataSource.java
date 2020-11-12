@@ -63,19 +63,19 @@ public final class BalancedClickhouseDataSource implements DataSource {
      * @throws IllegalArgumentException if param have not correct format,
      *                                  or error happens when checking host availability
      */
-    public BalancedClickhouseDataSource(final String url) {
+    public BalancedClickhouseDataSource(String url) {
         this(splitUrl(url), getFromUrl(url));
     }
 
     /**
      * create Datasource for clickhouse JDBC connections
      *
-     * @param url    address for connection to the database
-     * @param config database properties
+     * @param url        address for connection to the database
+     * @param properties database properties
      * @see #BalancedClickhouseDataSource(String)
      */
-    public BalancedClickhouseDataSource(final String url, Properties config) {
-        this(splitUrl(url), new ClickHouseConfig("", config));
+    public BalancedClickhouseDataSource(String url, Properties properties) {
+        this(splitUrl(url), new ClickHouseConfig("", properties));
     }
 
     /**

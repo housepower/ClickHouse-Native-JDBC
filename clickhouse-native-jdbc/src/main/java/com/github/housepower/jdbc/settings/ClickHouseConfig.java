@@ -15,21 +15,25 @@
 package com.github.housepower.jdbc.settings;
 
 import com.github.housepower.jdbc.ClickhouseJdbcUrlParser;
+import com.github.housepower.jdbc.annotation.Immutable;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
+@Immutable
 public class ClickHouseConfig {
 
-    private final int port;
+    private static List<String> CONNECT_PARAMS = Arrays.asList(
+            "address", "port", "database", "username", "password", "so_timeout_ms", "connect_timeout_ms");
+
     private final String address;
-    private final String database;
-    private final String username;
-    private final String password;
+    private final int port;
+    private String database;
+    private String username;
+    private String password;
     private int soTimeoutMs;
     private final int connectTimeoutMs;
+
     private final Map<SettingKey, Object> settings;
 
     public ClickHouseConfig(String url, Properties properties) throws SQLException {
@@ -109,5 +113,10 @@ public class ClickHouseConfig {
 
     public void setQueryTimeout(int timeout) {
         this.soTimeoutMs = timeout;
+    }
+
+    public void withCredentials(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 }
