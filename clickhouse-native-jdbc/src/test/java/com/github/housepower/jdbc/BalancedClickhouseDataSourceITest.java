@@ -14,7 +14,8 @@
 
 package com.github.housepower.jdbc;
 
-import org.junit.jupiter.api.BeforeAll;
+import com.github.housepower.jdbc.settings.ClickHouseConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
@@ -29,8 +30,8 @@ public class BalancedClickhouseDataSourceITest {
     private static BalancedClickhouseDataSource dataSource;
     private static BalancedClickhouseDataSource doubleDataSource;
 
-    @BeforeAll
-    public static void setUp() {
+    @BeforeEach
+    public void reset() {
         dataSource = new BalancedClickhouseDataSource("jdbc:clickhouse://127.0.0.1:9000");
         doubleDataSource = new BalancedClickhouseDataSource("jdbc:clickhouse://127.0.0.1:9000,127.0.0.1:9000");
     }
@@ -157,36 +158,35 @@ public class BalancedClickhouseDataSourceITest {
         assertEquals(42, rs.getInt("i"));
     }
 
-//    @Test
-//    public void testConstructWithProperties() {
-//        final Properties properties = new Properties();
-//        properties.setMaxThreads(3);
-//        properties.setSocketTimeout(67890);
-//        properties.setPassword("888888");
-//        //without connection parameters
-//        BalancedClickhouseDataSource dataSource = new BalancedClickhouseDataSource(
-//                "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click", properties);
-//        ClickHouseConfig dataSourceProperties = dataSource.getCfg();
-//        assertEquals(dataSourceProperties.getMaxThreads().intValue(), 3);
-//        assertEquals(dataSourceProperties.getSocketTimeout(), 67890);
-//        assertEquals(dataSourceProperties.getPassword(), "888888");
-//        assertEquals(dataSourceProperties.getDatabase(), "click");
-//        assertEquals(2, dataSource.getAllClickhouseUrls().size());
-//        assertEquals(dataSource.getAllClickhouseUrls().get(0), "jdbc:clickhouse://localhost:9000/click");
-//        assertEquals(dataSource.getAllClickhouseUrls().get(1), "jdbc:clickhouse://127.0.0.1:9000/click");
-//        // with connection parameters
-//        dataSource = new BalancedClickhouseDataSource(
-//                "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click?socket_timeout=12345&user=readonly", properties);
-//        dataSourceProperties = dataSource.getProperties();
-//        assertEquals(dataSourceProperties.getMaxThreads().intValue(), 3);
-//        assertEquals(dataSourceProperties.getSocketTimeout(), 12345);
-//        assertEquals(dataSourceProperties.getUser(), "readonly");
-//        assertEquals(dataSourceProperties.getPassword(), "888888");
-//        assertEquals(dataSourceProperties.getDatabase(), "click");
-//        assertEquals(2, dataSource.getAllClickhouseUrls().size());
-//        assertEquals(dataSource.getAllClickhouseUrls().get(0),
-//                "jdbc:clickhouse://localhost:9000/click?socket_timeout=12345&user=readonly");
-//        assertEquals(dataSource.getAllClickhouseUrls().get(1),
-//                "jdbc:clickhouse://127.0.0.1:9000/click?socket_timeout=12345&user=readonly");
-//    }
+    @Test
+    public void testConstructWithProperties() {
+        final Properties properties = new Properties();
+        properties.put("query_timeout", 6789);
+        properties.put("password", "888888");
+
+        // without connection parameters
+        BalancedClickhouseDataSource dataSource = new BalancedClickhouseDataSource(
+                "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click", properties);
+        ClickHouseConfig cfg = dataSource.getCfg();
+        assertEquals(6789000, cfg.queryTimeout());
+        assertEquals("888888", cfg.password());
+        assertEquals("click", cfg.database());
+        assertEquals(2, dataSource.getAllClickhouseUrls().size());
+        assertEquals(dataSource.getAllClickhouseUrls().get(0), "jdbc:clickhouse://localhost:9000/click");
+        assertEquals(dataSource.getAllClickhouseUrls().get(1), "jdbc:clickhouse://127.0.0.1:9000/click");
+
+        // with connection parameters
+        dataSource = new BalancedClickhouseDataSource(
+                "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click?query_timeout=12345&user=readonly", properties);
+        cfg = dataSource.getCfg();
+        assertEquals(6789000, cfg.queryTimeout());
+        assertEquals("readonly", cfg.user());
+        assertEquals("888888", cfg.password());
+        assertEquals("click", cfg.database());
+        assertEquals(2, dataSource.getAllClickhouseUrls().size());
+        assertEquals("jdbc:clickhouse://localhost:9000/click?query_timeout=12345&user=readonly",
+                dataSource.getAllClickhouseUrls().get(0));
+        assertEquals("jdbc:clickhouse://127.0.0.1:9000/click?query_timeout=12345&user=readonly",
+                dataSource.getAllClickhouseUrls().get(1));
+    }
 }

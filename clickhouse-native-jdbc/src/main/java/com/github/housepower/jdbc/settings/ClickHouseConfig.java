@@ -30,20 +30,20 @@ public class ClickHouseConfig {
     private final String host;
     private final int port;
     private final String database;
-    private final String username;
+    private final String user;
     private final String password;
-    private final int soTimeoutMs;
+    private final int queryTimeoutMs;
     private final int connectTimeoutMs;
     private final Map<SettingKey, Object> settings;
 
-    private ClickHouseConfig(int port, String host, String database, String username, String password,
-                             int soTimeoutMs, int connectTimeoutMs, Map<SettingKey, Object> settings) {
+    private ClickHouseConfig(int port, String host, String database, String user, String password,
+                             int queryTimeoutMs, int connectTimeoutMs, Map<SettingKey, Object> settings) {
         this.port = port;
         this.host = host;
         this.database = database;
-        this.username = username;
+        this.user = user;
         this.password = password;
-        this.soTimeoutMs = soTimeoutMs;
+        this.queryTimeoutMs = queryTimeoutMs;
         this.connectTimeoutMs = connectTimeoutMs;
         this.settings = settings;
     }
@@ -60,8 +60,8 @@ public class ClickHouseConfig {
         return this.database;
     }
 
-    public String username() {
-        return this.username;
+    public String user() {
+        return this.user;
     }
 
     public String password() {
@@ -69,7 +69,7 @@ public class ClickHouseConfig {
     }
 
     public int queryTimeout() {
-        return this.soTimeoutMs;
+        return this.queryTimeoutMs;
     }
 
     public int connectTimeout() {
@@ -87,16 +87,16 @@ public class ClickHouseConfig {
                 .build();
     }
 
-    public ClickHouseConfig withCredentials(String username, String password) {
+    public ClickHouseConfig withCredentials(String user, String password) {
         return Builder.builder(this)
-                .username(username)
+                .user(user)
                 .password(password)
                 .build();
     }
 
     public ClickHouseConfig withQueryTimeout(Duration timeout) {
         return Builder.builder(this)
-                .soTimeoutMs((int) timeout.toMillis())
+                .queryTimeoutMs((int) timeout.toMillis())
                 .build();
     }
 
@@ -129,9 +129,9 @@ public class ClickHouseConfig {
         private String host = "127.0.0.1";
         private int port = 9000;
         private String database = "default";
-        private String username = "default";
+        private String user = "default";
         private String password = "";
-        private int soTimeoutMs = 0;
+        private int queryTimeoutMs = 0;
         private int connectTimeoutMs = 0;
         private Map<SettingKey, Object> settings = new HashMap<>();
 
@@ -147,9 +147,9 @@ public class ClickHouseConfig {
                     .host(cfg.host())
                     .port(cfg.port())
                     .database(cfg.database())
-                    .username(cfg.username())
+                    .user(cfg.user())
                     .password(cfg.password())
-                    .soTimeoutMs(cfg.queryTimeout())
+                    .queryTimeoutMs(cfg.queryTimeout())
                     .connectTimeoutMs(cfg.connectTimeout())
                     .settings(new HashMap<>(cfg.settings()));
         }
@@ -169,8 +169,8 @@ public class ClickHouseConfig {
             return this;
         }
 
-        public Builder username(String username) {
-            this.username = username;
+        public Builder user(String user) {
+            this.user = user;
             return this;
         }
 
@@ -179,8 +179,8 @@ public class ClickHouseConfig {
             return this;
         }
 
-        public Builder soTimeoutMs(int soTimeoutMs) {
-            this.soTimeoutMs = soTimeoutMs;
+        public Builder queryTimeoutMs(int queryTimeoutMs) {
+            this.queryTimeoutMs = queryTimeoutMs;
             return this;
         }
 
@@ -216,25 +216,25 @@ public class ClickHouseConfig {
             this.port = (int) this.settings.getOrDefault(SettingKey.port, 9000);
             this.host = (String) this.settings.getOrDefault(SettingKey.host, "127.0.0.1");
             this.password = (String) this.settings.getOrDefault(SettingKey.password, "");
-            this.username = (String) this.settings.getOrDefault(SettingKey.user, "default");
+            this.user = (String) this.settings.getOrDefault(SettingKey.user, "default");
             this.database = (String) this.settings.getOrDefault(SettingKey.database, "default");
-            this.soTimeoutMs = (int) this.settings.getOrDefault(SettingKey.query_timeout, 0) * 1000;
+            this.queryTimeoutMs = (int) this.settings.getOrDefault(SettingKey.query_timeout, 0) * 1000;
             this.connectTimeoutMs = (int) this.settings.getOrDefault(SettingKey.connect_timeout, 0) * 1000;
 
             revisit();
             purgeSettings();
 
             return new ClickHouseConfig(
-                    port, host, database, username, password, soTimeoutMs, connectTimeoutMs, settings);
+                    port, host, database, user, password, queryTimeoutMs, connectTimeoutMs, settings);
         }
 
         private void revisit() {
             if (this.port == -1) this.port = 9000;
             if (StrUtil.isBlank(this.host)) this.host = "127.0.0.1";
-            if (StrUtil.isBlank(this.username)) this.username = "default";
+            if (StrUtil.isBlank(this.user)) this.user = "default";
             if (StrUtil.isBlank(this.password)) this.password = "";
             if (StrUtil.isBlank(this.database)) this.database = "default";
-            if (this.soTimeoutMs < 0) this.soTimeoutMs = 0;
+            if (this.queryTimeoutMs < 0) this.queryTimeoutMs = 0;
             if (this.connectTimeoutMs < 0) this.connectTimeoutMs = 0;
         }
 
