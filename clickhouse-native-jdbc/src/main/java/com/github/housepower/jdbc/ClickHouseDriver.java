@@ -40,25 +40,30 @@ public class ClickHouseDriver implements Driver {
 
     @Override
     public ClickHouseConnection connect(String url, Properties properties) throws SQLException {
-        ClickHouseConfig config = new ClickHouseConfig(url, properties);
-        return connect(url, config);
+        ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
+                .withJdbcUrl(url)
+                .withProperties(properties)
+                .build();
+        return connect(url, cfg);
     }
 
-    ClickHouseConnection connect(String url, ClickHouseConfig config) throws SQLException {
+    ClickHouseConnection connect(String url, ClickHouseConfig cfg) throws SQLException {
         if (!this.acceptsURL(url)) {
             return null;
         }
-        return ClickHouseConnection.createClickHouseConnection(config);
+        return ClickHouseConnection.createClickHouseConnection(cfg.withJdbcUrl(url));
     }
 
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties properties) throws SQLException {
-        ClickHouseConfig configure = new ClickHouseConfig(url, properties);
-
+        ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
+                .withJdbcUrl(url)
+                .withProperties(properties)
+                .build();
         int index = 0;
-        DriverPropertyInfo[] driverPropertiesInfo = new DriverPropertyInfo[configure.settings().size()];
+        DriverPropertyInfo[] driverPropertiesInfo = new DriverPropertyInfo[cfg.settings().size()];
 
-        for (Map.Entry<SettingKey, Object> entry : configure.settings().entrySet()) {
+        for (Map.Entry<SettingKey, Object> entry : cfg.settings().entrySet()) {
             String value = String.valueOf(entry.getValue());
 
             DriverPropertyInfo property = new DriverPropertyInfo(entry.getKey().name(), value);

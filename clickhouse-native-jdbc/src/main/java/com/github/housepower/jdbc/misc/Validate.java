@@ -14,15 +14,29 @@
 
 package com.github.housepower.jdbc.misc;
 
+import com.github.housepower.jdbc.exception.InvalidValueException;
+
+import javax.annotation.Nullable;
 import java.sql.SQLException;
 
 public class Validate {
+
+    // We need to migrate from #isTrue to #ensure to avoid throwing checked exception internal.
+    public static void ensure(boolean expr) {
+        ensure(expr, "");
+    }
+
+    public static void ensure(boolean expr, String message) {
+        if (!expr) {
+            throw new InvalidValueException(message);
+        }
+    }
 
     public static void isTrue(boolean expression) throws SQLException {
         isTrue(expression, null);
     }
 
-    public static void isTrue(boolean expression, String message) throws SQLException {
+    public static void isTrue(boolean expression, @Nullable String message) throws SQLException {
         if (!expression) {
             throw new SQLException(message);
         }

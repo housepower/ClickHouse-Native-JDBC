@@ -14,19 +14,22 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.exception.InvalidValueException;
+import com.github.housepower.jdbc.misc.StrUtil;
+import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
+import com.github.housepower.jdbc.settings.SettingKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p> Database for clickhouse jdbc connections.
@@ -37,7 +40,7 @@ import java.util.regex.Pattern;
  */
 public final class BalancedClickhouseDataSource implements DataSource {
 
-    private static final Logger LOG = LogManager.getLogManager().getLogger(BalancedClickhouseDataSource.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(BalancedClickhouseDataSource.class);
     private static final Pattern URL_TEMPLATE = Pattern.compile(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX +
             "//([a-zA-Z0-9_:,.-]+)" +
             "(/[a-zA-Z0-9_]+" +
@@ -51,7 +54,7 @@ public final class BalancedClickhouseDataSource implements DataSource {
     private final List<String> allUrls;
     private volatile List<String> enabledUrls;
 
-    private final ClickHouseConfig config;
+    private final ClickHouseConfig cfg;
     private final ClickHouseDriver driver = new ClickHouseDriver();
 
     /**
@@ -64,7 +67,7 @@ public final class BalancedClickhouseDataSource implements DataSource {
      *                                  or error happens when checking host availability
      */
     public BalancedClickhouseDataSource(String url) {
-        this(splitUrl(url), getFromUrl(url));
+        this(splitUrl(url), new Properties());
     }
 
     /**
@@ -75,42 +78,33 @@ public final class BalancedClickhouseDataSource implements DataSource {
      * @see #BalancedClickhouseDataSource(String)
      */
     public BalancedClickhouseDataSource(String url, Properties properties) {
-        this(splitUrl(url), new ClickHouseConfig("", properties));
+        this(splitUrl(url), properties);
     }
 
     /**
      * create Datasource for clickhouse JDBC connections
      *
-     * @param url    address for connection to the database
-     * @param config database config
+     * @param url      address for connection to the database
+     * @param settings clickhouse settings
      * @see #BalancedClickhouseDataSource(String)
      */
-    public BalancedClickhouseDataSource(final String url, ClickHouseConfig config) {
-        this(splitUrl(url), config.merge(getFromUrlWithoutDefault(url)));
+    public BalancedClickhouseDataSource(final String url, Map<SettingKey, Object> settings) {
+        this(splitUrl(url), settings);
     }
 
-    private BalancedClickhouseDataSource(final List<String> urls) {
-        this(urls, new ClickHouseConfig());
+    private BalancedClickhouseDataSource(final List<String> urls, Properties properties) {
+        this(urls, ClickhouseJdbcUrlParser.parseProperties(properties));
     }
 
-    private BalancedClickhouseDataSource(final List<String> urls, Properties info) {
-        this(urls, new ClickHouseConfig(info));
-    }
+    private BalancedClickhouseDataSource(final List<String> urls, Map<SettingKey, Object> settings) {
+        Validate.ensure(!urls.isEmpty(), "Incorrect ClickHouse jdbc url list. It must be not empty");
 
-    private BalancedClickhouseDataSource(final List<String> urls, ClickHouseConfig config) {
-        if (urls.isEmpty()) {
-            throw new IllegalArgumentException("Incorrect ClickHouse jdbc url list. It must be not empty");
-        }
-
-        try {
-            ClickHouseConfig localProperties = ClickhouseJdbcUrlParser.parse(urls.get(0), config.asProperties());
-            localProperties.setHost(null);
-            localProperties.setPort(-1);
-
-            this.config = localProperties;
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
+        this.cfg = ClickHouseConfig.Builder.builder()
+                .withJdbcUrl(urls.get(0))
+                .withSettings(settings)
+                .host("undefined")
+                .port(0)
+                .build();
 
         List<String> allUrls = new ArrayList<>(urls.size());
         for (final String url : urls) {
@@ -118,16 +112,14 @@ public final class BalancedClickhouseDataSource implements DataSource {
                 if (driver.acceptsURL(url)) {
                     allUrls.add(url);
                 } else {
-                    LOG.log(Level.WARNING, "that url is has not correct format: {}", url);
+                    LOG.warn("that url is has not correct format: {}", url);
                 }
             } catch (Exception e) {
-                throw new IllegalArgumentException("error while checking url: " + url, e);
+                throw new InvalidValueException("error while checking url: " + url, e);
             }
         }
 
-        if (allUrls.isEmpty()) {
-            throw new IllegalArgumentException("there are no correct urls");
-        }
+        Validate.ensure(!allUrls.isEmpty(), "there are no correct urls");
 
         this.allUrls = Collections.unmodifiableList(allUrls);
         this.enabledUrls = this.allUrls;
@@ -135,24 +127,17 @@ public final class BalancedClickhouseDataSource implements DataSource {
 
     static List<String> splitUrl(final String url) {
         Matcher m = URL_TEMPLATE.matcher(url);
-        if (!m.matches()) {
-            throw new IllegalArgumentException("Incorrect url");
-        }
-        String database = m.group(2);
-        if (database == null) {
-            database = "";
-        }
+        Validate.ensure(m.matches(), "Incorrect url");
+        final String database = StrUtil.getOrDefault(m.group(2), "");
         String[] hosts = m.group(1).split(",");
-        final List<String> result = new ArrayList<>(hosts.length);
-        for (final String host : hosts) {
-            result.add(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX + "//" + host + database);
-        }
-        return result;
+        return Arrays.stream(hosts)
+                .map(host -> ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX + "//" + host + database)
+                .collect(Collectors.toList());
     }
 
     private boolean ping(final String url) {
         try {
-            driver.connect(url, config).createStatement().execute("SELECT 1");
+            driver.connect(url, cfg).createStatement().execute("SELECT 1");
             return true;
         } catch (Exception e) {
             return false;
@@ -168,12 +153,12 @@ public final class BalancedClickhouseDataSource implements DataSource {
         List<String> enabledUrls = new ArrayList<>(allUrls.size());
 
         for (String url : allUrls) {
-            LOG.log(Level.FINE, "Pinging disabled url: {}", url);
+            LOG.debug("Pinging disabled url: {}", url);
             if (ping(url)) {
-                LOG.log(Level.FINE, "Url is alive now: {}", url);
+                LOG.debug("Url is alive now: {}", url);
                 enabledUrls.add(url);
             } else {
-                LOG.log(Level.FINE, "Url is dead now: {}", url);
+                LOG.warn("Url is dead now: {}", url);
             }
         }
 
@@ -202,7 +187,7 @@ public final class BalancedClickhouseDataSource implements DataSource {
      */
     @Override
     public ClickHouseConnection getConnection() throws SQLException {
-        return driver.connect(getAnyUrl(), config);
+        return driver.connect(getAnyUrl(), cfg);
     }
 
     /**
@@ -210,7 +195,7 @@ public final class BalancedClickhouseDataSource implements DataSource {
      */
     @Override
     public ClickHouseConnection getConnection(String username, String password) throws SQLException {
-        return driver.connect(getAnyUrl(), config.withCredentials(username, password));
+        return driver.connect(getAnyUrl(), cfg.withCredentials(username, password));
     }
 
     /**
@@ -268,7 +253,7 @@ public final class BalancedClickhouseDataSource implements DataSource {
      * {@inheritDoc}
      */
     @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -294,24 +279,7 @@ public final class BalancedClickhouseDataSource implements DataSource {
         return allUrls.size() != enabledUrls.size();
     }
 
-    public ClickHouseConfig getConfig() {
-        return config;
-    }
-
-    private static ClickHouseConfig getFromUrl(String url) throws SQLException {
-        return new ClickHouseConfig(getFromUrlWithoutDefault(url));
-    }
-
-    private static Properties getFromUrlWithoutDefault(String url) throws SQLException {
-        if (url == null || url.isEmpty()) {
-            return new Properties();
-        }
-
-        int index = url.indexOf("?");
-        if (index == -1) {
-            return new Properties();
-        }
-
-        return ClickhouseJdbcUrlParser.extractQueryParameters(url.substring(index + 1));
+    public ClickHouseConfig getCfg() {
+        return cfg;
     }
 }

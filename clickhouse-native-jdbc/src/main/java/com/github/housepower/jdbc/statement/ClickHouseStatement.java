@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,7 +42,7 @@ public class ClickHouseStatement implements SQLStatement {
     protected final ClickHouseConnection connection;
     protected final PhysicalInfo physicalInfo;
 
-    private final ClickHouseConfig cfg;
+    private ClickHouseConfig cfg;
     private long maxRows;
     private String db;
     private String table = "unknown";
@@ -49,7 +50,7 @@ public class ClickHouseStatement implements SQLStatement {
     public ClickHouseStatement(ClickHouseConnection connection, PhysicalInfo physicalInfo) {
         this.connection = connection;
         this.physicalInfo = physicalInfo;
-        this.cfg = connection.getConfigure().copy();
+        this.cfg = connection.getCfg();
         this.db = cfg.database();
     }
 
@@ -140,7 +141,7 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public void setQueryTimeout(int seconds) {
-        cfg.setQueryTimeout(seconds * 1000);
+        this.cfg = cfg.withQueryTimeout(Duration.ofSeconds(seconds));
     }
 
     @Override
