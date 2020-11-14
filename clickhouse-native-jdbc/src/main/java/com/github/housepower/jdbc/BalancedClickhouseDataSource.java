@@ -62,7 +62,7 @@ public final class BalancedClickhouseDataSource implements DataSource {
      *
      * @param url address for connection to the database, must have the next format
      *            {@code jdbc:clickhouse://<first-host>:<port>,<second-host>:<port>/<database>?param1=value1&param2=value2 }
-     *            for example, {@code jdbc:clickhouse://localhost:8123,localhost:8123/database?compress=1&decompress=2 }
+     *            for example, {@code jdbc:clickhouse://localhost:9000,localhost:9000/database?compress=1&decompress=2 }
      * @throws IllegalArgumentException if param have not correct format,
      *                                  or error happens when checking host availability
      */
