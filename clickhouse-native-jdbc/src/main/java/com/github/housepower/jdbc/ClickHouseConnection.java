@@ -28,6 +28,7 @@ import com.github.housepower.jdbc.statement.ClickHousePreparedQueryStatement;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
 
+import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 import java.sql.*;
 import java.time.Duration;
@@ -132,6 +133,28 @@ public class ClickHouseConnection implements SQLConnection {
             statement.execute("SELECT 1");
             return true;
         }
+    }
+
+    // ClickHouse support only `database`, we treat it as JDBC `catalog`
+    @Override
+    public void setCatalog(String catalog) throws SQLException {
+        this.cfg.set(this.getCfg().withDatabase(catalog));
+    }
+
+    @Override
+    public String getCatalog() throws SQLException {
+        return this.getCfg().database();
+    }
+
+    @Override
+    public void setSchema(String schema) throws SQLException {
+        // do nothing
+    }
+
+    @Override
+    @Nullable
+    public String getSchema() throws SQLException {
+        return null;
     }
 
     public boolean ping(Duration timeout) throws SQLException {

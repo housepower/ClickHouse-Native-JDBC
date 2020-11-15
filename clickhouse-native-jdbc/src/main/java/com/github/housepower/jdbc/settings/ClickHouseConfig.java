@@ -87,6 +87,12 @@ public class ClickHouseConfig {
                 .build();
     }
 
+    public ClickHouseConfig withDatabase(String database) {
+        return Builder.builder(this)
+                .database(database)
+                .build();
+    }
+
     public ClickHouseConfig withCredentials(String user, String password) {
         return Builder.builder(this)
                 .user(user)
@@ -126,13 +132,13 @@ public class ClickHouseConfig {
     }
 
     public static final class Builder {
-        private String host = "127.0.0.1";
-        private int port = 9000;
-        private String database = "default";
-        private String user = "default";
-        private String password = "";
-        private int queryTimeoutMs = 0;
-        private int connectTimeoutMs = 0;
+        private String host;
+        private int port;
+        private String database;
+        private String user;
+        private String password;
+        private int connectTimeoutMs;
+        private int queryTimeoutMs;
         private Map<SettingKey, Object> settings = new HashMap<>();
 
         private Builder() {
@@ -149,43 +155,53 @@ public class ClickHouseConfig {
                     .database(cfg.database())
                     .user(cfg.user())
                     .password(cfg.password())
-                    .queryTimeoutMs(cfg.queryTimeout())
                     .connectTimeoutMs(cfg.connectTimeout())
-                    .settings(new HashMap<>(cfg.settings()));
+                    .queryTimeoutMs(cfg.queryTimeout())
+                    .withSettings(cfg.settings());
+        }
+
+        public Builder withSetting(SettingKey key, Object value) {
+            this.settings.put(key, value);
+            return this;
+        }
+
+        public Builder withSettings(Map<SettingKey, Object> settings) {
+            CollectionUtil.mergeMapInPlaceKeepLast(this.settings, settings);
+            return this;
         }
 
         public Builder host(String host) {
-            this.host = host;
+            this.withSetting(SettingKey.host, host);
             return this;
         }
 
         public Builder port(int port) {
-            this.port = port;
+            this.withSetting(SettingKey.port, port);
             return this;
         }
 
         public Builder database(String database) {
-            this.database = database;
+            this.withSetting(SettingKey.database, database);
             return this;
         }
 
         public Builder user(String user) {
-            this.user = user;
+            this.withSetting(SettingKey.user, user);
             return this;
         }
 
         public Builder password(String password) {
-            this.password = password;
-            return this;
-        }
-
-        public Builder queryTimeoutMs(int queryTimeoutMs) {
-            this.queryTimeoutMs = queryTimeoutMs;
+            this.withSetting(SettingKey.password, password);
             return this;
         }
 
         public Builder connectTimeoutMs(int connectTimeoutMs) {
-            this.connectTimeoutMs = connectTimeoutMs;
+            this.withSetting(SettingKey.connect_timeout, connectTimeoutMs);
+            return this;
+        }
+
+        public Builder queryTimeoutMs(int queryTimeoutMs) {
+            this.withSetting(SettingKey.query_timeout, queryTimeoutMs);
             return this;
         }
 
@@ -199,11 +215,6 @@ public class ClickHouseConfig {
             return this;
         }
 
-        public Builder withSettings(Map<SettingKey, Object> settings) {
-            CollectionUtil.mergeMapInPlaceKeepLast(this.settings, settings);
-            return this;
-        }
-
         public Builder withJdbcUrl(String jdbcUrl) {
             return this.withSettings(ClickhouseJdbcUrlParser.parseJdbcUrl(jdbcUrl));
         }
@@ -213,13 +224,13 @@ public class ClickHouseConfig {
         }
 
         public ClickHouseConfig build() {
-            this.port = (int) this.settings.getOrDefault(SettingKey.port, 9000);
             this.host = (String) this.settings.getOrDefault(SettingKey.host, "127.0.0.1");
-            this.password = (String) this.settings.getOrDefault(SettingKey.password, "");
+            this.port = (int) this.settings.getOrDefault(SettingKey.port, 9000);
             this.user = (String) this.settings.getOrDefault(SettingKey.user, "default");
+            this.password = (String) this.settings.getOrDefault(SettingKey.password, "");
             this.database = (String) this.settings.getOrDefault(SettingKey.database, "default");
-            this.queryTimeoutMs = (int) this.settings.getOrDefault(SettingKey.query_timeout, 0) * 1000;
             this.connectTimeoutMs = (int) this.settings.getOrDefault(SettingKey.connect_timeout, 0) * 1000;
+            this.queryTimeoutMs = (int) this.settings.getOrDefault(SettingKey.query_timeout, 0) * 1000;
 
             revisit();
             purgeSettings();
