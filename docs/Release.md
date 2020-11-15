@@ -34,7 +34,7 @@ git checkout -b 2.5
 prepare release
 
 ```shell script
-mvn version:set -DnewVersion=2.5.0
+mvn versions:set -DnewVersion=2.5.0
 mvn versions:commit
 git commit -am '(release) prepare release v2.5.0-rc0'
 ```
@@ -42,7 +42,7 @@ git commit -am '(release) prepare release v2.5.0-rc0'
 prepare for next development iteration
 
 ```shell script
-mvn version:set -DnewVersion=2.6.0-SNAPSHOT
+mvn versions:set -DnewVersion=2.6.0-SNAPSHOT
 mvn versions:commit
 git commit -am '(release) prepare for next development iteration'
 ```
