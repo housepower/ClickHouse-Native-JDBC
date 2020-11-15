@@ -23,12 +23,27 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>clickhouse-integration-spark_${scala.compat.version}</artifactId>
+    <artifactId>clickhouse-integration-spark_${scala.binary.version}</artifactId>
 
     <dependencies>
+        <!--
+          This is a dummy dependency that is used to trigger the maven-shade plugin so that published
+          POMs are flattened and do not contain variables. Without this dependency, published POMs would
+          contain variables like ${scala.binary.version} that will be substituted according to the default
+          properties instead of the ones determined by the profiles that were active during publishing,
+          causing the Scala 2.12 build's POMs to have 2.11 dependencies due to the incorrect substitutions.
+
+          For more details, see SPARK-3812 and MNG-2971.
+        -->
+        <dependency>
+            <groupId>org.spark-project.spark</groupId>
+            <artifactId>unused</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.compat.version}</artifactId>
+            <artifactId>spark-sql_${scala.binary.version}</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -63,6 +78,26 @@
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createSourcesJar>true</createSourcesJar>
+                            <shadeTestJar>true</shadeTestJar>
+                            <shadeSourcesContent>true</shadeSourcesContent>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <dependencyReducedPomLocation>${project.build.directory}/pom.xml
+                            </dependencyReducedPomLocation>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
