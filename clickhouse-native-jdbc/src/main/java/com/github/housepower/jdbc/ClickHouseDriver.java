@@ -14,15 +14,84 @@
 
 package com.github.housepower.jdbc;
 
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import com.github.housepower.jdbc.settings.ClickHouseConfig;
+import com.github.housepower.jdbc.settings.ClickHouseDefines;
+import com.github.housepower.jdbc.settings.SettingKey;
 
-public class ClickHouseDriver extends NonRegisterDriver {
+import java.sql.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Logger;
+
+public class ClickHouseDriver implements Driver {
+
     static {
         try {
             DriverManager.registerDriver(new ClickHouseDriver());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean acceptsURL(String url) throws SQLException {
+        return url.startsWith(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX);
+    }
+
+    @Override
+    public ClickHouseConnection connect(String url, Properties properties) throws SQLException {
+        ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
+                .withJdbcUrl(url)
+                .withProperties(properties)
+                .build();
+        return connect(url, cfg);
+    }
+
+    ClickHouseConnection connect(String url, ClickHouseConfig cfg) throws SQLException {
+        if (!this.acceptsURL(url)) {
+            return null;
+        }
+        return ClickHouseConnection.createClickHouseConnection(cfg.withJdbcUrl(url));
+    }
+
+    @Override
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties properties) throws SQLException {
+        ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
+                .withJdbcUrl(url)
+                .withProperties(properties)
+                .build();
+        int index = 0;
+        DriverPropertyInfo[] driverPropertiesInfo = new DriverPropertyInfo[cfg.settings().size()];
+
+        for (Map.Entry<SettingKey, Object> entry : cfg.settings().entrySet()) {
+            String value = String.valueOf(entry.getValue());
+
+            DriverPropertyInfo property = new DriverPropertyInfo(entry.getKey().name(), value);
+            property.description = entry.getKey().describe();
+
+            driverPropertiesInfo[index++] = property;
+        }
+
+        return driverPropertiesInfo;
+    }
+
+    @Override
+    public int getMajorVersion() {
+        return ClickHouseDefines.MAJOR_VERSION;
+    }
+
+    @Override
+    public int getMinorVersion() {
+        return ClickHouseDefines.MINOR_VERSION;
+    }
+
+    @Override
+    public boolean jdbcCompliant() {
+        return false;
+    }
+
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 }

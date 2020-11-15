@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.*;
 import java.util.Enumeration;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,7 +37,7 @@ public class ConnectionParamITest {
     }
 
     @Test
-    public void successfullyMaxRowsToRead() throws Exception {
+    public void successfullyMaxRowsToRead() {
         assertThrows(SQLException.class, () -> {
             Connection connection = DriverManager
                     .getConnection("jdbc:clickhouse://127.0.0.1?max_rows_to_read=1&connect_timeout=10");
@@ -67,9 +66,9 @@ public class ConnectionParamITest {
     }
 
     @Test
-    public void successfullyUrlParser() throws Exception {
+    public void successfullyUrlParser() {
         String url = "jdbc:clickhouse://127.0.0.1/system?min_insert_block_size_rows=1000&connect_timeout=50";
-        ClickHouseConfig config = new ClickHouseConfig(url, new Properties());
+        ClickHouseConfig config = ClickHouseConfig.Builder.builder().withJdbcUrl(url).build();
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
 
@@ -77,10 +76,10 @@ public class ConnectionParamITest {
     }
 
     @Test
-    public void successfullyHostNameOnly() throws Exception {
+    public void successfullyHostNameOnly() {
         String url = "jdbc:clickhouse://my_clickhouse_sever_host_name/system?min_insert_block_size_rows=1000&connect_timeout=50";
-        ClickHouseConfig config = new ClickHouseConfig(url, new Properties());
-        assertEquals("my_clickhouse_sever_host_name", config.address());
+        ClickHouseConfig config = ClickHouseConfig.Builder.builder().withJdbcUrl(url).build();
+        assertEquals("my_clickhouse_sever_host_name", config.host());
         assertEquals(9000, config.port());
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
@@ -88,10 +87,10 @@ public class ConnectionParamITest {
     }
 
     @Test
-    public void successfullyHostNameWithDefaultPort() throws Exception {
+    public void successfullyHostNameWithDefaultPort() {
         String url = "jdbc:clickhouse://my_clickhouse_sever_host_name:9000/system?min_insert_block_size_rows=1000&connect_timeout=50";
-        ClickHouseConfig config = new ClickHouseConfig(url, new Properties());
-        assertEquals("my_clickhouse_sever_host_name", config.address());
+        ClickHouseConfig config = ClickHouseConfig.Builder.builder().withJdbcUrl(url).build();
+        assertEquals("my_clickhouse_sever_host_name", config.host());
         assertEquals(9000, config.port());
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
@@ -99,10 +98,10 @@ public class ConnectionParamITest {
     }
 
     @Test
-    public void successfullyHostNameWithCustomPort() throws Exception {
+    public void successfullyHostNameWithCustomPort() {
         String url = "jdbc:clickhouse://my_clickhouse_sever_host_name:1940/system?min_insert_block_size_rows=1000&connect_timeout=50";
-        ClickHouseConfig config = new ClickHouseConfig(url, new Properties());
-        assertEquals("my_clickhouse_sever_host_name", config.address());
+        ClickHouseConfig config = ClickHouseConfig.Builder.builder().withJdbcUrl(url).build();
+        assertEquals("my_clickhouse_sever_host_name", config.host());
         assertEquals(1940, config.port());
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));

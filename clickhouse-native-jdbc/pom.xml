@@ -25,14 +25,25 @@
 
     <artifactId>clickhouse-native-jdbc</artifactId>
 
+    <url>https://github.com/housepower/ClickHouse-Native-JDBC</url>
+
     <properties>
         <build.testJarPhase>prepare-package</build.testJarPhase>
     </properties>
 
     <dependencies>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>

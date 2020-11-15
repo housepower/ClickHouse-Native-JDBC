@@ -143,7 +143,7 @@ public class PhysicalConnection {
 
     public static PhysicalConnection openPhysicalConnection(ClickHouseConfig configure) throws SQLException {
         try {
-            SocketAddress endpoint = new InetSocketAddress(configure.address(), configure.port());
+            SocketAddress endpoint = new InetSocketAddress(configure.host(), configure.port());
 
             Socket socket = new Socket();
             socket.setTcpNoDelay(true);

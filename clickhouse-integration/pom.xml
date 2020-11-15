@@ -24,8 +24,9 @@
     </parent>
 
     <artifactId>clickhouse-integration</artifactId>
-
     <packaging>pom</packaging>
+
+    <url>https://github.com/housepower/ClickHouse-Native-JDBC</url>
 
     <modules>
         <module>clickhouse-integration-spark</module>

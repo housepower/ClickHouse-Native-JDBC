@@ -25,7 +25,14 @@
 
     <artifactId>clickhouse-native-jdbc-shaded</artifactId>
 
+    <url>https://github.com/housepower/ClickHouse-Native-JDBC</url>
+
     <dependencies>
+        <!-- explicit declare slf4j-api because we need to transitive depend on it -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.github.housepower</groupId>
             <artifactId>clickhouse-native-jdbc</artifactId>
@@ -46,23 +53,24 @@
                         <configuration>
                             <createSourcesJar>true</createSourcesJar>
                             <shadeSourcesContent>true</shadeSourcesContent>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
                             <dependencyReducedPomLocation>${project.build.directory}/pom.xml
                             </dependencyReducedPomLocation>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.slf4j:*</exclude>
+                                </excludes>
+                            </artifactSet>
                             <relocations>
                                 <relocation>
                                     <pattern>net.jpountz</pattern>
                                     <shadedPattern>com.github.housepower.repackaged.net.jpountz</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.joda.time</pattern>
-                                    <shadedPattern>com.github.housepower.repackaged.org.joda.time</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
-                                        <exclude>META-INF/maven/**</exclude>
                                         <exclude>LICENSE</exclude>
                                     </excludes>
                                 </filter>

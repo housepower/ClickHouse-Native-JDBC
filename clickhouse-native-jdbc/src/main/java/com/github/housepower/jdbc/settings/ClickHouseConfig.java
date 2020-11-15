@@ -14,75 +14,54 @@
 
 package com.github.housepower.jdbc.settings;
 
-import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.jdbc.ClickhouseJdbcUrlParser;
+import com.github.housepower.jdbc.misc.CollectionUtil;
+import com.github.housepower.jdbc.misc.StrUtil;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.SQLException;
+import javax.annotation.concurrent.Immutable;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+@Immutable
 public class ClickHouseConfig {
 
-    public static final Pattern DB_PATH_PATTERN = Pattern.compile("/([a-zA-Z0-9_]+)");
-    public static final Pattern HOST_PORT_PATH_PATTERN = Pattern.compile("//(?<host>[^/:\\s]+)(:(?<port>\\d+))?");
-
+    private final String host;
     private final int port;
-    private final String address;
     private final String database;
-    private final String username;
+    private final String user;
     private final String password;
-    private int soTimeout;
-    private final int connectTimeout;
+    private final int queryTimeoutMs;
+    private final int connectTimeoutMs;
     private final Map<SettingKey, Object> settings;
 
-    private ClickHouseConfig(int port, String address, String database, String username, String password,
-                             int soTimeout, int connectTimeout, Map<SettingKey, Object> settings) {
+    private ClickHouseConfig(int port, String host, String database, String user, String password,
+                             int queryTimeoutMs, int connectTimeoutMs, Map<SettingKey, Object> settings) {
         this.port = port;
-        this.address = address;
+        this.host = host;
         this.database = database;
-        this.username = username;
+        this.user = user;
         this.password = password;
-        this.soTimeout = soTimeout;
-        this.connectTimeout = connectTimeout;
+        this.queryTimeoutMs = queryTimeoutMs;
+        this.connectTimeoutMs = connectTimeoutMs;
         this.settings = settings;
-    }
-
-    public ClickHouseConfig(String url, Properties properties) throws SQLException {
-        this.settings = parseJDBCUrl(url);
-        this.settings.putAll(parseJDBCProperties(properties));
-
-        Object obj;
-        this.port = (obj = settings.remove(SettingKey.port)) == null ? 9000 : ((int) obj) == -1 ? 9000 : (int) obj;
-        this.address = (obj = settings.remove(SettingKey.address)) == null ? "127.0.0.1" : String.valueOf(obj);
-        this.password = (obj = settings.remove(SettingKey.password)) == null ? "" : String.valueOf(obj);
-        this.username = (obj = settings.remove(SettingKey.user)) == null ? "default" : String.valueOf(obj);
-        this.database = (obj = settings.remove(SettingKey.database)) == null ? "default" : String.valueOf(obj);
-
-        // Java use time unit mills @
-        // https://docs.oracle.com/javase/7/docs/api/java/net/Socket.html#connect(java.net.SocketAddress,%20int)
-        this.soTimeout = (obj = settings.remove(SettingKey.query_timeout)) == null ? 0 : (int) obj * 1000;
-        this.connectTimeout = (obj = settings.remove(SettingKey.connect_timeout)) == null ? 0 : (int) obj * 1000;
     }
 
     public int port() {
         return this.port;
     }
 
-    public String address() {
-        return this.address;
+    public String host() {
+        return this.host;
     }
 
     public String database() {
         return this.database;
     }
 
-    public String username() {
-        return this.username;
+    public String user() {
+        return this.user;
     }
 
     public String password() {
@@ -90,120 +69,183 @@ public class ClickHouseConfig {
     }
 
     public int queryTimeout() {
-        return this.soTimeout;
+        return this.queryTimeoutMs;
     }
 
     public int connectTimeout() {
-        return this.connectTimeout;
+        return this.connectTimeoutMs;
     }
 
     public Map<SettingKey, Object> settings() {
         return settings;
     }
 
-    public Map<SettingKey, Object> parseJDBCProperties(Properties properties) {
-        Map<SettingKey, Object> settings = new HashMap<>();
-
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            for (SettingKey settingKey : SettingKey.values()) {
-                String name = String.valueOf(entry.getKey());
-                if (settingKey.name().equalsIgnoreCase(name)) {
-                    settings.put(settingKey, settingKey.type().deserializeURL(String.valueOf(entry.getValue())));
-                }
-            }
-        }
-
-        return settings;
+    public ClickHouseConfig withHostPort(String host, int port) {
+        return Builder.builder(this)
+                .host(host)
+                .port(port)
+                .build();
     }
 
-    private Map<SettingKey, Object> parseJDBCUrl(String jdbcUrl) throws SQLException {
-        try {
-            URI uri = new URI(jdbcUrl.substring(5));
-
-            String host = parseHost(jdbcUrl);
-            Integer port = parsePort(jdbcUrl);
-            String database = parseDatabase(jdbcUrl);
-            Map<SettingKey, Object> settings = new HashMap<>();
-            settings.put(SettingKey.address, host);
-            settings.put(SettingKey.port, port);
-            settings.put(SettingKey.database, database);
-            settings.putAll(extractQueryParameters(uri.getQuery()));
-
-            return settings;
-        } catch (URISyntaxException ex) {
-            throw new SQLException(ex.getMessage(), ex);
-        }
+    public ClickHouseConfig withCredentials(String user, String password) {
+        return Builder.builder(this)
+                .user(user)
+                .password(password)
+                .build();
     }
 
-    private String parseDatabase(String jdbcUrl) throws URISyntaxException {
-        URI uri = new URI(jdbcUrl.substring(5));
-        String database = uri.getPath();
-        if (database != null && !database.isEmpty()) {
-            Matcher m = DB_PATH_PATTERN.matcher(database);
-            if (m.matches()) {
-                database = m.group(1);
-            } else {
-                throw new URISyntaxException("wrong database name path: '" + database + "'", jdbcUrl);
-            }
-        }
-        if (database != null && database.isEmpty()) {
-            database = "default";
-        }
-        return database;
+    public ClickHouseConfig withQueryTimeout(Duration timeout) {
+        return Builder.builder(this)
+                .queryTimeoutMs((int) timeout.toMillis())
+                .build();
     }
 
-    private String parseHost(String jdbcUrl) throws URISyntaxException {
-        String uriStr = jdbcUrl.substring(5);
-        URI uri = new URI(uriStr);
-        String host = uri.getHost();
-        if (host == null || host.isEmpty()) {
-            Matcher m = HOST_PORT_PATH_PATTERN.matcher(uriStr);
-            if (m.find()) {
-                host = m.group("host");
-            } else {
-                throw new URISyntaxException("No valid host was found", jdbcUrl);
-            }
+    public ClickHouseConfig withSettings(Map<SettingKey, Object> settings) {
+        return Builder.builder(this)
+                .withSettings(settings)
+                .build();
+    }
+
+    public ClickHouseConfig withJdbcUrl(String url) {
+        return Builder.builder(this)
+                .withJdbcUrl(url)
+                .build();
+    }
+
+    public ClickHouseConfig withProperties(Properties properties) {
+        return Builder.builder(this)
+                .withProperties(properties)
+                .build();
+    }
+
+    public ClickHouseConfig with(String url, Properties properties) {
+        return Builder.builder(this)
+                .withJdbcUrl(url)
+                .withProperties(properties)
+                .build();
+    }
+
+    public static final class Builder {
+        private String host = "127.0.0.1";
+        private int port = 9000;
+        private String database = "default";
+        private String user = "default";
+        private String password = "";
+        private int queryTimeoutMs = 0;
+        private int connectTimeoutMs = 0;
+        private Map<SettingKey, Object> settings = new HashMap<>();
+
+        private Builder() {
         }
-        return host;
-    }
 
-    private int parsePort(String jdbcUrl) throws URISyntaxException {
-        String uriStr = jdbcUrl.substring(5);
-        URI uri = new URI(uriStr);
-        int port = uri.getPort();
-        if (port <= -1) {
-            Matcher m = HOST_PORT_PATH_PATTERN.matcher(uriStr);
-            if (m.find() && m.group("port") != null) {
-                port = Integer.parseInt(m.group("port"));
-            }
+        public static Builder builder() {
+            return new Builder();
         }
-        return port;
-    }
 
-    private Map<SettingKey, Object> extractQueryParameters(String queryParameters) throws SQLException {
-        Map<SettingKey, Object> parameters = new HashMap<>();
-        StringTokenizer tokenizer = new StringTokenizer(queryParameters == null ? "" : queryParameters, "&");
-
-        while (tokenizer.hasMoreTokens()) {
-            String[] queryParameter = tokenizer.nextToken().split("=", 2);
-            Validate.isTrue(queryParameter.length == 2,
-                    "ClickHouse JDBC URL Parameter '" + queryParameters + "' Error, Expected '='.");
-
-            for (SettingKey settingKey : SettingKey.values()) {
-                if (settingKey.name().equalsIgnoreCase(queryParameter[0])) {
-                    parameters.put(settingKey, settingKey.type().deserializeURL(queryParameter[1]));
-                }
-            }
+        public static Builder builder(ClickHouseConfig cfg) {
+            return new Builder()
+                    .host(cfg.host())
+                    .port(cfg.port())
+                    .database(cfg.database())
+                    .user(cfg.user())
+                    .password(cfg.password())
+                    .queryTimeoutMs(cfg.queryTimeout())
+                    .connectTimeoutMs(cfg.connectTimeout())
+                    .settings(new HashMap<>(cfg.settings()));
         }
-        return parameters;
-    }
 
-    public void setQueryTimeout(int timeout) {
-        this.soTimeout = timeout;
-    }
+        public Builder host(String host) {
+            this.host = host;
+            return this;
+        }
 
-    public ClickHouseConfig copy() {
-        return new ClickHouseConfig(port, address, database, username, password,
-                soTimeout, connectTimeout, new HashMap<>(this.settings));
+        public Builder port(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public Builder database(String database) {
+            this.database = database;
+            return this;
+        }
+
+        public Builder user(String user) {
+            this.user = user;
+            return this;
+        }
+
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder queryTimeoutMs(int queryTimeoutMs) {
+            this.queryTimeoutMs = queryTimeoutMs;
+            return this;
+        }
+
+        public Builder connectTimeoutMs(int connectTimeoutMs) {
+            this.connectTimeoutMs = connectTimeoutMs;
+            return this;
+        }
+
+        public Builder settings(Map<SettingKey, Object> settings) {
+            this.settings = settings;
+            return this;
+        }
+
+        public Builder clearSettings() {
+            this.settings = new HashMap<>();
+            return this;
+        }
+
+        public Builder withSettings(Map<SettingKey, Object> settings) {
+            CollectionUtil.mergeMapInPlaceKeepLast(this.settings, settings);
+            return this;
+        }
+
+        public Builder withJdbcUrl(String jdbcUrl) {
+            return this.withSettings(ClickhouseJdbcUrlParser.parseJdbcUrl(jdbcUrl));
+        }
+
+        public Builder withProperties(Properties properties) {
+            return this.withSettings(ClickhouseJdbcUrlParser.parseProperties(properties));
+        }
+
+        public ClickHouseConfig build() {
+            this.port = (int) this.settings.getOrDefault(SettingKey.port, 9000);
+            this.host = (String) this.settings.getOrDefault(SettingKey.host, "127.0.0.1");
+            this.password = (String) this.settings.getOrDefault(SettingKey.password, "");
+            this.user = (String) this.settings.getOrDefault(SettingKey.user, "default");
+            this.database = (String) this.settings.getOrDefault(SettingKey.database, "default");
+            this.queryTimeoutMs = (int) this.settings.getOrDefault(SettingKey.query_timeout, 0) * 1000;
+            this.connectTimeoutMs = (int) this.settings.getOrDefault(SettingKey.connect_timeout, 0) * 1000;
+
+            revisit();
+            purgeSettings();
+
+            return new ClickHouseConfig(
+                    port, host, database, user, password, queryTimeoutMs, connectTimeoutMs, settings);
+        }
+
+        private void revisit() {
+            if (this.port == -1) this.port = 9000;
+            if (StrUtil.isBlank(this.host)) this.host = "127.0.0.1";
+            if (StrUtil.isBlank(this.user)) this.user = "default";
+            if (StrUtil.isBlank(this.password)) this.password = "";
+            if (StrUtil.isBlank(this.database)) this.database = "default";
+            if (this.queryTimeoutMs < 0) this.queryTimeoutMs = 0;
+            if (this.connectTimeoutMs < 0) this.connectTimeoutMs = 0;
+        }
+
+        private void purgeSettings() {
+            this.settings.remove(SettingKey.port);
+            this.settings.remove(SettingKey.host);
+            this.settings.remove(SettingKey.password);
+            this.settings.remove(SettingKey.user);
+            this.settings.remove(SettingKey.database);
+            this.settings.remove(SettingKey.query_timeout);
+            this.settings.remove(SettingKey.connect_timeout);
+        }
     }
 }

@@ -143,7 +143,7 @@ public enum SettingKey {
     enable_conditional_computation(ISettingType.Int64, "Enable conditional computations"),
     port(ISettingType.Int32, ""),
     user(ISettingType.String, ""),
-    address(ISettingType.String, ""),
+    host(ISettingType.String, ""),
     database(ISettingType.String, ""),
     password(ISettingType.String, ""),
     query_timeout(ISettingType.Seconds, "");
