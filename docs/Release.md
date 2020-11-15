@@ -51,7 +51,7 @@ git commit -am '(release) prepare for next development iteration'
 
 ```shell script
 mvn clean deploy -DskipTests -Prelease
-mvn clean deploy -DskipTests -Prelease -Dscala.version=2.12.10 -Dscala.compat.version=2.12
+mvn clean deploy -DskipTests -Prelease -Pscala-2.12
 ```
 
 ## Publish Release
