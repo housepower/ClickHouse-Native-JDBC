@@ -29,22 +29,12 @@ It's only need for **feature release**, you should cut a branch from master.
 git checkout -b 2.5
 ```
 
-## Bump Version
-
-prepare release
+## Bump Release Version
 
 ```shell script
-mvn version:set -DnewVersion=2.5.0
+mvn versions:set -DnewVersion=2.5.0
 mvn versions:commit
 git commit -am '(release) prepare release v2.5.0-rc0'
-```
-
-prepare for next development iteration
-
-```shell script
-mvn version:set -DnewVersion=2.6.0-SNAPSHOT
-mvn versions:commit
-git commit -am '(release) prepare for next development iteration'
 ```
 
 ## Package and Deploy to Sonatype
@@ -61,3 +51,11 @@ Verify, Close and Release to Maven Central Repository at https://oss.sonatype.or
 ## Announce on GitHub
 
 https://github.com/housepower/ClickHouse-Native-JDBC/releases
+
+## Bump Development Version
+
+```shell script
+mvn versions:set -DnewVersion=2.6.0-SNAPSHOT
+mvn versions:commit
+git commit -am '(release) prepare for next development iteration'
+```
