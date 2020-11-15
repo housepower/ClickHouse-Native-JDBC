@@ -134,6 +134,10 @@ public class ClickHouseConnection implements SQLConnection {
         }
     }
 
+    public boolean ping(Duration timeout) throws SQLException {
+        return physicalInfo.get().connection().ping(((int) timeout.toMillis()), physicalInfo.get().server());
+    }
+
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(insertQuery, physicalInfo.get().client(), cfg.get().settings());

@@ -24,8 +24,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -136,9 +138,8 @@ public final class BalancedClickhouseDataSource implements DataSource {
     }
 
     private boolean ping(final String url) {
-        try {
-            driver.connect(url, cfg).createStatement().execute("SELECT 1");
-            return true;
+        try (ClickHouseConnection connection = driver.connect(url, cfg)) {
+            return connection.ping(Duration.ofSeconds(1));
         } catch (Exception e) {
             return false;
         }
