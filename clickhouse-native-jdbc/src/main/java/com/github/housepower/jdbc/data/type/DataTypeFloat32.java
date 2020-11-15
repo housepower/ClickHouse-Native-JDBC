@@ -64,7 +64,7 @@ public class DataTypeFloat32 implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeFloat((Float) data);
+        serializer.writeFloat(((Number) data).floatValue());
     }
 
     @Override
