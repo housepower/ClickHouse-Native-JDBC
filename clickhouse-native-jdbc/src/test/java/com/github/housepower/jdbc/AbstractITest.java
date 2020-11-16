@@ -14,18 +14,20 @@
 
 package com.github.housepower.jdbc;
 
+import javax.sql.DataSource;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.time.ZoneId;
 import java.util.Enumeration;
 
 public abstract class AbstractITest implements Serializable {
 
-    protected static ZoneId clientTz = ZoneId.systemDefault();
-    protected static ZoneId serverTz = ZoneId.of("UTC");
-
+    protected static final ZoneId CLIENT_TZ = ZoneId.systemDefault();
+    protected static final ZoneId SERVER_TZ = ZoneId.of("UTC");
+    protected static final String DRIVER_CLASS_NAME = "com.github.housepower.jdbc.ClickHouseDriver";
     protected static final int SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
 
     protected String getJdbcUrl() {
@@ -41,14 +43,18 @@ public abstract class AbstractITest implements Serializable {
         return sb.toString();
     }
 
-    // this method should be synchronized since we reset the registered drivers in DriverManager
-    synchronized protected void withNewConnection(WithConnection withConnection, Object... args) throws Exception {
+    // this method should be synchronized
+    synchronized protected void resetDriverManager() throws SQLException {
         // remove all registered jdbc drivers
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
             DriverManager.deregisterDriver(drivers.nextElement());
         }
         DriverManager.registerDriver(new ClickHouseDriver());
+    }
+
+    protected void withNewConnection(WithConnection withConnection, Object... args) throws Exception {
+        resetDriverManager();
 
         String connectionStr;
         if (args.length > 0) {
@@ -58,6 +64,12 @@ public abstract class AbstractITest implements Serializable {
             connectionStr = getJdbcUrl();
         }
         try (Connection connection = DriverManager.getConnection(connectionStr)) {
+            withConnection.apply(connection);
+        }
+    }
+
+    protected void withNewConnection(DataSource ds, WithConnection withConnection) throws Exception {
+        try (Connection connection = ds.getConnection()) {
             withConnection.apply(connection);
         }
     }

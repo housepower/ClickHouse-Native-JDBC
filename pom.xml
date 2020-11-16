@@ -109,6 +109,7 @@
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <spark.version>2.4.7</spark.version>
+        <examples.hikari.version>3.4.5</examples.hikari.version>
         <jupiter.version>5.7.0</jupiter.version>
 
         <ClickHousePort>9000</ClickHousePort>
@@ -235,6 +236,11 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${examples.hikari.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>

@@ -126,14 +126,14 @@ public class PreparedStatementITest extends AbstractITest {
         LocalDate date = LocalDate.of(2020, 11, 7);
         LocalDateTime serverDateTime = date.atTime(9, 43, 12);
 
-        LocalDateTime clientDateTime = DateTimeHelper.convertTimeZone(serverDateTime, serverTz, clientTz);
+        LocalDateTime clientDateTime = DateTimeHelper.convertTimeZone(serverDateTime, SERVER_TZ, CLIENT_TZ);
         String dateLiteral = date.format(dateFmt);
         String clientDateTimeLiteral = clientDateTime.format(dateTimeFmt);
         String serverDateTimeLiteral = serverDateTime.format(dateTimeFmt);
         assertEquals(18573, date.toEpochDay());
         assertEquals("2020-11-07", dateLiteral);
-        assertEquals(1604742192, clientDateTime.atZone(clientTz).toEpochSecond());
-        assertEquals(1604742192, serverDateTime.atZone(serverTz).toEpochSecond());
+        assertEquals(1604742192, clientDateTime.atZone(CLIENT_TZ).toEpochSecond());
+        assertEquals(1604742192, serverDateTime.atZone(SERVER_TZ).toEpochSecond());
         // if client_time_zone is Asia/Shanghai
         // assertEquals("2020-11-07 17:43:12", clientDateTimeLiteral);
         assertEquals("2020-11-07 09:43:12", serverDateTimeLiteral);
@@ -148,7 +148,7 @@ public class PreparedStatementITest extends AbstractITest {
             preparedStatement.setShort(3, (short) date.toEpochDay());
             preparedStatement.setTimestamp(4, Timestamp.valueOf(clientDateTime));
             preparedStatement.setString(5, serverDateTimeLiteral);
-            preparedStatement.setLong(6, serverDateTime.atZone(serverTz).toEpochSecond());
+            preparedStatement.setLong(6, serverDateTime.atZone(SERVER_TZ).toEpochSecond());
             ResultSet rs = preparedStatement.executeQuery();
             assertTrue(rs.next());
             assertEquals(date.toEpochDay(), rs.getDate(1).toLocalDate().toEpochDay());
@@ -172,7 +172,7 @@ public class PreparedStatementITest extends AbstractITest {
             preparedStatement.setShort(3, (short) date.toEpochDay());
             preparedStatement.setTimestamp(4, Timestamp.valueOf(serverDateTime));
             preparedStatement.setString(5, serverDateTimeLiteral);
-            preparedStatement.setLong(6, clientDateTime.atZone(clientTz).toEpochSecond());
+            preparedStatement.setLong(6, clientDateTime.atZone(CLIENT_TZ).toEpochSecond());
             ResultSet rs = preparedStatement.executeQuery();
             assertTrue(rs.next());
             assertEquals(date.toEpochDay(), rs.getDate(1).toLocalDate().toEpochDay());
