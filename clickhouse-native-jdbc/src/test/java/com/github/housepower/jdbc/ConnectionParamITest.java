@@ -20,20 +20,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.*;
-import java.util.Enumeration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ConnectionParamITest {
+public class ConnectionParamITest extends AbstractITest {
 
     @BeforeEach
     public void init() throws SQLException {
-        Enumeration<Driver> drivers = DriverManager.getDrivers();
-        while (drivers.hasMoreElements()) {
-            DriverManager.deregisterDriver(drivers.nextElement());
-        }
-        DriverManager.registerDriver(new ClickHouseDriver());
+        resetDriverManager();
     }
 
     @Test
