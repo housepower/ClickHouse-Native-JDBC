@@ -37,8 +37,8 @@ public class Block {
         IColumn[] cols = new IColumn[columns];
 
         for (int i = 0; i < columns; i++) {
-            String name = deserializer.readStringBinary();
-            String type = deserializer.readStringBinary();
+            String name = deserializer.readUTF8StringBinary();
+            String type = deserializer.readUTF8StringBinary();
 
             IDataType dataType = DataTypeFactory.get(type, serverInfo);
             Object[] arr = dataType.deserializeBinaryBulk(rows, deserializer);

@@ -56,7 +56,7 @@ public interface ISettingType {
 
         @Override
         public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
-            serializer.writeStringBinary(java.lang.String.valueOf(value));
+            serializer.writeUTF8StringBinary(java.lang.String.valueOf(value));
         }
     };
 
@@ -68,7 +68,7 @@ public interface ISettingType {
 
         @Override
         public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
-            serializer.writeStringBinary(java.lang.String.valueOf(value));
+            serializer.writeUTF8StringBinary(java.lang.String.valueOf(value));
         }
     };
 
@@ -104,7 +104,7 @@ public interface ISettingType {
 
         @Override
         public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
-            serializer.writeStringBinary(java.lang.String.valueOf(value));
+            serializer.writeUTF8StringBinary(java.lang.String.valueOf(value));
         }
     };
 

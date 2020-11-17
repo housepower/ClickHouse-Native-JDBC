@@ -52,17 +52,17 @@ public class QueryRequest extends RequestOrResponse {
 
     @Override
     public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
-        serializer.writeStringBinary(queryId);
+        serializer.writeUTF8StringBinary(queryId);
         clientInfo.writeTo(serializer);
 
         for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
-            serializer.writeStringBinary(entry.getKey().name());
+            serializer.writeUTF8StringBinary(entry.getKey().name());
             entry.getKey().type().serializeSetting(serializer, entry.getValue());
         }
-        serializer.writeStringBinary("");
+        serializer.writeUTF8StringBinary("");
         serializer.writeVarInt(stage);
         serializer.writeBoolean(compression);
-        serializer.writeStringBinary(queryString);
+        serializer.writeUTF8StringBinary(queryString);
         // empty data to server
         DataRequest.EMPTY.writeTo(serializer);
 
@@ -87,19 +87,19 @@ public class QueryRequest extends RequestOrResponse {
 
         public void writeTo(BinarySerializer serializer) throws IOException {
             serializer.writeVarInt(ClientInfo.INITIAL_QUERY);
-            serializer.writeStringBinary("");
-            serializer.writeStringBinary("");
-            serializer.writeStringBinary(initialAddress);
+            serializer.writeUTF8StringBinary("");
+            serializer.writeUTF8StringBinary("");
+            serializer.writeUTF8StringBinary(initialAddress);
 
             // for TCP kind
             serializer.writeVarInt(TCP_KINE);
-            serializer.writeStringBinary("");
-            serializer.writeStringBinary(clientHostname);
-            serializer.writeStringBinary(clientName);
+            serializer.writeUTF8StringBinary("");
+            serializer.writeUTF8StringBinary(clientHostname);
+            serializer.writeUTF8StringBinary(clientName);
             serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
             serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
             serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
-            serializer.writeStringBinary("");
+            serializer.writeUTF8StringBinary("");
         }
     }
 }

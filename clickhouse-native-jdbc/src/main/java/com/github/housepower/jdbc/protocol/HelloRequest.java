@@ -39,12 +39,12 @@ public class HelloRequest extends RequestOrResponse {
 
     @Override
     public void writeImpl(BinarySerializer serializer) throws IOException {
-        serializer.writeStringBinary(ClickHouseDefines.NAME + " " + clientName);
+        serializer.writeUTF8StringBinary(ClickHouseDefines.NAME + " " + clientName);
         serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
         serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
         serializer.writeVarInt(clientReversion);
-        serializer.writeStringBinary(defaultDatabase);
-        serializer.writeStringBinary(clientUsername);
-        serializer.writeStringBinary(clientPassword);
+        serializer.writeUTF8StringBinary(defaultDatabase);
+        serializer.writeUTF8StringBinary(clientUsername);
+        serializer.writeUTF8StringBinary(clientPassword);
     }
 }

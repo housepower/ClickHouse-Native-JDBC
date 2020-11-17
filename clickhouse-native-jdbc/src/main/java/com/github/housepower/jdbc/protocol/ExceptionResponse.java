@@ -34,9 +34,9 @@ public class ExceptionResponse extends RequestOrResponse {
 
     public static SQLException readExceptionFrom(BinaryDeserializer deserializer) throws IOException {
         int code = deserializer.readInt();
-        String name = deserializer.readStringBinary();
-        String message = deserializer.readStringBinary();
-        String stackTrace = deserializer.readStringBinary();
+        String name = deserializer.readUTF8StringBinary();
+        String message = deserializer.readUTF8StringBinary();
+        String stackTrace = deserializer.readUTF8StringBinary();
 
         if (deserializer.readBoolean()) {
             return new ClickHouseSQLException(

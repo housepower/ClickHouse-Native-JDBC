@@ -40,6 +40,6 @@ public class ExtremesResponse extends RequestOrResponse {
 
     public static ExtremesResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
         throws IOException, SQLException {
-        return new ExtremesResponse(deserializer.readStringBinary(), Block.readFrom(deserializer, info));
+        return new ExtremesResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
     }
 }
