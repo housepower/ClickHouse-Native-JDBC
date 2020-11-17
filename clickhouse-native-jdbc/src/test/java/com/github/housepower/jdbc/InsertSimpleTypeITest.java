@@ -288,7 +288,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
                 assertFalse(rs.next());
                 statement.executeQuery("DROP TABLE IF EXISTS test");
-            }, "characterEncoding", charset);
+            }, "charset", charset);
         }
     }
 }
