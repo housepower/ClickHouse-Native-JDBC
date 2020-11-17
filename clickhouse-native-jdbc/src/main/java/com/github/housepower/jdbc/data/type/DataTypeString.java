@@ -73,7 +73,7 @@ public class DataTypeString implements IDataType {
         if (data instanceof String) {
             byte []bs = ((String) data).getBytes(charset);
             serializer.writeBytesBinary(bs);
-        } else if (data instanceof StringView){
+        } else if (data instanceof StringView) {
             serializer.writeStringViewBinary((StringView) data, charset);
         } else {
             serializer.writeBytesBinary((byte []) data);

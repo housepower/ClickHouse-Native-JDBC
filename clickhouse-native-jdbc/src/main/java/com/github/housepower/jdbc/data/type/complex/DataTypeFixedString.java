@@ -23,7 +23,6 @@ import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -128,7 +127,7 @@ public class DataTypeFixedString implements IDataType {
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         String[] data = new String[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = new String(deserializer.readBytes(n), StandardCharsets.UTF_8);
+            data[row] = new String(deserializer.readBytes(n), charset);
         }
         return data;
     }
