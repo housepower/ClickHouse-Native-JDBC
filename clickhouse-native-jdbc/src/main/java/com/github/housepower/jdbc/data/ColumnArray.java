@@ -48,8 +48,8 @@ public class ColumnArray extends AbstractColumn {
     @Override
     public void flushToSerializer(BinarySerializer serializer, boolean now) throws SQLException, IOException {
         if (isExported()) {
-            serializer.writeStringBinary(name);
-            serializer.writeStringBinary(type.name());
+            serializer.writeUTF8StringBinary(name);
+            serializer.writeUTF8StringBinary(type.name());
         }
 
         flushOffsets(serializer);

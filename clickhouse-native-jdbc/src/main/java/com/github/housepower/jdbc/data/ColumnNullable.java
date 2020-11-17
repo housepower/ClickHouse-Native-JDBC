@@ -43,8 +43,8 @@ public class ColumnNullable extends AbstractColumn {
     @Override
     public void flushToSerializer(BinarySerializer serializer, boolean now) throws IOException, SQLException {
         if (isExported()) {
-            serializer.writeStringBinary(name);
-            serializer.writeStringBinary(type.name());
+            serializer.writeUTF8StringBinary(name);
+            serializer.writeUTF8StringBinary(type.name());
         }
 
         for (byte sign : nullableSign) {

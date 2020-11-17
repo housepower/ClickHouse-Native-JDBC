@@ -38,7 +38,7 @@ public class DataRequest extends RequestOrResponse {
 
     @Override
     public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
-        serializer.writeStringBinary(name);
+        serializer.writeUTF8StringBinary(name);
 
         serializer.maybeEnableCompressed();
         block.writeTo(serializer);

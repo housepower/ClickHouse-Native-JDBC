@@ -86,7 +86,7 @@ public class BinarySerializer {
         container.get().writeBinary((byte) ((i >> 56) & 0xFF));
     }
 
-    public void writeStringBinary(String binary) throws IOException {
+    public void writeUTF8StringBinary(String binary) throws IOException {
         byte[] bs = binary.getBytes(StandardCharsets.UTF_8);
         writeVarInt(bs.length);
         container.get().writeBinary(bs);

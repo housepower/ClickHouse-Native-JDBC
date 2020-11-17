@@ -40,6 +40,6 @@ public class TotalsResponse extends RequestOrResponse {
 
     public static TotalsResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
         throws IOException, SQLException {
-        return new TotalsResponse(deserializer.readStringBinary(), Block.readFrom(deserializer, info));
+        return new TotalsResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
     }
 }

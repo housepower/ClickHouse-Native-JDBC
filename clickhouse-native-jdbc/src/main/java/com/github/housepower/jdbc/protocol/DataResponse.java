@@ -40,7 +40,7 @@ public class DataResponse extends RequestOrResponse {
 
     public static DataResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
         throws IOException, SQLException {
-        String name = deserializer.readStringBinary();
+        String name = deserializer.readUTF8StringBinary();
 
         deserializer.maybeEnableCompressed();
         Block block = Block.readFrom(deserializer, info);
