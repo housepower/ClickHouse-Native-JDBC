@@ -58,7 +58,7 @@ public class IssueReproduceITest extends AbstractITest {
             assertTrue(rs.next());
             assertEquals(100, rs.getInt(1));
             statement.executeQuery("DROP TABLE IF EXISTS test");
-        }, true);
+        });
     }
 
 }

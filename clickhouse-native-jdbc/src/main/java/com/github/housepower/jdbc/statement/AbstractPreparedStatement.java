@@ -114,6 +114,11 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     @Override
+    public void setBytes(int index, byte[] x) throws SQLException {
+        setObject(index, x);
+    }
+
+    @Override
     public void setTimestamp(int index, Timestamp x) throws SQLException {
         setObject(index, x);
     }

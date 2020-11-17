@@ -19,13 +19,19 @@ import com.github.housepower.jdbc.data.IColumn;
 import com.github.housepower.jdbc.misc.CheckedIterator;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.DataResponse;
+import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLResultSet;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Date;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 
 public class ClickHouseResultSet implements SQLResultSet {
     private int row = -1;
@@ -36,16 +42,19 @@ public class ClickHouseResultSet implements SQLResultSet {
     private Block lastFetchBlock = null;
 
     private final Block header;
+    private final ClickHouseConfig cfg;
     private final String db;
     private final String table;
     private final ClickHouseStatement statement;
     private final CheckedIterator<DataResponse, SQLException> iterator;
 
-    public ClickHouseResultSet(Block header, String db,
+    public ClickHouseResultSet(Block header,
+                               ClickHouseConfig cfg, String db,
                                String table,
                                CheckedIterator<DataResponse, SQLException> iterator,
                                ClickHouseStatement statement) {
         this.header = header;
+        this.cfg = cfg;
         this.db = db;
         this.table = table;
         this.iterator = iterator;
@@ -198,6 +207,12 @@ public class ClickHouseResultSet implements SQLResultSet {
     public String getString(int index) throws SQLException {
         Object data = getObject(index);
         return (String) data;
+    }
+
+    @Override
+    public byte[] getBytes(int index) throws SQLException {
+        String data = (String) getObject(index);
+        return data.getBytes(cfg.charset());
     }
 
     @Override

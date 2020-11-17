@@ -18,11 +18,13 @@ import com.github.housepower.jdbc.ClickhouseJdbcUrlParser;
 import com.github.housepower.jdbc.misc.CollectionUtil;
 import com.github.housepower.jdbc.misc.StrUtil;
 
-import javax.annotation.concurrent.Immutable;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.annotation.concurrent.Immutable;
 
 @Immutable
 public class ClickHouseConfig {
@@ -34,10 +36,11 @@ public class ClickHouseConfig {
     private final String password;
     private final int queryTimeoutMs;
     private final int connectTimeoutMs;
+    private final Charset charset;
     private final Map<SettingKey, Object> settings;
 
     private ClickHouseConfig(int port, String host, String database, String user, String password,
-                             int queryTimeoutMs, int connectTimeoutMs, Map<SettingKey, Object> settings) {
+                             int queryTimeoutMs, int connectTimeoutMs, Charset charset, Map<SettingKey, Object> settings) {
         this.port = port;
         this.host = host;
         this.database = database;
@@ -45,6 +48,7 @@ public class ClickHouseConfig {
         this.password = password;
         this.queryTimeoutMs = queryTimeoutMs;
         this.connectTimeoutMs = connectTimeoutMs;
+        this.charset = charset;
         this.settings = settings;
     }
 
@@ -74,6 +78,10 @@ public class ClickHouseConfig {
 
     public int connectTimeout() {
         return this.connectTimeoutMs;
+    }
+
+    public Charset charset() {
+        return this.charset;
     }
 
     public Map<SettingKey, Object> settings() {
@@ -139,6 +147,7 @@ public class ClickHouseConfig {
         private String password;
         private int connectTimeoutMs;
         private int queryTimeoutMs;
+        private Charset charset;
         private Map<SettingKey, Object> settings = new HashMap<>();
 
         private Builder() {
@@ -157,7 +166,13 @@ public class ClickHouseConfig {
                     .password(cfg.password())
                     .connectTimeoutMs(cfg.connectTimeout())
                     .queryTimeoutMs(cfg.queryTimeout())
+                    .charset(cfg.charset().name())
                     .withSettings(cfg.settings());
+        }
+
+        private Builder charset(String charset) {
+            this.withSetting(SettingKey.charset, charset);
+            return this;
         }
 
         public Builder withSetting(SettingKey key, Object value) {
@@ -231,12 +246,14 @@ public class ClickHouseConfig {
             this.database = (String) this.settings.getOrDefault(SettingKey.database, "default");
             this.connectTimeoutMs = (int) this.settings.getOrDefault(SettingKey.connect_timeout, 0) * 1000;
             this.queryTimeoutMs = (int) this.settings.getOrDefault(SettingKey.query_timeout, 0) * 1000;
+            String characterEncoding = (String) this.settings.getOrDefault(SettingKey.charset, "UTF-8");
+            charset = Charset.forName(characterEncoding);
 
             revisit();
             purgeSettings();
 
             return new ClickHouseConfig(
-                    port, host, database, user, password, queryTimeoutMs, connectTimeoutMs, settings);
+                    port, host, database, user, password, queryTimeoutMs, connectTimeoutMs, charset, settings);
         }
 
         private void revisit() {
@@ -257,6 +274,7 @@ public class ClickHouseConfig {
             this.settings.remove(SettingKey.database);
             this.settings.remove(SettingKey.query_timeout);
             this.settings.remove(SettingKey.connect_timeout);
+            this.settings.remove(SettingKey.charset);
         }
     }
 }

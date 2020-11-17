@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc.data.type;
 
+import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
@@ -21,10 +22,16 @@ import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.sql.Types;
 
 public class DataTypeString implements IDataType {
+    private Charset charset;
+
+    public DataTypeString(PhysicalInfo.ServerInfo serverInfo) {
+        this.charset = serverInfo.getConfigure().charset();
+    }
 
     @Override
     public String name() {
@@ -63,25 +70,37 @@ public class DataTypeString implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof StringView) { // should always be StringView
-            serializer.writeStringViewBinary((StringView) data);
-        } else if (data instanceof String) {
-            serializer.writeStringBinary((String) data);
+        if (data instanceof String) {
+            byte []bs = ((String) data).getBytes(charset);
+            serializer.writeBytesBinary(bs);
+        } else if (data instanceof StringView) {
+            serializer.writeStringViewBinary((StringView) data, charset);
         } else {
-            throw new SQLException("Expected String Parameter, but was " + data.getClass().getSimpleName());
+            serializer.writeBytesBinary((byte []) data);
         }
     }
 
+
+    /**
+     * deserializeBinary will always returns String
+     * for getBytes(idx) method, we encode the String again
+     * @param deserializer
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     */
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readStringBinary();
+    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        byte []bs = deserializer.readBytesBinary();
+        return new String(bs, charset);
     }
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         String[] data = new String[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = deserializer.readStringBinary();
+            byte []bs = deserializer.readBytesBinary();
+            data[row] = new String(bs, charset);
         }
         return data;
     }

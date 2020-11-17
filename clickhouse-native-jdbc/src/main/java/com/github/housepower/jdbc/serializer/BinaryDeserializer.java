@@ -66,6 +66,12 @@ public class BinaryDeserializer {
         return (container.get().readBinary() != 0);
     }
 
+    public byte[] readBytesBinary() throws IOException {
+        byte[] data = new byte[(int) readVarInt()];
+        container.get().readBinary(data);
+        return data;
+    }
+
     public String readStringBinary() throws IOException {
         byte[] data = new byte[(int) readVarInt()];
         return container.get().readBinary(data) > 0 ? new String(data, StandardCharsets.UTF_8) : "";
