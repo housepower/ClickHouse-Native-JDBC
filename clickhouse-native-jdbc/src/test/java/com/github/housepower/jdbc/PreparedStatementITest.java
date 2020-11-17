@@ -160,7 +160,7 @@ public class PreparedStatementITest extends AbstractITest {
             assertEquals(clientDateTime, rs.getTimestamp(7).toLocalDateTime());
             assertEquals(clientDateTime, rs.getTimestamp(8).toLocalDateTime());
             assertFalse(rs.next());
-        }, false);
+        });
 
         // use client_time_zone
         withNewConnection(connection -> {
@@ -184,7 +184,7 @@ public class PreparedStatementITest extends AbstractITest {
             assertEquals(clientDateTime, rs.getTimestamp(7).toLocalDateTime());
             assertEquals(clientDateTime, rs.getTimestamp(8).toLocalDateTime());
             assertFalse(rs.next());
-        }, true);
+        }, "use_client_time_zone", true);
     }
 
     @Test

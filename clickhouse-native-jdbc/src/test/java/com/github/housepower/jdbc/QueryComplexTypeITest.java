@@ -39,7 +39,7 @@ public class QueryComplexTypeITest extends AbstractITest {
             assertTrue(rs.next());
             assertEquals(date, rs.getDate(1).toLocalDate());
             assertFalse(rs.next());
-        }, true);
+        }, "use_client_time_zone", true);
 
         // use server timezone, UTC
         withNewConnection(connection -> {
@@ -48,7 +48,7 @@ public class QueryComplexTypeITest extends AbstractITest {
             assertTrue(rs.next());
             assertEquals(date, rs.getDate(1).toLocalDate());
             assertFalse(rs.next());
-        }, false);
+        });
     }
 
     @Test

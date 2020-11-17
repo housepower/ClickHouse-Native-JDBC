@@ -22,6 +22,7 @@ import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -33,16 +34,18 @@ public class DataTypeFixedString implements IDataType {
         Validate.isTrue(lexer.character() == '(');
         Number fixedStringN = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ')');
-        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue());
+        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue(), serverInfo);
     }
 
     private final int n;
     private final String name;
     private final String defaultValue;
+    private final Charset charset;
 
-    public DataTypeFixedString(String name, int n) {
+    public DataTypeFixedString(String name, int n, PhysicalInfo.ServerInfo serverInfo) {
         this.n = n;
         this.name = name;
+        this.charset = serverInfo.getConfigure().charset();
 
         char[] data = new char[n];
         for (int i = 0; i < n; i++) {
@@ -94,7 +97,11 @@ public class DataTypeFixedString implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
             throws SQLException, IOException {
-        writeBytes(((String) data).getBytes(StandardCharsets.UTF_8), serializer);
+        if (data instanceof String) {
+            writeBytes(((String) data).getBytes(charset), serializer);
+        } else {
+            writeBytes(((byte []) (data)), serializer);
+        }
     }
 
     private void writeBytes(byte[] bs, BinarySerializer serializer)
@@ -114,7 +121,7 @@ public class DataTypeFixedString implements IDataType {
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new String(deserializer.readBytes(n), StandardCharsets.UTF_8);
+        return new String(deserializer.readBytes(n), charset);
     }
 
     @Override

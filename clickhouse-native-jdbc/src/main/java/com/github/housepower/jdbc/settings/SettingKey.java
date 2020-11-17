@@ -146,7 +146,8 @@ public enum SettingKey {
     host(ISettingType.String, ""),
     database(ISettingType.String, ""),
     password(ISettingType.String, ""),
-    query_timeout(ISettingType.Seconds, "");
+    query_timeout(ISettingType.Seconds, ""),
+    characterEncoding(ISettingType.String, "charset for converting between Bytes and String");
 
     private final String describe;
     private final ISettingType type;

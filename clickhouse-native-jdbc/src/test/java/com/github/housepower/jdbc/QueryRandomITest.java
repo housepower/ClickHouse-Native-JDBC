@@ -58,6 +58,6 @@ public class QueryRandomITest extends AbstractITest {
             }
             assertEquals(i , 10000);
             statement.executeQuery("DROP TABLE IF EXISTS test_random");
-        }, true);
+        }, "use_client_time_zone", true);
     }
 }

@@ -111,7 +111,7 @@ public class InsertComplexTypeITest extends AbstractITest {
 
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
-        }, true);
+        }, "use_client_time_zone", true);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 rs.getTimestamp(1));
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
-        }, true);
+        }, "use_client_time_zone", true);
     }
 
     @Test
@@ -148,7 +148,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 rs.getTimestamp(1));
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
-        }, true);
+        }, "use_client_time_zone", true);
     }
 
     @Test
@@ -167,7 +167,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 rs.getTimestamp(1));
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
-        }, true);
+        }, "use_client_time_zone", true);
     }
 
     @Test

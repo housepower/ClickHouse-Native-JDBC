@@ -129,10 +129,10 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test String)ENGINE=Log");
-            statement.executeQuery("INSERT INTO test VALUES('test_string')");
+            statement.executeQuery("INSERT INTO test VALUES('我爱祖国')");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
             assertTrue(rs.next());
-            assertEquals("test_string", rs.getString(1));
+            assertEquals("我爱祖国", rs.getString(1));
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
@@ -157,7 +157,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
-        }, true);
+        }, "use_client_time_zone", true);
     }
 
     @Test
@@ -260,5 +260,35 @@ public class InsertSimpleTypeITest extends AbstractITest {
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
+    }
+
+    @Test
+    public void successfullyCharset() throws Exception {
+        String []charsets = new String[]{ "UTF-8", "GB2312", "UTF-16"};
+        for (String charset : charsets) {
+            withNewConnection(connection -> {
+                Statement statement = connection.createStatement();
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(s1 String, s2 String)ENGINE=Log");
+
+                String insertSQL = "INSERT INTO test VALUES('" + "我爱中国" +
+                                   "','" + "我爱地球" +
+                                   "')";
+
+                statement.executeQuery(insertSQL);
+
+                ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY s1");
+                assertTrue(rs.next());
+                assertEquals("我爱中国", rs.getString(1));
+                assertEquals("我爱地球", rs.getString(2));
+
+                assertArrayEquals("我爱中国".getBytes(charset), rs.getBytes(1));
+                assertArrayEquals("我爱地球".getBytes(charset), rs.getBytes(2));
+
+                assertFalse(rs.next());
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }, "characterEncoding", charset);
+        }
     }
 }

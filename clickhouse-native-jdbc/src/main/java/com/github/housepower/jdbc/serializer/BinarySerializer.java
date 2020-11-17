@@ -22,6 +22,7 @@ import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class BinarySerializer {
@@ -91,9 +92,14 @@ public class BinarySerializer {
         container.get().writeBinary(bs);
     }
 
-    public void writeStringViewBinary(StringView data) throws IOException {
-        writeVarInt(data.end() - data.start());
-        ByteBuffer buf = StandardCharsets.UTF_8.encode(data.toCharBuffer());
+    public void writeBytesBinary(byte []bs) throws IOException {
+        writeVarInt(bs.length);
+        container.get().writeBinary(bs);
+    }
+
+    public void writeStringViewBinary(StringView data, Charset charset) throws IOException {
+        ByteBuffer buf = charset.encode(data.toCharBuffer());
+        writeVarInt(buf.limit() - buf.position());
         container.get().writeBinary(buf.array(), buf.position(), buf.limit() - buf.position());
     }
 

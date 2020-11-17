@@ -60,6 +60,8 @@ public class DataTypeFactory {
             return DataTypeFixedString.createFixedStringType(lexer, serverInfo);
         } else if (dataTypeName.checkEquals("Decimal")) {
             return DataTypeDecimal.createDecimalType(lexer, serverInfo);
+        } else if (dataTypeName.checkEquals("String")) {
+            return new DataTypeString(serverInfo);
         } else {
             String name = String.valueOf(dataTypeName);
             IDataType dataType = dataTypes.get(name);
@@ -73,7 +75,6 @@ public class DataTypeFactory {
 
         creators.put("IPv4", new DataTypeIPv4());
         creators.put("UUID", new DataTypeUUID());
-        creators.put("String", new DataTypeString());
         creators.put("Float32", new DataTypeFloat32());
         creators.put("Float64", new DataTypeFloat64());
 
