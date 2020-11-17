@@ -71,7 +71,7 @@ public class ClickHouseStatement implements SQLStatement {
         extractDBAndTableName(query);
         Matcher matcher = VALUES_REGEX.matcher(query);
 
-        if (matcher.find() && query.toUpperCase(Locale.ROOT).startsWith("INSERT")) {
+        if (matcher.find() && query.trim().toUpperCase(Locale.ROOT).startsWith("INSERT")) {
             lastResultSet = null;
             String insertQuery = query.substring(0, matcher.end() - 1);
             block = getSampleBlock(insertQuery);
