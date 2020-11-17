@@ -31,10 +31,6 @@ public abstract class AbstractITest implements Serializable {
     protected static final String DRIVER_CLASS_NAME = "com.github.housepower.jdbc.ClickHouseDriver";
     protected static final int SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
 
-    protected String getJdbcUrl() {
-        return getJdbcUrl();
-    }
-
     protected String getJdbcUrl(Object ...params) {
         StringBuilder sb = new StringBuilder();
         sb.append("jdbc:clickhouse://127.0.0.1:").append(SERVER_PORT);

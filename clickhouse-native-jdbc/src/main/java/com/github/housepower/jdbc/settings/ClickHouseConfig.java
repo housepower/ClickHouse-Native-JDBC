@@ -171,7 +171,7 @@ public class ClickHouseConfig {
         }
 
         private Builder charset(String charset) {
-            this.withSetting(SettingKey.characterEncoding, charset);
+            this.withSetting(SettingKey.charset, charset);
             return this;
         }
 
@@ -246,7 +246,7 @@ public class ClickHouseConfig {
             this.database = (String) this.settings.getOrDefault(SettingKey.database, "default");
             this.connectTimeoutMs = (int) this.settings.getOrDefault(SettingKey.connect_timeout, 0) * 1000;
             this.queryTimeoutMs = (int) this.settings.getOrDefault(SettingKey.query_timeout, 0) * 1000;
-            String characterEncoding = (String) this.settings.getOrDefault(SettingKey.characterEncoding, "UTF-8");
+            String characterEncoding = (String) this.settings.getOrDefault(SettingKey.charset, "UTF-8");
             charset = Charset.forName(characterEncoding);
 
             revisit();
@@ -274,7 +274,7 @@ public class ClickHouseConfig {
             this.settings.remove(SettingKey.database);
             this.settings.remove(SettingKey.query_timeout);
             this.settings.remove(SettingKey.connect_timeout);
-            this.settings.remove(SettingKey.characterEncoding);
+            this.settings.remove(SettingKey.charset);
         }
     }
 }
