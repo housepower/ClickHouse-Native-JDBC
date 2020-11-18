@@ -1,4 +1,5 @@
 module.exports = {
+  base: '/ClickHouse-Native-JDBC/',
   title: 'ClickHouse Native JDBC',
   evergreen: true,
   locales: {
