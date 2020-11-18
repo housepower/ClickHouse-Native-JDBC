@@ -149,6 +149,7 @@ public class PhysicalConnection {
             socket.setTcpNoDelay(true);
             socket.setSendBufferSize(ClickHouseDefines.SOCKET_BUFFER_SIZE);
             socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_BUFFER_SIZE);
+            socket.setKeepAlive(configure.tcpKeepAlive());
             socket.connect(endpoint, configure.connectTimeout());
 
             return new PhysicalConnection(socket, new BinarySerializer(new SocketBuffedWriter(socket), true), new BinaryDeserializer(socket));

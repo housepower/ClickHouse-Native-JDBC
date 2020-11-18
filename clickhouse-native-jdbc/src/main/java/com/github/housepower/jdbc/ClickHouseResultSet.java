@@ -77,6 +77,11 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
+    public byte[] getBytes(String name) throws SQLException {
+        return this.getBytes(this.findColumn(name));
+    }
+
+    @Override
     public Date getDate(String name) throws SQLException {
         return this.getDate(this.findColumn(name));
     }
