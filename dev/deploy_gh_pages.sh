@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[[ -z $(git show HEAD -- docs) ]] && echo 'no changes in docs, skip' && exit 0
+
 cd docs/.vuepress/dist
 
 git config --global user.name  'GitHub Workflow'
