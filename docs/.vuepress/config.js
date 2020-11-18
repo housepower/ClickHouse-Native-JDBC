@@ -27,12 +27,57 @@ module.exports = {
         },
         algolia: {},
         nav: [
-          { text: 'Home', link: '/' },
+          { text: 'Guide', link: '/guide/' },
+          { text: 'Dev', link: '/dev/' },
+          { text: 'Deep Dive', link: '/deep-dive/' },
           { text: 'GitHub', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
         ],
         sidebar: {
-          '/': [/* ... */],
-          '/nested/': [/* ... */]
+          '/guide/': [
+            {
+              title: 'Quick Start',
+              collapsable: false,
+              sidebarDepth: 1,
+              children: [
+                '/'
+              ]
+            },
+            {
+              title: 'JDBC Driver',
+              children: [ /* ... */],
+              initialOpenGroupIndex: -1
+            },
+            {
+              title: 'Spark Integration',
+              children: [ /* ... */],
+              initialOpenGroupIndex: -1
+            },
+            {
+              title: 'Troubleshooting',
+              children: [ /* ... */],
+              initialOpenGroupIndex: -1
+            }
+          ],
+          '/dev/': [
+            {
+              title: 'Pull Request',
+              collapsable: false,
+              sidebarDepth: 1,
+              children: [
+                '/'
+              ]
+            }
+          ],
+          '/deep-dive/': [
+            {
+              title: 'How it works',
+              collapsable: false,
+              sidebarDepth: 1,
+              children: [
+                '/'
+              ]
+            }
+          ]
         }
       },
       '/zh/': {
@@ -47,12 +92,57 @@ module.exports = {
         },
         algolia: {},
         nav: [
-          { text: '主页', link: '/zh/' },
+          { text: '指南', link: '/zh/guide/' },
+          { text: '开发', link: '/zh/dev/' },
+          { text: '深入', link: '/zh/deep-dive/' },
           { text: 'GitHub', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
         ],
         sidebar: {
-          '/zh/': [/* ... */],
-          '/zh/nested/': [/* ... */]
+          '/zh/guide/': [
+            {
+              title: '快速入门',
+              collapsable: false,
+              sidebarDepth: 1,
+              children: [
+                '/'
+              ]
+            },
+            {
+              title: 'JDBC 驱动',
+              children: [ /* ... */],
+              initialOpenGroupIndex: -1
+            },
+            {
+              title: 'Spark 集成',
+              children: [ /* ... */],
+              initialOpenGroupIndex: -1
+            },
+            {
+              title: '常见问题',
+              children: [ /* ... */],
+              initialOpenGroupIndex: -1
+            }
+          ],
+          '/zh/dev/': [
+            {
+              title: 'Pull Request',
+              collapsable: false,
+              sidebarDepth: 1,
+              children: [
+                '/'
+              ]
+            }
+          ],
+          '/zh/deep-dive/': [
+            {
+              title: '工作原理',
+              collapsable: false,
+              sidebarDepth: 1,
+              children: [
+                '/'
+              ]
+            }
+          ]
         }
       }
     }
