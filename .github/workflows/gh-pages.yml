@@ -16,4 +16,4 @@ jobs:
       - run: npm run docs:build
       - run: dev/deploy_gh_pages.sh
         env:
-          - PAGES_DEPLOY_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          PAGES_DEPLOY_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
