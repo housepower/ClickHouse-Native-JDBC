@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-[[ -z $(git show HEAD -- docs) ]] && echo 'no changes in docs, skip' && exit 0
+if [[ -z $(git show HEAD -- docs) ]]; then
+  echo 'no changes in docs, skip'
+  exit 0
+fi
 
 cd docs/.vuepress/dist
 
