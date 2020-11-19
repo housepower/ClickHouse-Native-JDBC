@@ -120,14 +120,17 @@ public class InsertComplexTypeITest extends AbstractITest {
             Statement statement = connection.createStatement();
 
             statement.executeQuery("DROP TABLE IF EXISTS test");
-            statement.executeQuery("CREATE TABLE test(test_datetime DateTime64(9, 'UTC'))ENGINE=Log");
-            statement.executeQuery("INSERT INTO test VALUES(toDateTime64('2000-01-01 00:01:01.123456789'))");
-            ResultSet rs = statement.executeQuery("SELECT * FROM test");
+            statement.executeQuery("CREATE TABLE test(seq UInt8, test_datetime DateTime64(9, 'UTC'))ENGINE=Log");
+            statement.executeQuery("INSERT INTO test VALUES(1, toDateTime64('2000-01-01 00:01:01.123456789'))");
+            statement.executeQuery("INSERT INTO test VALUES(2, toDateTime64('2000-01-01 00:01:01.0234567'))");
+            statement.executeQuery("INSERT INTO test VALUES(3, toDateTime64('2000-01-01 00:01:01.0234567889'))");
+            ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY seq");
             assertTrue(rs.next());
-
-            assertEquals(
-                Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 0, 1, 1, 123456789)),
-                rs.getTimestamp(1));
+            assertEquals(Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 0, 1, 1, 123456789)), rs.getTimestamp(2));
+            assertTrue(rs.next());
+            assertEquals(Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 0, 1, 1, 23456700)), rs.getTimestamp(2));
+            assertTrue(rs.next());
+            assertEquals(Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 0, 1, 1, 23456789)), rs.getTimestamp(2));
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         }, true);
