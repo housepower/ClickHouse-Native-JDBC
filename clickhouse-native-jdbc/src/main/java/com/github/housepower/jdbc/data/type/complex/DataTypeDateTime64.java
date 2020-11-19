@@ -28,7 +28,6 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.DecimalFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -59,11 +58,11 @@ public class DataTypeDateTime64 implements IDataType {
     public static final Timestamp DEFAULT_VALUE = new Timestamp(0);
     public static final int NANOS_IN_SECOND = 1_000_000_000;
     public static final int MILLIS_IN_SECOND = 1000;
-    public static final int[] pow10 = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
-
+    public static final int[] POW_10 = {1, 10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000};
     public static final int MIN_SCALE = 0;
     public static final int MAX_SCALA = 9;
     public static final int DEFAULT_SCALE = 3;
+
     private final String name;
     private final int scale;
     private final ZoneId tz;
@@ -138,7 +137,7 @@ public class DataTypeDateTime64 implements IDataType {
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        long value = deserializer.readLong() * pow10[MAX_SCALA - scale];
+        long value = deserializer.readLong() * POW_10[MAX_SCALA - scale];
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);
         Timestamp timestamp = new Timestamp(epochSeconds * 1000);
@@ -152,7 +151,7 @@ public class DataTypeDateTime64 implements IDataType {
         Timestamp timestamp = (Timestamp) data;
         long epochSeconds = timestamp.getTime() / MILLIS_IN_SECOND;
         int nanos = timestamp.getNanos();
-        long value = (epochSeconds * NANOS_IN_SECOND + nanos) / pow10[MAX_SCALA - scale];
+        long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
         serializer.writeLong(value);
     }
 
