@@ -127,7 +127,7 @@ public class DataTypeDateTime64 implements IDataType {
         BigDecimal _seconds = BigDecimal.valueOf(lexer.numberLiteral().doubleValue())
                 .setScale(scale, BigDecimal.ROUND_HALF_UP);
         int second = _seconds.intValue();
-        int nanos = _seconds.subtract(BigDecimal.valueOf(second)).movePointRight(scale).intValue();
+        int nanos = _seconds.subtract(BigDecimal.valueOf(second)).movePointRight(9).intValue();
         Validate.isTrue(lexer.character() == '\'');
         Validate.isTrue(lexer.character() == ')');
 
