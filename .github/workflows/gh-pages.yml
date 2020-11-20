@@ -12,8 +12,8 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
-      - run: npm install
-      - run: npm run docs:build
-      - run: dev/deploy_gh_pages.sh
+      - run: '[[ -z $(git show HEAD -- docs) ]] || npm install'
+      - run: '[[ -z $(git show HEAD -- docs) ]] || npm run docs:build'
+      - run: '[[ -z $(git show HEAD -- docs) ]] || dev/deploy_gh_pages.sh'
         env:
           PAGES_DEPLOY_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
