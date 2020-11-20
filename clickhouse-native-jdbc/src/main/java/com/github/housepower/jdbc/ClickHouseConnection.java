@@ -27,6 +27,8 @@ import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
 import com.github.housepower.jdbc.statement.ClickHousePreparedQueryStatement;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
@@ -44,10 +46,12 @@ import java.util.regex.Pattern;
 
 public class ClickHouseConnection implements SQLConnection {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ClickHouseConnection.class);
     private static final Pattern VALUES_REGEX = Pattern.compile("[Vv][Aa][Ll][Uu][Ee][Ss]\\s*\\(");
 
     private final AtomicBoolean isClosed;
     private final AtomicReference<ClickHouseConfig> cfg;
+    // TODO Since #getHealthyPhysicalConnection() is synchronized, can we remove AtomicReference?
     private final AtomicReference<PhysicalInfo> physicalInfo;
     private final AtomicReference<ConnectionState> state = new AtomicReference<>(ConnectionState.IDLE);
 
@@ -192,12 +196,16 @@ public class ClickHouseConnection implements SQLConnection {
         return block.rows();
     }
 
-    private PhysicalConnection getHealthyPhysicalConnection() throws SQLException {
+    synchronized private PhysicalConnection getHealthyPhysicalConnection() throws SQLException {
         PhysicalInfo oldInfo = physicalInfo.get();
         if (!oldInfo.connection().ping(cfg.get().queryTimeout(), physicalInfo.get().server())) {
+            LOG.warn("connection loss with state[{}], create new connection and reset state", state);
             PhysicalInfo newInfo = createPhysicalInfo(cfg.get());
+            // TODO method is synchronized
             PhysicalInfo closeableInfo = physicalInfo.compareAndSet(oldInfo, newInfo) ? oldInfo : newInfo;
             closeableInfo.connection().disPhysicalConnection();
+            assert oldInfo == closeableInfo;
+            state.set(ConnectionState.IDLE);
         }
 
         return physicalInfo.get().connection();
