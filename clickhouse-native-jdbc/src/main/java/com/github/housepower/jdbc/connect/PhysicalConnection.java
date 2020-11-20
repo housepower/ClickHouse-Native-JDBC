@@ -17,21 +17,14 @@ package com.github.housepower.jdbc.connect;
 import com.github.housepower.jdbc.buffer.SocketBuffedWriter;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.protocol.DataRequest;
-import com.github.housepower.jdbc.protocol.DataResponse;
-import com.github.housepower.jdbc.protocol.EOFStreamResponse;
-import com.github.housepower.jdbc.protocol.HelloRequest;
-import com.github.housepower.jdbc.protocol.HelloResponse;
-import com.github.housepower.jdbc.protocol.PingRequest;
-import com.github.housepower.jdbc.protocol.PongResponse;
-import com.github.housepower.jdbc.protocol.ProgressResponse;
-import com.github.housepower.jdbc.protocol.QueryRequest;
-import com.github.housepower.jdbc.protocol.RequestOrResponse;
+import com.github.housepower.jdbc.protocol.*;
 import com.github.housepower.jdbc.serializer.BinaryDeserializer;
 import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -42,6 +35,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class PhysicalConnection {
+    private static final Logger LOG = LoggerFactory.getLogger(PhysicalConnection.class);
+
     private final Socket socket;
     private final SocketAddress address;
     private final BinarySerializer serializer;
@@ -59,13 +54,15 @@ public class PhysicalConnection {
             sendRequest(new PingRequest());
             for (; ; ) {
                 RequestOrResponse response = receiveResponse(soTimeout, info);
-                Validate.isTrue(response instanceof ProgressResponse || response instanceof PongResponse,
-                    "Expect Pong Response.");
 
                 if (response instanceof PongResponse)
                     return true;
+
+                // TODO there are some previous response we haven't consumed
+                LOG.warn("skip response: {}", response.type());
             }
         } catch (SQLException e) {
+            LOG.warn(e.getMessage());
             return false;
         }
     }
@@ -128,7 +125,7 @@ public class PhysicalConnection {
     }
 
     private void sendQuery(String id, int stage, QueryRequest.ClientInfo info, String query,
-        Map<SettingKey, Object> settings) throws SQLException {
+                           Map<SettingKey, Object> settings) throws SQLException {
         sendRequest(new QueryRequest(id, info, stage, true, query, settings));
     }
 
