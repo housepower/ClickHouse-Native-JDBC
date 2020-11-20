@@ -156,12 +156,14 @@ public class ClickHouseConnection implements SQLConnection {
         return block.rows();
     }
 
-    private PhysicalConnection getHealthyPhysicalConnection() throws SQLException {
+    synchronized private PhysicalConnection getHealthyPhysicalConnection() throws SQLException {
         PhysicalInfo oldInfo = atomicInfo.get();
         if (!oldInfo.connection().ping(configure.queryTimeout(), atomicInfo.get().server())) {
             PhysicalInfo newInfo = createPhysicalInfo(configure);
             PhysicalInfo closeableInfo = atomicInfo.compareAndSet(oldInfo, newInfo) ? oldInfo : newInfo;
             closeableInfo.connection().disPhysicalConnection();
+            assert oldInfo == closeableInfo;
+            state.set(ConnectionState.IDLE);
         }
 
         return atomicInfo.get().connection();
