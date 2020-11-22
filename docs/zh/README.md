@@ -1,2 +1,2 @@
-ClickHouse Native JDBC 中文主页
-==============================
+ClickHouse Native JDBC 主页
+==========================

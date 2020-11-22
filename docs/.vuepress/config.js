@@ -30,6 +30,7 @@ module.exports = {
           { text: 'Guide', link: '/guide/' },
           { text: 'Dev', link: '/dev/' },
           { text: 'Deep Dive', link: '/deep-dive/' },
+          { text: 'Release Notes', link: '/release-notes/'},
           { text: 'GitHub', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
         ],
         sidebar: {
@@ -38,9 +39,7 @@ module.exports = {
               title: 'Quick Start',
               collapsable: false,
               sidebarDepth: 1,
-              children: [
-                '/'
-              ]
+              children: [],
             },
             {
               title: 'JDBC Driver',
@@ -63,21 +62,30 @@ module.exports = {
               title: 'Pull Request',
               collapsable: false,
               sidebarDepth: 1,
-              children: [
-                '/'
-              ]
-            }
-          ],
-          '/deep-dive/': [
+              children: [],
+            },
             {
-              title: 'How it works',
+              title: 'Release',
               collapsable: false,
               sidebarDepth: 1,
               children: [
-                '/'
-              ]
+                ['internal_release', 'Internal Release'],
+                ['public_release', 'Public Release'],
+              ],
+            },
+          ],
+          '/deep-dive/': [
+            {
+              title: 'ClickHouse',
+              collapsable: false,
+              sidebarDepth: 2,
+              children: [
+                ['data_type', 'DataType'],
+                ['native_protocol', 'Native Protocol'],
+              ],
             }
-          ]
+          ],
+          '/release-notes/': [],
         }
       },
       '/zh/': {
@@ -95,7 +103,8 @@ module.exports = {
           { text: '指南', link: '/zh/guide/' },
           { text: '开发', link: '/zh/dev/' },
           { text: '深入', link: '/zh/deep-dive/' },
-          { text: 'GitHub', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
+          { text: '发行注记', link: '/zh/release-notes/' },
+          { text: '源码仓库', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
         ],
         sidebar: {
           '/zh/guide/': [
@@ -103,9 +112,7 @@ module.exports = {
               title: '快速入门',
               collapsable: false,
               sidebarDepth: 1,
-              children: [
-                '/'
-              ]
+              children: [],
             },
             {
               title: 'JDBC 驱动',
@@ -128,9 +135,7 @@ module.exports = {
               title: 'Pull Request',
               collapsable: false,
               sidebarDepth: 1,
-              children: [
-                '/'
-              ]
+              children: [],
             }
           ],
           '/zh/deep-dive/': [
@@ -138,11 +143,10 @@ module.exports = {
               title: '工作原理',
               collapsable: false,
               sidebarDepth: 1,
-              children: [
-                '/'
-              ]
+              children: [],
             }
-          ]
+          ],
+          '/zh/release-notes/': [],
         }
       }
     }

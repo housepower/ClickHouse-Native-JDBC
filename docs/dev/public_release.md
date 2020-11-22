@@ -1,3 +1,10 @@
+Public Release Manuel
+=====================
+
+::: tip
+Public Release means deploy to Maven Central
+:::
+
 ## Setup GPG
 
 https://imtianx.cn/2019/05/29/gpg_an_zhuang_yu_shi_yong/
