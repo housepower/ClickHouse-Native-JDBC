@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: https://avatars2.githubusercontent.com/u/40261547
+heroImage: /logo_320px.svg
 actionText: Get Started →
 actionLink: /release-notes/
 features:
