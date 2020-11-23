@@ -2,6 +2,9 @@ module.exports = {
   base: '/ClickHouse-Native-JDBC/',
   title: 'ClickHouse Native JDBC',
   evergreen: true,
+  plugins: [
+    'mermaidjs'
+  ],
   locales: {
     '/': {
       lang: 'en-US',
