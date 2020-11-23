@@ -147,7 +147,7 @@ public final class BalancedClickhouseDataSource implements DataSource {
     /**
      * Checks if clickhouse on url is alive, if it isn't, disable url, else enable.
      *
-     * @return number of avaliable clickhouse urls
+     * @return number of available clickhouse urls
      */
     synchronized int actualize() {
         List<String> enabledUrls = new ArrayList<>(allUrls.size());

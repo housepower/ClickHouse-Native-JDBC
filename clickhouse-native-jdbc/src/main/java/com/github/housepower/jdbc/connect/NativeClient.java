@@ -31,9 +31,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
+// TODO throw ClickHouseException instead of SQLException
 public class NativeClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(NativeClient.class);
@@ -47,7 +49,7 @@ public class NativeClient {
             socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
             socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
             socket.setKeepAlive(configure.tcpKeepAlive());
-            socket.connect(endpoint, configure.connectTimeoutMs());
+            socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
 
             return new NativeClient(socket, new BinarySerializer(
                     new SocketBuffedWriter(socket), true), new BinaryDeserializer(socket));
@@ -72,11 +74,11 @@ public class NativeClient {
         return address;
     }
 
-    public boolean ping(int soTimeoutMs, NativeContext.ServerContext info) {
+    public boolean ping(Duration soTimeout, NativeContext.ServerContext info) {
         try {
             sendRequest(new PingRequest());
             while (true) {
-                Response response = receiveResponse(soTimeoutMs, info);
+                Response response = receiveResponse(soTimeout, info);
 
                 if (response instanceof PongResponse)
                     return true;
@@ -90,9 +92,9 @@ public class NativeClient {
         }
     }
 
-    public Block receiveSampleBlock(int soTimeoutMs, NativeContext.ServerContext info) throws SQLException {
+    public Block receiveSampleBlock(Duration soTimeout, NativeContext.ServerContext info) throws SQLException {
         while (true) {
-            Response response = receiveResponse(soTimeoutMs, info);
+            Response response = receiveResponse(soTimeout, info);
             if (response instanceof DataResponse) {
                 return ((DataResponse) response).block();
             }
@@ -113,20 +115,20 @@ public class NativeClient {
         sendRequest(new DataRequest("", data));
     }
 
-    public HelloResponse receiveHello(int soTimeoutMs, NativeContext.ServerContext info) throws SQLException {
-        Response response = receiveResponse(soTimeoutMs, info);
+    public HelloResponse receiveHello(Duration soTimeout, NativeContext.ServerContext info) throws SQLException {
+        Response response = receiveResponse(soTimeout, info);
         Validate.isTrue(response instanceof HelloResponse, "Expect Hello Response.");
         return (HelloResponse) response;
     }
 
-    public EOFStreamResponse receiveEndOfStream(int soTimeoutMs, NativeContext.ServerContext info) throws SQLException {
-        Response response = receiveResponse(soTimeoutMs, info);
+    public EOFStreamResponse receiveEndOfStream(Duration soTimeout, NativeContext.ServerContext info) throws SQLException {
+        Response response = receiveResponse(soTimeout, info);
         Validate.isTrue(response instanceof EOFStreamResponse, "Expect EOFStream Response.");
         return (EOFStreamResponse) response;
     }
 
-    public QueryResponse receiveQuery(int soTimeoutMs, NativeContext.ServerContext info) {
-        return new QueryResponse(() -> receiveResponse(soTimeoutMs, info));
+    public QueryResponse receiveQuery(Duration soTimeout, NativeContext.ServerContext info) {
+        return new QueryResponse(() -> receiveResponse(soTimeout, info));
     }
 
     public void disconnect() throws SQLException {
@@ -158,9 +160,9 @@ public class NativeClient {
         }
     }
 
-    private Response receiveResponse(int soTimeoutMs, NativeContext.ServerContext info) throws SQLException {
+    private Response receiveResponse(Duration soTimeout, NativeContext.ServerContext info) throws SQLException {
         try {
-            socket.setSoTimeout(soTimeoutMs);
+            socket.setSoTimeout(((int) soTimeout.toMillis()));
             Response response = Response.readFrom(deserializer, info);
             LOG.trace("recv response: {}", response.type());
             return response;

@@ -17,6 +17,7 @@ package com.github.housepower.jdbc.settings;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
+import java.time.Duration;
 
 public interface ISettingType {
 
@@ -87,12 +88,24 @@ public interface ISettingType {
     ISettingType Seconds = new ISettingType() {
         @Override
         public Object deserializeURL(String queryParameter) {
-            return Integer.valueOf(queryParameter);
+            return Duration.ofSeconds(Long.parseLong(queryParameter));
         }
 
         @Override
         public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
-            serializer.writeVarInt((Integer) value);
+            serializer.writeVarInt(((Duration) value).getSeconds());
+        }
+    };
+
+    ISettingType Milliseconds = new ISettingType() {
+        @Override
+        public Object deserializeURL(String queryParameter) {
+            return Duration.ofMillis(Long.parseLong(queryParameter));
+        }
+
+        @Override
+        public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
+            serializer.writeVarInt(((Duration) value).toMillis());
         }
     };
 
@@ -105,18 +118,6 @@ public interface ISettingType {
         @Override
         public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
             serializer.writeUTF8StringBinary(java.lang.String.valueOf(value));
-        }
-    };
-
-    ISettingType Milliseconds = new ISettingType() {
-        @Override
-        public Object deserializeURL(String queryParameter) {
-            return Long.valueOf(queryParameter);
-        }
-
-        @Override
-        public void serializeSetting(BinarySerializer serializer, Object value) throws IOException {
-            serializer.writeVarInt((Long) value);
         }
     };
 }

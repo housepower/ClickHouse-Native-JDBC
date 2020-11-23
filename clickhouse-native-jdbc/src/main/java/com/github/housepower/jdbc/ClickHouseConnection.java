@@ -131,8 +131,8 @@ public class ClickHouseConnection implements SQLConnection {
     }
 
     @Override
-    public boolean isValid(int timeout) throws SQLException {
-        return getNativeClient().ping(timeout, nativeCtx.get().serverCtx());
+    public boolean isValid(int timeoutMs) throws SQLException {
+        return getNativeClient().ping(Duration.ofMillis(timeoutMs), nativeCtx.get().serverCtx());
     }
 
     // ClickHouse support only `database`, we treat it as JDBC `catalog`
@@ -158,7 +158,7 @@ public class ClickHouseConnection implements SQLConnection {
     }
 
     public boolean ping(Duration timeout) throws SQLException {
-        return nativeCtx.get().nativeClient().ping(((int) timeout.toMillis()), nativeCtx.get().serverCtx());
+        return nativeCtx.get().nativeClient().ping(timeout, nativeCtx.get().serverCtx());
     }
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
@@ -166,7 +166,7 @@ public class ClickHouseConnection implements SQLConnection {
         nativeClient.sendQuery(insertQuery, nativeCtx.get().clientCtx(), cfg.get().settings());
         Validate.isTrue(this.state.compareAndSet(ConnectionState.IDLE, ConnectionState.WAITING_INSERT),
                 "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
-        return nativeClient.receiveSampleBlock(cfg.get().queryTimeoutMs(), nativeCtx.get().serverCtx());
+        return nativeClient.receiveSampleBlock(cfg.get().queryTimeout(), nativeCtx.get().serverCtx());
     }
 
     public QueryResponse sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
@@ -174,7 +174,7 @@ public class ClickHouseConnection implements SQLConnection {
                 "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         NativeClient nativeClient = getHealthyNativeClient();
         nativeClient.sendQuery(query, nativeCtx.get().clientCtx(), cfg.settings());
-        return nativeClient.receiveQuery(cfg.queryTimeoutMs(), nativeCtx.get().serverCtx());
+        return nativeClient.receiveQuery(cfg.queryTimeout(), nativeCtx.get().serverCtx());
     }
 
     // when sendInsertRequest we must ensure the connection is healthy
@@ -186,14 +186,14 @@ public class ClickHouseConnection implements SQLConnection {
         NativeClient nativeClient = getNativeClient();
         nativeClient.sendData(block);
         nativeClient.sendData(new Block());
-        nativeClient.receiveEndOfStream(cfg.get().queryTimeoutMs(), nativeCtx.get().serverCtx());
+        nativeClient.receiveEndOfStream(cfg.get().queryTimeout(), nativeCtx.get().serverCtx());
         Validate.isTrue(this.state.compareAndSet(ConnectionState.WAITING_INSERT, ConnectionState.IDLE));
         return block.rows();
     }
 
     synchronized private NativeClient getHealthyNativeClient() throws SQLException {
         NativeContext oldInfo = nativeCtx.get();
-        if (!oldInfo.nativeClient().ping(cfg.get().queryTimeoutMs(), nativeCtx.get().serverCtx())) {
+        if (!oldInfo.nativeClient().ping(cfg.get().queryTimeout(), nativeCtx.get().serverCtx())) {
             LOG.warn("connection loss with state[{}], create new connection and reset state", state);
             NativeContext newInfo = createNativeContext(cfg.get());
             // TODO method is synchronized
@@ -232,7 +232,7 @@ public class ClickHouseConnection implements SQLConnection {
             long revision = ClickHouseDefines.CLIENT_REVISION;
             nativeClient.sendHello("client", revision, configure.database(), configure.user(), configure.password());
 
-            HelloResponse response = nativeClient.receiveHello(configure.queryTimeoutMs(), null);
+            HelloResponse response = nativeClient.receiveHello(configure.queryTimeout(), null);
             ZoneId timeZone = ZoneId.of(response.serverTimeZone());
             return new NativeContext.ServerContext(configure, response.reversion(), timeZone, response.serverDisplayName());
         } catch (SQLException rethrows) {
