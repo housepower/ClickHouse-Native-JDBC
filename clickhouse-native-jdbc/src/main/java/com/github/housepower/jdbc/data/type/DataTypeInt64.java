@@ -16,8 +16,8 @@ package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.math.BigInteger;

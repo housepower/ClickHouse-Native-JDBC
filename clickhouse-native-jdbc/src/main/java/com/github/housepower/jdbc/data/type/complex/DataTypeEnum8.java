@@ -18,8 +18,8 @@ import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -34,7 +34,7 @@ public class DataTypeEnum8 implements IDataType {
         List<Byte> enumValues = new ArrayList<>();
         List<String> enumNames = new ArrayList<>();
 
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < 1 << 8; i++) {
             enumNames.add(lexer.stringLiteral());
             Validate.isTrue(lexer.character() == '=');
             enumValues.add(lexer.numberLiteral().byteValue());

@@ -12,32 +12,19 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.protocol;
+package com.github.housepower.jdbc.exception;
 
-public enum ProtocolType {
-    REQUEST_HELLO(0),
-    REQUEST_QUERY(1),
-    REQUEST_DATA(2),
-    REQUEST_PING(4),
+public class NotImplementedException extends ClickHouseException {
 
-    RESPONSE_HELLO(0),
-    RESPONSE_Data(1),
-    RESPONSE_Exception(2),
-    RESPONSE_Progress(3),
-    RESPONSE_Pong(4),
-    RESPONSE_EndOfStream(5),
-    RESPONSE_ProfileInfo(6),
-    RESPONSE_Totals(7),
-    RESPONSE_Extremes(8),
-    RESPONSE_TablesStatusResponse(9);
-
-    private final int id;
-
-    ProtocolType(int id) {
-        this.id = id;
+    public NotImplementedException(String message) {
+        super(message);
     }
 
-    public long id() {
-        return id;
+    public NotImplementedException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public NotImplementedException(Throwable cause) {
+        super(cause);
     }
 }

@@ -15,7 +15,7 @@
 package com.github.housepower.jdbc.data;
 
 import com.github.housepower.jdbc.buffer.ByteArrayWriter;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;

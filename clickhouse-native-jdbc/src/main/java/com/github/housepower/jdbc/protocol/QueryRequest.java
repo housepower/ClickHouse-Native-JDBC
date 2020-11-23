@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.protocol;
 
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
 
@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryRequest extends RequestOrResponse {
+public class QueryRequest implements Request {
 
     public static final int COMPLETE_STAGE = 2;
 
@@ -40,7 +40,6 @@ public class QueryRequest extends RequestOrResponse {
 
     public QueryRequest(String queryId, ClientInfo clientInfo, int stage, boolean compression, String queryString,
         Map<SettingKey, Object> settings) {
-        super(ProtocolType.REQUEST_QUERY);
 
         this.stage = stage;
         this.queryId = queryId;
@@ -48,6 +47,11 @@ public class QueryRequest extends RequestOrResponse {
         this.clientInfo = clientInfo;
         this.compression = compression;
         this.queryString = queryString;
+    }
+
+    @Override
+    public ProtoType type() {
+        return ProtoType.REQUEST_QUERY;
     }
 
     @Override

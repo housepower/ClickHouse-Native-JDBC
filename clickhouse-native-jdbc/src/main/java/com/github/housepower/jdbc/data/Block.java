@@ -17,8 +17,8 @@ package com.github.housepower.jdbc.data;
 import com.github.housepower.jdbc.connect.PhysicalInfo;
 import com.github.housepower.jdbc.data.BlockSettings.Setting;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;

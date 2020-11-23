@@ -14,14 +14,13 @@
 
 package com.github.housepower.jdbc.protocol;
 
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
 import java.time.ZoneId;
 
-public class HelloResponse extends RequestOrResponse {
+public class HelloResponse implements Response {
 
     private final long reversion;
     private final long majorVersion;
@@ -31,10 +30,9 @@ public class HelloResponse extends RequestOrResponse {
     private final String serverDisplayName;
 
     public HelloResponse(
-        String serverName, long majorVersion, long minorVersion, long reversion,
-        String serverTimeZone,
-        String serverDisplayName) {
-        super(ProtocolType.RESPONSE_HELLO);
+            String serverName, long majorVersion, long minorVersion, long reversion,
+            String serverTimeZone,
+            String serverDisplayName) {
 
         this.reversion = reversion;
         this.serverName = serverName;
@@ -42,6 +40,11 @@ public class HelloResponse extends RequestOrResponse {
         this.minorVersion = minorVersion;
         this.serverTimeZone = serverTimeZone;
         this.serverDisplayName = serverDisplayName;
+    }
+
+    @Override
+    public ProtoType type() {
+        return ProtoType.RESPONSE_HELLO;
     }
 
     public long reversion() {
@@ -68,12 +71,6 @@ public class HelloResponse extends RequestOrResponse {
         return serverDisplayName;
     }
 
-
-    @Override
-    public void writeImpl(BinarySerializer serializer) {
-        throw new UnsupportedOperationException("HelloResponse Cannot write to Server.");
-    }
-
     public static HelloResponse readFrom(BinaryDeserializer deserializer) throws IOException {
         String name = deserializer.readUTF8StringBinary();
         long majorVersion = deserializer.readVarInt();
@@ -82,19 +79,16 @@ public class HelloResponse extends RequestOrResponse {
         String serverTimeZone = getTimeZone(deserializer, serverReversion);
         String serverDisplayName = getDisplayName(deserializer, serverReversion);
 
-        return new HelloResponse(name, majorVersion, minorVersion, serverReversion, serverTimeZone,
-                                 serverDisplayName);
+        return new HelloResponse(name, majorVersion, minorVersion, serverReversion, serverTimeZone, serverDisplayName);
     }
 
-    private static String getTimeZone(BinaryDeserializer deserializer, long serverReversion)
-        throws IOException {
+    private static String getTimeZone(BinaryDeserializer deserializer, long serverReversion) throws IOException {
         return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_TIMEZONE ?
-               deserializer.readUTF8StringBinary() : ZoneId.systemDefault().getId();
+                deserializer.readUTF8StringBinary() : ZoneId.systemDefault().getId();
     }
 
-    private static String getDisplayName(BinaryDeserializer deserializer, long serverReversion)
-        throws IOException {
+    private static String getDisplayName(BinaryDeserializer deserializer, long serverReversion) throws IOException {
         return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_DISPLAY_NAME ?
-               deserializer.readUTF8StringBinary() : "localhost";
+                deserializer.readUTF8StringBinary() : "localhost";
     }
 }

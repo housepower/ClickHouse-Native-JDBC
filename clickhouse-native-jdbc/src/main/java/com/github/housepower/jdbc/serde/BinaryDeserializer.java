@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.serializer;
+package com.github.housepower.jdbc.serde;
 
 import com.github.housepower.jdbc.buffer.BuffedReader;
 import com.github.housepower.jdbc.buffer.CompressedBuffedReader;
@@ -85,7 +85,7 @@ public class BinaryDeserializer {
         container.select(true);
     }
 
-    public void maybeDisenableCompressed() {
+    public void maybeDisableCompressed() {
         container.select(false);
     }
 

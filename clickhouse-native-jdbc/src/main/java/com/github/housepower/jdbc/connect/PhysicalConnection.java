@@ -18,8 +18,8 @@ import com.github.housepower.jdbc.buffer.SocketBuffedWriter;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.*;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
@@ -53,7 +53,7 @@ public class PhysicalConnection {
         try {
             sendRequest(new PingRequest());
             for (; ; ) {
-                RequestOrResponse response = receiveResponse(soTimeout, info);
+                Response response = receiveResponse(soTimeout, info);
 
                 if (response instanceof PongResponse)
                     return true;
@@ -81,7 +81,7 @@ public class PhysicalConnection {
 
     public Block receiveSampleBlock(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
         while (true) {
-            RequestOrResponse response = receiveResponse(soTimeout, info);
+            Response response = receiveResponse(soTimeout, info);
             if (response instanceof DataResponse) {
                 return ((DataResponse) response).block();
             }
@@ -89,21 +89,21 @@ public class PhysicalConnection {
     }
 
     public HelloResponse receiveHello(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
-        RequestOrResponse response = receiveResponse(soTimeout, info);
+        Response response = receiveResponse(soTimeout, info);
         Validate.isTrue(response instanceof HelloResponse, "Expect Hello Response.");
         return (HelloResponse) response;
     }
 
     public EOFStreamResponse receiveEndOfStream(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
-        RequestOrResponse response = receiveResponse(soTimeout, info);
+        Response response = receiveResponse(soTimeout, info);
         Validate.isTrue(response instanceof EOFStreamResponse, "Expect EOFStream Response.");
         return (EOFStreamResponse) response;
     }
 
-    public RequestOrResponse receiveResponse(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
+    public Response receiveResponse(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
         try {
             socket.setSoTimeout(soTimeout);
-            return RequestOrResponse.readFrom(deserializer, info);
+            return Response.readFrom(deserializer, info);
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -129,7 +129,7 @@ public class PhysicalConnection {
         sendRequest(new QueryRequest(id, info, stage, true, query, settings));
     }
 
-    private void sendRequest(RequestOrResponse request) throws SQLException {
+    private void sendRequest(Request request) throws SQLException {
         try {
             request.writeTo(serializer);
             serializer.flushToTarget(true);

@@ -16,7 +16,7 @@ package com.github.housepower.jdbc.data;
 
 import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.jdbc.data.type.complex.DataTypeTuple;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;

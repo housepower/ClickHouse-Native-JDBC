@@ -14,21 +14,16 @@
 
 package com.github.housepower.jdbc.protocol;
 
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
-
-public class ProfileInfoResponse extends RequestOrResponse {
-
-    ProfileInfoResponse() {
-        super(ProtocolType.RESPONSE_ProfileInfo);
-    }
+public class ProfileInfoResponse implements Response {
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
-        throw new UnsupportedOperationException("ProfileInfoResponse Cannot write to Server.");
+    public ProtoType type() {
+        return ProtoType.RESPONSE_PROFILE_INFO;
     }
 
     public static ProfileInfoResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {

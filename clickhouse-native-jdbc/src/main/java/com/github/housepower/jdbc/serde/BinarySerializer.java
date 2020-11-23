@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.serializer;
+package com.github.housepower.jdbc.serde;
 
 import com.github.housepower.jdbc.buffer.BuffedWriter;
 import com.github.housepower.jdbc.buffer.CompressedBuffedWriter;

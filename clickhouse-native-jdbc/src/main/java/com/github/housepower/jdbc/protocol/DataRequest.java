@@ -15,12 +15,12 @@
 package com.github.housepower.jdbc.protocol;
 
 import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class DataRequest extends RequestOrResponse {
+public class DataRequest implements Request {
     public static final DataRequest EMPTY = new DataRequest("");
 
     private final String name;
@@ -31,9 +31,13 @@ public class DataRequest extends RequestOrResponse {
     }
 
     public DataRequest(String name, Block block) {
-        super(ProtocolType.REQUEST_DATA);
         this.name = name;
         this.block = block;
+    }
+
+    @Override
+    public ProtoType type() {
+        return ProtoType.REQUEST_DATA;
     }
 
     @Override

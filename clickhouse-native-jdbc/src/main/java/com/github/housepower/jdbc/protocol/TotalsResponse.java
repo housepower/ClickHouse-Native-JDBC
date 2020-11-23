@@ -14,32 +14,30 @@
 
 package com.github.housepower.jdbc.protocol;
 
+import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.data.Block;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
-import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
-
-public class TotalsResponse extends RequestOrResponse {
+public class TotalsResponse implements Response {
 
     private final String name;
     private final Block block;
 
     TotalsResponse(String name, Block block) {
-        super(ProtocolType.RESPONSE_Totals);
         this.name = name;
         this.block = block;
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
-        throw new UnsupportedOperationException("TotalsResponse Cannot write to Server.");
+    public ProtoType type() {
+        return ProtoType.RESPONSE_TOTALS;
     }
 
     public static TotalsResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
-        throws IOException, SQLException {
+            throws IOException, SQLException {
         return new TotalsResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
     }
 }

@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.settings;
 
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 

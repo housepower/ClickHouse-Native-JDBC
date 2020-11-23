@@ -14,14 +14,15 @@
 
 package com.github.housepower.jdbc.protocol;
 
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 
-public class PingRequest extends RequestOrResponse {
+public class PingRequest implements Request {
 
-    public PingRequest() {
-        super(ProtocolType.REQUEST_PING);
+    @Override
+    public ProtoType type() {
+        return ProtoType.REQUEST_PING;
     }
 
     @Override
