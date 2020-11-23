@@ -49,17 +49,17 @@ public class PhysicalConnection {
         this.address = socket.getLocalSocketAddress();
     }
 
-    public boolean ping(int soTimeout, PhysicalInfo.ServerInfo info) {
+    public boolean ping(int soTimeoutMs, PhysicalInfo.ServerInfo info) {
         try {
             sendRequest(new PingRequest());
-            for (; ; ) {
-                Response response = receiveResponse(soTimeout, info);
+            while (true) {
+                Response response = receiveResponse(soTimeoutMs, info);
 
                 if (response instanceof PongResponse)
                     return true;
 
                 // TODO there are some previous response we haven't consumed
-                LOG.warn("skip response: {}", response.type());
+                LOG.warn("expect pong, skip response: {}", response.type());
             }
         } catch (SQLException e) {
             LOG.warn(e.getMessage());
@@ -72,37 +72,39 @@ public class PhysicalConnection {
     }
 
     public void sendQuery(String query, QueryRequest.ClientInfo info, Map<SettingKey, Object> settings) throws SQLException {
-        sendQuery(UUID.randomUUID().toString(), QueryRequest.COMPLETE_STAGE, info, query, settings);
+        sendQuery(UUID.randomUUID().toString(), QueryRequest.STAGE_COMPLETE, info, query, settings);
     }
 
     public void sendHello(String client, long reversion, String db, String user, String password) throws SQLException {
         sendRequest(new HelloRequest(client, reversion, db, user, password));
     }
 
-    public Block receiveSampleBlock(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
+    public Block receiveSampleBlock(int soTimeoutMs, PhysicalInfo.ServerInfo info) throws SQLException {
         while (true) {
-            Response response = receiveResponse(soTimeout, info);
+            Response response = receiveResponse(soTimeoutMs, info);
             if (response instanceof DataResponse) {
                 return ((DataResponse) response).block();
             }
+            // TODO there are some previous response we haven't consumed
+            LOG.warn("expect sample block, skip response: {}", response.type());
         }
     }
 
-    public HelloResponse receiveHello(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
-        Response response = receiveResponse(soTimeout, info);
+    public HelloResponse receiveHello(int soTimeoutMs, PhysicalInfo.ServerInfo info) throws SQLException {
+        Response response = receiveResponse(soTimeoutMs, info);
         Validate.isTrue(response instanceof HelloResponse, "Expect Hello Response.");
         return (HelloResponse) response;
     }
 
-    public EOFStreamResponse receiveEndOfStream(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
-        Response response = receiveResponse(soTimeout, info);
+    public EOFStreamResponse receiveEndOfStream(int soTimeoutMs, PhysicalInfo.ServerInfo info) throws SQLException {
+        Response response = receiveResponse(soTimeoutMs, info);
         Validate.isTrue(response instanceof EOFStreamResponse, "Expect EOFStream Response.");
         return (EOFStreamResponse) response;
     }
 
-    public Response receiveResponse(int soTimeout, PhysicalInfo.ServerInfo info) throws SQLException {
+    public Response receiveResponse(int soTimeoutMs, PhysicalInfo.ServerInfo info) throws SQLException {
         try {
-            socket.setSoTimeout(soTimeout);
+            socket.setSoTimeout(soTimeoutMs);
             return Response.readFrom(deserializer, info);
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
@@ -144,10 +146,10 @@ public class PhysicalConnection {
 
             Socket socket = new Socket();
             socket.setTcpNoDelay(true);
-            socket.setSendBufferSize(ClickHouseDefines.SOCKET_BUFFER_SIZE);
-            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_BUFFER_SIZE);
+            socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
+            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
             socket.setKeepAlive(configure.tcpKeepAlive());
-            socket.connect(endpoint, configure.connectTimeout());
+            socket.connect(endpoint, configure.connectTimeoutMs());
 
             return new PhysicalConnection(socket, new BinarySerializer(new SocketBuffedWriter(socket), true), new BinaryDeserializer(socket));
         } catch (IOException ex) {

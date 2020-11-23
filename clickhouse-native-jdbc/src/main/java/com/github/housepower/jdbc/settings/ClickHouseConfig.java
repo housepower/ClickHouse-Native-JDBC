@@ -74,11 +74,11 @@ public class ClickHouseConfig {
         return this.password;
     }
 
-    public int queryTimeout() {
+    public int queryTimeoutMs() {
         return this.queryTimeoutMs;
     }
 
-    public int connectTimeout() {
+    public int connectTimeoutMs() {
         return this.connectTimeoutMs;
     }
 
@@ -171,8 +171,8 @@ public class ClickHouseConfig {
                     .database(cfg.database())
                     .user(cfg.user())
                     .password(cfg.password())
-                    .connectTimeoutMs(cfg.connectTimeout())
-                    .queryTimeoutMs(cfg.queryTimeout())
+                    .connectTimeoutMs(cfg.connectTimeoutMs())
+                    .queryTimeoutMs(cfg.queryTimeoutMs())
                     .charset(cfg.charset().name())
                     .tcpKeepAlive(cfg.tcpKeepAlive())
                     .withSettings(cfg.settings());

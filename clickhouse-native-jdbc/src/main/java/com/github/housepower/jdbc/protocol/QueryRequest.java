@@ -25,7 +25,16 @@ import java.util.Map;
 
 public class QueryRequest implements Request {
 
-    public static final int COMPLETE_STAGE = 2;
+    // Only read/have been read the columns specified in the query.
+    public static final int STAGE_FETCH_COLUMNS = 0;
+    // Until the stage where the results of processing on different servers can be combined.
+    public static final int STAGE_WITH_MERGEABLE_STATE = 1;
+    // Completely.
+    public static final int STAGE_COMPLETE = 2;
+    // Until the stage where the aggregate functions were calculated and finalized.
+    // It is used for auto distributed_group_by_no_merge optimization for distributed engine.
+    // (See comments in StorageDistributed).
+    public static final int STAGE_WITH_MERGEABLE_STATE_AFTER_AGGREGATION = 3;
 
     private final int stage;
     private final String queryId;

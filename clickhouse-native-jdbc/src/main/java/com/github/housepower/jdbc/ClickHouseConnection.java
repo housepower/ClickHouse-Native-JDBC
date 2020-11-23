@@ -170,7 +170,7 @@ public class ClickHouseConnection implements SQLConnection {
         connection.sendQuery(insertQuery, physicalInfo.get().client(), cfg.get().settings());
         Validate.isTrue(this.state.compareAndSet(ConnectionState.IDLE, ConnectionState.WAITING_INSERT),
                 "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
-        return connection.receiveSampleBlock(cfg.get().queryTimeout(), physicalInfo.get().server());
+        return connection.receiveSampleBlock(cfg.get().queryTimeoutMs(), physicalInfo.get().server());
     }
 
     public QueryResponse sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
@@ -179,7 +179,7 @@ public class ClickHouseConnection implements SQLConnection {
         PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(query, physicalInfo.get().client(), cfg.settings());
 
-        return new QueryResponse(() -> connection.receiveResponse(this.cfg.get().queryTimeout(), physicalInfo.get().server()));
+        return new QueryResponse(() -> connection.receiveResponse(this.cfg.get().queryTimeoutMs(), physicalInfo.get().server()));
     }
 
     // when sendInsertRequest we must ensure the connection is healthy
@@ -191,14 +191,14 @@ public class ClickHouseConnection implements SQLConnection {
         PhysicalConnection connection = getPhysicalConnection();
         connection.sendData(block);
         connection.sendData(new Block());
-        connection.receiveEndOfStream(cfg.get().queryTimeout(), physicalInfo.get().server());
+        connection.receiveEndOfStream(cfg.get().queryTimeoutMs(), physicalInfo.get().server());
         Validate.isTrue(this.state.compareAndSet(ConnectionState.WAITING_INSERT, ConnectionState.IDLE));
         return block.rows();
     }
 
     synchronized private PhysicalConnection getHealthyPhysicalConnection() throws SQLException {
         PhysicalInfo oldInfo = physicalInfo.get();
-        if (!oldInfo.connection().ping(cfg.get().queryTimeout(), physicalInfo.get().server())) {
+        if (!oldInfo.connection().ping(cfg.get().queryTimeoutMs(), physicalInfo.get().server())) {
             LOG.warn("connection loss with state[{}], create new connection and reset state", state);
             PhysicalInfo newInfo = createPhysicalInfo(cfg.get());
             // TODO method is synchronized
@@ -237,7 +237,7 @@ public class ClickHouseConnection implements SQLConnection {
             long revision = ClickHouseDefines.CLIENT_REVISION;
             physical.sendHello("client", revision, configure.database(), configure.user(), configure.password());
 
-            HelloResponse response = physical.receiveHello(configure.queryTimeout(), null);
+            HelloResponse response = physical.receiveHello(configure.queryTimeoutMs(), null);
             ZoneId timeZone = ZoneId.of(response.serverTimeZone());
             return new PhysicalInfo.ServerInfo(configure, response.reversion(), timeZone, response.serverDisplayName());
         } catch (SQLException rethrows) {

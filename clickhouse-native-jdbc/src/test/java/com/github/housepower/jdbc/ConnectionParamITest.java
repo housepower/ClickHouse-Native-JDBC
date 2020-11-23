@@ -67,7 +67,7 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
 
-        assertEquals(50000, config.connectTimeout());
+        assertEquals(50000, config.connectTimeoutMs());
     }
 
     @Test
@@ -78,7 +78,7 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals(9000, config.port());
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
-        assertEquals(50000, config.connectTimeout());
+        assertEquals(50000, config.connectTimeoutMs());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals(9000, config.port());
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
-        assertEquals(50000, config.connectTimeout());
+        assertEquals(50000, config.connectTimeoutMs());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals(1940, config.port());
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
-        assertEquals(50000, config.connectTimeout());
+        assertEquals(50000, config.connectTimeoutMs());
     }
 
 }

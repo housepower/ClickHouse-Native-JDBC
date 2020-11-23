@@ -136,7 +136,7 @@ public class ClickHouseStatement implements SQLStatement {
     // JDBC returns timeout in seconds
     @Override
     public int getQueryTimeout() {
-        return cfg.queryTimeout() / 1000;
+        return cfg.queryTimeoutMs() / 1000;
     }
 
     @Override

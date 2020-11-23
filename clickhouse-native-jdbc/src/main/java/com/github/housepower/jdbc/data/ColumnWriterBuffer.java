@@ -31,7 +31,7 @@ public class ColumnWriterBuffer {
     public BinarySerializer column;
 
     public ColumnWriterBuffer() {
-        this.columnWriter = new ByteArrayWriter(ClickHouseDefines.COLUMN_BUFFER);
+        this.columnWriter = new ByteArrayWriter(ClickHouseDefines.COLUMN_BUFFER_BYTES);
         this.column = new BinarySerializer(columnWriter, false);
     }
 

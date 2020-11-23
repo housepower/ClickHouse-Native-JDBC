@@ -168,7 +168,7 @@ public class BalancedClickhouseDataSourceITest {
         BalancedClickhouseDataSource dataSource = new BalancedClickhouseDataSource(
                 "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click", properties);
         ClickHouseConfig cfg = dataSource.getCfg();
-        assertEquals(6789000, cfg.queryTimeout());
+        assertEquals(6789000, cfg.queryTimeoutMs());
         assertEquals("888888", cfg.password());
         assertEquals("click", cfg.database());
         assertEquals(2, dataSource.getAllClickhouseUrls().size());
@@ -179,7 +179,7 @@ public class BalancedClickhouseDataSourceITest {
         dataSource = new BalancedClickhouseDataSource(
                 "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click?query_timeout=12345&user=readonly", properties);
         cfg = dataSource.getCfg();
-        assertEquals(6789000, cfg.queryTimeout());
+        assertEquals(6789000, cfg.queryTimeoutMs());
         assertEquals("readonly", cfg.user());
         assertEquals("888888", cfg.password());
         assertEquals("click", cfg.database());
