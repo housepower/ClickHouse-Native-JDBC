@@ -31,7 +31,7 @@ module.exports = {
         algolia: {},
         nav: [
           { text: 'Guide', link: '/guide/' },
-          { text: 'Dev', link: '/dev/' },
+          { text: 'Dev', link: '/dev/contribute' },
           { text: 'Deep Dive', link: '/deep-dive/' },
           { text: 'Release Notes', link: '/release-notes/'},
           { text: 'GitHub', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
@@ -61,12 +61,7 @@ module.exports = {
             }
           ],
           '/dev/': [
-            {
-              title: 'Contribute',
-              collapsable: false,
-              sidebarDepth: 1,
-              children: [],
-            },
+            ['contribute', 'Contribute Guide'],
             {
               title: 'Release',
               collapsable: false,
@@ -104,7 +99,7 @@ module.exports = {
         algolia: {},
         nav: [
           { text: '指南', link: '/zh/guide/' },
-          { text: '开发', link: '/zh/dev/' },
+          { text: '开发', link: '/zh/dev/contribute' },
           { text: '深入', link: '/zh/deep-dive/' },
           { text: '发行注记', link: '/zh/release-notes/' },
           { text: '源码仓库', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
@@ -134,12 +129,7 @@ module.exports = {
             }
           ],
           '/zh/dev/': [
-            {
-              title: '项目贡献',
-              collapsable: false,
-              sidebarDepth: 1,
-              children: [],
-            },
+            ['contribute', '贡献指南'],
             {
               title: '发布',
               collapsable: false,

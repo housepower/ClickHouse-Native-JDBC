@@ -1,2 +1,2 @@
-ClickHouse Native JDBC User Guide
-==============================
+User Guide
+==========

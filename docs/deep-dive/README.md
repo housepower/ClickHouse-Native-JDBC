@@ -1,2 +1,2 @@
-ClickHouse Native JDBC Deep Dive
-==============================
+Deep Dive
+=========

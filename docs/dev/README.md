@@ -1,2 +1,2 @@
-ClickHouse Native JDBC Dev Docs
-==============================
+Dev Docs
+========
