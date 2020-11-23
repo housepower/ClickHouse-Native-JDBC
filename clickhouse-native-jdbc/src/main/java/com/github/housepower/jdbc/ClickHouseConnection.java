@@ -132,12 +132,7 @@ public class ClickHouseConnection implements SQLConnection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        ClickHouseConfig validCfg = cfg.get().withQueryTimeout(Duration.ofSeconds(timeout));
-        try (Connection connection = new ClickHouseConnection(validCfg, nativeCtx.get());
-             Statement statement = connection.createStatement()) {
-            statement.execute("SELECT 1");
-            return true;
-        }
+        return getNativeClient().ping(timeout, nativeCtx.get().serverCtx());
     }
 
     // ClickHouse support only `database`, we treat it as JDBC `catalog`

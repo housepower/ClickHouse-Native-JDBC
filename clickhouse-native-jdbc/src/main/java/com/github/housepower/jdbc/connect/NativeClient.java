@@ -131,12 +131,13 @@ public class NativeClient {
 
     public void disconnect() throws SQLException {
         try {
-            if (!socket.isClosed()) {
-                LOG.debug("close socket");
-                serializer.flushToTarget(true);
-                socket.close();
+            if (socket.isClosed()) {
+                LOG.warn("socket already closed, ignore");
+                return;
             }
-            LOG.debug("try disconnecting already closed connection");
+            LOG.debug("flush and close socket");
+            serializer.flushToTarget(true);
+            socket.close();
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
