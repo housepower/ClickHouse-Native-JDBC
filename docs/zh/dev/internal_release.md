@@ -1,14 +1,13 @@
-Internal Release Manuel
-=======================
+内部发布手册
+==========
 
 ::: tip
-Internal Release means deploy to private Nexus Repository. Please make sure you are granted to access 
-your company private Nexus Repository.
+内部发布是指部署到私服 Nexus 仓库. 请确保你有公司私服的访问权限.
 :::
 
-## Setup Nexus Authentication
+## 设置私服 Nexus 认证
 
-Edit and put below configurations into `~/.m2/settings.xml`
+编辑并将下面的配置放入 `~/.m2/settings.xml`
 
 ```xml
 <servers>
@@ -25,7 +24,7 @@ Edit and put below configurations into `~/.m2/settings.xml`
 </servers>
 ```
 
-## Package and Deploy to Nexus
+## 打包并部署到私服 Nexus
 
 ```shell script
 mvn clean deploy -Prelease -DskipTests -DskipITs \
@@ -36,7 +35,7 @@ mvn clean deploy -Prelease -DskipTests -DskipITs \
 ```
 
 ::: tip
-To force refresh snapshot dependencies:
+用以下命令强制刷新 SNAPSHOT 依赖:
 - Maven: `mvn clean compile –update-snapshots`
 - Gradle `gradlew clean build --refresh-dependencies`
 :::

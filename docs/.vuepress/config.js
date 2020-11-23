@@ -62,7 +62,7 @@ module.exports = {
           ],
           '/dev/': [
             {
-              title: 'Pull Request',
+              title: 'Contribute',
               collapsable: false,
               sidebarDepth: 1,
               children: [],
@@ -135,18 +135,30 @@ module.exports = {
           ],
           '/zh/dev/': [
             {
-              title: 'Pull Request',
+              title: '项目贡献',
               collapsable: false,
               sidebarDepth: 1,
               children: [],
-            }
+            },
+            {
+              title: '发布',
+              collapsable: false,
+              sidebarDepth: 1,
+              children: [
+                ['internal_release', '内部发布'],
+                ['public_release', '公开发布'],
+              ],
+            },
           ],
           '/zh/deep-dive/': [
             {
-              title: '工作原理',
+              title: 'ClickHouse',
               collapsable: false,
               sidebarDepth: 1,
-              children: [],
+              children: [
+                ['data_type', '数据类型'],
+                ['native_protocol', '原生协议'],
+              ],
             }
           ],
           '/zh/release-notes/': [],

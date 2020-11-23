@@ -1,36 +1,35 @@
-Public Release Manuel
+公开发布手册
 =====================
 
 ::: warning
-Public Release means deploy to Maven Central. Only core team members are granted to 
-deploy into Public Repository.
+公开发布是指部署到 Maven Central. 只有核心项目成员才有权限发布到公开仓库.
 :::
 
-## Setup GPG
+## 设置 GPG
 
-Install on macOS
+在 macOS 上安装
 ```shell script
 brew install gnupg
 ```
 
-Generate key if you don't have it.
+如果没有秘钥, 生成一个秘钥
 ```shell script
 gpg --full-generate-key
 ```
 
-Publish public key
+公开公有秘钥
 ```shell script
 gpg --send-keys [key-id] --keyserver hkp://subkeys.pgp.net
 ```
 
-Show keys
+查看秘钥
 ```shell script
 gpg --list-keys
 ```
 
-## Setup Sonatype Authentication
+## 设置 Sonatype 认证
 
-Edit and put below configurations into `~/.m2/settings.xml`
+编辑并将下面的配置放入 `~/.m2/settings.xml`
 
 ```xml
 <servers>
@@ -47,15 +46,15 @@ Edit and put below configurations into `~/.m2/settings.xml`
 </servers>
 ```
 
-## Cut Branch
+## 切出分支
 
-It's only need for **feature release**, you should cut a branch from master.
+只有在发布**特性版本**时, 你才需要从 master 分支上切出分支.
 
 ```shell script
 git checkout -b 2.5
 ```
 
-## Bump Release Version
+## 切换发布版本
 
 ```shell script
 mvn versions:set -DnewVersion=2.5.0
@@ -63,26 +62,26 @@ mvn versions:commit
 git commit -am '(release) prepare release v2.5.0-rc0'
 ```
 
-## Package and Deploy to Sonatype
+## 打包并部署到 Sonatype
 
 ```shell script
 mvn clean deploy -DskipTests -Prelease
 mvn clean deploy -DskipTests -Prelease -Pscala-2.12
 ```
 
-## Publish Release
+## 发布
 
-Go to [Sonatype Repository](https://oss.sonatype.org/#stagingRepositories)
+进入 [Sonatype 仓库](https://oss.sonatype.org/#stagingRepositories)
 
-1. verify artifacts
-2. close repository
-3. release to Maven Central
+1. 验证资源文件
+2. 关闭仓库
+3. 发布到 Maven Central
 
-## Announce on GitHub
+## 在 GitHub 上声明
 
-Edit at [GitHub Release Page](https://github.com/housepower/ClickHouse-Native-JDBC/releases)
+编辑 [GitHub 发布页](https://github.com/housepower/ClickHouse-Native-JDBC/releases)
 
-## Bump Development Version
+## 切换开发版本
 
 ```shell script
 mvn versions:set -DnewVersion=2.6.0-SNAPSHOT

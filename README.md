@@ -8,6 +8,8 @@ ClickHouse Native JDBC
 [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/housepower/ClickHouse-Native-JDBC.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/housepower/ClickHouse-Native-JDBC/context:java)
 [![License](https://img.shields.io/github/license/housepower/ClickHouse-Native-JDBC)](https://github.com/housepower/ClickHouse-Native-JDBC/blob/master/LICENSE)
 
+[Home Page](https://housepower.github.io/ClickHouse-Native-JDBC/)
+
 A Native JDBC library for accessing [ClickHouse](https://clickhouse.yandex/) in Java, also provide a library for 
 integrating with [Apache Spark](https://github.com/apache/spark/).
 
