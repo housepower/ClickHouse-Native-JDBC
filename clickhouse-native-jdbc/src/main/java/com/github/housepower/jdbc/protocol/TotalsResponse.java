@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.protocol;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 
@@ -36,7 +36,7 @@ public class TotalsResponse implements Response {
         return ProtoType.RESPONSE_TOTALS;
     }
 
-    public static TotalsResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
+    public static TotalsResponse readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info)
             throws IOException, SQLException {
         return new TotalsResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
     }

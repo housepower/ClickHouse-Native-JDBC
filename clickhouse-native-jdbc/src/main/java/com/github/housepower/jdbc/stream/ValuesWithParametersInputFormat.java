@@ -49,7 +49,7 @@ public class ValuesWithParametersInputFormat implements InputFormat {
 
         for (int column = 0; column < block.columns(); column++) {
             if (constIdx[column] > 0) {
-                block.incrIndex(column);
+                block.incIndex(column);
             }
         }
         Validate.isTrue(lexer.character() == ')');

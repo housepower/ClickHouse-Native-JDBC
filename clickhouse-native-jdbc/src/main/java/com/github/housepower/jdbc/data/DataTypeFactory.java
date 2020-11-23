@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.data;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.type.*;
 import com.github.housepower.jdbc.data.type.complex.*;
 import com.github.housepower.jdbc.misc.SQLLexer;
@@ -28,40 +28,40 @@ import java.util.Map;
 
 public class DataTypeFactory {
 
-    public static IDataType get(String type, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+    public static IDataType get(String type, NativeContext.ServerContext serverContext) throws SQLException {
         SQLLexer lexer = new SQLLexer(0, type);
-        IDataType dataType = get(lexer, serverInfo);
+        IDataType dataType = get(lexer, serverContext);
         Validate.isTrue(lexer.eof());
         return dataType;
     }
 
     private static final Map<String, IDataType> dataTypes = initialDataTypes();
 
-    public static IDataType get(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+    public static IDataType get(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
         StringView dataTypeName = lexer.bareWord();
 
         if (dataTypeName.checkEquals("Date")) {
-            return DataTypeDate.createDateType(lexer, serverInfo);
+            return DataTypeDate.createDateType(lexer, serverContext);
         } else if (dataTypeName.checkEquals("Tuple")) {
-            return DataTypeTuple.createTupleType(lexer, serverInfo);
+            return DataTypeTuple.createTupleType(lexer, serverContext);
         } else if (dataTypeName.checkEquals("Array")) {
-            return DataTypeArray.createArrayType(lexer, serverInfo);
+            return DataTypeArray.createArrayType(lexer, serverContext);
         } else if (dataTypeName.checkEquals("Enum8")) {
-            return DataTypeEnum8.createEnum8Type(lexer, serverInfo);
+            return DataTypeEnum8.createEnum8Type(lexer, serverContext);
         } else if (dataTypeName.checkEquals("Enum16")) {
-            return DataTypeEnum16.createEnum16Type(lexer, serverInfo);
+            return DataTypeEnum16.createEnum16Type(lexer, serverContext);
         } else if (dataTypeName.checkEquals("DateTime")) {
-            return DataTypeDateTime.createDateTimeType(lexer, serverInfo);
+            return DataTypeDateTime.createDateTimeType(lexer, serverContext);
         } else if (dataTypeName.checkEquals("DateTime64")) {
-            return DataTypeDateTime64.createDateTime64Type(lexer, serverInfo);
+            return DataTypeDateTime64.createDateTime64Type(lexer, serverContext);
         } else if (dataTypeName.checkEquals("Nullable")) {
-            return DataTypeNullable.createNullableType(lexer, serverInfo);
+            return DataTypeNullable.createNullableType(lexer, serverContext);
         } else if (dataTypeName.checkEquals("FixedString")) {
-            return DataTypeFixedString.createFixedStringType(lexer, serverInfo);
+            return DataTypeFixedString.createFixedStringType(lexer, serverContext);
         } else if (dataTypeName.checkEquals("Decimal")) {
-            return DataTypeDecimal.createDecimalType(lexer, serverInfo);
+            return DataTypeDecimal.createDecimalType(lexer, serverContext);
         } else if (dataTypeName.checkEquals("String")) {
-            return new DataTypeString(serverInfo);
+            return new DataTypeString(serverContext);
         } else {
             String name = String.valueOf(dataTypeName);
             IDataType dataType = dataTypes.get(name);

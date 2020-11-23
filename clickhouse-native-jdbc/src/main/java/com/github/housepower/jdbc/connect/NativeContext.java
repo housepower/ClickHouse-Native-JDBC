@@ -14,42 +14,42 @@
 
 package com.github.housepower.jdbc.connect;
 
-import com.github.housepower.jdbc.protocol.QueryRequest.ClientInfo;
+import com.github.housepower.jdbc.protocol.QueryRequest.ClientContext;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 
 import java.time.ZoneId;
 
-public class PhysicalInfo {
+public class NativeContext {
 
-    private final ClientInfo client;
-    private final ServerInfo server;
-    private final PhysicalConnection connection;
+    private final ClientContext clientCtx;
+    private final ServerContext serverCtx;
+    private final NativeClient nativeClient;
 
-    public PhysicalInfo(ClientInfo client, ServerInfo server, PhysicalConnection connection) {
-        this.client = client;
-        this.server = server;
-        this.connection = connection;
+    public NativeContext(ClientContext clientCtx, ServerContext serverCtx, NativeClient nativeClient) {
+        this.clientCtx = clientCtx;
+        this.serverCtx = serverCtx;
+        this.nativeClient = nativeClient;
     }
 
-    public ClientInfo client() {
-        return client;
+    public ClientContext clientCtx() {
+        return clientCtx;
     }
 
-    public ServerInfo server() {
-        return server;
+    public ServerContext serverCtx() {
+        return serverCtx;
     }
 
-    public PhysicalConnection connection() {
-        return connection;
+    public NativeClient nativeClient() {
+        return nativeClient;
     }
 
-    public static class ServerInfo {
+    public static class ServerContext {
         private final long reversion;
         private final ZoneId timeZone;
         private final String displayName;
         private final ClickHouseConfig configure;
 
-        public ServerInfo(ClickHouseConfig configure, long reversion, ZoneId timeZone, String displayName) {
+        public ServerContext(ClickHouseConfig configure, long reversion, ZoneId timeZone, String displayName) {
             this.configure = configure;
             this.reversion = reversion;
             this.timeZone = timeZone;

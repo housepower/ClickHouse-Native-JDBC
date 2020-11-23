@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.protocol;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 
@@ -37,7 +37,7 @@ public class ExtremesResponse implements Response {
     }
 
     public static ExtremesResponse readFrom(
-            BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info) throws IOException, SQLException {
+            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
         return new ExtremesResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
     }
 }

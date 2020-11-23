@@ -30,7 +30,7 @@ public class DruidITest extends DataSourceITest {
     }
 
     @Test
-    public void testDbcpBasicDataSource() throws Exception {
+    public void testDruidDataSource() throws Exception {
         Properties prop = new Properties();
         prop.put("url", getJdbcUrl());
         prop.put("driverClassName", DRIVER_CLASS_NAME);

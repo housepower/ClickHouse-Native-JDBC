@@ -56,7 +56,7 @@ public class ValuesInputFormat implements InputFormat {
 
         for (int column = 0; column < block.columns(); column++) {
             if (constIdx[column] > 0) {
-                block.incrIndex(column);
+                block.incIndex(column);
             }
         }
     }

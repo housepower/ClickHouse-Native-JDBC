@@ -15,7 +15,7 @@
 package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.ClickHouseStruct;
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
@@ -33,12 +33,12 @@ import java.util.List;
 public class DataTypeTuple implements IDataType {
 
     public static DataTypeTuple createTupleType(SQLLexer lexer,
-                                                PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+                                                NativeContext.ServerContext serverContext) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
         List<IDataType> nestedDataTypes = new ArrayList<>();
 
         for (; ; ) {
-            nestedDataTypes.add(DataTypeFactory.get(lexer, serverInfo));
+            nestedDataTypes.add(DataTypeFactory.get(lexer, serverContext));
             char delimiter = lexer.character();
             Validate.isTrue(delimiter == ',' || delimiter == ')');
             if (delimiter == ')') {

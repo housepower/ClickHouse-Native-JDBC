@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
@@ -29,8 +29,8 @@ import java.sql.Types;
 public class DataTypeString implements IDataType {
     private Charset charset;
 
-    public DataTypeString(PhysicalInfo.ServerInfo serverInfo) {
-        this.charset = serverInfo.getConfigure().charset();
+    public DataTypeString(NativeContext.ServerContext serverContext) {
+        this.charset = serverContext.getConfigure().charset();
     }
 
     @Override

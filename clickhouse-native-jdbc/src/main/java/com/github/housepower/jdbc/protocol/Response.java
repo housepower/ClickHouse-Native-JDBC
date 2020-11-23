@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.protocol;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.exception.NotImplementedException;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 
@@ -25,7 +25,7 @@ public interface Response {
 
     ProtoType type();
 
-    static Response readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info) throws IOException, SQLException {
+    static Response readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
         switch ((int) deserializer.readVarInt()) {
             case 0:
                 return HelloResponse.readFrom(deserializer);

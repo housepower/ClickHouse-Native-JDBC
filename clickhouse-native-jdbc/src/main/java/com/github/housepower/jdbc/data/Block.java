@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.data;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.BlockSettings.Setting;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
@@ -28,7 +28,7 @@ import java.util.Map;
 public class Block {
 
     public static Block readFrom(BinaryDeserializer deserializer,
-                                 PhysicalInfo.ServerInfo serverInfo) throws IOException, SQLException {
+                                 NativeContext.ServerContext serverContext) throws IOException, SQLException {
         BlockSettings info = BlockSettings.readFrom(deserializer);
 
         int columns = (int) deserializer.readVarInt();
@@ -40,7 +40,7 @@ public class Block {
             String name = deserializer.readUTF8StringBinary();
             String type = deserializer.readUTF8StringBinary();
 
-            IDataType dataType = DataTypeFactory.get(type, serverInfo);
+            IDataType dataType = DataTypeFactory.get(type, serverContext);
             Object[] arr = dataType.deserializeBinaryBulk(rows, deserializer);
             cols[i] = ColumnFactory.createColumn(name, dataType, arr);
         }
@@ -90,15 +90,15 @@ public class Block {
         }
     }
 
-    public void setObject(int i, Object object) throws SQLException {
+    public void setObject(int i, Object object) {
         objects[columnIndexAdds[i]] = object;
     }
 
-    public void setConstObject(int i, Object object) throws SQLException {
+    public void setConstObject(int i, Object object) {
         objects[i] = object;
     }
 
-    public void incrIndex(int i) {
+    public void incIndex(int i) {
         for (int j = i; j < columnIndexAdds.length; j++) {
             columnIndexAdds[j] += 1;
         }

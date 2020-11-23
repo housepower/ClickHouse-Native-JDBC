@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
@@ -29,7 +29,7 @@ import java.util.List;
 
 public class DataTypeEnum8 implements IDataType {
 
-    public static IDataType createEnum8Type(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+    public static IDataType createEnum8Type(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
         List<Byte> enumValues = new ArrayList<>();
         List<String> enumNames = new ArrayList<>();

@@ -34,22 +34,45 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
 
-public class PhysicalConnection {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalConnection.class);
+public class NativeClient {
+
+    private static final Logger LOG = LoggerFactory.getLogger(NativeClient.class);
+
+    public static NativeClient connect(ClickHouseConfig configure) throws SQLException {
+        try {
+            SocketAddress endpoint = new InetSocketAddress(configure.host(), configure.port());
+            // TODO support proxy
+            Socket socket = new Socket();
+            socket.setTcpNoDelay(true);
+            socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
+            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
+            socket.setKeepAlive(configure.tcpKeepAlive());
+            socket.connect(endpoint, configure.connectTimeoutMs());
+
+            return new NativeClient(socket, new BinarySerializer(
+                    new SocketBuffedWriter(socket), true), new BinaryDeserializer(socket));
+        } catch (IOException ex) {
+            throw new SQLException(ex.getMessage(), ex);
+        }
+    }
 
     private final Socket socket;
     private final SocketAddress address;
     private final BinarySerializer serializer;
     private final BinaryDeserializer deserializer;
 
-    public PhysicalConnection(Socket socket, BinarySerializer serializer, BinaryDeserializer deserializer) {
+    public NativeClient(Socket socket, BinarySerializer serializer, BinaryDeserializer deserializer) {
         this.socket = socket;
         this.serializer = serializer;
         this.deserializer = deserializer;
         this.address = socket.getLocalSocketAddress();
     }
 
-    public boolean ping(int soTimeoutMs, PhysicalInfo.ServerInfo info) {
+    public SocketAddress address() {
+        return address;
+    }
+
+    public boolean ping(int soTimeoutMs, NativeContext.ServerContext info) {
         try {
             sendRequest(new PingRequest());
             while (true) {
@@ -67,19 +90,7 @@ public class PhysicalConnection {
         }
     }
 
-    public void sendData(Block data) throws SQLException {
-        sendRequest(new DataRequest("", data));
-    }
-
-    public void sendQuery(String query, QueryRequest.ClientInfo info, Map<SettingKey, Object> settings) throws SQLException {
-        sendQuery(UUID.randomUUID().toString(), QueryRequest.STAGE_COMPLETE, info, query, settings);
-    }
-
-    public void sendHello(String client, long reversion, String db, String user, String password) throws SQLException {
-        sendRequest(new HelloRequest(client, reversion, db, user, password));
-    }
-
-    public Block receiveSampleBlock(int soTimeoutMs, PhysicalInfo.ServerInfo info) throws SQLException {
+    public Block receiveSampleBlock(int soTimeoutMs, NativeContext.ServerContext info) throws SQLException {
         while (true) {
             Response response = receiveResponse(soTimeoutMs, info);
             if (response instanceof DataResponse) {
@@ -90,49 +101,55 @@ public class PhysicalConnection {
         }
     }
 
-    public HelloResponse receiveHello(int soTimeoutMs, PhysicalInfo.ServerInfo info) throws SQLException {
+    public void sendHello(String client, long reversion, String db, String user, String password) throws SQLException {
+        sendRequest(new HelloRequest(client, reversion, db, user, password));
+    }
+
+    public void sendQuery(String query, QueryRequest.ClientContext info, Map<SettingKey, Object> settings) throws SQLException {
+        sendQuery(UUID.randomUUID().toString(), QueryRequest.STAGE_COMPLETE, info, query, settings);
+    }
+
+    public void sendData(Block data) throws SQLException {
+        sendRequest(new DataRequest("", data));
+    }
+
+    public HelloResponse receiveHello(int soTimeoutMs, NativeContext.ServerContext info) throws SQLException {
         Response response = receiveResponse(soTimeoutMs, info);
         Validate.isTrue(response instanceof HelloResponse, "Expect Hello Response.");
         return (HelloResponse) response;
     }
 
-    public EOFStreamResponse receiveEndOfStream(int soTimeoutMs, PhysicalInfo.ServerInfo info) throws SQLException {
+    public EOFStreamResponse receiveEndOfStream(int soTimeoutMs, NativeContext.ServerContext info) throws SQLException {
         Response response = receiveResponse(soTimeoutMs, info);
         Validate.isTrue(response instanceof EOFStreamResponse, "Expect EOFStream Response.");
         return (EOFStreamResponse) response;
     }
 
-    public Response receiveResponse(int soTimeoutMs, PhysicalInfo.ServerInfo info) throws SQLException {
-        try {
-            socket.setSoTimeout(soTimeoutMs);
-            return Response.readFrom(deserializer, info);
-        } catch (IOException ex) {
-            throw new SQLException(ex.getMessage(), ex);
-        }
+    public QueryResponse receiveQuery(int soTimeoutMs, NativeContext.ServerContext info) {
+        return new QueryResponse(() -> receiveResponse(soTimeoutMs, info));
     }
 
-    public SocketAddress address() {
-        return address;
-    }
-
-    public void disPhysicalConnection() throws SQLException {
+    public void disconnect() throws SQLException {
         try {
             if (!socket.isClosed()) {
+                LOG.debug("close socket");
                 serializer.flushToTarget(true);
                 socket.close();
             }
+            LOG.debug("try disconnecting already closed connection");
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
     }
 
-    private void sendQuery(String id, int stage, QueryRequest.ClientInfo info, String query,
+    private void sendQuery(String id, int stage, QueryRequest.ClientContext info, String query,
                            Map<SettingKey, Object> settings) throws SQLException {
         sendRequest(new QueryRequest(id, info, stage, true, query, settings));
     }
 
     private void sendRequest(Request request) throws SQLException {
         try {
+            LOG.debug("send request: {}", request.type());
             request.writeTo(serializer);
             serializer.flushToTarget(true);
         } catch (IOException ex) {
@@ -140,18 +157,12 @@ public class PhysicalConnection {
         }
     }
 
-    public static PhysicalConnection openPhysicalConnection(ClickHouseConfig configure) throws SQLException {
+    private Response receiveResponse(int soTimeoutMs, NativeContext.ServerContext info) throws SQLException {
         try {
-            SocketAddress endpoint = new InetSocketAddress(configure.host(), configure.port());
-
-            Socket socket = new Socket();
-            socket.setTcpNoDelay(true);
-            socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
-            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
-            socket.setKeepAlive(configure.tcpKeepAlive());
-            socket.connect(endpoint, configure.connectTimeoutMs());
-
-            return new PhysicalConnection(socket, new BinarySerializer(new SocketBuffedWriter(socket), true), new BinaryDeserializer(socket));
+            socket.setSoTimeout(soTimeoutMs);
+            Response response = Response.readFrom(deserializer, info);
+            LOG.debug("recv response: {}", response.type());
+            return response;
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
