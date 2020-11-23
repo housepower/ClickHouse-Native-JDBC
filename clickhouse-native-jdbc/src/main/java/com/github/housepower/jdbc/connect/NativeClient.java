@@ -150,7 +150,7 @@ public class NativeClient {
 
     private void sendRequest(Request request) throws SQLException {
         try {
-            LOG.debug("send request: {}", request.type());
+            LOG.trace("send request: {}", request.type());
             request.writeTo(serializer);
             serializer.flushToTarget(true);
         } catch (IOException ex) {
@@ -162,7 +162,7 @@ public class NativeClient {
         try {
             socket.setSoTimeout(soTimeoutMs);
             Response response = Response.readFrom(deserializer, info);
-            LOG.debug("recv response: {}", response.type());
+            LOG.trace("recv response: {}", response.type());
             return response;
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
