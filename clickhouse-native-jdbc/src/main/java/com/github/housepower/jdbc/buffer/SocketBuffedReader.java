@@ -31,7 +31,7 @@ public class SocketBuffedReader implements BuffedReader {
     private int position;
 
     public SocketBuffedReader(Socket socket) throws IOException {
-        this(socket.getInputStream(), ClickHouseDefines.SOCKET_BUFFER_SIZE);
+        this(socket.getInputStream(), ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
     }
 
     SocketBuffedReader(InputStream in, int capacity) {

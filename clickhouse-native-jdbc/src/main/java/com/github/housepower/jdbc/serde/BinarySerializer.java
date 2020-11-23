@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.serializer;
+package com.github.housepower.jdbc.serde;
 
 import com.github.housepower.jdbc.buffer.BuffedWriter;
 import com.github.housepower.jdbc.buffer.CompressedBuffedWriter;
@@ -33,7 +33,7 @@ public class BinarySerializer {
         this.enableCompress = enableCompress;
         BuffedWriter compressBuffer = null;
         if (enableCompress) {
-            compressBuffer = new CompressedBuffedWriter(ClickHouseDefines.SOCKET_BUFFER_SIZE, writer);
+            compressBuffer = new CompressedBuffedWriter(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES, writer);
         }
         container = new Container<>(writer, compressBuffer);
     }

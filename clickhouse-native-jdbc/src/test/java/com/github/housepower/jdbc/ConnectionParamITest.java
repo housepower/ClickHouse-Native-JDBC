@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.*;
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -67,7 +68,7 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
 
-        assertEquals(50000, config.connectTimeout());
+        assertEquals(Duration.ofSeconds(50), config.connectTimeout());
     }
 
     @Test
@@ -78,7 +79,7 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals(9000, config.port());
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
-        assertEquals(50000, config.connectTimeout());
+        assertEquals(Duration.ofSeconds(50), config.connectTimeout());
     }
 
     @Test
@@ -89,7 +90,7 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals(9000, config.port());
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
-        assertEquals(50000, config.connectTimeout());
+        assertEquals(Duration.ofSeconds(50), config.connectTimeout());
     }
 
     @Test
@@ -100,7 +101,7 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals(1940, config.port());
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
-        assertEquals(50000, config.connectTimeout());
+        assertEquals(Duration.ofSeconds(50), config.connectTimeout());
     }
 
 }

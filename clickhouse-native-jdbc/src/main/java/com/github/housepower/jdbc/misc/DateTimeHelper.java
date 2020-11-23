@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.misc;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.settings.SettingKey;
 
 import java.time.LocalDateTime;
@@ -23,9 +23,9 @@ import java.time.ZonedDateTime;
 
 public class DateTimeHelper {
 
-    public static ZoneId chooseTimeZone(PhysicalInfo.ServerInfo serverInfo) {
-        return (boolean) serverInfo.getConfigure().settings().getOrDefault(SettingKey.use_client_time_zone, false)
-                ? ZoneId.systemDefault() : serverInfo.timeZone();
+    public static ZoneId chooseTimeZone(NativeContext.ServerContext serverContext) {
+        return (boolean) serverContext.getConfigure().settings().getOrDefault(SettingKey.use_client_time_zone, false)
+                ? ZoneId.systemDefault() : serverContext.timeZone();
     }
 
     public static LocalDateTime convertTimeZone(LocalDateTime localDateTime, ZoneId from, ZoneId to) {

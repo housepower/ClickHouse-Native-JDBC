@@ -14,23 +14,17 @@
 
 package com.github.housepower.jdbc.protocol;
 
-import java.io.IOException;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
 
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
-
-public class EOFStreamResponse extends RequestOrResponse {
-
-    EOFStreamResponse() {
-        super(ProtocolType.RESPONSE_EndOfStream);
-    }
+public class EOFStreamResponse implements Response {
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
-        throw new UnsupportedOperationException("EndOfStreamResponse Cannot write to Server.");
+    public ProtoType type() {
+        return ProtoType.RESPONSE_END_OF_STREAM;
     }
 
-    public static RequestOrResponse readFrom(BinaryDeserializer deserializer) {
+    public static Response readFrom(BinaryDeserializer deserializer) {
         return new EOFStreamResponse();
     }
+
 }

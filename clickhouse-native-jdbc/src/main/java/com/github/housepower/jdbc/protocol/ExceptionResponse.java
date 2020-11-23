@@ -15,21 +15,16 @@
 package com.github.housepower.jdbc.protocol;
 
 import com.github.housepower.jdbc.ClickHouseSQLException;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class ExceptionResponse extends RequestOrResponse {
-
-    ExceptionResponse() {
-        super(ProtocolType.RESPONSE_Exception);
-    }
+public class ExceptionResponse implements Response {
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
-        throw new UnsupportedOperationException("ExceptionResponse Cannot write to Server.");
+    public ProtoType type() {
+        return ProtoType.RESPONSE_EXCEPTION;
     }
 
     public static SQLException readExceptionFrom(BinaryDeserializer deserializer) throws IOException {
@@ -40,7 +35,7 @@ public class ExceptionResponse extends RequestOrResponse {
 
         if (deserializer.readBoolean()) {
             return new ClickHouseSQLException(
-                code, name + message + ". Stack trace:\n\n" + stackTrace, readExceptionFrom(deserializer));
+                    code, name + message + ". Stack trace:\n\n" + stackTrace, readExceptionFrom(deserializer));
         }
 
         return new ClickHouseSQLException(code, name + message + ". Stack trace:\n\n" + stackTrace);

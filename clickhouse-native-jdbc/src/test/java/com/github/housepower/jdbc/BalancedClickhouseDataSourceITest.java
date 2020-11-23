@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.Duration;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -168,7 +169,7 @@ public class BalancedClickhouseDataSourceITest {
         BalancedClickhouseDataSource dataSource = new BalancedClickhouseDataSource(
                 "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click", properties);
         ClickHouseConfig cfg = dataSource.getCfg();
-        assertEquals(6789000, cfg.queryTimeout());
+        assertEquals(Duration.ofSeconds(6789), cfg.queryTimeout());
         assertEquals("888888", cfg.password());
         assertEquals("click", cfg.database());
         assertEquals(2, dataSource.getAllClickhouseUrls().size());
@@ -179,7 +180,7 @@ public class BalancedClickhouseDataSourceITest {
         dataSource = new BalancedClickhouseDataSource(
                 "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click?query_timeout=12345&user=readonly", properties);
         cfg = dataSource.getCfg();
-        assertEquals(6789000, cfg.queryTimeout());
+        assertEquals(Duration.ofSeconds(6789), cfg.queryTimeout());
         assertEquals("readonly", cfg.user());
         assertEquals("888888", cfg.password());
         assertEquals("click", cfg.database());

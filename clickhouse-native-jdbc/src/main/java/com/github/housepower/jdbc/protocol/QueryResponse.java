@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.util.function.Supplier;
 
 public class QueryResponse {
-    private final CheckedSupplier<RequestOrResponse, SQLException> responseSupplier;
+    private final CheckedSupplier<Response, SQLException> responseSupplier;
     private Block header;
     private boolean atEnd;
     // Progress
@@ -31,7 +31,7 @@ public class QueryResponse {
     // ProfileInfo
     // EndOfStream
 
-    public QueryResponse(CheckedSupplier<RequestOrResponse, SQLException> responseSupplier) {
+    public QueryResponse(CheckedSupplier<Response, SQLException> responseSupplier) {
         this.responseSupplier = responseSupplier;
     }
 
@@ -50,7 +50,7 @@ public class QueryResponse {
 
     private DataResponse consumeDataResponse() throws SQLException {
         while (!atEnd) {
-            RequestOrResponse response = responseSupplier.get();
+            Response response = responseSupplier.get();
             if (response instanceof DataResponse) {
                 return (DataResponse) response;
             } else if (response instanceof EOFStreamResponse || response == null) {

@@ -14,32 +14,30 @@
 
 package com.github.housepower.jdbc.protocol;
 
+import com.github.housepower.jdbc.connect.NativeContext;
+import com.github.housepower.jdbc.data.Block;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
-import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
-
-public class ExtremesResponse extends RequestOrResponse {
+public class ExtremesResponse implements Response {
 
     private final String name;
     private final Block block;
 
     ExtremesResponse(String name, Block block) {
-        super(ProtocolType.RESPONSE_Extremes);
         this.name = name;
         this.block = block;
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
-        throw new UnsupportedOperationException("ExtremesResponse Cannot write to Server.");
+    public ProtoType type() {
+        return ProtoType.RESPONSE_EXTREMES;
     }
 
-    public static ExtremesResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
-        throws IOException, SQLException {
+    public static ExtremesResponse readFrom(
+            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
         return new ExtremesResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
     }
 }

@@ -15,7 +15,7 @@
 package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
@@ -37,13 +37,13 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     protected Object[] parameters;
 
-    public AbstractPreparedStatement(ClickHouseConnection connection, PhysicalInfo physicalInfo, String[] queryParts) {
-        super(connection, physicalInfo);
+    public AbstractPreparedStatement(ClickHouseConnection connection, NativeContext nativeContext, String[] queryParts) {
+        super(connection, nativeContext);
         this.queryParts = queryParts;
         if (queryParts != null && queryParts.length > 0)
             this.parameters = new Object[queryParts.length];
 
-        ZoneId tz = DateTimeHelper.chooseTimeZone(physicalInfo.server());
+        ZoneId tz = DateTimeHelper.chooseTimeZone(nativeContext.serverCtx());
         this.dateFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ROOT).withZone(tz);
         this.timestampFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ROOT).withZone(tz);
     }

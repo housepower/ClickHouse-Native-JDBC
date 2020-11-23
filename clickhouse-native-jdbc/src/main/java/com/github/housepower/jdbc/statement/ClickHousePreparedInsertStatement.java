@@ -15,7 +15,7 @@
 package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
@@ -34,8 +34,8 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     public ClickHousePreparedInsertStatement(int posOfData,
                                              String fullQuery,
                                              ClickHouseConnection conn,
-                                             PhysicalInfo physicalInfo) throws SQLException {
-        super(conn, physicalInfo, null);
+                                             NativeContext nativeContext) throws SQLException {
+        super(conn, nativeContext, null);
         this.blockInit = false;
         this.posOfData = posOfData;
         this.fullQuery = fullQuery;

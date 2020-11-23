@@ -15,13 +15,13 @@
 package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.ClickHouseArray;
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -33,12 +33,12 @@ import java.util.List;
 
 public class DataTypeArray implements IDataType {
 
-    public static IDataType createArrayType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+    public static IDataType createArrayType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
-        IDataType arrayNestedType = DataTypeFactory.get(lexer, serverInfo);
+        IDataType arrayNestedType = DataTypeFactory.get(lexer, serverContext);
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
-                arrayNestedType, DataTypeFactory.get("UInt64", serverInfo));
+                arrayNestedType, DataTypeFactory.get("UInt64", serverContext));
     }
 
     private final String name;

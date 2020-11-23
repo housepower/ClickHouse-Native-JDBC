@@ -14,12 +14,12 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -29,11 +29,11 @@ import java.sql.Types;
 public class DataTypeFixedString implements IDataType {
 
     public static IDataType createFixedStringType(SQLLexer lexer,
-                                                  PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+                                                  NativeContext.ServerContext serverContext) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
         Number fixedStringN = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ')');
-        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue(), serverInfo);
+        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue(), serverContext);
     }
 
     private final int n;
@@ -41,10 +41,10 @@ public class DataTypeFixedString implements IDataType {
     private final String defaultValue;
     private final Charset charset;
 
-    public DataTypeFixedString(String name, int n, PhysicalInfo.ServerInfo serverInfo) {
+    public DataTypeFixedString(String name, int n, NativeContext.ServerContext serverContext) {
         this.n = n;
         this.name = name;
-        this.charset = serverInfo.getConfigure().charset();
+        this.charset = serverContext.getConfigure().charset();
 
         byte[] data = new byte[n];
         for (int i = 0; i < n; i++) {

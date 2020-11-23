@@ -15,7 +15,7 @@
 package com.github.housepower.jdbc.data;
 
 import com.github.housepower.jdbc.buffer.ByteArrayWriter;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class ColumnWriterBuffer {
     public BinarySerializer column;
 
     public ColumnWriterBuffer() {
-        this.columnWriter = new ByteArrayWriter(ClickHouseDefines.COLUMN_BUFFER);
+        this.columnWriter = new ByteArrayWriter(ClickHouseDefines.COLUMN_BUFFER_BYTES);
         this.column = new BinarySerializer(columnWriter, false);
     }
 

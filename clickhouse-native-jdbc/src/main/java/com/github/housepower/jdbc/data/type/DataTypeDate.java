@@ -14,12 +14,12 @@
 
 package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -29,7 +29,7 @@ import java.time.*;
 
 public class DataTypeDate implements IDataType {
 
-    public static IDataType createDateType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) {
+    public static IDataType createDateType(SQLLexer lexer, NativeContext.ServerContext serverContext) {
         return new DataTypeDate();
     }
 

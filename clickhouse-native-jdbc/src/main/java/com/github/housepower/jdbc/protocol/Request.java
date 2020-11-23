@@ -12,34 +12,38 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.data;
+package com.github.housepower.jdbc.protocol;
 
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class Column extends AbstractColumn {
+public interface Request {
 
-    public Column(String name, IDataType type, Object[] values) {
-        super(name, type, values);
-        this.values = values;
+    ProtoType type();
+
+    void writeImpl(BinarySerializer serializer) throws IOException, SQLException;
+
+    default void writeTo(BinarySerializer serializer) throws IOException, SQLException {
+        serializer.writeVarInt(type().id());
+        this.writeImpl(serializer);
     }
 
-    @Override
-    public void write(Object object) throws IOException, SQLException {
-        type().serializeBinary(object, buffer.column);
-    }
+    enum ProtoType {
+        REQUEST_HELLO(0),
+        REQUEST_QUERY(1),
+        REQUEST_DATA(2),
+        REQUEST_PING(4);
 
-    @Override
-    public void flushToSerializer(BinarySerializer serializer, boolean now) throws IOException, SQLException {
-        if (isExported()) {
-            serializer.writeUTF8StringBinary(name);
-            serializer.writeUTF8StringBinary(type.name());
+        private final int id;
+
+        ProtoType(int id) {
+            this.id = id;
         }
 
-        if (now) {
-            buffer.writeTo(serializer);
+        public long id() {
+            return id;
         }
     }
 }

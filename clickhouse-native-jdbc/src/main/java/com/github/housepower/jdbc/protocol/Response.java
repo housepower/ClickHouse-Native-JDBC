@@ -14,35 +14,18 @@
 
 package com.github.housepower.jdbc.protocol;
 
+import com.github.housepower.jdbc.connect.NativeContext;
+import com.github.housepower.jdbc.exception.NotImplementedException;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
+public interface Response {
 
-public abstract class RequestOrResponse {
+    ProtoType type();
 
-    private final ProtocolType type;
-
-    public ProtocolType type() {
-        return type;
-    }
-
-    RequestOrResponse(ProtocolType type) {
-        this.type = type;
-    }
-
-    public void writeTo(BinarySerializer serializer) throws IOException, SQLException {
-        serializer.writeVarInt(type.id());
-
-        this.writeImpl(serializer);
-    }
-
-    public abstract void writeImpl(BinarySerializer serializer) throws IOException, SQLException;
-
-    public static RequestOrResponse readFrom(BinaryDeserializer deserializer, PhysicalInfo.ServerInfo info)
-        throws IOException, SQLException {
+    static Response readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
         switch ((int) deserializer.readVarInt()) {
             case 0:
                 return HelloResponse.readFrom(deserializer);
@@ -62,16 +45,33 @@ public abstract class RequestOrResponse {
                 return TotalsResponse.readFrom(deserializer, info);
             case 8:
                 return ExtremesResponse.readFrom(deserializer, info);
+            case 9:
+                throw new NotImplementedException("RESPONSE_TABLES_STATUS_RESPONSE");
             default:
                 throw new IllegalStateException("Accept the id of response that is not recognized by Server.");
         }
     }
 
-    private static boolean isPingResult(ProtocolType type, BinaryDeserializer deserializer) {
-        return ProtocolType.REQUEST_PING.equals(type);
-    }
+    enum ProtoType {
+        RESPONSE_HELLO(0),
+        RESPONSE_DATA(1),
+        RESPONSE_EXCEPTION(2),
+        RESPONSE_PROGRESS(3),
+        RESPONSE_PONG(4),
+        RESPONSE_END_OF_STREAM(5),
+        RESPONSE_PROFILE_INFO(6),
+        RESPONSE_TOTALS(7),
+        RESPONSE_EXTREMES(8),
+        RESPONSE_TABLES_STATUS_RESPONSE(9);
 
-    private static boolean isResultPacket(ProtocolType type, BinaryDeserializer deserializer) {
-        return ProtocolType.REQUEST_QUERY.equals(type);
+        private final int id;
+
+        ProtoType(int id) {
+            this.id = id;
+        }
+
+        public long id() {
+            return id;
+        }
     }
 }

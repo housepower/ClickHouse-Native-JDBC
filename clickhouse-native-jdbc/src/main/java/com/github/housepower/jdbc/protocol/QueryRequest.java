@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.protocol;
 
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
 
@@ -23,37 +23,50 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryRequest extends RequestOrResponse {
+public class QueryRequest implements Request {
 
-    public static final int COMPLETE_STAGE = 2;
+    // Only read/have been read the columns specified in the query.
+    public static final int STAGE_FETCH_COLUMNS = 0;
+    // Until the stage where the results of processing on different servers can be combined.
+    public static final int STAGE_WITH_MERGEABLE_STATE = 1;
+    // Completely.
+    public static final int STAGE_COMPLETE = 2;
+    // Until the stage where the aggregate functions were calculated and finalized.
+    // It is used for auto distributed_group_by_no_merge optimization for distributed engine.
+    // (See comments in StorageDistributed).
+    public static final int STAGE_WITH_MERGEABLE_STATE_AFTER_AGGREGATION = 3;
 
     private final int stage;
     private final String queryId;
     private final String queryString;
     private final boolean compression;
-    private final ClientInfo clientInfo;
+    private final ClientContext clientContext;
     private final Map<SettingKey, Object> settings;
 
-    public QueryRequest(String queryId, ClientInfo clientInfo, int stage, boolean compression, String queryString) {
-        this(queryId, clientInfo, stage, compression, queryString, new HashMap<>());
+    public QueryRequest(String queryId, ClientContext clientContext, int stage, boolean compression, String queryString) {
+        this(queryId, clientContext, stage, compression, queryString, new HashMap<>());
     }
 
-    public QueryRequest(String queryId, ClientInfo clientInfo, int stage, boolean compression, String queryString,
-        Map<SettingKey, Object> settings) {
-        super(ProtocolType.REQUEST_QUERY);
+    public QueryRequest(String queryId, ClientContext clientContext, int stage, boolean compression, String queryString,
+                        Map<SettingKey, Object> settings) {
 
         this.stage = stage;
         this.queryId = queryId;
         this.settings = settings;
-        this.clientInfo = clientInfo;
+        this.clientContext = clientContext;
         this.compression = compression;
         this.queryString = queryString;
     }
 
     @Override
+    public ProtoType type() {
+        return ProtoType.REQUEST_QUERY;
+    }
+
+    @Override
     public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
         serializer.writeUTF8StringBinary(queryId);
-        clientInfo.writeTo(serializer);
+        clientContext.writeTo(serializer);
 
         for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
             serializer.writeUTF8StringBinary(entry.getKey().name());
@@ -68,7 +81,7 @@ public class QueryRequest extends RequestOrResponse {
 
     }
 
-    public static class ClientInfo {
+    public static class ClientContext {
         public static final int TCP_KINE = 1;
 
         public static final byte NO_QUERY = 0;
@@ -79,14 +92,14 @@ public class QueryRequest extends RequestOrResponse {
         private final String clientHostname;
         private final String initialAddress;
 
-        public ClientInfo(String initialAddress, String clientHostname, String clientName) {
+        public ClientContext(String initialAddress, String clientHostname, String clientName) {
             this.clientName = clientName;
             this.clientHostname = clientHostname;
             this.initialAddress = initialAddress;
         }
 
         public void writeTo(BinarySerializer serializer) throws IOException {
-            serializer.writeVarInt(ClientInfo.INITIAL_QUERY);
+            serializer.writeVarInt(ClientContext.INITIAL_QUERY);
             serializer.writeUTF8StringBinary("");
             serializer.writeUTF8StringBinary("");
             serializer.writeUTF8StringBinary(initialAddress);

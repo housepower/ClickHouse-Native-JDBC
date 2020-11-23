@@ -14,12 +14,12 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -29,12 +29,12 @@ import java.util.List;
 
 public class DataTypeEnum16 implements IDataType {
 
-    public static IDataType createEnum16Type(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+    public static IDataType createEnum16Type(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
         List<Short> enumValues = new ArrayList<>();
         List<String> enumNames = new ArrayList<>();
 
-        for (int i = 0; i < 65535; i++) {
+        for (int i = 0; i < 1 << 16; i++) {
             enumNames.add(lexer.stringLiteral());
             Validate.isTrue(lexer.character() == '=');
             enumValues.add(lexer.numberLiteral().shortValue());

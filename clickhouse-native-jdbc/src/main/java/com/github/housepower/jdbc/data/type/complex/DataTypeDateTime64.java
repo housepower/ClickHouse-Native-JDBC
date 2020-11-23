@@ -14,14 +14,14 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo.ServerInfo;
+import com.github.housepower.jdbc.connect.NativeContext.ServerContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -33,7 +33,7 @@ import java.time.ZonedDateTime;
 
 public class DataTypeDateTime64 implements IDataType {
 
-    public static DataTypeDateTime64 createDateTime64Type(SQLLexer lexer, ServerInfo serverInfo) throws SQLException {
+    public static DataTypeDateTime64 createDateTime64Type(SQLLexer lexer, ServerContext serverContext) throws SQLException {
         if (lexer.isCharacter('(')) {
             Validate.isTrue(lexer.character() == '(');
             int scale = lexer.numberLiteral().intValue();
@@ -44,13 +44,13 @@ public class DataTypeDateTime64 implements IDataType {
                 Validate.isTrue(lexer.isWhitespace());
                 String dataTimeZone = lexer.stringLiteral();
                 Validate.isTrue(lexer.character() == ')');
-                return new DataTypeDateTime64("DateTime64(" + scale + ", '" + dataTimeZone + "')", scale, serverInfo);
+                return new DataTypeDateTime64("DateTime64(" + scale + ", '" + dataTimeZone + "')", scale, serverContext);
             }
 
             Validate.isTrue(lexer.character() == ')');
-            return new DataTypeDateTime64("DateTime64(" + scale + ")", scale, serverInfo);
+            return new DataTypeDateTime64("DateTime64(" + scale + ")", scale, serverContext);
         }
-        return new DataTypeDateTime64("DateTime64", DEFAULT_SCALE, serverInfo);
+        return new DataTypeDateTime64("DateTime64", DEFAULT_SCALE, serverContext);
     }
 
     // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
@@ -67,10 +67,10 @@ public class DataTypeDateTime64 implements IDataType {
     private final int scale;
     private final ZoneId tz;
 
-    public DataTypeDateTime64(String name, int scala, ServerInfo serverInfo) {
+    public DataTypeDateTime64(String name, int scala, ServerContext serverContext) {
         this.name = name;
         this.scale = scala;
-        this.tz = DateTimeHelper.chooseTimeZone(serverInfo);
+        this.tz = DateTimeHelper.chooseTimeZone(serverContext);
     }
 
     @Override

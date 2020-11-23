@@ -14,12 +14,12 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -30,7 +30,7 @@ import java.util.Locale;
 
 public class DataTypeDecimal implements IDataType {
 
-    public static IDataType createDecimalType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+    public static IDataType createDecimalType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
         Number precision = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ',');

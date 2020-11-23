@@ -14,12 +14,12 @@
 
 package com.github.housepower.jdbc.protocol;
 
+import com.github.housepower.jdbc.serde.BinarySerializer;
+import com.github.housepower.jdbc.settings.ClickHouseDefines;
+
 import java.io.IOException;
 
-import com.github.housepower.jdbc.settings.ClickHouseDefines;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
-
-public class HelloRequest extends RequestOrResponse {
+public class HelloRequest implements Request {
 
     private final String clientName;
     private final long clientReversion;
@@ -27,14 +27,18 @@ public class HelloRequest extends RequestOrResponse {
     private final String clientUsername;
     private final String clientPassword;
 
-    public HelloRequest(String clientName, long clientReversion, String defaultDatabase, String clientUsername,
-        String clientPassword) {
-        super(ProtocolType.REQUEST_HELLO);
+    public HelloRequest(String clientName, long clientReversion, String defaultDatabase,
+                        String clientUsername, String clientPassword) {
         this.clientName = clientName;
         this.clientReversion = clientReversion;
         this.defaultDatabase = defaultDatabase;
         this.clientUsername = clientUsername;
         this.clientPassword = clientPassword;
+    }
+
+    @Override
+    public ProtoType type() {
+        return ProtoType.REQUEST_HELLO;
     }
 
     @Override

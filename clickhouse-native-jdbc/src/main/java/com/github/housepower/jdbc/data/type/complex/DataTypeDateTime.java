@@ -14,13 +14,13 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
-import com.github.housepower.jdbc.connect.PhysicalInfo;
+import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.DateTimeHelper;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.serializer.BinaryDeserializer;
-import com.github.housepower.jdbc.serializer.BinarySerializer;
+import com.github.housepower.jdbc.serde.BinaryDeserializer;
+import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -31,14 +31,14 @@ import java.time.ZonedDateTime;
 
 public class DataTypeDateTime implements IDataType {
 
-    public static IDataType createDateTimeType(SQLLexer lexer, PhysicalInfo.ServerInfo serverInfo) throws SQLException {
+    public static IDataType createDateTimeType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
         if (lexer.isCharacter('(')) {
             Validate.isTrue(lexer.character() == '(');
             String dataTimeZone = lexer.stringLiteral();
             Validate.isTrue(lexer.character() == ')');
-            return new DataTypeDateTime("DateTime('" + dataTimeZone + "')", serverInfo);
+            return new DataTypeDateTime("DateTime('" + dataTimeZone + "')", serverContext);
         }
-        return new DataTypeDateTime("DateTime", serverInfo);
+        return new DataTypeDateTime("DateTime", serverContext);
     }
 
     // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
@@ -48,9 +48,9 @@ public class DataTypeDateTime implements IDataType {
 
     private final String name;
 
-    public DataTypeDateTime(String name, PhysicalInfo.ServerInfo serverInfo) {
+    public DataTypeDateTime(String name, NativeContext.ServerContext serverContext) {
         this.name = name;
-        this.tz = DateTimeHelper.chooseTimeZone(serverInfo);
+        this.tz = DateTimeHelper.chooseTimeZone(serverContext);
     }
 
     @Override
