@@ -116,13 +116,7 @@ public class ClickHouseConnection implements SQLConnection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        ClickHouseConfig validConfigure = configure.copy();
-        validConfigure.setQueryTimeout(timeout * 1000);
-        try (Connection connection = new ClickHouseConnection(validConfigure, atomicInfo.get());
-             Statement statement = connection.createStatement()) {
-            statement.execute("SELECT 1");
-            return true;
-        }
+        return getPhysicalConnection().ping(timeout, atomicInfo.get().server());
     }
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
