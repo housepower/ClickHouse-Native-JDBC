@@ -116,7 +116,7 @@ public class ClickHouseConnection implements SQLConnection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        return getPhysicalConnection().ping(timeout, atomicInfo.get().server());
+        return getPhysicalConnection().ping(timeout * 1000, atomicInfo.get().server());
     }
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
