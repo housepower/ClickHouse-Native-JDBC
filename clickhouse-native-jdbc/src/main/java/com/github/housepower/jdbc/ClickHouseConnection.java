@@ -131,8 +131,8 @@ public class ClickHouseConnection implements SQLConnection {
     }
 
     @Override
-    public boolean isValid(int timeoutMs) throws SQLException {
-        return getNativeClient().ping(Duration.ofMillis(timeoutMs), nativeCtx.get().serverCtx());
+    public boolean isValid(int timeout) throws SQLException {
+        return getNativeClient().ping(Duration.ofSeconds(timeout), nativeCtx.get().serverCtx());
     }
 
     // ClickHouse support only `database`, we treat it as JDBC `catalog`
