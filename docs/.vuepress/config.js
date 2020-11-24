@@ -30,7 +30,7 @@ module.exports = {
         },
         algolia: {},
         nav: [
-          { text: 'Guide', link: '/guide/' },
+          { text: 'Guide', link: '/guide/quick_start' },
           { text: 'Dev', link: '/dev/contribute' },
           { text: 'Deep Dive', link: '/deep-dive/' },
           { text: 'Release Notes', link: '/release-notes/'},
@@ -38,27 +38,15 @@ module.exports = {
         ],
         sidebar: {
           '/guide/': [
+            ['quick_start', 'Quick Start'],
             {
-              title: 'Quick Start',
-              collapsable: false,
-              sidebarDepth: 1,
-              children: [],
+              title: 'Usage',
+              children: [
+                ['jdbc_driver', 'JDBC Driver'],
+                ['spark_integration', 'Spark Integration'],
+              ],
             },
-            {
-              title: 'JDBC Driver',
-              children: [ /* ... */],
-              initialOpenGroupIndex: -1
-            },
-            {
-              title: 'Spark Integration',
-              children: [ /* ... */],
-              initialOpenGroupIndex: -1
-            },
-            {
-              title: 'Troubleshooting',
-              children: [ /* ... */],
-              initialOpenGroupIndex: -1
-            }
+            ['troubleshooting', 'Troubleshooting'],
           ],
           '/dev/': [
             ['contribute', 'Contribute Guide'],
@@ -106,27 +94,15 @@ module.exports = {
         ],
         sidebar: {
           '/zh/guide/': [
+            ['quick_start', '快速入门'],
             {
-              title: '快速入门',
-              collapsable: false,
-              sidebarDepth: 1,
-              children: [],
+              title: '使用',
+              children: [
+                ['jdbc_driver', 'JDBC 驱动'],
+                ['spark_integration', 'Spark 集成'],
+              ],
             },
-            {
-              title: 'JDBC 驱动',
-              children: [ /* ... */],
-              initialOpenGroupIndex: -1
-            },
-            {
-              title: 'Spark 集成',
-              children: [ /* ... */],
-              initialOpenGroupIndex: -1
-            },
-            {
-              title: '常见问题',
-              children: [ /* ... */],
-              initialOpenGroupIndex: -1
-            }
+            ['troubleshooting', '常见问题'],
           ],
           '/zh/dev/': [
             ['contribute', '贡献指南'],
