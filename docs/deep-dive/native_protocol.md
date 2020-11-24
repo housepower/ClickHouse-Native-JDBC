@@ -1,5 +1,5 @@
-ClickHouse client - server communication process 
-========================================
+ClickHouse C/S Native Protocol
+===
 
 ## Connection
 
@@ -19,7 +19,7 @@ Note left of Client: I got server infos
 
 - You can find all the request/response type in `com.github.housepower.jdbc.protocol` package.
 
-## Data Querys
+## Query
 
 After the connection established and hello request/response, we can send plain sql strings to query the data. 
 
@@ -32,9 +32,9 @@ Note left of Client: I got response data now
 Note left of Client: I will deserialize them to the ResultSets.
 ```
 
-## Insert Querys
+## Insert
 
-The plain sql querys which send query sql to the server, but it's not efficient for batch inserts. ClickHouse provide another type of data request for batch inserts that we can send blocks to the server directly.
+The plain query which send sql literal to the server, but it's not efficient for batch inserts. ClickHouse provides another type of data request for batch inserts that we can send blocks to the server directly.
 
 ```mermaid
 sequenceDiagram

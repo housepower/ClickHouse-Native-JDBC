@@ -1,5 +1,5 @@
-ClickHouse 客户端-服务端通信协议
-========================================
+ClickHouse 客户端-服务端原生通信协议
+===
 
 ## 建立连接
 
@@ -34,7 +34,7 @@ Note left of Client: I will deserialize them to the ResultSets.
 
 ## 插入
 
-The plain sql querys which send query sql to the server, but it's not efficient for batch inserts. ClickHouse provide another type of data request for batch inserts that we can send blocks to the server directly.
+The plain query which send sql literal to the server, but it's not efficient for batch inserts. ClickHouse provides another type of data request for batch inserts that we can send blocks to the server directly.
 
 ```mermaid
 sequenceDiagram

@@ -2,7 +2,7 @@
 home: true
 heroImage: /logo_320px.svg
 actionText: 开始 →
-actionLink: /zh/release-notes/
+actionLink: /zh/guide/introduction
 features:
 - title: 原生协议
   details: 基于原生(TCP)协议实现的 ClickHouse JDBC 驱动.

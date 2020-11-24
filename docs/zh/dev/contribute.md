@@ -110,6 +110,10 @@ This branch exists locally and it is there you should make all of your proposed 
 Your changes should include changes to existing tests or additional unit and/or integration tests that verify your changes work. We recommend frequently running related unit tests (in your IDE or using Maven) to make sure your changes didn't break anything else, and that you also periodically run a complete build using Maven to make sure that everything still works:
 
     $ mvn clean verify
+    
+Run benchmark and check the benchmark report to make sure your changes don't affect performance:
+
+    $ mvn -Pbenchmark clean integration-test -DskipITs
 
 Feel free to commit your changes locally as often as you'd like, though we generally prefer that each commit represent a complete and atomic change to the code. Often, this means that most issues will be addressed with a single commit in a single pull-request, but other more complex issues might be better served with a few commits that each make separate but atomic changes. (Some developers prefer to commit frequently and to ammend their first commit with additional changes. Other developers like to make multiple commits and to then squash them. How you do this is up to you. However, *never* change, squash, or ammend a commit that appears in the history of the upstream repository.) When in doubt, use a few separate atomic commits; if the reviewers think they should be squashed, they'll let you know when they review your pull request.
 
@@ -147,7 +151,7 @@ To run the build, navigate to the project's root directory and run:
 
 It might be useful to simply run a _validate_ check against the code instead of automatically applying code style changes.  If you want to simply run validation, navigate to the project's root directory and run:
 
-    $ mvn clean install -Dformat.formatter.goal=validate -Dformat.imports.goal=check     
+    $ mvn validate
 
 Please note that when running _validate_ checks, the build will stop as soon as it encounters its first violation.  This means it is necessary to run the build multiple times until no violations are detected.
 

@@ -2,7 +2,7 @@
 home: true
 heroImage: /logo_320px.svg
 actionText: Get Started →
-actionLink: /release-notes/
+actionLink: /guide/introduction
 features:
 - title: Native Protocol
   details: A ClickHouse JDBC driver implemented in Native(TCP) protocol.
