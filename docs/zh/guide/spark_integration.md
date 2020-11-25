@@ -1,14 +1,13 @@
 ## Spark 集成
 
-### Requirements
+### 使用要求
 
 - Java 8, Scala 2.11/2.12, Spark 2.4.x
-- Or Java 8/11, Scala 2.12, Spark 3.0.x
+- 或者 Java 8/11, Scala 2.12, Spark 3.0.x
 
-**Notes:** Spark 2.3.x(EOL) should also work fine. Actually we do test on both Java 8 and Java 11, 
-but Spark official support on Java 11 since 3.0.0.
+**注意:** Spark 2.3.x(EOL) 也可以使用。但我们只对 Java 8 和 Java 11 做测试，Spark 3.0.0 开始支持Java11。
 
-### Import
+### 导入包
 
 - Gradle
 
@@ -28,15 +27,15 @@ compile "com.github.housepower:clickhouse-integration-spark_2.11:${clickhouse_na
 </dependency>
 ```
 
-### Examples
+### 示例
 
-Make sure register `ClickHouseDialects` before using it
+使用前先注册 `ClickHouseDialects` 
 
 ```scala
     JdbcDialects.registerDialect(ClickHouseDialect)
 ```
 
-Read from ClickHouse to DataFrame
+读取 ClickHouse 数据到 DataFrame
 
 ```scala
 val df = spark.read
@@ -49,7 +48,7 @@ val df = spark.read
     .load
 ```
 
-Write DataFrame to ClickHouse (support `truncate table`)
+将 DataFrame 写入 ClickHouse (支持 `truncate table`)
 
 ```scala
 df.write
@@ -66,4 +65,4 @@ df.write
     .save
 ```
 
-See also [SparkOnClickHouseITest](https://github.com/housepower/ClickHouse-Native-JDBC/clickhouse-integration/clickhouse-integration-spark/src/test/scala/com.github.housepower.jdbc.spark/SparkOnClickHouseITest.scala)
+更多参考 [SparkOnClickHouseITest](https://github.com/housepower/ClickHouse-Native-JDBC/clickhouse-integration/clickhouse-integration-spark/src/test/scala/com.github.housepower.jdbc.spark/SparkOnClickHouseITest.scala)

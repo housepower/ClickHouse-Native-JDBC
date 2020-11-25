@@ -1,23 +1,12 @@
 ## JDBC 驱动
 
-### Requirements
+### 使用要求
 
 - Java 8/11. 
 
-**Notes:** We only do test with Java LTS versions.
+**注意:** 我们只对 Java LTS 版本做测试。
 
-### Differences from [yandex/clickhouse-jdbc](https://github.com/yandex/clickhouse-jdbc)
-
-* Data is organized and compressed by columns.
-* Implemented in the TCP Protocol, with higher performance than HTTP, here is the [benchmark report](docs/dev/benchmark.md).
-
-### Limitations
-
-* Not support non-values format.
-* Not support complex values expression, like `INSERT INTO test_table VALUES(toDate(123456))`.
-* Not support more compression method, like `ZSTD`.
-
-### Import
+### 导入包
 
 - Gradle
 ```groovy
@@ -47,9 +36,9 @@ compile "com.github.housepower:clickhouse-native-jdbc:${clickhouse_native_jdbc_v
 ```
 
 
-### Examples
+### 示例
 
-Select query, see also [SimpleQuery](https://github.com/housepower/ClickHouse-Native-JDBC/examples/src/main/java/examples/SimpleQuery.java)
+查询示例， 参考[SimpleQuery](https://github.com/housepower/ClickHouse-Native-JDBC/examples/src/main/java/examples/SimpleQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {
@@ -64,7 +53,7 @@ try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.
 }
 ```
 
-All DDL,DML queries, see also [ExecuteQuery](https://github.com/housepower/ClickHouse-Native-JDBC/examples/src/main/java/examples/ExecuteQuery.java)
+DDL、 DML 示例， 参考 [ExecuteQuery](https://github.com/housepower/ClickHouse-Native-JDBC/examples/src/main/java/examples/ExecuteQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {
@@ -82,7 +71,7 @@ try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.
 }
 ```
 
-Batch insert query, see also [BatchQuery](https://github.com/housepower/ClickHouse-Native-JDBC/examples/src/main/java/examples/BatchQuery.java)
+批量插入示例，参考[BatchQuery](https://github.com/housepower/ClickHouse-Native-JDBC/examples/src/main/java/examples/BatchQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {

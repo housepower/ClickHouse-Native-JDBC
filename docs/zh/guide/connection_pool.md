@@ -1,6 +1,6 @@
 ## 连接池
 
-This driver should work properly with most connection pool, we do test with the most popular 3 pools:
+这个驱动兼容大多数连接池，我们最常用的三种做了测试：
 
 ### HikariCP
 
