@@ -4,30 +4,30 @@
 
 - Java 8/11. 
 
-**注意:** 我们只对 Java LTS 版本做测试。
+**注意:** 我们只基于 Java LTS 版本做测试。
 
 ### 导入包
 
 - Gradle
 ```groovy
-// (recommended) shaded version, available since 2.3-stable
+// (推荐) shaded 版本，自 2.3-stable 起可用
 compile "com.github.housepower:clickhouse-native-jdbc-shaded:${clickhouse_native_jdbc_version}"
 
-// normal version
+// 常规版本
 compile "com.github.housepower:clickhouse-native-jdbc:${clickhouse_native_jdbc_version}"
 ```
 
 - Maven
 
 ```xml
-<!-- (recommended) shaded version, available since 2.3-stable -->
+<!-- (推荐) shaded 版本，自 2.3-stable 起可用 -->
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc-shaded</artifactId>
     <version>${clickhouse-native-jdbc.version}</version>
 </dependency>
 
-<!-- normal version -->
+<!-- 常规版本 -->
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc</artifactId>
@@ -38,7 +38,7 @@ compile "com.github.housepower:clickhouse-native-jdbc:${clickhouse_native_jdbc_v
 
 ### 示例
 
-查询示例， 参考[SimpleQuery](https://github.com/housepower/ClickHouse-Native-JDBC/examples/src/main/java/examples/SimpleQuery.java)
+查询示例，更多参考 [SimpleQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/SimpleQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {
@@ -53,7 +53,7 @@ try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.
 }
 ```
 
-DDL、 DML 示例， 参考 [ExecuteQuery](https://github.com/housepower/ClickHouse-Native-JDBC/examples/src/main/java/examples/ExecuteQuery.java)
+DDL、DML 示例，更多参考 [ExecuteQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/ExecuteQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {
@@ -71,7 +71,7 @@ try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.
 }
 ```
 
-批量插入示例，参考[BatchQuery](https://github.com/housepower/ClickHouse-Native-JDBC/examples/src/main/java/examples/BatchQuery.java)
+批量插入示例，更多参考 [BatchQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/BatchQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {

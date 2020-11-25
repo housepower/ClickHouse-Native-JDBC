@@ -8,60 +8,59 @@ ClickHouse Native JDBC
 [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/housepower/ClickHouse-Native-JDBC.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/housepower/ClickHouse-Native-JDBC/context:java)
 [![License](https://img.shields.io/github/license/housepower/ClickHouse-Native-JDBC)](https://github.com/housepower/ClickHouse-Native-JDBC/blob/master/LICENSE)
 
-English | [简体中文](README_zh.md)
+[English](README.md) | 简体中文
 
-## [Home Page](https://housepower.github.io/ClickHouse-Native-JDBC/)
+## [项目主页](https://housepower.github.io/ClickHouse-Native-JDBC/zh/)
 
-A Native JDBC library for accessing [ClickHouse](https://clickhouse.yandex/) in Java, also provide a library for 
-integrating with [Apache Spark](https://github.com/apache/spark/).
+这是一个基于原生(TCP)协议实现的 JDBC 驱动，用来访问 [ClickHouse](https://clickhouse.yandex/) ，同时也支持与 [Apache Spark](https://github.com/apache/spark/) 的集成。
 
-## CONTRIBUTE
+## 参与贡献
 
-We welcome anyone that wants to help out in any way, whether that includes reporting problems, helping with documentations, or contributing code changes to fix bugs, add tests, or implement new features. Please follow [Contributing Guide](CONTRIBUTE.md).
+我们欢迎大家以各种形式参与项目贡献，可以是报告问题、完善文档、修复 bug、添加测试用例、实现新特性等。请参考 [贡献指南](CONTRIBUTE.md)。
 
-Supported by [JetBrains Open Source License](https://www.jetbrains.com/?from=ClickHouse-Native-JDBC) 2020-2021. 
+本项目受 [JetBrains Open Source License](https://www.jetbrains.com/?from=ClickHouse-Native-JDBC) 2020-2021 赞助支持. 
 
-## JDBC Driver
+## JDBC 驱动
 
-### Requirements
+### 使用要求
 
 - Java 8/11. 
 
-**Notes:** We only do test with Java LTS versions.
+**注意:** 我们只基于 Java LTS 版本做测试。
 
-### Differences from [yandex/clickhouse-jdbc](https://github.com/yandex/clickhouse-jdbc)
+### 与 [yandex/clickhouse-jdbc](https://github.com/yandex/clickhouse-jdbc) 驱动的不同点
 
-* Data is organized and compressed by columns.
-* Implemented in the TCP Protocol, with higher performance than HTTP, here is the [benchmark report](docs/dev/benchmark.md).
+* 写入时，数据按照列式格式组织并压缩
+* 基于 TCP 协议实现，比 HTTP 协议更高效，参考 [性能测试报告](docs/dev/benchmark.md)。
 
-### Limitations
+### 限制
 
-* Not support non-values format.
-* Not support complex values expression, like `INSERT INTO test_table VALUES(toDate(123456))`.
-* Not support more compression method, like `ZSTD`.
+* 不支持 non-values 格式。
+* 不支持复杂表达式语句的批量写入，如：`INSERT INTO test_table VALUES(toDate(123456))`。
+* 不支持 `ZSTD` 压缩。
 
-### Import
+### 导入包
 
 - Gradle
 ```groovy
-// (recommended) shaded version, available since 2.3-stable
+// (推荐) shaded 版本，自 2.3-stable 起可用
 compile "com.github.housepower:clickhouse-native-jdbc-shaded:${clickhouse_native_jdbc_version}"
 
-// normal version
+// 常规版本
 compile "com.github.housepower:clickhouse-native-jdbc:${clickhouse_native_jdbc_version}"
 ```
 
 - Maven
 
 ```xml
-<!-- (recommended) shaded version, available since 2.3-stable -->
+<!-- (推荐) shaded 版本，自 2.3-stable 起可用 -->
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc-shaded</artifactId>
     <version>${clickhouse-native-jdbc.version}</version>
 </dependency>
 
-<!-- normal version -->
+<!-- 常规版本 -->
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-native-jdbc</artifactId>
@@ -69,29 +68,28 @@ compile "com.github.housepower:clickhouse-native-jdbc:${clickhouse_native_jdbc_v
 </dependency>
 ```
 
-## Integration with Spark
+## Spark 集成
 
-### Requirements
+### 使用要求
 
 - Java 8, Scala 2.11/2.12, Spark 2.4.x
-- Or Java 8/11, Scala 2.12, Spark 3.0.x
+- 或者 Java 8/11, Scala 2.12, Spark 3.0.x
 
-**Notes:** Spark 2.3.x(EOL) should also work fine. Actually we do test on both Java 8 and Java 11, 
-but Spark official support on Java 11 since 3.0.0.
+**注意:** Spark 2.3.x(EOL) 理论上也支持。但我们只对 Java 8 和 Java 11 做测试，Spark 自 3.0.0 起官方支持 Java 11。
 
-### Import
+### 导入包
 
 - Gradle
 
 ```groovy
-// available since 2.4.0
+// 自 2.4.0 起可用
 compile "com.github.housepower:clickhouse-integration-spark_2.11:${clickhouse_native_jdbc_version}"
 ```
 
 - Maven
 
 ```xml
-<!-- available since 2.4.0 -->
+<!-- 自 2.4.0 起可用 -->
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-integration-spark_2.11</artifactId>
@@ -99,6 +97,6 @@ compile "com.github.housepower:clickhouse-integration-spark_2.11:${clickhouse_na
 </dependency>
 ```
 
-## License
+## 开源协议
 
-This project is distributed under the terms of the Apache License (Version 2.0). See [LICENSE](LICENSE) for details.
+Apache License (Version 2.0)。详情参考 [LICENSE](LICENSE).

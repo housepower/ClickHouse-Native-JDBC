@@ -4,7 +4,7 @@
 
 ### HikariCP
 
-Add dependency in Maven `pom.xml`.
+在 Maven `pom.xml` 添加依赖.
 
 ```xml
 <dependency>
@@ -14,7 +14,7 @@ Add dependency in Maven `pom.xml`.
 </dependency>
 ```
 
-Use simple `HikariDataSource`.
+使用普通的 `HikariDataSource`.
 
 ```java
 HikariConfig conf = new HikariConfig();
@@ -25,7 +25,7 @@ try (HikariDataSource ds = new HikariDataSource(conf)) {
 }
 ```
 
-Use `HikariDataSource` wrap `BalancedClickhouseDataSource` to connect clickhouse cluster.
+使用 `HikariDataSource` 包装 `BalancedClickhouseDataSource` 来连接 ClickHouse 集群.
 
 ```java
 DataSource balancedCkDs = new BalancedClickhouseDataSource(getJdbcUrl());
@@ -39,7 +39,7 @@ try (HikariDataSource ds = new HikariDataSource(conf)) {
 
 ### Alibaba Druid
 
-Add dependency in Maven `pom.xml`
+在 Maven `pom.xml` 添加依赖.
 
 ```xml  
 <dependency>
@@ -49,7 +49,7 @@ Add dependency in Maven `pom.xml`
 </dependency>
 ```
 
-Use `DruidDataSource`.
+使用 `DruidDataSource`.
 
 ```java
 Properties prop = new Properties();
@@ -62,7 +62,7 @@ try (DruidDataSource ds = (DruidDataSource) DruidDataSourceFactory.createDataSou
 
 ### Apache DBCP2
 
-Add dependency in Maven `pom.xml`
+在 Maven `pom.xml` 添加依赖.
 
 ```xml
 <dependency>
@@ -72,7 +72,7 @@ Add dependency in Maven `pom.xml`
 </dependency>
 ```
 
-Use `BasicDataSource`.
+使用 `BasicDataSource`.
 
 ```java
 Properties prop = new Properties();

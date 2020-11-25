@@ -5,21 +5,21 @@
 - Java 8, Scala 2.11/2.12, Spark 2.4.x
 - 或者 Java 8/11, Scala 2.12, Spark 3.0.x
 
-**注意:** Spark 2.3.x(EOL) 也可以使用。但我们只对 Java 8 和 Java 11 做测试，Spark 3.0.0 开始支持Java11。
+**注意:** Spark 2.3.x(EOL) 理论上也支持。但我们只对 Java 8 和 Java 11 做测试，Spark 自 3.0.0 起官方支持 Java 11。
 
 ### 导入包
 
 - Gradle
 
 ```groovy
-// available since 2.4.0
+// 自 2.4.0 起可用
 compile "com.github.housepower:clickhouse-integration-spark_2.11:${clickhouse_native_jdbc_version}"
 ```
 
 - Maven
 
 ```xml
-<!-- available since 2.4.0 -->
+<!-- 自 2.4.0 起可用 -->
 <dependency>
     <groupId>com.github.housepower</groupId>
     <artifactId>clickhouse-integration-spark_2.11</artifactId>
@@ -29,13 +29,13 @@ compile "com.github.housepower:clickhouse-integration-spark_2.11:${clickhouse_na
 
 ### 示例
 
-使用前先注册 `ClickHouseDialects` 
+请确保在使用前注册 `ClickHouseDialects` 
 
 ```scala
     JdbcDialects.registerDialect(ClickHouseDialect)
 ```
 
-读取 ClickHouse 数据到 DataFrame
+读取 ClickHouse 表数据到 DataFrame
 
 ```scala
 val df = spark.read
@@ -48,7 +48,7 @@ val df = spark.read
     .load
 ```
 
-将 DataFrame 写入 ClickHouse (支持 `truncate table`)
+将 DataFrame 写入 ClickHouse 表 (支持 `truncate table`)
 
 ```scala
 df.write
