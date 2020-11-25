@@ -21,6 +21,6 @@ Supported by [JetBrains Open Source License](https://www.jetbrains.com/?from=Cli
 
 目前实现了和 Spark JDBC API 的打通，如数据类型映射，自动建表，自动情况表，读写等。
 
-## 证书
+## 开源协议
 
 Apache License (Version 2.0). 更多参考 [LICENSE](https://github.com/housepower/ClickHouse-Native-JDBC/LICENSE) for details.
