@@ -5,50 +5,51 @@ ClickHouse 客户端-服务端原生通信协议
 
 ```mermaid
 sequenceDiagram
-Client -> Server: Open socket Connection
-Server --> Client: Ok, got a new client connection
-Note right of Server: Connection established
-Client -> Server: Send Hello Request
-Server --> Client: Hello response
-Note left of Client: I got server infos
+客户端 -> 服务端: 开启 socket 连接
+服务端 --> 客户端: ok，新的客户端
+Note right of 服务端: 连接建立成功
+客户端 -> 服务端: 发送 Hello 请求
+服务端 --> 客户端: Hello 返回
+Note left of 客户端: 获取到了服务相关信息
 ```
 
 ## 发请请求
 
-- There are many kinds of requests/response, the above `hello` is one of them.
+- 请求有非常多种不同的 requests/response, 上述 `hello` 为其中一种。
 
-- You can find all the request/response type in `com.github.housepower.jdbc.protocol` package.
+- 可以在 `com.github.housepower.jdbc.protocol` 包下面找到所有的 requests/response 类型。
 
 ## 查询
 
-After the connection established and hello request/response, we can send plain sql strings to query the data. 
+当连接建立并且经过 hello请求返回后，我们可以发送一个字符串SQL来查询数据。
 
 ```mermaid
 sequenceDiagram
-Client -> Server: Send DataRequest Request
-Note right of Server: Oh, a new query just comes, I will handle that query.
-Server --> Client: DataResponse
-Note left of Client: I got response data now
-Note left of Client: I will deserialize them to the ResultSets.
+客户端 -> 服务端: 发送 DataRequest 请求
+Note right of 服务端: 新的请求来啦，<br/> 我将进行处理
+服务端 --> 客户端: 返回 DataResponse
+Note left of 客户端: 我拿到了 DataResponse 了
+Note left of 客户端: 我将解析 DataResponse 成 ResultSet
 ```
 
 ## 插入
 
-The plain query which send sql literal to the server, but it's not efficient for batch inserts. ClickHouse provides another type of data request for batch inserts that we can send blocks to the server directly.
+一些小的查询请求，可以以字符串SQL的方式和服务端交互，但这不利于批量数据的插入。ClickHouse 提供了另外原生的批量导入协议支持，这样我们可以直接往ClickHouse发送block数据。
+
 
 ```mermaid
 sequenceDiagram
-Client -> Server: Send insert query to the server (which called by PreparedStatement)
-Note right of Server: Oh, a new prepare insert just comes, I'll look at the table schemas.
-Server --> Client: DataResponse (Empty Block, which is also called sampleBlock)
-Note right of Server: State: Waiting for inserts.
-Note left of Client: I got a block now, and I know the names and types of this table.
-Note left of Client: Write the data to the blocks (when we can `setObject` in JDBC)
-Client -> Server: send a large block by dataRequest
-Note right of Server: A Block just comes, I'll insert them to the table
-Client -> Server: send a empty block to end the inserts
-Note right of Server: A empty block just comes, which means the client finish the inserts.
-Note right of Server: State: Idle.
+客户端 -> 服务端: 发送Insert请求到服务端 (也称之 PreparedStatement)
+Note right of 服务端: 新的PreparedStatement请求来了,<br/>我将看看对应的表的元数据信息
+服务端 --> 客户端: 返回 DataResponse (空的 Block, <br/> 也称之 sampleBlock)
+Note right of 服务端: State: 等待插入。
+Note left of 客户端: 拿到 sampleBlock 了, <br/> 我知道了这个表的元数据（字段名称，类型等）
+Note left of 客户端: 写入数据到内存的 block中 <br/> (当我们在 JDBC 调用 `setObject` 的时候)
+客户端 -> 服务端: 将 block 包装成 dataRequest 发送
+Note right of 服务端: 新的 block 来了,  <br/> 我将插入到表中
+客户端 -> 服务端: 发送一个空的 block 结束 插入
+Note right of 服务端: 空的 block 来了,  <br/> 请求结束
+Note right of 服务端: State: 空闲
 ```
 
  
