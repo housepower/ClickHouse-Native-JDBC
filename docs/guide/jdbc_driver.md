@@ -6,17 +6,6 @@
 
 **Notes:** We only do test with Java LTS versions.
 
-### Differences from [yandex/clickhouse-jdbc](https://github.com/yandex/clickhouse-jdbc)
-
-* Data is organized and compressed by columns.
-* Implemented in the TCP Protocol, with higher performance than HTTP, here is the [benchmark report](docs/dev/benchmark.md).
-
-### Limitations
-
-* Not support non-values format.
-* Not support complex values expression, like `INSERT INTO test_table VALUES(toDate(123456))`.
-* Not support more compression method, like `ZSTD`.
-
 ### Import
 
 - Gradle
