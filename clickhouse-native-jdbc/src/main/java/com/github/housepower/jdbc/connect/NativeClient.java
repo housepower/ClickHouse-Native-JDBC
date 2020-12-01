@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc.connect;
 
+import com.github.housepower.jdbc.buffer.SocketBuffedReader;
 import com.github.housepower.jdbc.buffer.SocketBuffedWriter;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
@@ -51,8 +52,9 @@ public class NativeClient {
             socket.setKeepAlive(configure.tcpKeepAlive());
             socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
 
-            return new NativeClient(socket, new BinarySerializer(
-                    new SocketBuffedWriter(socket), true), new BinaryDeserializer(socket));
+            return new NativeClient(socket,
+                    new BinarySerializer(new SocketBuffedWriter(socket), true),
+                    new BinaryDeserializer(new SocketBuffedReader(socket)));
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -65,9 +67,9 @@ public class NativeClient {
 
     public NativeClient(Socket socket, BinarySerializer serializer, BinaryDeserializer deserializer) {
         this.socket = socket;
+        this.address = socket.getLocalSocketAddress();
         this.serializer = serializer;
         this.deserializer = deserializer;
-        this.address = socket.getLocalSocketAddress();
     }
 
     public SocketAddress address() {

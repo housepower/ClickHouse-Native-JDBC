@@ -16,20 +16,17 @@ package com.github.housepower.jdbc.serde;
 
 import com.github.housepower.jdbc.buffer.BuffedReader;
 import com.github.housepower.jdbc.buffer.CompressedBuffedReader;
-import com.github.housepower.jdbc.buffer.SocketBuffedReader;
 import com.github.housepower.jdbc.misc.Container;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 public class BinaryDeserializer {
 
     private final Container<BuffedReader> container;
 
-    public BinaryDeserializer(Socket socket) throws IOException {
-        SocketBuffedReader socketReader = new SocketBuffedReader(socket);
-        container = new Container<>(socketReader, new CompressedBuffedReader(socketReader));
+    public BinaryDeserializer(BuffedReader buffedReader) {
+        container = new Container<>(buffedReader, new CompressedBuffedReader(buffedReader));
     }
 
     public long readVarInt() throws IOException {
