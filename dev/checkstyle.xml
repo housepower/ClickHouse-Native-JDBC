@@ -81,6 +81,12 @@
             <property name="option" value="nospace"/>
             <property name="allowLineBreaks" value="false"/>
         </module>
+
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="
+                org.slf4j,
+                java.util.logging" />
+        </module>
     </module>
 
     <module name="SuppressionFilter">

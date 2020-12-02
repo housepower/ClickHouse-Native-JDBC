@@ -19,8 +19,8 @@ import com.github.housepower.jdbc.misc.StrUtil;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.SettingKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;

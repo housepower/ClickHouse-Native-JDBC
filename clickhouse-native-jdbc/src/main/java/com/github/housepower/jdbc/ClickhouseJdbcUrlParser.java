@@ -17,8 +17,8 @@ package com.github.housepower.jdbc;
 import com.github.housepower.jdbc.exception.InvalidValueException;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.settings.SettingKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;

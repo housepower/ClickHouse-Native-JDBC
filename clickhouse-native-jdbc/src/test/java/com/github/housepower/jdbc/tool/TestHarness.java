@@ -16,8 +16,8 @@ package com.github.housepower.jdbc.tool;
 
 import com.github.housepower.jdbc.AbstractITest;
 import com.google.common.base.Joiner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
