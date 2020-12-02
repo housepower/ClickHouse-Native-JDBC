@@ -48,6 +48,10 @@ public class DataResponse implements Response {
         return new DataResponse(name, block);
     }
 
+    public String name() {
+        return name;
+    }
+
     public Block block() {
         return block;
     }

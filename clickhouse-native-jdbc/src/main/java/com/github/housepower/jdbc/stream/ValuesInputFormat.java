@@ -24,10 +24,9 @@ public class ValuesInputFormat implements InputFormat {
 
     private final SQLLexer lexer;
 
-    public ValuesInputFormat(int pos, String data) throws SQLException {
+    public ValuesInputFormat(int pos, String data) {
         this.lexer = new SQLLexer(pos, data);
     }
-
 
     @Override
     public void fillBlock(Block block) throws SQLException {

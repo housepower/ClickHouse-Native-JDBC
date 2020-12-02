@@ -26,6 +26,8 @@ import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
 import com.github.housepower.jdbc.log.Logger;
 import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.jdbc.stream.QueryResult;
+import com.github.housepower.jdbc.stream.ClickHouseQueryResult;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -129,8 +131,8 @@ public class NativeClient {
         return (EOFStreamResponse) response;
     }
 
-    public QueryResponse receiveQuery(Duration soTimeout, NativeContext.ServerContext info) {
-        return new QueryResponse(() -> receiveResponse(soTimeout, info));
+    public QueryResult receiveQuery(Duration soTimeout, NativeContext.ServerContext info) {
+        return new ClickHouseQueryResult(() -> receiveResponse(soTimeout, info));
     }
 
     public void disconnect() throws SQLException {

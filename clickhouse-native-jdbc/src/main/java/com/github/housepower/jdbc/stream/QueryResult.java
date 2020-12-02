@@ -12,16 +12,17 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.misc;
+package com.github.housepower.jdbc.stream;
 
-/**
- * Copyright (C) 2018 SpectX
- * Created by Lauri Nõmme
- * 12.12.2018 16:11
- */
-public interface CheckedIterator<T, E extends Throwable> {
+import com.github.housepower.jdbc.data.Block;
+import com.github.housepower.jdbc.misc.CheckedIterator;
+import com.github.housepower.jdbc.protocol.DataResponse;
 
-    boolean hasNext() throws E;
+import java.sql.SQLException;
 
-    T next() throws E;
+public interface QueryResult {
+
+    Block header() throws SQLException;
+
+    CheckedIterator<DataResponse, SQLException> data();
 }

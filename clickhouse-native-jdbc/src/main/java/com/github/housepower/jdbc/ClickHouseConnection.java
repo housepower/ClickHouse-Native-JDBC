@@ -20,7 +20,7 @@ import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.HelloResponse;
 import com.github.housepower.jdbc.protocol.QueryRequest;
-import com.github.housepower.jdbc.protocol.QueryResponse;
+import com.github.housepower.jdbc.stream.QueryResult;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
@@ -169,7 +169,7 @@ public class ClickHouseConnection implements SQLConnection {
         return nativeClient.receiveSampleBlock(cfg.get().queryTimeout(), nativeCtx.get().serverCtx());
     }
 
-    public QueryResponse sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
+    public QueryResult sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
         Validate.isTrue(this.state.get() == ConnectionState.IDLE,
                 "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         NativeClient nativeClient = getHealthyNativeClient();

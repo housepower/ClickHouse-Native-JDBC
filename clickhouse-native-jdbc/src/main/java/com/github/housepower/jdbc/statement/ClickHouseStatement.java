@@ -18,7 +18,7 @@ import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseResultSet;
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.protocol.QueryResponse;
+import com.github.housepower.jdbc.stream.QueryResult;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.SettingKey;
 import com.github.housepower.jdbc.stream.ValuesInputFormat;
@@ -81,8 +81,8 @@ public class ClickHouseStatement implements SQLStatement {
             return connection.sendInsertRequest(block);
         }
 
-        QueryResponse response = connection.sendQueryRequest(query, cfg);
-        lastResultSet = new ClickHouseResultSet(response.header(), cfg, db, table, response.data().get(), this);
+        QueryResult result = connection.sendQueryRequest(query, cfg);
+        lastResultSet = new ClickHouseResultSet(result.header(), cfg, db, table, result.data(), this);
         return 0;
     }
 
