@@ -21,7 +21,6 @@ import com.github.housepower.jdbc.settings.SettingKey;
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 public class ClickHouseDriver implements Driver {
 
@@ -91,7 +90,7 @@ public class ClickHouseDriver implements Driver {
     }
 
     @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 }

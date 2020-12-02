@@ -27,8 +27,8 @@ import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
 import com.github.housepower.jdbc.statement.ClickHousePreparedQueryStatement;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.net.InetSocketAddress;

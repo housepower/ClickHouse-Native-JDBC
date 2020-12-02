@@ -24,8 +24,8 @@ import com.github.housepower.jdbc.serde.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

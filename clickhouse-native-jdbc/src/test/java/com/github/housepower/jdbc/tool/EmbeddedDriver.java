@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 
 import java.sql.*;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 public class EmbeddedDriver implements Driver {
 
@@ -56,7 +55,7 @@ public class EmbeddedDriver implements Driver {
     }
 
     @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return null;
     }
 }

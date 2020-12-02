@@ -14,21 +14,21 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.annotation.Issue;
 import com.google.common.base.Strings;
-
 import org.junit.jupiter.api.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- *
- */
 public class IssueReproduceITest extends AbstractITest {
+
     @Test
+    @Issue("63")
     public void testIssue63() throws Exception {
         withNewConnection(connection -> {
             int columnNum = 36;
@@ -60,5 +60,4 @@ public class IssueReproduceITest extends AbstractITest {
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
-
 }
