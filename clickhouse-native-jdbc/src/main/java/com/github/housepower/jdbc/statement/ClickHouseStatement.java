@@ -50,7 +50,7 @@ public class ClickHouseStatement implements SQLStatement {
     public ClickHouseStatement(ClickHouseConnection connection, NativeContext nativeContext) {
         this.connection = connection;
         this.nativeContext = nativeContext;
-        this.cfg = connection.getCfg();
+        this.cfg = connection.cfg();
         this.db = cfg.database();
     }
 

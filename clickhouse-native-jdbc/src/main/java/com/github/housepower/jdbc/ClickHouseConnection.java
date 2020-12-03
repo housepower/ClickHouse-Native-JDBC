@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.connect.SessionState;
 import com.github.housepower.jdbc.connect.NativeClient;
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.Block;
@@ -54,7 +55,7 @@ public class ClickHouseConnection implements SQLConnection {
     // TODO Since #getHealthyNativeClient() is synchronized, can we remove AtomicReference?
     private final AtomicReference<NativeContext> nativeCtx;
     // TODO move to NativeClient
-    private final AtomicReference<ConnectionState> state = new AtomicReference<>(ConnectionState.IDLE);
+    private final AtomicReference<SessionState> state = new AtomicReference<>(SessionState.IDLE);
 
     protected ClickHouseConnection(ClickHouseConfig cfg, NativeContext nativeCtx) {
         this.isClosed = new AtomicBoolean(false);
@@ -62,12 +63,16 @@ public class ClickHouseConnection implements SQLConnection {
         this.nativeCtx = new AtomicReference<>(nativeCtx);
     }
 
-    public ClickHouseConfig getCfg() {
+    public ClickHouseConfig cfg() {
         return cfg.get();
     }
 
-    public NativeContext getNativeContext() {
-        return nativeCtx.get();
+    public NativeContext.ServerContext serverContext() {
+        return nativeCtx.get().serverCtx();
+    }
+
+    public QueryRequest.ClientContext clientContext() {
+        return nativeCtx.get().clientCtx();
     }
 
     @Override
@@ -142,12 +147,12 @@ public class ClickHouseConnection implements SQLConnection {
     // ClickHouse support only `database`, we treat it as JDBC `catalog`
     @Override
     public void setCatalog(String catalog) throws SQLException {
-        this.cfg.set(this.getCfg().withDatabase(catalog));
+        this.cfg.set(this.cfg().withDatabase(catalog));
     }
 
     @Override
     public String getCatalog() throws SQLException {
-        return this.getCfg().database();
+        return this.cfg().database();
     }
 
     @Override
@@ -168,13 +173,13 @@ public class ClickHouseConnection implements SQLConnection {
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         NativeClient nativeClient = getHealthyNativeClient();
         nativeClient.sendQuery(insertQuery, nativeCtx.get().clientCtx(), cfg.get().settings());
-        Validate.isTrue(this.state.compareAndSet(ConnectionState.IDLE, ConnectionState.WAITING_INSERT),
+        Validate.isTrue(this.state.compareAndSet(SessionState.IDLE, SessionState.WAITING_INSERT),
                 "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         return nativeClient.receiveSampleBlock(cfg.get().queryTimeout(), nativeCtx.get().serverCtx());
     }
 
     public QueryResult sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
-        Validate.isTrue(this.state.get() == ConnectionState.IDLE,
+        Validate.isTrue(this.state.get() == SessionState.IDLE,
                 "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         NativeClient nativeClient = getHealthyNativeClient();
         nativeClient.sendQuery(query, nativeCtx.get().clientCtx(), cfg.settings());
@@ -184,14 +189,14 @@ public class ClickHouseConnection implements SQLConnection {
     // when sendInsertRequest we must ensure the connection is healthy
     // the #getSampleBlock() must be called before this method
     public int sendInsertRequest(Block block) throws SQLException {
-        Validate.isTrue(this.state.get() == ConnectionState.WAITING_INSERT,
+        Validate.isTrue(this.state.get() == SessionState.WAITING_INSERT,
                 "Call getSampleBlock before insert.");
 
         NativeClient nativeClient = getNativeClient();
         nativeClient.sendData(block);
         nativeClient.sendData(new Block());
         nativeClient.receiveEndOfStream(cfg.get().queryTimeout(), nativeCtx.get().serverCtx());
-        Validate.isTrue(this.state.compareAndSet(ConnectionState.WAITING_INSERT, ConnectionState.IDLE));
+        Validate.isTrue(this.state.compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE));
         return block.rowCnt();
     }
 
@@ -204,7 +209,7 @@ public class ClickHouseConnection implements SQLConnection {
             NativeContext closeableCtx = nativeCtx.compareAndSet(oldInfo, newInfo) ? oldInfo : newInfo;
             closeableCtx.nativeClient().disconnect();
             assert oldInfo == closeableCtx;
-            state.set(ConnectionState.IDLE);
+            state.set(SessionState.IDLE);
         }
 
         return nativeCtx.get().nativeClient();

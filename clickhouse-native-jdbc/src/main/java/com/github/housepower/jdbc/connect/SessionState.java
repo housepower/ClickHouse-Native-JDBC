@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc;
+package com.github.housepower.jdbc.connect;
 
-public enum ConnectionState {
+public enum SessionState {
 
     IDLE, WAITING_INSERT
 }
