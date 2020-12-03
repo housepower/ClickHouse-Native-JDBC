@@ -45,7 +45,7 @@ public abstract class AbstractColumn implements IColumn {
     }
 
     @Override
-    public Object values(int idx) {
+    public Object value(int idx) {
         return values[idx];
     }
 

@@ -34,11 +34,11 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 
 public class ClickHouseResultSet implements SQLResultSet {
-    private int row = -1;
-    private Block current = new Block();
+    private int currentRowNum = -1;
+    private Block currentBlock = new Block();
 
-    private int lastFetchRow = -1;
-    private int lastFetchColumn = -1;
+    private int lastFetchRowIdx = -1;
+    private int lastFetchColumnIdx = -1;
     private Block lastFetchBlock = null;
 
     private final Block header;
@@ -222,10 +222,10 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public Object getObject(int index) throws SQLException {
-        Validate.isTrue(row >= 0 && row < current.rows(),
+        Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
                 "No row information was obtained.You must call ResultSet.next() before that.");
-        IColumn column = (lastFetchBlock = current).getByPosition((lastFetchColumn = index - 1));
-        return column.values((lastFetchRow = row));
+        IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
+        return column.value((lastFetchRowIdx = currentRowNum));
     }
 
     @Override
@@ -250,9 +250,9 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public boolean wasNull() throws SQLException {
         Validate.isTrue(lastFetchBlock != null, "Please call Result.next()");
-        Validate.isTrue(lastFetchColumn >= 0, "Please call Result.getXXX()");
-        Validate.isTrue(lastFetchRow >= 0 && lastFetchRow < lastFetchBlock.rows(), "Please call Result.next()");
-        return lastFetchBlock.getByPosition(lastFetchColumn).values(lastFetchRow) == null;
+        Validate.isTrue(lastFetchColumnIdx >= 0, "Please call Result.getXXX()");
+        Validate.isTrue(lastFetchRowIdx >= 0 && lastFetchRowIdx < lastFetchBlock.rowCnt(), "Please call Result.next()");
+        return lastFetchBlock.getColumnByPosition(lastFetchColumnIdx).value(lastFetchRowIdx) == null;
     }
 
     @Override
@@ -277,13 +277,13 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        return ++row < current.rows() || (row = 0) < (current = fetchBlock()).rows();
+        return ++currentRowNum < currentBlock.rowCnt() || (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
     }
 
     private Block fetchBlock() throws SQLException {
         while (iterator.hasNext()) {
             DataResponse next = iterator.next();
-            if (next.block().rows() > 0) {
+            if (next.block().rowCnt() > 0) {
                 return next.block();
             }
         }

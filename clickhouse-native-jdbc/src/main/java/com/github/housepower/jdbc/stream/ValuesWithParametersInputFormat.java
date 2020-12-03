@@ -19,37 +19,37 @@ import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 
 import java.sql.SQLException;
+import java.util.BitSet;
 
 public class ValuesWithParametersInputFormat implements InputFormat {
 
     private final SQLLexer lexer;
 
-    public ValuesWithParametersInputFormat(int pos, String query) {
-        this.lexer = new SQLLexer(pos, query);
+    public ValuesWithParametersInputFormat(int pos, String sql) {
+        this.lexer = new SQLLexer(pos, sql);
     }
 
     @Override
     public void fillBlock(Block block) throws SQLException {
-        int[] constIdx = new int[block.columns()];
+        BitSet constIdxFlags = new BitSet(block.columnCnt());
         char nextChar = lexer.character();
         Validate.isTrue(nextChar == '(');
-        for (int column = 0; column < block.columns(); column++) {
-            if (column > 0) {
+        for (int columnIdx = 0; columnIdx < block.columnCnt(); columnIdx++) {
+            if (columnIdx > 0) {
                 Validate.isTrue(lexer.character() == ',');
             }
 
-            if (!lexer.isCharacter('?')) {
-                block.setConstObject(column, block.getByPosition(column).type()
-                                                 .deserializeTextQuoted(lexer));
-                constIdx[column] = 1;
-            } else {
+            if (lexer.isCharacter('?')) {
                 lexer.character();
+            } else {
+                constIdxFlags.set(columnIdx);
+                block.setConstObject(columnIdx, block.getColumnByPosition(columnIdx).type().deserializeTextQuoted(lexer));
             }
         }
 
-        for (int column = 0; column < block.columns(); column++) {
-            if (constIdx[column] > 0) {
-                block.incIndex(column);
+        for (int columnIdx = 0; columnIdx < block.columnCnt(); columnIdx++) {
+            if (constIdxFlags.get(columnIdx)) {
+                block.incPlaceholderIndexes(columnIdx);
             }
         }
         Validate.isTrue(lexer.character() == ')');

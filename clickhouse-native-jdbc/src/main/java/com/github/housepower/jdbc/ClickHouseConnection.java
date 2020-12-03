@@ -188,7 +188,7 @@ public class ClickHouseConnection implements SQLConnection {
         nativeClient.sendData(new Block());
         nativeClient.receiveEndOfStream(cfg.get().queryTimeout(), nativeCtx.get().serverCtx());
         Validate.isTrue(this.state.compareAndSet(ConnectionState.WAITING_INSERT, ConnectionState.IDLE));
-        return block.rows();
+        return block.rowCnt();
     }
 
     synchronized private NativeClient getHealthyNativeClient() throws SQLException {

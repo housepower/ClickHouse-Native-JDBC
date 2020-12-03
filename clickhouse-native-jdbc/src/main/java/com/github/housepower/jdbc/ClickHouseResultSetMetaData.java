@@ -36,12 +36,12 @@ public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
 
     @Override
     public int getColumnCount() throws SQLException {
-        return header.columns();
+        return header.columnCnt();
     }
 
     @Override
     public int getColumnType(int index) throws SQLException {
-        IDataType type = header.getByPosition(index - 1).type();
+        IDataType type = header.getColumnByPosition(index - 1).type();
         return type.sqlTypeId();
     }
 
@@ -67,12 +67,12 @@ public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
 
     @Override
     public String getColumnTypeName(int column) throws SQLException {
-        return header.getByPosition(column - 1).type().name();
+        return header.getColumnByPosition(column - 1).type().name();
     }
 
     @Override
     public String getColumnClassName(int column) throws SQLException {
-        return header.getByPosition(column - 1).type().javaTypeClass().getName();
+        return header.getColumnByPosition(column - 1).type().javaTypeClass().getName();
     }
 
     @Override
@@ -82,28 +82,28 @@ public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
 
     @Override
     public String getColumnLabel(int index) throws SQLException {
-        return header.getByPosition(index - 1).name();
+        return header.getColumnByPosition(index - 1).name();
     }
 
     @Override
     public int isNullable(int index) throws SQLException {
-        return (header.getByPosition(index - 1).type() instanceof DataTypeNullable) ?
+        return (header.getColumnByPosition(index - 1).type() instanceof DataTypeNullable) ?
             ResultSetMetaData.columnNullable : ResultSetMetaData.columnNoNulls;
     }
 
     @Override
     public boolean isSigned(int index) throws SQLException {
-        return header.getByPosition(index - 1).name().startsWith("U");
+        return header.getColumnByPosition(index - 1).name().startsWith("U");
     }
 
     @Override
     public int getPrecision(int column) throws SQLException {
-        return header.getByPosition(column - 1).type().getPrecision();
+        return header.getColumnByPosition(column - 1).type().getPrecision();
     }
 
     @Override
     public int getScale(int column) throws SQLException {
-        return header.getByPosition(column - 1).type().getScale();
+        return header.getColumnByPosition(column - 1).type().getScale();
     }
 
     @Override
