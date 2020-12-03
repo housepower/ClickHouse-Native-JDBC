@@ -82,7 +82,7 @@ public class ClickHouseStatement implements SQLStatement {
         }
 
         QueryResult result = connection.sendQueryRequest(query, cfg);
-        lastResultSet = new ClickHouseResultSet(result.header(), cfg, db, table, result.data(), this);
+        lastResultSet = new ClickHouseResultSet(this, cfg, db, table, result.header(), result.data());
         return 0;
     }
 

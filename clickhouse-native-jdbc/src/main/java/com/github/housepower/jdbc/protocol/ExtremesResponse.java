@@ -23,10 +23,15 @@ import java.sql.SQLException;
 
 public class ExtremesResponse implements Response {
 
+    public static ExtremesResponse readFrom(
+            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
+        return new ExtremesResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
+    }
+
     private final String name;
     private final Block block;
 
-    ExtremesResponse(String name, Block block) {
+    public ExtremesResponse(String name, Block block) {
         this.name = name;
         this.block = block;
     }
@@ -36,8 +41,11 @@ public class ExtremesResponse implements Response {
         return ProtoType.RESPONSE_EXTREMES;
     }
 
-    public static ExtremesResponse readFrom(
-            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
-        return new ExtremesResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
+    public String name() {
+        return name;
+    }
+
+    public Block block() {
+        return block;
     }
 }

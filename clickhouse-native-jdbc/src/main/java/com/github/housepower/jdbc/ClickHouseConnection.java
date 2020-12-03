@@ -66,6 +66,10 @@ public class ClickHouseConnection implements SQLConnection {
         return cfg.get();
     }
 
+    public NativeContext getNativeContext() {
+        return nativeCtx.get();
+    }
+
     @Override
     public void close() throws SQLException {
         if (!isClosed() && isClosed.compareAndSet(false, true)) {
@@ -234,7 +238,9 @@ public class ClickHouseConnection implements SQLConnection {
 
             HelloResponse response = nativeClient.receiveHello(configure.queryTimeout(), null);
             ZoneId timeZone = ZoneId.of(response.serverTimeZone());
-            return new NativeContext.ServerContext(configure, response.reversion(), timeZone, response.serverDisplayName());
+            return new NativeContext.ServerContext(
+                    response.majorVersion(), response.minorVersion(), response.reversion(),
+                    configure, timeZone, response.serverDisplayName());
         } catch (SQLException rethrows) {
             nativeClient.disconnect();
             throw rethrows;

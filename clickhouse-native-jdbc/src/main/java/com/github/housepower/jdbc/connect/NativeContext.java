@@ -44,20 +44,38 @@ public class NativeContext {
     }
 
     public static class ServerContext {
+        private final long majorVersion;
+        private final long minorVersion;
         private final long reversion;
         private final ZoneId timeZone;
         private final String displayName;
         private final ClickHouseConfig configure;
 
-        public ServerContext(ClickHouseConfig configure, long reversion, ZoneId timeZone, String displayName) {
-            this.configure = configure;
+        public ServerContext(long majorVersion, long reversion, long minorVersion,
+                             ClickHouseConfig configure,
+                             ZoneId timeZone, String displayName) {
+            this.majorVersion = majorVersion;
+            this.minorVersion = minorVersion;
             this.reversion = reversion;
+            this.configure = configure;
             this.timeZone = timeZone;
             this.displayName = displayName;
         }
 
+        public long majorVersion() {
+            return majorVersion;
+        }
+
+        public long minorVersion() {
+            return minorVersion;
+        }
+
         public long reversion() {
             return reversion;
+        }
+
+        public String version() {
+            return majorVersion + "." + minorVersion + "." + reversion;
         }
 
         public ZoneId timeZone() {

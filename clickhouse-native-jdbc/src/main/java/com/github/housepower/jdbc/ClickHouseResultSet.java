@@ -41,24 +41,25 @@ public class ClickHouseResultSet implements SQLResultSet {
     private int lastFetchColumnIdx = -1;
     private Block lastFetchBlock = null;
 
-    private final Block header;
+    private final ClickHouseStatement statement;
     private final ClickHouseConfig cfg;
     private final String db;
     private final String table;
-    private final ClickHouseStatement statement;
-    private final CheckedIterator<DataResponse, SQLException> iterator;
+    private final Block header;
+    private final CheckedIterator<DataResponse, SQLException> dataResponses;
 
-    public ClickHouseResultSet(Block header,
-                               ClickHouseConfig cfg, String db,
+    public ClickHouseResultSet(ClickHouseStatement statement,
+                               ClickHouseConfig cfg,
+                               String db,
                                String table,
-                               CheckedIterator<DataResponse, SQLException> iterator,
-                               ClickHouseStatement statement) {
-        this.header = header;
+                               Block header,
+                               CheckedIterator<DataResponse, SQLException> dataResponses) {
+        this.statement = statement;
         this.cfg = cfg;
         this.db = db;
         this.table = table;
-        this.iterator = iterator;
-        this.statement = statement;
+        this.header = header;
+        this.dataResponses = dataResponses;
     }
 
     @Override
@@ -281,8 +282,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     private Block fetchBlock() throws SQLException {
-        while (iterator.hasNext()) {
-            DataResponse next = iterator.next();
+        while (dataResponses.hasNext()) {
+            DataResponse next = dataResponses.next();
             if (next.block().rowCnt() > 0) {
                 return next.block();
             }
