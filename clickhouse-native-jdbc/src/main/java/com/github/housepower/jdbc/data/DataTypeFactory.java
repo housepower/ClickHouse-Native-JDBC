@@ -75,7 +75,7 @@ public class DataTypeFactory {
         } else {
             String name = String.valueOf(dataTypeName);
             IDataType dataType = dataTypes.get(name);
-            Validate.isTrue(dataType != null, "Unknown data type family:" + name);
+            Validate.isTrue(dataType != null, "Unknown data type: " + name);
             return dataType;
         }
     }

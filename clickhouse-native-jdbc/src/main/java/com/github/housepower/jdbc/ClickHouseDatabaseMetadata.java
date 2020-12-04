@@ -16,8 +16,6 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.log.Logger;
-import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.sql.*;
@@ -29,7 +27,6 @@ import java.util.List;
 public final class ClickHouseDatabaseMetadata implements DatabaseMetaData {
 
     private static final String DEFAULT_CATALOG = "default";
-    private static final Logger LOG = LoggerFactory.getLogger(ClickHouseDatabaseMetadata.class);
 
     private final String url;
     private final ClickHouseConnection connection;
@@ -57,17 +54,17 @@ public final class ClickHouseDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public String getUserName() throws SQLException {
-        return null;
+        return connection.cfg().user();
     }
 
     @Override
     public boolean isReadOnly() throws SQLException {
-        return true;
+        return false;
     }
 
     @Override
     public boolean nullsAreSortedHigh() throws SQLException {
-        return true;
+        return false;
     }
 
     @Override
@@ -77,12 +74,12 @@ public final class ClickHouseDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public boolean nullsAreSortedAtStart() throws SQLException {
-        return true;
+        return false;
     }
 
     @Override
     public boolean nullsAreSortedAtEnd() throws SQLException {
-        return false;
+        return true;
     }
 
     @Override

@@ -51,7 +51,7 @@ public class NativeContext {
         private final String displayName;
         private final ClickHouseConfig configure;
 
-        public ServerContext(long majorVersion, long reversion, long minorVersion,
+        public ServerContext(long majorVersion, long minorVersion, long reversion,
                              ClickHouseConfig configure,
                              ZoneId timeZone, String displayName) {
             this.majorVersion = majorVersion;

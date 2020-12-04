@@ -41,7 +41,6 @@ public class ClickHouseQueryResult implements QueryResult {
     @Override
     public Block header() throws SQLException {
         ensureHeaderConsumed();
-
         return header;
     }
 

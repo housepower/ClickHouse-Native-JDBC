@@ -51,7 +51,7 @@ public class QueryResultBuilder {
     }
 
     public QueryResultBuilder columnNames(List<String> names) {
-        Validate.ensure(names.size() != columnNum, "size mismatch, req: " + columnNum + " got: " + names.size());
+        Validate.ensure(names.size() == columnNum, "size mismatch, req: " + columnNum + " got: " + names.size());
         this.columnNames = names;
         return this;
     }
@@ -61,10 +61,10 @@ public class QueryResultBuilder {
     }
 
     public QueryResultBuilder columnTypes(List<String> types) throws SQLException {
-        Validate.ensure(types.size() != columnNum, "size mismatch, req: " + columnNum + " got: " + types.size());
+        Validate.ensure(types.size() == columnNum, "size mismatch, req: " + columnNum + " got: " + types.size());
         this.columnTypes = new ArrayList<>(columnNum);
         for (int i = 0; i < columnNum; i++) {
-            columnTypes.set(i, DataTypeFactory.get(types.get(i), serverContext));
+            columnTypes.add(DataTypeFactory.get(types.get(i), serverContext));
         }
         return this;
     }
@@ -74,7 +74,7 @@ public class QueryResultBuilder {
     }
 
     public QueryResultBuilder addRow(List<?> row) {
-        Validate.ensure(row.size() != columnNum, "size mismatch, req: " + columnNum + " got: " + row.size());
+        Validate.ensure(row.size() == columnNum, "size mismatch, req: " + columnNum + " got: " + row.size());
         rows.add(row);
         return this;
     }
@@ -89,7 +89,7 @@ public class QueryResultBuilder {
         for (int c = 0; c < columnNum; c++) {
             headerColumns[c] = ColumnFactory.createColumn(columnNames.get(c), columnTypes.get(c), emptyObjects);
         }
-        Block headerBlock = new Block(columnNum, headerColumns);
+        Block headerBlock = new Block(0, headerColumns);
 
         // assemble all rows to one data block
         IColumn[] dataColumns = new IColumn[columnNum];
@@ -100,7 +100,7 @@ public class QueryResultBuilder {
             }
             dataColumns[c] = ColumnFactory.createColumn(columnNames.get(c), columnTypes.get(c), columnObjects);
         }
-        Block dataBlock = new Block(columnNum, dataColumns);
+        Block dataBlock = new Block(rows.size(), dataColumns);
 
         return new QueryResult() {
 

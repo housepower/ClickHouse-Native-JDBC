@@ -166,6 +166,11 @@ public class ClickHouseConnection implements SQLConnection {
         return null;
     }
 
+    @Override
+    public DatabaseMetaData getMetaData() throws SQLException {
+        return new ClickHouseDatabaseMetadata(cfg().jdbcUrl(), this);
+    }
+
     public boolean ping(Duration timeout) throws SQLException {
         return nativeCtx.get().nativeClient().ping(timeout, nativeCtx.get().serverCtx());
     }
