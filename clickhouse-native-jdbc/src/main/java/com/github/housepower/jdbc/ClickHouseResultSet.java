@@ -16,6 +16,8 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.IColumn;
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.misc.CheckedIterator;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.DataResponse;
@@ -34,6 +36,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 
 public class ClickHouseResultSet implements SQLResultSet {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClickHouseResultSet.class);
+
     private int currentRowNum = -1;
     private Block currentBlock = new Block();
 
@@ -250,6 +255,7 @@ public class ClickHouseResultSet implements SQLResultSet {
         // TODO check if query responses are completed
         //  1. if completed, just set isClosed = true
         //  2. if not, cancel query and consume the rest responses
+        LOG.debug("close ResultSet");
         this.isClosed = true;
     }
 
@@ -288,11 +294,13 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     private Block fetchBlock() throws SQLException {
         while (dataResponses.hasNext()) {
+            LOG.trace("fetch next DataResponse");
             DataResponse next = dataResponses.next();
             if (next.block().rowCnt() > 0) {
                 return next.block();
             }
         }
+        LOG.debug("no more DataResponse, return empty Block");
         return new Block();
     }
 }
