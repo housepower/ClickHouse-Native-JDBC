@@ -144,26 +144,26 @@ public class ClickHouseConnection implements SQLConnection {
         return getNativeClient().ping(Duration.ofSeconds(timeout), nativeCtx.get().serverCtx());
     }
 
-    // ClickHouse support only `database`, we treat it as JDBC `catalog`
     @Override
     public void setCatalog(String catalog) throws SQLException {
-        this.cfg.set(this.cfg().withDatabase(catalog));
+        // do nothing
     }
 
     @Override
     public String getCatalog() throws SQLException {
-        return this.cfg().database();
+        return null;
     }
 
+    // ClickHouse support only `database`, we treat it as JDBC `schema`
     @Override
     public void setSchema(String schema) throws SQLException {
-        // do nothing
+        this.cfg.set(this.cfg().withDatabase(schema));
     }
 
     @Override
     @Nullable
     public String getSchema() throws SQLException {
-        return null;
+        return this.cfg().database();
     }
 
     @Override

@@ -113,12 +113,12 @@ public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
 
     @Override
     public String getCatalogName(int column) throws SQLException {
-        return db;
+        return "default";
     }
 
     @Override
     public String getSchemaName(int column) throws SQLException {
-        return "";
+        return db;
     }
 
     @Override
