@@ -88,7 +88,7 @@ public class NativeClient {
                     return true;
 
                 // TODO there are some previous response we haven't consumed
-                LOG.warn("expect pong, skip response: {}", response.type());
+                LOG.debug("expect pong, skip response: {}", response.type());
             }
         } catch (SQLException e) {
             LOG.warn(e.getMessage());
@@ -103,7 +103,7 @@ public class NativeClient {
                 return ((DataResponse) response).block();
             }
             // TODO there are some previous response we haven't consumed
-            LOG.warn("expect sample block, skip response: {}", response.type());
+            LOG.debug("expect sample block, skip response: {}", response.type());
         }
     }
 
@@ -138,7 +138,7 @@ public class NativeClient {
     public void disconnect() throws SQLException {
         try {
             if (socket.isClosed()) {
-                LOG.warn("socket already closed, ignore");
+                LOG.info("socket already closed, ignore");
                 return;
             }
             LOG.debug("flush and close socket");
