@@ -48,6 +48,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     private final Block header;
     private final CheckedIterator<DataResponse, SQLException> dataResponses;
 
+    private boolean isClosed = false;
+
     public ClickHouseResultSet(ClickHouseStatement statement,
                                ClickHouseConfig cfg,
                                String db,
@@ -245,7 +247,10 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public void close() throws SQLException {
-        // nothing
+        // TODO check if query responses are completed
+        //  1. if completed, just set isClosed = true
+        //  2. if not, cancel query and consume the rest responses
+        this.isClosed = true;
     }
 
     @Override
@@ -258,7 +263,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public boolean isClosed() throws SQLException {
-        return false;
+        return this.isClosed;
     }
 
     @Override
