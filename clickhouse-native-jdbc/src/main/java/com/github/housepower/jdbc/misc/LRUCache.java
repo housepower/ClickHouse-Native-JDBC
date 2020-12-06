@@ -40,7 +40,12 @@ public class LRUCache<K, V> {
     }
 
     public synchronized void put(K key, V value) {
+        map.remove(key);
         map.put(key, value);
+    }
+
+    public synchronized void putIfAbsent(K key, V value) {
+        map.putIfAbsent(key, value);
     }
 
     public synchronized void clear() {
