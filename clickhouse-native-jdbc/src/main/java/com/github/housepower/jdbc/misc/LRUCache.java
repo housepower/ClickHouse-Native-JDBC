@@ -21,14 +21,14 @@ import java.util.Map;
  * LRUCache is a simple LRUCache implemention, based on <code>LinkedHashMap</code>.
  */
 public class LRUCache<K, V> {
-    private static final float  HashTableLoadFactor = 0.75f;
+    private static final float  HASH_TABLE_LOAD_FACTOR = 0.75f;
 
     private int                  cacheSize;
     private LinkedHashMap<K, V> map;
 
     public LRUCache(int cacheSize) {
         this.cacheSize = cacheSize;
-        this.map = new LinkedHashMap<K, V>(cacheSize, HashTableLoadFactor, true) {
+        this.map = new LinkedHashMap<K, V>(cacheSize, HASH_TABLE_LOAD_FACTOR, true) {
             public boolean removeEldestEntry(Map.Entry eldest) {
                 return size() > LRUCache.this.cacheSize;
             }

@@ -28,12 +28,12 @@ import java.util.Map;
 
 
 public class DataTypeFactory {
-    private static LRUCache<String, IDataType> typeCache = new LRUCache<>(1024);
+    private static LRUCache<String, IDataType> DATA_TYPE_CACHE = new LRUCache<>(1024);
 
     public static IDataType get(String type, NativeContext.ServerContext serverContext) throws SQLException {
-        IDataType dataType = typeCache.get(type);
+        IDataType dataType = DATA_TYPE_CACHE.get(type);
         if (dataType != null) {
-            typeCache.put(type, dataType);
+            DATA_TYPE_CACHE.put(type, dataType);
             return dataType;
         }
 
@@ -41,7 +41,7 @@ public class DataTypeFactory {
         dataType = get(lexer, serverContext);
         Validate.isTrue(lexer.eof());
 
-        typeCache.put(type, dataType);
+        DATA_TYPE_CACHE.put(type, dataType);
         return dataType;
     }
 
