@@ -17,6 +17,7 @@ package com.github.housepower.jdbc.data;
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.type.*;
 import com.github.housepower.jdbc.data.type.complex.*;
+import com.github.housepower.jdbc.misc.LRUCache;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
@@ -27,11 +28,18 @@ import java.util.Map;
 
 
 public class DataTypeFactory {
+    private static LRUCache<String, IDataType> typeCache = new LRUCache<>(1024);
 
     public static IDataType get(String type, NativeContext.ServerContext serverContext) throws SQLException {
+        if (typeCache.get(type) != null) {
+            return typeCache.get(type);
+        }
+
         SQLLexer lexer = new SQLLexer(0, type);
         IDataType dataType = get(lexer, serverContext);
         Validate.isTrue(lexer.eof());
+
+        typeCache.put(type, dataType);
         return dataType;
     }
 
