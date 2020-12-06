@@ -43,7 +43,7 @@ public class DecimalTypeITest extends AbstractITest {
             for (int i = 0; i < 3; i++) {
                 pstmt.setBigDecimal(1, value32);
                 pstmt.setBigDecimal(2, value64);
-                pstmt.setArray(3, new ClickHouseArray(valueArray));
+                pstmt.setArray(3, connection.createArrayOf("Decimal(5,3)", valueArray));
                 pstmt.addBatch();
             }
             pstmt.executeBatch();

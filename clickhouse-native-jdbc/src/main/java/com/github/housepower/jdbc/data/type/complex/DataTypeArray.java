@@ -55,7 +55,7 @@ public class DataTypeArray implements IDataType {
         this.name = name;
         this.elemDataType = elemDataType;
         this.offsetIDataType = offsetIDataType;
-        this.defaultValue = new ClickHouseArray(new Object[]{elemDataType.defaultValue()});
+        this.defaultValue = new ClickHouseArray(elemDataType, new Object[]{elemDataType.defaultValue()});
     }
 
     @Override
@@ -107,12 +107,12 @@ public class DataTypeArray implements IDataType {
             }
             arrayData.add(elemDataType.deserializeTextQuoted(lexer));
         }
-        return new ClickHouseArray(arrayData.toArray());
+        return new ClickHouseArray(elemDataType, arrayData.toArray());
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Object []arr = (Object[]) data;
+        Object[] arr = (Object[]) data;
         for (Object f : arr) {
             getElemDataType().serializeBinary(f, serializer);
         }
@@ -120,8 +120,7 @@ public class DataTypeArray implements IDataType {
 
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer)
-            throws SQLException, IOException {
+    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
         offsetIDataType.serializeBinary(data.length, serializer);
         getElemDataType().serializeBinaryBulk(data, serializer);
     }
@@ -140,7 +139,7 @@ public class DataTypeArray implements IDataType {
         }
 
         Object[] offsets = offsetIDataType.deserializeBinaryBulk(rows, deserializer);
-        ClickHouseArray res = new ClickHouseArray(
+        ClickHouseArray res = new ClickHouseArray(elemDataType,
                 elemDataType.deserializeBinaryBulk(((BigInteger) offsets[rows - 1]).intValue(), deserializer));
 
         for (int row = 0, lastOffset = 0; row < rows; row++) {

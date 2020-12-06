@@ -67,6 +67,11 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
+    public boolean getBoolean(String name) throws SQLException {
+        return this.getBoolean(this.findColumn(name));
+    }
+
+    @Override
     public int getInt(String name) throws SQLException {
         return this.getInt(this.findColumn(name));
     }

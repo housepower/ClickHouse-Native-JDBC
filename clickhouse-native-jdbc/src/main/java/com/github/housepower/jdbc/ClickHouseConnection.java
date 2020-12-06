@@ -18,6 +18,7 @@ import com.github.housepower.jdbc.connect.SessionState;
 import com.github.housepower.jdbc.connect.NativeClient;
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.Block;
+import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.HelloResponse;
 import com.github.housepower.jdbc.protocol.QueryRequest;
@@ -130,7 +131,7 @@ public class ClickHouseConnection implements SQLConnection {
     @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create Array, because the connection is closed.");
-        return new ClickHouseArray(elements);
+        return new ClickHouseArray(DataTypeFactory.get(typeName, nativeCtx.get().serverCtx()), elements);
     }
 
     @Override

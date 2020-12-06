@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.log.Logger;
 import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.wrapper.SQLArray;
@@ -25,9 +26,21 @@ public class ClickHouseArray implements SQLArray {
     private static final Logger LOG = LoggerFactory.getLogger(ClickHouseArray.class);
 
     private final Object[] data;
+    private final IDataType dataType;
 
-    public ClickHouseArray(Object[] data) {
+    public ClickHouseArray(IDataType dataType, Object[] data) {
+        this.dataType = dataType;
         this.data = data;
+    }
+
+    @Override
+    public String getBaseTypeName() throws SQLException {
+        return dataType.name();
+    }
+
+    @Override
+    public int getBaseType() throws SQLException {
+        return dataType.sqlTypeId();
     }
 
     @Override
@@ -47,6 +60,6 @@ public class ClickHouseArray implements SQLArray {
     public ClickHouseArray slice(int offset, int length) {
         Object[] result = new Object[length];
         if (length >= 0) System.arraycopy(data, offset, result, 0, length);
-        return new ClickHouseArray(result);
+        return new ClickHouseArray(dataType, result);
     }
 }

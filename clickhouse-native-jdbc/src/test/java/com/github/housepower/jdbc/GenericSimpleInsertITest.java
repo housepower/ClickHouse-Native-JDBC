@@ -29,7 +29,7 @@ public class GenericSimpleInsertITest extends AbstractITest {
         helper.create();
         helper.insert();
         helper.checkItem();
-        helper.checkAggr();
+        helper.checkAgg();
         helper.clean();
     }
 }
