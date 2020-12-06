@@ -21,12 +21,12 @@ import java.sql.SQLException;
 
 public class PongResponse implements Response {
 
+    public static PongResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
+        return new PongResponse();
+    }
+
     @Override
     public ProtoType type() {
         return ProtoType.RESPONSE_PONG;
-    }
-
-    public static PongResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
-        return new PongResponse();
     }
 }

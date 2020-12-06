@@ -39,11 +39,11 @@ public class ClickHouseConfig {
     private final Map<SettingKey, Object> settings;
     private final boolean tcpKeepAlive;
 
-    private ClickHouseConfig(int port, String host, String database, String user, String password,
+    private ClickHouseConfig(String host, int port, String database, String user, String password,
                              Duration queryTimeout, Duration connectTimeout, boolean tcpKeepAlive,
                              Charset charset, Map<SettingKey, Object> settings) {
-        this.port = port;
         this.host = host;
+        this.port = port;
         this.database = database;
         this.user = user;
         this.password = password;
@@ -54,12 +54,12 @@ public class ClickHouseConfig {
         this.settings = settings;
     }
 
-    public int port() {
-        return this.port;
-    }
-
     public String host() {
         return this.host;
+    }
+
+    public int port() {
+        return this.port;
     }
 
     public String database() {
@@ -84,6 +84,20 @@ public class ClickHouseConfig {
 
     public Charset charset() {
         return this.charset;
+    }
+
+    public String jdbcUrl() {
+        StringBuilder builder = new StringBuilder(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX)
+                .append("//").append(host).append(":").append(port).append("/").append(database)
+                .append("?").append(SettingKey.query_timeout).append("=").append(queryTimeout.getSeconds())
+                .append("&").append(SettingKey.connect_timeout).append("=").append(connectTimeout.getSeconds())
+                .append("&").append(SettingKey.charset).append("=").append(charset)
+                .append("&").append(SettingKey.tcp_keep_alive).append("=").append(tcpKeepAlive);
+
+        for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
+            builder.append("&").append(entry.getKey()).append("=").append(entry.getKey());
+        }
+        return builder.toString();
     }
 
     public Map<SettingKey, Object> settings() {
@@ -283,12 +297,12 @@ public class ClickHouseConfig {
             purgeSettings();
 
             return new ClickHouseConfig(
-                    port, host, database, user, password, queryTimeout, connectTimeout, tcpKeepAlive, charset, settings);
+                    host, port, database, user, password, queryTimeout, connectTimeout, tcpKeepAlive, charset, settings);
         }
 
         private void revisit() {
-            if (this.port == -1) this.port = 9000;
             if (StrUtil.isBlank(this.host)) this.host = "127.0.0.1";
+            if (this.port == -1) this.port = 9000;
             if (StrUtil.isBlank(this.user)) this.user = "default";
             if (StrUtil.isBlank(this.password)) this.password = "";
             if (StrUtil.isBlank(this.database)) this.database = "default";

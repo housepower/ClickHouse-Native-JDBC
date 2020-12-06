@@ -16,6 +16,8 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.IColumn;
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.misc.CheckedIterator;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.DataResponse;
@@ -26,39 +28,47 @@ import com.github.housepower.jdbc.wrapper.SQLResultSet;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Date;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 
 public class ClickHouseResultSet implements SQLResultSet {
-    private int row = -1;
-    private Block current = new Block();
 
-    private int lastFetchRow = -1;
-    private int lastFetchColumn = -1;
+    private static final Logger LOG = LoggerFactory.getLogger(ClickHouseResultSet.class);
+
+    private int currentRowNum = -1;
+    private Block currentBlock = new Block();
+
+    private int lastFetchRowIdx = -1;
+    private int lastFetchColumnIdx = -1;
     private Block lastFetchBlock = null;
 
-    private final Block header;
+    private final ClickHouseStatement statement;
     private final ClickHouseConfig cfg;
     private final String db;
     private final String table;
-    private final ClickHouseStatement statement;
-    private final CheckedIterator<DataResponse, SQLException> iterator;
+    private final Block header;
+    private final CheckedIterator<DataResponse, SQLException> dataResponses;
 
-    public ClickHouseResultSet(Block header,
-                               ClickHouseConfig cfg, String db,
+    private boolean isFirst = false;
+    private boolean isAfterLast = false;
+    private boolean isClosed = false;
+
+    public ClickHouseResultSet(ClickHouseStatement statement,
+                               ClickHouseConfig cfg,
+                               String db,
                                String table,
-                               CheckedIterator<DataResponse, SQLException> iterator,
-                               ClickHouseStatement statement) {
-        this.header = header;
+                               Block header,
+                               CheckedIterator<DataResponse, SQLException> dataResponses) {
+        this.statement = statement;
         this.cfg = cfg;
         this.db = db;
         this.table = table;
-        this.iterator = iterator;
-        this.statement = statement;
+        this.header = header;
+        this.dataResponses = dataResponses;
+    }
+
+    @Override
+    public boolean getBoolean(String name) throws SQLException {
+        return this.getBoolean(this.findColumn(name));
     }
 
     @Override
@@ -131,7 +141,57 @@ public class ClickHouseResultSet implements SQLResultSet {
         return this.getBigDecimal(this.findColumn(name));
     }
 
-    /*===================================================================*/
+    @Override
+    public boolean isBeforeFirst() throws SQLException {
+        return currentRowNum == -1;
+    }
+
+    @Override
+    public boolean isAfterLast() throws SQLException {
+        return isAfterLast;
+    }
+
+    @Override
+    public boolean isFirst() throws SQLException {
+        return isFirst;
+    }
+
+    @Override
+    public boolean first() throws SQLException {
+        throw new SQLException("TYPE_FORWARD_ONLY");
+    }
+
+    @Override
+    public boolean last() throws SQLException {
+        throw new SQLException("TYPE_FORWARD_ONLY");
+    }
+
+    @Override
+    public void setFetchDirection(int direction) throws SQLException {
+    }
+
+    @Override
+    public int getFetchDirection() throws SQLException {
+        return ResultSet.FETCH_FORWARD;
+    }
+
+    @Override
+    public void setFetchSize(int rows) throws SQLException {
+    }
+
+    @Override
+    public int getFetchSize() throws SQLException {
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public boolean getBoolean(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return false;
+        }
+        return (boolean) data;
+    }
 
     @Override
     public int getInt(int index) throws SQLException {
@@ -222,10 +282,12 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public Object getObject(int index) throws SQLException {
-        Validate.isTrue(row >= 0 && row < current.rows(),
-                "No row information was obtained.You must call ResultSet.next() before that.");
-        IColumn column = (lastFetchBlock = current).getByPosition((lastFetchColumn = index - 1));
-        return column.values((lastFetchRow = row));
+        LOG.trace("get object at row: {}, column: {} from block with column count: {}, row count: {}",
+                currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
+        Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
+                "No row information was obtained. You must call ResultSet.next() before that.");
+        IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
+        return column.value((lastFetchRowIdx = currentRowNum));
     }
 
     @Override
@@ -243,21 +305,35 @@ public class ClickHouseResultSet implements SQLResultSet {
     /*==================================================================*/
 
     @Override
+    public int getType() throws SQLException {
+        return ResultSet.TYPE_FORWARD_ONLY;
+    }
+
+    @Override
     public void close() throws SQLException {
-        // nothing
+        // TODO check if query responses are completed
+        //  1. if completed, just set isClosed = true
+        //  2. if not, cancel query and consume the rest responses
+        LOG.debug("close ResultSet");
+        this.isClosed = true;
     }
 
     @Override
     public boolean wasNull() throws SQLException {
         Validate.isTrue(lastFetchBlock != null, "Please call Result.next()");
-        Validate.isTrue(lastFetchColumn >= 0, "Please call Result.getXXX()");
-        Validate.isTrue(lastFetchRow >= 0 && lastFetchRow < lastFetchBlock.rows(), "Please call Result.next()");
-        return lastFetchBlock.getByPosition(lastFetchColumn).values(lastFetchRow) == null;
+        Validate.isTrue(lastFetchColumnIdx >= 0, "Please call Result.getXXX()");
+        Validate.isTrue(lastFetchRowIdx >= 0 && lastFetchRowIdx < lastFetchBlock.rowCnt(), "Please call Result.next()");
+        return lastFetchBlock.getColumnByPosition(lastFetchColumnIdx).value(lastFetchRowIdx) == null;
+    }
+
+    @Override
+    public int getHoldability() throws SQLException {
+        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
     @Override
     public boolean isClosed() throws SQLException {
-        return false;
+        return this.isClosed;
     }
 
     @Override
@@ -267,6 +343,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public int findColumn(String name) throws SQLException {
+        LOG.trace("find column: {}", name);
         return header.getPositionByName(name);
     }
 
@@ -277,16 +354,32 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        return ++row < current.rows() || (row = 0) < (current = fetchBlock()).rows();
+        boolean isBeforeFirst = isBeforeFirst();
+        LOG.trace("check status[before]: is_before_first: {}, is_first: {}, is_after_last: {}", isBeforeFirst, isFirst, isAfterLast);
+
+        boolean hasNext = ++currentRowNum < currentBlock.rowCnt() || (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
+
+        isFirst = isBeforeFirst && hasNext;
+        isAfterLast = !hasNext;
+        LOG.trace("check status[after]: has_next: {}, is_before_first: {}, is_first: {}, is_after_last: {}", hasNext, isBeforeFirst(), isFirst, isAfterLast);
+
+        return hasNext;
+    }
+
+    @Override
+    public Logger logger() {
+        return ClickHouseResultSet.LOG;
     }
 
     private Block fetchBlock() throws SQLException {
-        while (iterator.hasNext()) {
-            DataResponse next = iterator.next();
-            if (next.block().rows() > 0) {
+        while (dataResponses.hasNext()) {
+            LOG.trace("fetch next DataResponse");
+            DataResponse next = dataResponses.next();
+            if (next.block().rowCnt() > 0) {
                 return next.block();
             }
         }
+        LOG.debug("no more DataResponse, return empty Block");
         return new Block();
     }
 }

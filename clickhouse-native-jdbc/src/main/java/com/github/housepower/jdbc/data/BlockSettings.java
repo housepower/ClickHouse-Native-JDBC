@@ -46,7 +46,7 @@ public class BlockSettings {
     private static Setting[] readSettingsFrom(int currentSize, BinaryDeserializer deserializer) throws IOException {
         long num = deserializer.readVarInt();
 
-        for (Setting setting : Setting.values()) {
+        for (Setting setting : Setting.defaultValues()) {
             if (setting.num == num) {
                 if (Boolean.class.isAssignableFrom(setting.clazz)) {
                     Setting receiveSetting = new Setting(setting.num, deserializer.readBoolean());
@@ -65,8 +65,12 @@ public class BlockSettings {
     }
 
     public static class Setting {
-        public static final Setting BUCKET_NUM = new Setting(2, -1);
         public static final Setting IS_OVERFLOWS = new Setting(1, false);
+        public static final Setting BUCKET_NUM = new Setting(2, -1);
+
+        public static Setting[] defaultValues() {
+            return new Setting[] {IS_OVERFLOWS, BUCKET_NUM};
+        }
 
         private final int num;
         private final Class clazz;
@@ -76,10 +80,6 @@ public class BlockSettings {
             this.num = num;
             this.defaultValue = defaultValue;
             this.clazz = defaultValue.getClass();
-        }
-
-        public static Setting[] values() {
-            return new Setting[] {IS_OVERFLOWS, BUCKET_NUM};
         }
     }
 }

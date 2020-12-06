@@ -18,13 +18,12 @@ import com.github.housepower.jdbc.serde.BinaryDeserializer;
 
 public class EOFStreamResponse implements Response {
 
-    @Override
-    public ProtoType type() {
-        return ProtoType.RESPONSE_END_OF_STREAM;
-    }
-
     public static Response readFrom(BinaryDeserializer deserializer) {
         return new EOFStreamResponse();
     }
 
+    @Override
+    public ProtoType type() {
+        return ProtoType.RESPONSE_END_OF_STREAM;
+    }
 }

@@ -27,6 +27,6 @@ public class PingRequest implements Request {
 
     @Override
     public void writeImpl(BinarySerializer serializer) throws IOException {
-        //Nothing
+        // Nothing
     }
 }

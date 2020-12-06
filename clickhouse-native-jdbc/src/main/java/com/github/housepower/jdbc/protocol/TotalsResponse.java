@@ -23,6 +23,11 @@ import java.sql.SQLException;
 
 public class TotalsResponse implements Response {
 
+    public static TotalsResponse readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info)
+            throws IOException, SQLException {
+        return new TotalsResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
+    }
+
     private final String name;
     private final Block block;
 
@@ -36,8 +41,11 @@ public class TotalsResponse implements Response {
         return ProtoType.RESPONSE_TOTALS;
     }
 
-    public static TotalsResponse readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info)
-            throws IOException, SQLException {
-        return new TotalsResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
+    public String name() {
+        return name;
+    }
+
+    public Block block() {
+        return block;
     }
 }

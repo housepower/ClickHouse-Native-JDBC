@@ -31,76 +31,84 @@ public class Block {
                                  NativeContext.ServerContext serverContext) throws IOException, SQLException {
         BlockSettings info = BlockSettings.readFrom(deserializer);
 
-        int columns = (int) deserializer.readVarInt();
-        int rows = (int) deserializer.readVarInt();
+        int columnCnt = (int) deserializer.readVarInt();
+        int rowCnt = (int) deserializer.readVarInt();
 
-        IColumn[] cols = new IColumn[columns];
+        IColumn[] columns = new IColumn[columnCnt];
 
-        for (int i = 0; i < columns; i++) {
+        for (int i = 0; i < columnCnt; i++) {
             String name = deserializer.readUTF8StringBinary();
             String type = deserializer.readUTF8StringBinary();
 
             IDataType dataType = DataTypeFactory.get(type, serverContext);
-            Object[] arr = dataType.deserializeBinaryBulk(rows, deserializer);
-            cols[i] = ColumnFactory.createColumn(name, dataType, arr);
+            Object[] arr = dataType.deserializeBinaryBulk(rowCnt, deserializer);
+            columns[i] = ColumnFactory.createColumn(name, dataType, arr);
         }
 
-        return new Block(rows, cols, info);
+        return new Block(rowCnt, columns, info);
     }
 
     private final IColumn[] columns;
     private final BlockSettings settings;
-    private final Map<String, Integer> nameWithPosition;
-
-    private final Object[] objects;
-    private final int[] columnIndexAdds;
-    private int rows;
+    // position start with 1
+    private final Map<String, Integer> nameAndPositions;
+    private final Object[] rowData;
+    private final int[] placeholderIndexes;
+    private int rowCnt;
 
     public Block() {
         this(0, new IColumn[0]);
     }
 
-    public Block(int rows, IColumn[] columns) {
-        this(rows, columns, new BlockSettings(Setting.values()));
+    public Block(int rowCnt, IColumn[] columns) {
+        this(rowCnt, columns, new BlockSettings(Setting.defaultValues()));
     }
 
-    public Block(int rows, IColumn[] columns, BlockSettings settings) {
-        this.rows = rows;
+    public Block(int rowCnt, IColumn[] columns, BlockSettings settings) {
+        this.rowCnt = rowCnt;
         this.columns = columns;
         this.settings = settings;
 
-        this.objects = new Object[columns.length];
-        this.columnIndexAdds = new int[columns.length];
-        nameWithPosition = new HashMap<>();
+        this.rowData = new Object[columns.length];
+        this.nameAndPositions = new HashMap<>();
+        this.placeholderIndexes = new int[columns.length];
         for (int i = 0; i < columns.length; i++) {
-            nameWithPosition.put(columns[i].name(), i + 1);
-            columnIndexAdds[i] = i;
+            nameAndPositions.put(columns[i].name(), i + 1);
+            placeholderIndexes[i] = i;
         }
+    }
+
+    public int rowCnt() {
+        return rowCnt;
+    }
+
+    public int columnCnt() {
+        return columns.length;
     }
 
     public void appendRow() throws SQLException {
         int i = 0;
         try {
-            for (i = 0; i < columns.length; i++) {
-                columns[i].write(objects[i]);
+            for (; i < columns.length; i++) {
+                columns[i].write(rowData[i]);
             }
-            rows++;
+            rowCnt++;
         } catch (IOException | ClassCastException e) {
-            throw new SQLException("Exception processing value " + objects[i] + " for column: " + columns[i].name(), e);
+            throw new SQLException("Exception processing value " + rowData[i] + " for column: " + columns[i].name(), e);
         }
     }
 
-    public void setObject(int i, Object object) {
-        objects[columnIndexAdds[i]] = object;
+    public void setConstObject(int columnIdx, Object object) {
+        rowData[columnIdx] = object;
     }
 
-    public void setConstObject(int i, Object object) {
-        objects[i] = object;
+    public void setPlaceholderObject(int placeholderIdx, Object object) {
+        rowData[placeholderIndexes[placeholderIdx]] = object;
     }
 
-    public void incIndex(int i) {
-        for (int j = i; j < columnIndexAdds.length; j++) {
-            columnIndexAdds[j] += 1;
+    public void incPlaceholderIndexes(int columnIdx) {
+        for (int i = columnIdx; i < placeholderIndexes.length; i++) {
+            placeholderIndexes[i] += 1;
         }
     }
 
@@ -108,38 +116,30 @@ public class Block {
         settings.writeTo(serializer);
 
         serializer.writeVarInt(columns.length);
-        serializer.writeVarInt(rows);
+        serializer.writeVarInt(rowCnt);
 
         for (IColumn column : columns) {
             column.flushToSerializer(serializer, true);
         }
     }
 
-    public int rows() {
-        return rows;
-    }
-
-    public int columns() {
-        return columns.length;
-    }
-
-    public IColumn getByPosition(int column) throws SQLException {
-        Validate.isTrue(column < columns.length,
-                "Position " + column +
+    public IColumn getColumnByPosition(int position) throws SQLException {
+        Validate.isTrue(position < columns.length,
+                "Position " + position +
                         " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
-        return columns[column];
+        return columns[position];
     }
 
-    public int getPositionByName(String name) throws SQLException {
-        Validate.isTrue(nameWithPosition.containsKey(name), "Column '" + name + "' does not exist");
-        return nameWithPosition.get(name);
+    public int getPositionByName(String columnName) throws SQLException {
+        Validate.isTrue(nameAndPositions.containsKey(columnName), "Column '" + columnName + "' does not exist");
+        return nameAndPositions.get(columnName);
     }
 
-    public Object getObject(int index) throws SQLException {
-        Validate.isTrue(index < columns.length,
-                "Position " + index +
+    public Object getObject(int columnIndex) throws SQLException {
+        Validate.isTrue(columnIndex < columns.length,
+                "Position " + columnIndex +
                         " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
-        return objects[index];
+        return rowData[columnIndex];
     }
 
     public void initWriteBuffer() {

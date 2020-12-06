@@ -57,7 +57,7 @@ class SparkOnClickHouseITest extends AbstractITest with Logging {
     doSparkJdbcReadAndWrite(sourceHelper.getTableName, targetHelper.getTableName)
     // order is not guaranteed
     // targetHelper.checkItem()
-    targetHelper.checkAggr()
+    targetHelper.checkAgg()
     targetHelper.clean()
     sourceHelper.clean()
   }
@@ -74,7 +74,7 @@ class SparkOnClickHouseITest extends AbstractITest with Logging {
     doSparkJdbcReadAndCreateTableWrite(sourceHelper.getTableName, targetHelper.getTableName)
     // order is not guaranteed
     // targetHelper.checkItem()
-    targetHelper.checkAggr()
+    targetHelper.checkAgg()
     targetHelper.clean()
     sourceHelper.clean()
   }

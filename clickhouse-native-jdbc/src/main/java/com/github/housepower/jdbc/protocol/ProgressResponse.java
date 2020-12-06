@@ -20,6 +20,10 @@ import java.io.IOException;
 
 public class ProgressResponse implements Response {
 
+    public static ProgressResponse readFrom(BinaryDeserializer deserializer) throws IOException {
+        return new ProgressResponse(deserializer.readVarInt(), deserializer.readVarInt(), deserializer.readVarInt());
+    }
+
     private final long newRows;
     private final long newBytes;
     private final long newTotalRows;
@@ -35,19 +39,15 @@ public class ProgressResponse implements Response {
         return ProtoType.RESPONSE_PROGRESS;
     }
 
-    public static ProgressResponse readFrom(BinaryDeserializer deserializer) throws IOException {
-        return new ProgressResponse(deserializer.readVarInt(), deserializer.readVarInt(), deserializer.readVarInt());
-    }
-
-    public long getNewRows() {
+    public long newRows() {
         return newRows;
     }
 
-    public long getNewBytes() {
+    public long newBytes() {
         return newBytes;
     }
 
-    public long getNewTotalRows() {
+    public long newTotalRows() {
         return newTotalRows;
     }
 }

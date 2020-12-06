@@ -12,16 +12,19 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.protocol;
+package com.github.housepower.jdbc.stream;
 
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.misc.CheckedIterator;
 import com.github.housepower.jdbc.misc.CheckedSupplier;
+import com.github.housepower.jdbc.protocol.DataResponse;
+import com.github.housepower.jdbc.protocol.EOFStreamResponse;
+import com.github.housepower.jdbc.protocol.Response;
 
 import java.sql.SQLException;
-import java.util.function.Supplier;
 
-public class QueryResponse {
+public class ClickHouseQueryResult implements QueryResult {
+
     private final CheckedSupplier<Response, SQLException> responseSupplier;
     private Block header;
     private boolean atEnd;
@@ -31,14 +34,47 @@ public class QueryResponse {
     // ProfileInfo
     // EndOfStream
 
-    public QueryResponse(CheckedSupplier<Response, SQLException> responseSupplier) {
+    public ClickHouseQueryResult(CheckedSupplier<Response, SQLException> responseSupplier) {
         this.responseSupplier = responseSupplier;
     }
 
+    @Override
     public Block header() throws SQLException {
         ensureHeaderConsumed();
-
         return header;
+    }
+
+    @Override
+    public CheckedIterator<DataResponse, SQLException> data() {
+        return new CheckedIterator<DataResponse, SQLException>() {
+
+            private DataResponse current;
+
+            @Override
+            public boolean hasNext() throws SQLException {
+                return current != null || fill() != null;
+            }
+
+            @Override
+            public DataResponse next() throws SQLException {
+                return drain();
+            }
+
+            private DataResponse fill() throws SQLException {
+                ensureHeaderConsumed();
+                return current = consumeDataResponse();
+            }
+
+            private DataResponse drain() throws SQLException {
+                if (current == null) {
+                    fill();
+                }
+
+                DataResponse top = current;
+                current = null;
+                return top;
+            }
+        };
     }
 
     private void ensureHeaderConsumed() throws SQLException {
@@ -59,36 +95,5 @@ public class QueryResponse {
         }
 
         return null;
-    }
-
-    public Supplier<CheckedIterator<DataResponse, SQLException>> data() {
-        return () -> new CheckedIterator<DataResponse, SQLException>() {
-            DataResponse current;
-
-            private DataResponse fill() throws SQLException {
-                ensureHeaderConsumed();
-                return current = consumeDataResponse();
-            }
-
-            private DataResponse drain() throws SQLException {
-                if (current == null) {
-                    fill();
-                }
-
-                DataResponse top = current;
-                current = null;
-                return top;
-            }
-
-            @Override
-            public boolean hasNext() throws SQLException {
-                return current != null || fill() != null;
-            }
-
-            @Override
-            public DataResponse next() throws SQLException {
-                return drain();
-            }
-        };
     }
 }
