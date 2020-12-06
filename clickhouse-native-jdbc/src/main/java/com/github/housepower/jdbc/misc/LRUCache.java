@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- *
+ * LRUCache is a simple LRUCache implemention, based on <code>LinkedHashMap</code>.
  */
 public class LRUCache<Key, Value> {
     private static final float   hashTableLoadFactor = 0.75f;
