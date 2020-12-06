@@ -14,11 +14,16 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.wrapper.SQLArray;
 
 import java.sql.SQLException;
 
 public class ClickHouseArray implements SQLArray {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClickHouseArray.class);
+
     private final Object[] data;
 
     public ClickHouseArray(Object[] data) {
@@ -32,6 +37,11 @@ public class ClickHouseArray implements SQLArray {
     @Override
     public Object getArray() throws SQLException {
         return data;
+    }
+
+    @Override
+    public Logger logger() {
+        return ClickHouseArray.LOG;
     }
 
     public ClickHouseArray slice(int offset, int length) {

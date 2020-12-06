@@ -17,12 +17,16 @@ package com.github.housepower.jdbc;
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.wrapper.SQLResultSetMetaData;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClickHouseResultSetMetaData.class);
 
     private final Block header;
     private final String db;
@@ -155,5 +159,10 @@ public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
     @Override
     public boolean isAutoIncrement(int index) throws SQLException {
         return false;
+    }
+
+    @Override
+    public Logger logger() {
+        return ClickHouseResultSetMetaData.LOG;
     }
 }

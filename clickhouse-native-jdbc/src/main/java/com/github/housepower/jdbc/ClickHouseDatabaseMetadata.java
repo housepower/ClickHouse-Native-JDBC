@@ -16,7 +16,10 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
+import com.github.housepower.jdbc.wrapper.SQLDatabaseMetadata;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -24,7 +27,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public final class ClickHouseDatabaseMetadata implements DatabaseMetaData {
+public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClickHouseDatabaseMetadata.class);
 
     private static final String DEFAULT_CATALOG = "default";
 
@@ -1215,7 +1220,7 @@ public final class ClickHouseDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public boolean supportsBatchUpdates() throws SQLException {
-        return true;
+        return false;
     }
 
     @Override
@@ -1373,6 +1378,11 @@ public final class ClickHouseDatabaseMetadata implements DatabaseMetaData {
     @Override
     public boolean generatedKeyAlwaysReturned() throws SQLException {
         return false;
+    }
+
+    @Override
+    public Logger logger() {
+        return ClickHouseDatabaseMetadata.LOG;
     }
 
     private ResultSet request(String sql) throws SQLException {

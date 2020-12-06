@@ -1232,7 +1232,7 @@ class ClickHouseDatabaseMetadataITest extends AbstractITest {
     void supportsBatchUpdates() throws Exception {
         withNewConnection(connection -> {
             DatabaseMetaData dm = connection.getMetaData();
-            assertTrue(dm.supportsBatchUpdates());
+            assertFalse(dm.supportsBatchUpdates());
         });
     }
 

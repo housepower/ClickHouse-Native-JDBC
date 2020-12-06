@@ -256,4 +256,9 @@ public class ClickHouseConnection implements SQLConnection {
             throw rethrows;
         }
     }
+
+    @Override
+    public Logger logger() {
+        return ClickHouseConnection.LOG;
+    }
 }

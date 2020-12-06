@@ -14,24 +14,29 @@
 
 package com.github.housepower.jdbc.wrapper;
 
+import com.github.housepower.jdbc.log.Logging;
+
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Struct;
 import java.util.Map;
 
-public interface SQLStruct extends Struct {
+public interface SQLStruct extends Struct, Logging {
     @Override
     default String getSQLTypeName() throws SQLException {
+        logger().debug("invoke unimplemented method #getSQLTypeName()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Object[] getAttributes() throws SQLException {
+        logger().debug("invoke unimplemented method #getAttributes()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Object[] getAttributes(Map<String, Class<?>> map) throws SQLException {
+        logger().debug("invoke unimplemented method #getAttributes(Map<String, Class<?>> map)");
         throw new SQLFeatureNotSupportedException();
     }
 }

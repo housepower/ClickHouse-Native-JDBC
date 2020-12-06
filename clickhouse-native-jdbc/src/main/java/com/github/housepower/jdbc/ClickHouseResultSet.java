@@ -28,12 +28,7 @@ import com.github.housepower.jdbc.wrapper.SQLResultSet;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Date;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 
 public class ClickHouseResultSet implements SQLResultSet {
 
@@ -53,6 +48,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     private final Block header;
     private final CheckedIterator<DataResponse, SQLException> dataResponses;
 
+    private boolean isFirst = false;
+    private boolean isAfterLast = false;
     private boolean isClosed = false;
 
     public ClickHouseResultSet(ClickHouseStatement statement,
@@ -139,7 +136,57 @@ public class ClickHouseResultSet implements SQLResultSet {
         return this.getBigDecimal(this.findColumn(name));
     }
 
-    /*===================================================================*/
+    @Override
+    public boolean isBeforeFirst() throws SQLException {
+        return currentRowNum == -1;
+    }
+
+    @Override
+    public boolean isAfterLast() throws SQLException {
+        return isAfterLast;
+    }
+
+    @Override
+    public boolean isFirst() throws SQLException {
+        return isFirst;
+    }
+
+    @Override
+    public boolean first() throws SQLException {
+        throw new SQLException("TYPE_FORWARD_ONLY");
+    }
+
+    @Override
+    public boolean last() throws SQLException {
+        throw new SQLException("TYPE_FORWARD_ONLY");
+    }
+
+    @Override
+    public void setFetchDirection(int direction) throws SQLException {
+    }
+
+    @Override
+    public int getFetchDirection() throws SQLException {
+        return ResultSet.FETCH_FORWARD;
+    }
+
+    @Override
+    public void setFetchSize(int rows) throws SQLException {
+    }
+
+    @Override
+    public int getFetchSize() throws SQLException {
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public boolean getBoolean(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return false;
+        }
+        return (boolean) data;
+    }
 
     @Override
     public int getInt(int index) throws SQLException {
@@ -230,8 +277,10 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public Object getObject(int index) throws SQLException {
+        LOG.trace("get object at row: {}, column: {} from block with column count: {}, row count: {}",
+                currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
         Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
-                "No row information was obtained.You must call ResultSet.next() before that.");
+                "No row information was obtained. You must call ResultSet.next() before that.");
         IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
         return column.value((lastFetchRowIdx = currentRowNum));
     }
@@ -251,6 +300,11 @@ public class ClickHouseResultSet implements SQLResultSet {
     /*==================================================================*/
 
     @Override
+    public int getType() throws SQLException {
+        return ResultSet.TYPE_FORWARD_ONLY;
+    }
+
+    @Override
     public void close() throws SQLException {
         // TODO check if query responses are completed
         //  1. if completed, just set isClosed = true
@@ -268,6 +322,11 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
+    public int getHoldability() throws SQLException {
+        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
+    }
+
+    @Override
     public boolean isClosed() throws SQLException {
         return this.isClosed;
     }
@@ -279,6 +338,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public int findColumn(String name) throws SQLException {
+        LOG.trace("find column: {}", name);
         return header.getPositionByName(name);
     }
 
@@ -289,7 +349,21 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        return ++currentRowNum < currentBlock.rowCnt() || (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
+        boolean isBeforeFirst = isBeforeFirst();
+        LOG.trace("check status[before]: is_before_first: {}, is_first: {}, is_after_last: {}", isBeforeFirst, isFirst, isAfterLast);
+
+        boolean hasNext = ++currentRowNum < currentBlock.rowCnt() || (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
+
+        isFirst = isBeforeFirst && hasNext;
+        isAfterLast = !hasNext;
+        LOG.trace("check status[after]: has_next: {}, is_before_first: {}, is_first: {}, is_after_last: {}", hasNext, isBeforeFirst(), isFirst, isAfterLast);
+
+        return hasNext;
+    }
+
+    @Override
+    public Logger logger() {
+        return ClickHouseResultSet.LOG;
     }
 
     private Block fetchBlock() throws SQLException {
