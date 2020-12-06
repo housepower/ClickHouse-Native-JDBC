@@ -23,7 +23,20 @@ import java.sql.SQLException;
 
 public class DataResponse implements Response {
 
+    public static DataResponse readFrom(
+            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
+
+        String name = deserializer.readUTF8StringBinary();
+
+        deserializer.maybeEnableCompressed();
+        Block block = Block.readFrom(deserializer, info);
+        deserializer.maybeDisableCompressed();
+
+        return new DataResponse(name, block);
+    }
+
     private final String name;
+
     private final Block block;
 
     public DataResponse(String name, Block block) {
@@ -36,16 +49,8 @@ public class DataResponse implements Response {
         return ProtoType.RESPONSE_DATA;
     }
 
-    public static DataResponse readFrom(
-            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
-
-        String name = deserializer.readUTF8StringBinary();
-
-        deserializer.maybeEnableCompressed();
-        Block block = Block.readFrom(deserializer, info);
-        deserializer.maybeDisableCompressed();
-
-        return new DataResponse(name, block);
+    public String name() {
+        return name;
     }
 
     public Block block() {

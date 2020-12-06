@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc;
+package com.github.housepower.jdbc.log;
 
-public enum ConnectionState {
+public interface Logging {
 
-    IDLE, WAITING_INSERT
+    Logger logger();
 }

@@ -14,6 +14,8 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.log.Logger;
+import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.wrapper.SQLStruct;
 
@@ -23,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClickHouseStruct implements SQLStruct {
+    private static final Logger LOG = LoggerFactory.getLogger(ClickHouseStruct.class);
     private static final Pattern REGEX = Pattern.compile("_(\\d+)");
 
     private final String type;
@@ -60,5 +63,10 @@ public class ClickHouseStruct implements SQLStruct {
             res[i++] = clazz.cast(attributes[attrIndex]);
         }
         return res;
+    }
+
+    @Override
+    public Logger logger() {
+        return ClickHouseStruct.LOG;
     }
 }

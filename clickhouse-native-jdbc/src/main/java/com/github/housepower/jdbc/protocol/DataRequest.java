@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class DataRequest implements Request {
+
     public static final DataRequest EMPTY = new DataRequest("");
 
     private final String name;

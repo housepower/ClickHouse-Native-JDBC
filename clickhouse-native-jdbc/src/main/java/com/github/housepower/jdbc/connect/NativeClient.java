@@ -26,6 +26,8 @@ import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
 import com.github.housepower.jdbc.log.Logger;
 import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.jdbc.stream.QueryResult;
+import com.github.housepower.jdbc.stream.ClickHouseQueryResult;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -86,7 +88,7 @@ public class NativeClient {
                     return true;
 
                 // TODO there are some previous response we haven't consumed
-                LOG.warn("expect pong, skip response: {}", response.type());
+                LOG.debug("expect pong, skip response: {}", response.type());
             }
         } catch (SQLException e) {
             LOG.warn(e.getMessage());
@@ -101,7 +103,7 @@ public class NativeClient {
                 return ((DataResponse) response).block();
             }
             // TODO there are some previous response we haven't consumed
-            LOG.warn("expect sample block, skip response: {}", response.type());
+            LOG.debug("expect sample block, skip response: {}", response.type());
         }
     }
 
@@ -129,14 +131,14 @@ public class NativeClient {
         return (EOFStreamResponse) response;
     }
 
-    public QueryResponse receiveQuery(Duration soTimeout, NativeContext.ServerContext info) {
-        return new QueryResponse(() -> receiveResponse(soTimeout, info));
+    public QueryResult receiveQuery(Duration soTimeout, NativeContext.ServerContext info) {
+        return new ClickHouseQueryResult(() -> receiveResponse(soTimeout, info));
     }
 
     public void disconnect() throws SQLException {
         try {
             if (socket.isClosed()) {
-                LOG.warn("socket already closed, ignore");
+                LOG.info("socket already closed, ignore");
                 return;
             }
             LOG.debug("flush and close socket");

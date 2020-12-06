@@ -51,7 +51,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         this.block = getSampleBlock(insertQuery);
         this.block.initWriteBuffer();
         this.blockInit = true;
-        new ValuesWithParametersInputFormat(fullQuery, posOfData).fillBlock(block);
+        new ValuesWithParametersInputFormat(posOfData, fullQuery).fillBlock(block);
     }
 
     @Override
@@ -79,10 +79,11 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         addParameters();
     }
 
+    // parameterIndex start with 1
     @Override
-    public void setObject(int index, Object x) throws SQLException {
+    public void setObject(int parameterIndex, Object x) throws SQLException {
         initBlockIfPossible();
-        block.setObject(index - 1, x);
+        block.setPlaceholderObject(parameterIndex - 1, x);
     }
 
     private void addParameters() throws SQLException {
@@ -140,7 +141,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         sb.append(": ");
         try {
             sb.append(insertQuery).append(" (");
-            for (int i = 0; i < block.columns(); i++) {
+            for (int i = 0; i < block.columnCnt(); i++) {
                 Object obj = block.getObject(i);
                 if (obj == null) {
                     sb.append("?");
@@ -149,7 +150,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
                 } else {
                     sb.append("'").append(obj).append("'");
                 }
-                if (i < block.columns() - 1) {
+                if (i < block.columnCnt() - 1) {
                     sb.append(",");
                 }
             }

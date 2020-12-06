@@ -24,18 +24,18 @@ public class ClickHouseConnectionITest extends AbstractITest {
     @Test
     public void testCatalog() throws Exception {
         withNewConnection(connection -> {
-            assertEquals("default", connection.getCatalog());
+            assertNull(connection.getCatalog());
             connection.setCatalog("abc");
-            assertEquals("abc", connection.getCatalog());
+            assertNull(connection.getCatalog());
         });
     }
 
     @Test
     public void testSchema() throws Exception {
         withNewConnection(connection -> {
-            assertNull(connection.getSchema());
-            connection.setCatalog("abc");
-            assertNull(connection.getSchema());
+            assertEquals("default", connection.getSchema());
+            connection.setSchema("abc");
+            assertEquals("abc", connection.getSchema());
         });
     }
 }

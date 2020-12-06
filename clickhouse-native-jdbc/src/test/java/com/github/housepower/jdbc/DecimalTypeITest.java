@@ -59,7 +59,7 @@ public class DecimalTypeITest extends AbstractITest {
                 pstmt.setBigDecimal(2, value64);
                 pstmt.setBigDecimal(3, value64);
                 pstmt.setBigDecimal(4, value64);
-                pstmt.setArray(5, new ClickHouseArray(valueArray));
+                pstmt.setArray(5, connection.createArrayOf("Decimal(5,3)", valueArray));
                 pstmt.addBatch();
             }
             pstmt.executeBatch();

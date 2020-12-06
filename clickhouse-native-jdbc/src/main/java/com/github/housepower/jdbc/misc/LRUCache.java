@@ -18,13 +18,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * LRUCache is a simple LRUCache implemention, based on <code>LinkedHashMap</code>.
+ * LRUCache is a simple LRUCache implementation, based on <code>LinkedHashMap</code>.
  */
 public class LRUCache<K, V> {
-    private static final float  HASH_TABLE_LOAD_FACTOR = 0.75f;
+    private static final float HASH_TABLE_LOAD_FACTOR = 0.75f;
 
-    private int                  cacheSize;
-    private LinkedHashMap<K, V> map;
+    private final int cacheSize;
+    private final LinkedHashMap<K, V> map;
 
     public LRUCache(int cacheSize) {
         this.cacheSize = cacheSize;
@@ -52,7 +52,7 @@ public class LRUCache<K, V> {
         map.clear();
     }
 
-    public synchronized int size() {
+    public synchronized int cacheSize() {
         return map.size();
     }
 }

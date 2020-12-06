@@ -27,7 +27,7 @@ public interface IColumn {
 
     IDataType type();
 
-    Object values(int idx);
+    Object value(int idx);
 
     void write(Object object) throws IOException, SQLException;
 

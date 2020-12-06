@@ -19,6 +19,8 @@ package com.github.housepower.jdbc.misc;
  * Created by Lauri Nõmme
  * 12.12.2018 16:04
  */
+@FunctionalInterface
 public interface CheckedSupplier<R, E extends Throwable> {
+
     R get() throws E;
 }

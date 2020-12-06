@@ -170,7 +170,7 @@ public class TestHarness extends AbstractITest {
                 for (int i = 0; i < types.size(); i++) {
                     if (types.get(i).name.get().startsWith("Array(")) {
                         Array array =
-                                connection.createArrayOf("text", (Object[]) types.get(i).data.apply(row));
+                                connection.createArrayOf("String", (Object[]) types.get(i).data.apply(row));
                         stmt.setObject(i + 1, array);
                     } else {
                         stmt.setObject(i + 1, types.get(i).data.apply(row));
@@ -182,7 +182,7 @@ public class TestHarness extends AbstractITest {
         });
     }
 
-    public void checkAggr() throws Exception {
+    public void checkAgg() throws Exception {
         StringBuilder sqlBuilder = new StringBuilder("SELECT ");
         Double[] results = new Double[types.size()];
 
@@ -197,7 +197,7 @@ public class TestHarness extends AbstractITest {
         }
         sqlBuilder.append(" FROM ").append(tableName);
         String sql = sqlBuilder.toString();
-        LOG.debug("AGGR SQL: \n{}", sql);
+        LOG.debug("AGG SQL: \n{}", sql);
 
         withNewConnection(connection -> {
             Statement stmt = connection.createStatement();
@@ -208,7 +208,7 @@ public class TestHarness extends AbstractITest {
                 String typeName = types.get(i).name.get();
                 Double result = rs.getDouble(i + 1);
                 assertEquals(results[i], result,
-                        () -> "Check Aggr Error Type: " + typeName);
+                        () -> "Check Agg Error Type: " + typeName);
             }
         });
     }
