@@ -915,7 +915,7 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
         ResultSet descTable = request(query.toString());
         int colNum = 1;
         while (descTable.next()) {
-            List<String> row = new ArrayList<>();
+            List<Object> row = new ArrayList<>();
             //catalog name
             row.add(DEFAULT_CATALOG);
             //database name
@@ -926,19 +926,19 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
             IDataType dataType = DataTypeFactory.get(descTable.getString("type"), connection.serverContext());
             row.add(descTable.getString("name"));
             //data type
-            row.add(String.valueOf(dataType.sqlTypeId()));
+            row.add(dataType.sqlTypeId());
             //type name
             row.add(descTable.getString("name"));
             // column size / precision
-            row.add(String.valueOf(dataType.getPrecision()));
+            row.add(dataType.getPrecision());
             //buffer length
-            row.add("0");
+            row.add(0);
             // decimal digits
-            row.add(String.valueOf(dataType.getScale()));
+            row.add(dataType.getScale());
             // radix
-            row.add("10");
+            row.add(10);
             // nullable
-            row.add(dataType.nullable() ? String.valueOf(columnNullable) : String.valueOf(columnNoNulls));
+            row.add(dataType.nullable() ? columnNullable : columnNoNulls);
             //remarks
             row.add(null);
 
@@ -955,9 +955,9 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
             row.add(null);
 
             // char octet length
-            row.add("0");
+            row.add(0);
             // ordinal
-            row.add(String.valueOf(colNum));
+            row.add(colNum);
             colNum += 1;
 
             //IS_NULLABLE
