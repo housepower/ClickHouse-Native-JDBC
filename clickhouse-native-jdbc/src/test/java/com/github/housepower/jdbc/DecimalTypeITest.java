@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
 
+import joptsimple.internal.Strings;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DecimalTypeITest extends AbstractITest {
@@ -32,18 +34,32 @@ public class DecimalTypeITest extends AbstractITest {
             BigDecimal value64 = BigDecimal.valueOf(12343143412341.21D);
             value64 = value64.setScale(5, RoundingMode.HALF_UP);
 
+            BigDecimal value128 = new BigDecimal(Strings.repeat('1', (38 - 16)));
+            value128 = value128.setScale(16, RoundingMode.HALF_UP);
+
+            BigDecimal value256 = new BigDecimal(Strings.repeat('1', (76 - 26)));
+            value256 = value256.setScale(26, RoundingMode.HALF_UP);
+
             BigDecimal[] valueArray = new BigDecimal[]{
                     BigDecimal.valueOf(412341.21D).setScale(3, RoundingMode.HALF_UP),
                     BigDecimal.valueOf(512341.25D).setScale(3, RoundingMode.HALF_UP)
             };
             Statement statement = connection.createStatement();
             statement.execute("DROP TABLE IF EXISTS decimal_test");
-            statement.execute("CREATE TABLE IF NOT EXISTS decimal_test (value32 Decimal(7,2), value64 Decimal(15,5), value_array Array(Decimal(5,3))) Engine=Memory();");
-            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO decimal_test(value32,value64,value_array) values(?,?,?);");
+            statement.execute("CREATE TABLE IF NOT EXISTS decimal_test (value32 Decimal(7,2), "
+                              + "value64 Decimal(15,5), "
+                              + "value128 Decimal(36, 16),"
+                              + "value256 Decimal(46, 26),"
+                              + "value_array Array(Decimal(5,3))) Engine=Memory()");
+            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO decimal_test"
+                                                                  + "(value32,value64,value128,value256,value_array) "
+                                                                  + "values(?,?,?,?,?);");
             for (int i = 0; i < 3; i++) {
                 pstmt.setBigDecimal(1, value32);
                 pstmt.setBigDecimal(2, value64);
-                pstmt.setArray(3, new ClickHouseArray(valueArray));
+                pstmt.setBigDecimal(3, value64);
+                pstmt.setBigDecimal(4, value64);
+                pstmt.setArray(5, new ClickHouseArray(valueArray));
                 pstmt.addBatch();
             }
             pstmt.executeBatch();
@@ -57,7 +73,11 @@ public class DecimalTypeITest extends AbstractITest {
                 assertEquals(value32, rsValue32);
                 BigDecimal rsValue64 = rs.getBigDecimal(2);
                 assertEquals(value64, rsValue64);
-                ClickHouseArray rsValueArray = (ClickHouseArray) rs.getArray(3);
+                BigDecimal rsValue128 = rs.getBigDecimal(3);
+                assertEquals(value128, rsValue128);
+                BigDecimal rsValue256 = rs.getBigDecimal(4);
+                assertEquals(value256, rsValue256);
+                ClickHouseArray rsValueArray = (ClickHouseArray) rs.getArray(5);
                 Object[] decimalArray = (Object[]) rsValueArray.getArray();
                 assertEquals(decimalArray.length, valueArray.length);
                 for (int i = 0; i < valueArray.length; i++) {

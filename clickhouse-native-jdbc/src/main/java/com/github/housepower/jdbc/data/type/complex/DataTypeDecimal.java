@@ -23,6 +23,7 @@ import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -46,6 +47,7 @@ public class DataTypeDecimal implements IDataType {
     private final BigDecimal scaleFactor;
     private final int nobits;
 
+    //@see: https://clickhouse.tech/docs/en/sql-reference/data-types/decimal/
     public DataTypeDecimal(String name, int precision, int scale) {
         this.name = name;
         this.precision = precision;
@@ -55,6 +57,10 @@ public class DataTypeDecimal implements IDataType {
             this.nobits = 32;
         } else if (this.precision <= 18) {
             this.nobits = 64;
+        } else if (this.precision <= 38) {
+            this.nobits = 128;
+        } else if (this.precision <= 76) {
+            this.nobits = 256;
         } else {
             throw new IllegalArgumentException(String.format(Locale.ENGLISH,
                     "Precision[%d] is out of boundary.", precision));
@@ -122,6 +128,20 @@ public class DataTypeDecimal implements IDataType {
                 serializer.writeLong(targetValue.longValue());
                 break;
             }
+            case 128: {
+                BigInteger res = targetValue.toBigInteger();
+                serializer.writeLong(targetValue.longValue());
+                serializer.writeLong(res.shiftLeft(64).longValue());
+                break;
+            }
+            case 256: {
+                BigInteger res = targetValue.toBigInteger();
+                serializer.writeLong(targetValue.longValue());
+                serializer.writeLong(res.shiftLeft(64).longValue());
+                serializer.writeLong(res.shiftLeft(64).longValue());
+                serializer.writeLong(res.shiftLeft(64).longValue());
+                break;
+            }
             default: {
                 throw new RuntimeException(String.format(Locale.ENGLISH,
                         "Unknown precision[%d] & scale[%d]", precision, scale));
@@ -145,6 +165,26 @@ public class DataTypeDecimal implements IDataType {
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
+
+            case 128: {
+                long v1 = deserializer.readLong();
+                long v2 = deserializer.readLong();
+                value = new BigDecimal(v1 + "" + v2);
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
+                break;
+            }
+
+            case 256: {
+                long v1 = deserializer.readLong();
+                long v2 = deserializer.readLong();
+                long v3 = deserializer.readLong();
+                long v4 = deserializer.readLong();
+
+                value = new BigDecimal("" + v1 + v2 + v3 + v4);
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
+                break;
+            }
+
             default: {
                 throw new RuntimeException(String.format(Locale.ENGLISH,
                         "Unknown precision[%d] & scale[%d]", precision, scale));
