@@ -52,7 +52,7 @@ public class LRUCache<K, V> {
         map.clear();
     }
 
-    public synchronized int size() {
+    public synchronized int cacheSize() {
         return map.size();
     }
 }
