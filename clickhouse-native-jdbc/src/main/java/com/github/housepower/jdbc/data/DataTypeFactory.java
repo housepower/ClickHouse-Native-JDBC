@@ -33,6 +33,7 @@ public class DataTypeFactory {
     public static IDataType get(String type, NativeContext.ServerContext serverContext) throws SQLException {
         IDataType dataType = typeCache.get(type);
         if (dataType != null) {
+            typeCache.put(type, dataType);
             return dataType;
         }
 
