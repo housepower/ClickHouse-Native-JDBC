@@ -130,16 +130,16 @@ public class DataTypeDecimal implements IDataType {
             }
             case 128: {
                 BigInteger res = targetValue.toBigInteger();
-                serializer.writeLong(targetValue.longValue());
                 serializer.writeLong(res.shiftLeft(64).longValue());
+                serializer.writeLong(targetValue.longValue());
                 break;
             }
             case 256: {
                 BigInteger res = targetValue.toBigInteger();
+                serializer.writeLong(res.shiftLeft(64 * 3).longValue());
+                serializer.writeLong(res.shiftLeft(64 * 2).longValue());
+                serializer.writeLong(res.shiftLeft(64).longValue());
                 serializer.writeLong(targetValue.longValue());
-                serializer.writeLong(res.shiftLeft(64).longValue());
-                serializer.writeLong(res.shiftLeft(64).longValue());
-                serializer.writeLong(res.shiftLeft(64).longValue());
                 break;
             }
             default: {
