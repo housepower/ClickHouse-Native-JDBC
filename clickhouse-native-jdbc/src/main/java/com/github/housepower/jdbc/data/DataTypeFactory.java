@@ -82,7 +82,7 @@ public class DataTypeFactory {
             return DataTypeDateTime64.creator.createDataType(lexer, serverContext);
         } else if (dataTypeName.equalsIgnoreCase("Nullable")) {
             return DataTypeNullable.creator.createDataType(lexer, serverContext);
-        } else if (dataTypeName.equalsIgnoreCase("FixedString")) {
+        } else if (dataTypeName.equalsIgnoreCase("FixedString") || dataTypeName.equals("Binary")) {
             return DataTypeFixedString.creator.createDataType(lexer, serverContext);
         } else if (dataTypeName.equalsIgnoreCase("Decimal")) {
             return DataTypeDecimal.creator.createDataType(lexer, serverContext);
@@ -101,26 +101,26 @@ public class DataTypeFactory {
     private static Map<String, IDataType> initialDataTypes() {
         Map<String, IDataType> creators = new HashMap<>();
 
-        registType(creators, new DataTypeIPv4());
-        registType(creators, new DataTypeUUID());
-        registType(creators, new DataTypeFloat32());
-        registType(creators, new DataTypeFloat64());
+        registerType(creators, new DataTypeIPv4());
+        registerType(creators, new DataTypeUUID());
+        registerType(creators, new DataTypeFloat32());
+        registerType(creators, new DataTypeFloat64());
 
-        registType(creators, new DataTypeInt8("Int8"));
-        registType(creators, new DataTypeInt16("Int16"));
-        registType(creators, new DataTypeInt32("Int32"));
-        registType(creators, new DataTypeInt64("Int64"));
+        registerType(creators, new DataTypeInt8("Int8"));
+        registerType(creators, new DataTypeInt16("Int16"));
+        registerType(creators, new DataTypeInt32("Int32"));
+        registerType(creators, new DataTypeInt64("Int64"));
 
-        registType(creators, new DataTypeInt8("UInt8"));
-        registType(creators, new DataTypeInt16("UInt16"));
-        registType(creators, new DataTypeInt32("UInt32"));
-        registType(creators, new DataTypeInt64("UInt64"));
+        registerType(creators, new DataTypeInt8("UInt8"));
+        registerType(creators, new DataTypeInt16("UInt16"));
+        registerType(creators, new DataTypeInt32("UInt32"));
+        registerType(creators, new DataTypeInt64("UInt64"));
 
-        registType(creators, new DataTypeDate());
+        registerType(creators, new DataTypeDate());
         return creators;
     }
 
-    private static void registType(Map<String, IDataType> creators, IDataType type) {
+    private static void registerType(Map<String, IDataType> creators, IDataType type) {
         creators.put(type.name().toLowerCase(Locale.ROOT), type);
         for (String typeName : type.getAliases()) {
             creators.put(typeName.toLowerCase(Locale.ROOT), type);
@@ -134,7 +134,7 @@ public class DataTypeFactory {
         return creators;
     }
 
-    private static void registComplexType(Map<String, DataTypeCreator> creators, IDataType type, DataTypeCreator creator) {
+    private static void registerComplexType(Map<String, DataTypeCreator> creators, IDataType type, DataTypeCreator creator) {
         creators.put(type.name().toLowerCase(Locale.ROOT), creator);
         for (String typeName : type.getAliases()) {
             creators.put(typeName.toLowerCase(Locale.ROOT), creator);
