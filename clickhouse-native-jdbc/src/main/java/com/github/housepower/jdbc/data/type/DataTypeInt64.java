@@ -112,6 +112,14 @@ public class DataTypeInt64 implements IDataType {
     }
 
     @Override
+    public String[] getAliases() {
+        if (isUnsigned) {
+            return new String[0];
+        }
+        return new String[]{"BIGINT"};
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue();
     }

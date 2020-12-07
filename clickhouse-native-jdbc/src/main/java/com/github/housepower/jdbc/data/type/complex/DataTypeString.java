@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.data.type;
+package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
@@ -28,6 +28,9 @@ import java.sql.Types;
 
 public class DataTypeString implements IDataType {
     private Charset charset;
+
+    public static DataTypeCreator
+        creator = (lexer, serverContext) -> new DataTypeString(serverContext);
 
     public DataTypeString(NativeContext.ServerContext serverContext) {
         this.charset = serverContext.getConfigure().charset();
@@ -103,6 +106,21 @@ public class DataTypeString implements IDataType {
             data[row] = new String(bs, charset);
         }
         return data;
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[]{
+            "LONGBLOB",
+            "MEDIUMBLOB",
+            "TINYBLOB",
+            "MEDIUMTEXT",
+            "CHAR",
+            "VARCHAR",
+            "TEXT",
+            "TINYTEXT",
+            "LONGTEXT",
+            "BLOB" };
     }
 
     @Override

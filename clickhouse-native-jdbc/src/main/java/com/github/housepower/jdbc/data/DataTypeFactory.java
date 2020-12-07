@@ -15,11 +15,28 @@
 package com.github.housepower.jdbc.data;
 
 import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.data.type.*;
-import com.github.housepower.jdbc.data.type.complex.*;
+import com.github.housepower.jdbc.data.type.DataTypeDate;
+import com.github.housepower.jdbc.data.type.DataTypeFloat32;
+import com.github.housepower.jdbc.data.type.DataTypeFloat64;
+import com.github.housepower.jdbc.data.type.DataTypeIPv4;
+import com.github.housepower.jdbc.data.type.complex.DataTypeString;
+import com.github.housepower.jdbc.data.type.DataTypeInt16;
+import com.github.housepower.jdbc.data.type.DataTypeInt32;
+import com.github.housepower.jdbc.data.type.DataTypeInt64;
+import com.github.housepower.jdbc.data.type.DataTypeInt8;
+import com.github.housepower.jdbc.data.type.DataTypeUUID;
+import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
+import com.github.housepower.jdbc.data.type.complex.DataTypeCreator;
+import com.github.housepower.jdbc.data.type.complex.DataTypeDateTime;
+import com.github.housepower.jdbc.data.type.complex.DataTypeDateTime64;
+import com.github.housepower.jdbc.data.type.complex.DataTypeDecimal;
+import com.github.housepower.jdbc.data.type.complex.DataTypeEnum16;
+import com.github.housepower.jdbc.data.type.complex.DataTypeEnum8;
+import com.github.housepower.jdbc.data.type.complex.DataTypeFixedString;
+import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
+import com.github.housepower.jdbc.data.type.complex.DataTypeTuple;
 import com.github.housepower.jdbc.misc.LRUCache;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 
 import java.sql.SQLException;
@@ -49,34 +66,31 @@ public class DataTypeFactory {
     private static final Map<String, IDataType> dataTypes = initialDataTypes();
 
     public static IDataType get(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
-        StringView dataTypeName = lexer.bareWord();
+        String dataTypeName = String.valueOf(lexer.bareWord());
 
-        if (dataTypeName.checkEquals("Date") || "Date".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeDate.createDateType(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("Tuple") || "Tuple".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeTuple.createTupleType(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("Array") || "Array".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeArray.createArrayType(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("Enum8") || "Enum8".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeEnum8.createEnum8Type(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("Enum16") || "Enum16".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeEnum16.createEnum16Type(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("DateTime") || "DateTime".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeDateTime.createDateTimeType(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("DateTime64") || "DateTime64".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeDateTime64.createDateTime64Type(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("Nullable") || "Nullable".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeNullable.createNullableType(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("FixedString") || "FixedString".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeFixedString.createFixedStringType(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("Decimal") || "Decimal".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return DataTypeDecimal.createDecimalType(lexer, serverContext);
-        } else if (dataTypeName.checkEquals("String") || "String".equalsIgnoreCase(String.valueOf(dataTypeName))) {
-            return new DataTypeString(serverContext);
+        if (dataTypeName.equalsIgnoreCase("Tuple")) {
+            return DataTypeTuple.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("Array")) {
+            return DataTypeArray.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("Enum8")) {
+            return DataTypeEnum8.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("Enum16")) {
+            return DataTypeEnum16.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("DateTime")) {
+            return DataTypeDateTime.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("DateTime64")) {
+            return DataTypeDateTime64.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("Nullable")) {
+            return DataTypeNullable.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("FixedString")) {
+            return DataTypeFixedString.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("Decimal")) {
+            return DataTypeDecimal.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equals("String")) {
+            return DataTypeString.creator.createDataType(lexer, serverContext);
         } else {
-            String name = String.valueOf(dataTypeName).toLowerCase(Locale.ROOT);
-            IDataType dataType = dataTypes.get(name);
-            Validate.isTrue(dataType != null, "Unknown data type: " + name);
+            IDataType dataType = dataTypes.get(dataTypeName.toLowerCase(Locale.ROOT));
+            Validate.isTrue(dataType != null, "Unknown data type: " + dataTypeName);
             return dataType;
         }
     }
@@ -87,20 +101,43 @@ public class DataTypeFactory {
     private static Map<String, IDataType> initialDataTypes() {
         Map<String, IDataType> creators = new HashMap<>();
 
-        creators.put("ipv4", new DataTypeIPv4());
-        creators.put("uuid", new DataTypeUUID());
-        creators.put("float32", new DataTypeFloat32());
-        creators.put("float64", new DataTypeFloat64());
+        registType(creators, new DataTypeIPv4());
+        registType(creators, new DataTypeUUID());
+        registType(creators, new DataTypeFloat32());
+        registType(creators, new DataTypeFloat64());
 
-        creators.put("int8", new DataTypeInt8("Int8"));
-        creators.put("int16", new DataTypeInt16("Int16"));
-        creators.put("int32", new DataTypeInt32("Int32"));
-        creators.put("int64", new DataTypeInt64("Int64"));
-        creators.put("uint8", new DataTypeInt8("UInt8"));
-        creators.put("uint16", new DataTypeInt16("UInt16"));
-        creators.put("uint32", new DataTypeInt32("UInt32"));
-        creators.put("uint64", new DataTypeInt64("UInt64"));
+        registType(creators, new DataTypeInt8("Int8"));
+        registType(creators, new DataTypeInt16("Int16"));
+        registType(creators, new DataTypeInt32("Int32"));
+        registType(creators, new DataTypeInt64("Int64"));
 
+        registType(creators, new DataTypeInt8("UInt8"));
+        registType(creators, new DataTypeInt16("UInt16"));
+        registType(creators, new DataTypeInt32("UInt32"));
+        registType(creators, new DataTypeInt64("UInt64"));
+
+        registType(creators, new DataTypeDate());
         return creators;
+    }
+
+    private static void registType(Map<String, IDataType> creators, IDataType type) {
+        creators.put(type.name().toLowerCase(Locale.ROOT), type);
+        for (String typeName : type.getAliases()) {
+            creators.put(typeName.toLowerCase(Locale.ROOT), type);
+        }
+    }
+
+
+    // TODO
+    private static Map<String, DataTypeCreator> initComplexDataTypes() {
+        Map<String, DataTypeCreator> creators = new HashMap<>();
+        return creators;
+    }
+
+    private static void registComplexType(Map<String, DataTypeCreator> creators, IDataType type, DataTypeCreator creator) {
+        creators.put(type.name().toLowerCase(Locale.ROOT), creator);
+        for (String typeName : type.getAliases()) {
+            creators.put(typeName.toLowerCase(Locale.ROOT), creator);
+        }
     }
 }

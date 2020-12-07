@@ -93,6 +93,14 @@ public class DataTypeInt16 implements IDataType {
     }
 
     @Override
+    public String[] getAliases() {
+        if (isUnsigned) {
+            return new String[0];
+        }
+        return new String[]{"SMALLINT"};
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().shortValue();
     }

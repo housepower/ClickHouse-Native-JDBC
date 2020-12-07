@@ -28,13 +28,12 @@ import java.sql.Types;
 
 public class DataTypeFixedString implements IDataType {
 
-    public static IDataType createFixedStringType(SQLLexer lexer,
-                                                  NativeContext.ServerContext serverContext) throws SQLException {
+    public static DataTypeCreator creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         Number fixedStringN = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue(), serverContext);
-    }
+    };
 
     private final int n;
     private final String name;
@@ -130,5 +129,10 @@ public class DataTypeFixedString implements IDataType {
             data[row] = new String(deserializer.readBytes(n), charset);
         }
         return data;
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[]{"BINARY"};
     }
 }

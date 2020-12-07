@@ -14,7 +14,6 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
-import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
@@ -29,7 +28,7 @@ import java.util.List;
 
 public class DataTypeEnum8 implements IDataType {
 
-    public static IDataType createEnum8Type(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
+    public static DataTypeCreator creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         List<Byte> enumValues = new ArrayList<>();
         List<String> enumNames = new ArrayList<>();
@@ -56,7 +55,7 @@ public class DataTypeEnum8 implements IDataType {
             }
         }
         throw new SQLException("DataType Enum8 size must be less than 256");
-    }
+    };
 
     private final String name;
     private final Byte[] values;

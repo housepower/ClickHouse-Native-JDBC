@@ -31,7 +31,7 @@ import java.time.ZonedDateTime;
 
 public class DataTypeDateTime implements IDataType {
 
-    public static IDataType createDateTimeType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
+    public static DataTypeCreator creator = (lexer, serverContext) -> {
         if (lexer.isCharacter('(')) {
             Validate.isTrue(lexer.character() == '(');
             String dataTimeZone = lexer.stringLiteral();
@@ -39,7 +39,7 @@ public class DataTypeDateTime implements IDataType {
             return new DataTypeDateTime("DateTime('" + dataTimeZone + "')", serverContext);
         }
         return new DataTypeDateTime("DateTime", serverContext);
-    }
+    };
 
     // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
     // we should ensure DON'T modify it anywhere.
@@ -125,5 +125,10 @@ public class DataTypeDateTime implements IDataType {
             data[row] = new Timestamp(deserializer.readInt() * 1000L);
         }
         return data;
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[]{"TIMESTAMP"};
     }
 }

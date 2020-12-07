@@ -14,7 +14,6 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
-import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
@@ -30,7 +29,7 @@ import java.util.Locale;
 
 public class DataTypeDecimal implements IDataType {
 
-    public static IDataType createDecimalType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
+    public static DataTypeCreator creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         Number precision = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ',');
@@ -38,7 +37,7 @@ public class DataTypeDecimal implements IDataType {
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeDecimal("Decimal(" + precision.intValue() + "," + scale.intValue() + ")",
                 precision.intValue(), scale.intValue());
-    }
+    };
 
     private final String name;
     private final int precision;
