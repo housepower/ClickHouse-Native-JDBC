@@ -17,7 +17,7 @@ jobs:
           java-version: 8
       - name: Start clickhouse-server
         run: docker-compose up -d
-      - run: sed -i '' -e 's/TRACE/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
-      - run: sed -i '' -e 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
+      - run: sed -i 's/TRACE/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
+      - run: sed -i 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
       - name: Run benchmarks
         run: mvn -B -Pbenchmark clean integration-test -DskipITs
