@@ -86,4 +86,9 @@ public class DataTypeUUID implements IDataType {
         }
         return data;
     }
+
+    @Override
+    public String[] getAliases() {
+        return new String[0];
+    }
 }

@@ -14,7 +14,6 @@
 
 package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
@@ -25,14 +24,9 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.time.*;
+import java.time.LocalDate;
 
 public class DataTypeDate implements IDataType {
-
-    public static IDataType createDateType(SQLLexer lexer, NativeContext.ServerContext serverContext) {
-        return new DataTypeDate();
-    }
-
     // Since `Date` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
     // we should ensure DON'T modify it anywhere.
     private static final Date DEFAULT_VALUE = Date.valueOf(LocalDate.ofEpochDay(0));
@@ -95,6 +89,11 @@ public class DataTypeDate implements IDataType {
             data[row] = Date.valueOf(LocalDate.ofEpochDay(daysSinceEpoch));
         }
         return data;
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[0];
     }
 
     @Override

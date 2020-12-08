@@ -94,6 +94,14 @@ public class DataTypeInt32 implements IDataType {
     }
 
     @Override
+    public String[] getAliases() {
+        if (isUnsigned) {
+            return new String[0];
+        }
+        return new String[]{"INT", "INTEGER"};
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue() & 0xffffffff;
     }

@@ -53,4 +53,8 @@ public interface IDataType {
     }
 
     Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException;
+
+    default String[] getAliases() {
+        return new String[0];
+    }
 }

@@ -82,6 +82,11 @@ public class DataTypeFloat32 implements IDataType {
     }
 
     @Override
+    public String[] getAliases() {
+        return new String[]{"FLOAT"};
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().floatValue();
     }

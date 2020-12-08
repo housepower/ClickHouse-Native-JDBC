@@ -15,7 +15,6 @@
 package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.ClickHouseStruct;
-import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
@@ -32,8 +31,7 @@ import java.util.List;
 
 public class DataTypeTuple implements IDataType {
 
-    public static DataTypeTuple createTupleType(SQLLexer lexer,
-                                                NativeContext.ServerContext serverContext) throws SQLException {
+    public static DataTypeCreator creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         List<IDataType> nestedDataTypes = new ArrayList<>();
 
@@ -51,7 +49,7 @@ public class DataTypeTuple implements IDataType {
                 return new DataTypeTuple(builder.append(")").toString(), nestedDataTypes.toArray(new IDataType[0]));
             }
         }
-    }
+    };
 
     public IDataType[] getNestedTypes() {
         return nestedTypes;

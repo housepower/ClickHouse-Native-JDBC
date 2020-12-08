@@ -82,6 +82,11 @@ public class DataTypeFloat64 implements IDataType {
     }
 
     @Override
+    public String[] getAliases() {
+        return new String[]{"DOUBLE"};
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().doubleValue();
     }
