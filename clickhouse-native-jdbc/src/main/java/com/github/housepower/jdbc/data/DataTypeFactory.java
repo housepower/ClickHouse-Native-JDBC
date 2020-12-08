@@ -86,7 +86,7 @@ public class DataTypeFactory {
             return DataTypeFixedString.creator.createDataType(lexer, serverContext);
         } else if (dataTypeName.equalsIgnoreCase("Decimal")) {
             return DataTypeDecimal.creator.createDataType(lexer, serverContext);
-        } else if (dataTypeName.equals("String")) {
+        } else if (dataTypeName.equalsIgnoreCase("String")) {
             return DataTypeString.creator.createDataType(lexer, serverContext);
         } else {
             IDataType dataType = dataTypes.get(dataTypeName.toLowerCase(Locale.ROOT));
@@ -126,7 +126,6 @@ public class DataTypeFactory {
             creators.put(typeName.toLowerCase(Locale.ROOT), type);
         }
     }
-
 
     // TODO
     private static Map<String, DataTypeCreator> initComplexDataTypes() {
