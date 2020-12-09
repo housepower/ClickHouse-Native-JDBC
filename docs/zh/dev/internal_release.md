@@ -36,6 +36,6 @@ mvn clean deploy -Prelease -DskipTests -DskipITs \
 
 ::: tip
 用以下命令强制刷新 SNAPSHOT 依赖:
-- Maven: `mvn clean compile –update-snapshots`
+- Maven: `mvn clean compile --update-snapshots`
 - Gradle: `gradlew clean build --refresh-dependencies`
 :::

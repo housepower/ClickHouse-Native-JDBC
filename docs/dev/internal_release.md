@@ -37,6 +37,6 @@ mvn clean deploy -Prelease -DskipTests -DskipITs \
 
 ::: tip
 To force refresh snapshot dependencies:
-- Maven: `mvn clean compile –update-snapshots`
-- Gradle `gradlew clean build --refresh-dependencies`
+- Maven: `mvn clean compile --update-snapshots`
+- Gradle: `gradlew clean build --refresh-dependencies`
 :::
