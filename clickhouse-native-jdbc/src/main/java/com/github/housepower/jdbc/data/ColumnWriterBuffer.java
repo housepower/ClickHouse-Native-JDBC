@@ -19,6 +19,7 @@ import com.github.housepower.jdbc.serializer.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 /**
@@ -35,9 +36,12 @@ public class ColumnWriterBuffer {
         this.column = new BinarySerializer(columnWriter, false);
     }
 
+    @SuppressWarnings("RedundantCast")
     public void writeTo(BinarySerializer serializer) throws IOException {
         for (ByteBuffer buffer : columnWriter.getBufferList()) {
-            buffer.flip();
+            // upcast is necessary, see detail at:
+            // https://bitbucket.org/ijabz/jaudiotagger/issues/313/java-8-javalangnosuchmethoderror
+            ((Buffer) buffer).flip();
             while (buffer.hasRemaining()) {
                 serializer.writeByte(buffer.get());
             }
