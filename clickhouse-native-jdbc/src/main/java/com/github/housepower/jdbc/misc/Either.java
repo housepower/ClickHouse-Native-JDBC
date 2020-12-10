@@ -14,13 +14,13 @@
 
 package com.github.housepower.jdbc.misc;
 
-public class Container<T> {
+public class Either<T> {
     private final T left;
     private final T right;
 
     private boolean isLeft = true;
 
-    public Container(T left, T right) {
+    public Either(T left, T right) {
         this.left = left;
         this.right = right;
     }

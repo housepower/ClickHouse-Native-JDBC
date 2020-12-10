@@ -16,7 +16,7 @@ package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.misc.DateTimeHelper;
+import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
@@ -50,7 +50,7 @@ public class DataTypeDateTime implements IDataType {
 
     public DataTypeDateTime(String name, NativeContext.ServerContext serverContext) {
         this.name = name;
-        this.tz = DateTimeHelper.chooseTimeZone(serverContext);
+        this.tz = DateTimeUtil.chooseTimeZone(serverContext);
     }
 
     @Override

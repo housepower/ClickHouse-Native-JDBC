@@ -16,7 +16,7 @@ package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.connect.NativeContext.ServerContext;
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.misc.DateTimeHelper;
+import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
@@ -70,7 +70,7 @@ public class DataTypeDateTime64 implements IDataType {
     public DataTypeDateTime64(String name, int scala, ServerContext serverContext) {
         this.name = name;
         this.scale = scala;
-        this.tz = DateTimeHelper.chooseTimeZone(serverContext);
+        this.tz = DateTimeUtil.chooseTimeZone(serverContext);
     }
 
     @Override
