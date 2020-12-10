@@ -18,7 +18,7 @@ import com.github.housepower.jdbc.log.Logging;
 
 import java.sql.*;
 
-public interface SQLStatement extends Statement, Logging {
+public interface SQLStatement extends Statement, SQLWrapper, Logging {
 
     @Override
     default ResultSet executeQuery(String sql) throws SQLException {
@@ -317,18 +317,6 @@ public interface SQLStatement extends Statement, Logging {
     @Override
     default long executeLargeUpdate(String sql, String[] columnNames) throws SQLException {
         logger().debug("invoke unimplemented method #executeLargeUpdate(String sql, String[] columnNames)");
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    default <T> T unwrap(Class<T> iface) throws SQLException {
-        logger().debug("invoke unimplemented method #unwrap(Class<T> iface)");
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    default boolean isWrapperFor(Class<?> iface) throws SQLException {
-        logger().debug("invoke unimplemented method #isWrapperFor(Class<?> iface)");
         throw new SQLFeatureNotSupportedException();
     }
 }

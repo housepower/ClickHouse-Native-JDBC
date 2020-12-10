@@ -14,22 +14,23 @@
 
 package com.github.housepower.jdbc.wrapper;
 
+import com.github.housepower.jdbc.exception.NotImplementedException;
 import com.github.housepower.jdbc.log.Logging;
 
 import java.sql.*;
 
-public interface SQLDatabaseMetadata extends DatabaseMetaData, Logging {
+public interface SQLDatabaseMetadata extends DatabaseMetaData, SQLWrapper, Logging {
 
     @Override
     default int getDriverMajorVersion() {
         logger().debug("invoke unimplemented method #getDriverMajorVersion()");
-        return 0;
+        throw new NotImplementedException("unimplemented method #getDriverMajorVersion()");
     }
 
     @Override
     default int getDriverMinorVersion() {
         logger().debug("invoke unimplemented method #getDriverMinorVersion()");
-        return 0;
+        throw new NotImplementedException("unimplemented method #getDriverMinorVersion()");
     }
 
     @Override
@@ -765,14 +766,12 @@ public interface SQLDatabaseMetadata extends DatabaseMetaData, Logging {
     }
 
     @Override
-
     default ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
         logger().debug("invoke unimplemented method #getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-
     default ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern) throws SQLException {
         logger().debug("invoke unimplemented method #getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern)");
         throw new SQLFeatureNotSupportedException();
@@ -785,7 +784,6 @@ public interface SQLDatabaseMetadata extends DatabaseMetaData, Logging {
     }
 
     @Override
-
     default ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable) throws SQLException {
         logger().debug("invoke unimplemented method #getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable)");
         throw new SQLFeatureNotSupportedException();
@@ -1064,18 +1062,6 @@ public interface SQLDatabaseMetadata extends DatabaseMetaData, Logging {
     @Override
     default boolean generatedKeyAlwaysReturned() throws SQLException {
         logger().debug("invoke unimplemented method #generatedKeyAlwaysReturned()");
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    default <T> T unwrap(Class<T> iface) throws SQLException {
-        logger().debug("invoke unimplemented method #unwrap(Class<T> iface)");
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    default boolean isWrapperFor(Class<?> iface) throws SQLException {
-        logger().debug("invoke unimplemented method #isWrapperFor(Class<?> iface)");
         throw new SQLFeatureNotSupportedException();
     }
 }

@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -74,6 +75,64 @@ public class ClickHouseConnection implements SQLConnection {
 
     public QueryRequest.ClientContext clientContext() {
         return nativeCtx.get().clientCtx();
+    }
+
+    @Override
+    public void setAutoCommit(boolean autoCommit) throws SQLException {
+    }
+
+    @Override
+    public boolean getAutoCommit() throws SQLException {
+        return true;
+    }
+
+    @Override
+    public void commit() throws SQLException {
+    }
+
+    @Override
+    public void rollback() throws SQLException {
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) throws SQLException {
+    }
+
+    @Override
+    public boolean isReadOnly() throws SQLException {
+        return false;
+    }
+
+    @Override
+    public Map<String, Class<?>> getTypeMap() throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
+    }
+
+    @Override
+    public void setHoldability(int holdability) throws SQLException {
+    }
+
+    @Override
+    public int getHoldability() throws SQLException {
+        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
+    }
+
+    @Override
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+    }
+
+    @Override
+    public int getNetworkTimeout() throws SQLException {
+        return 0;
+    }
+
+    @Override
+    public void abort(Executor executor) throws SQLException {
+        this.close();
     }
 
     @Override
@@ -145,16 +204,6 @@ public class ClickHouseConnection implements SQLConnection {
         return getNativeClient().ping(Duration.ofSeconds(timeout), nativeCtx.get().serverCtx());
     }
 
-    @Override
-    public void setCatalog(String catalog) throws SQLException {
-        // do nothing
-    }
-
-    @Override
-    public String getCatalog() throws SQLException {
-        return null;
-    }
-
     // ClickHouse support only `database`, we treat it as JDBC `schema`
     @Override
     public void setSchema(String schema) throws SQLException {
@@ -168,8 +217,41 @@ public class ClickHouseConnection implements SQLConnection {
     }
 
     @Override
+    public void setCatalog(String catalog) throws SQLException {
+        // do nothing
+    }
+
+    @Override
+    public String getCatalog() throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void setTransactionIsolation(int level) throws SQLException {
+    }
+
+    @Override
+    public int getTransactionIsolation() throws SQLException {
+        return Connection.TRANSACTION_NONE;
+    }
+
+    @Override
+    public SQLWarning getWarnings() throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void clearWarnings() throws SQLException {
+    }
+
+    @Override
     public DatabaseMetaData getMetaData() throws SQLException {
         return new ClickHouseDatabaseMetadata(cfg().jdbcUrl(), this);
+    }
+
+    @Override
+    public Logger logger() {
+        return ClickHouseConnection.LOG;
     }
 
     public boolean ping(Duration timeout) throws SQLException {
@@ -191,9 +273,9 @@ public class ClickHouseConnection implements SQLConnection {
         nativeClient.sendQuery(query, nativeCtx.get().clientCtx(), cfg.settings());
         return nativeClient.receiveQuery(cfg.queryTimeout(), nativeCtx.get().serverCtx());
     }
-
     // when sendInsertRequest we must ensure the connection is healthy
     // the #getSampleBlock() must be called before this method
+
     public int sendInsertRequest(Block block) throws SQLException {
         Validate.isTrue(this.state.get() == SessionState.WAITING_INSERT,
                 "Call getSampleBlock before insert.");
@@ -256,10 +338,5 @@ public class ClickHouseConnection implements SQLConnection {
             nativeClient.disconnect();
             throw rethrows;
         }
-    }
-
-    @Override
-    public Logger logger() {
-        return ClickHouseConnection.LOG;
     }
 }

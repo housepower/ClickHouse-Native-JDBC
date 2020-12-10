@@ -12,24 +12,23 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc;
+package com.github.housepower.jdbc.wrapper;
 
 import java.sql.SQLException;
+import java.sql.Wrapper;
 
-public class ClickHouseSQLException extends SQLException {
+public interface SQLWrapper extends Wrapper {
 
-    private final int code;
-
-    public ClickHouseSQLException(int code, String message) {
-        this(code, message, null);
+    @Override
+    default <T> T unwrap(Class<T> iface) throws SQLException {
+        if (isWrapperFor(iface)) {
+            return iface.cast(this);
+        }
+        throw new SQLException("Cannot unwrap to " + iface.getName());
     }
 
-    public ClickHouseSQLException(int code, String message, Throwable cause) {
-        super(message, cause);
-        this.code = code;
-    }
-
-    public int getCode() {
-        return code;
+    @Override
+    default boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return iface != null && iface.isAssignableFrom(getClass());
     }
 }
