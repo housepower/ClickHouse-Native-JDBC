@@ -31,7 +31,6 @@ public class SocketBuffedWriter implements BuffedWriter {
         out.write(byt);
     }
 
-
     @Override
     public void writeBinary(byte[] bytes) throws IOException {
         out.write(bytes);
