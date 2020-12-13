@@ -82,6 +82,11 @@ public class DataTypeIPv4 implements IDataType {
     }
 
     @Override
+    public String[] getAliases() {
+        return new String[0];
+    }
+
+    @Override
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue() & 0xffffffffL;
     }

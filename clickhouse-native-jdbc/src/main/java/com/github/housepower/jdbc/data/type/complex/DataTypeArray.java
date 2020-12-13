@@ -15,7 +15,6 @@
 package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.ClickHouseArray;
-import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
@@ -33,13 +32,13 @@ import java.util.List;
 
 public class DataTypeArray implements IDataType {
 
-    public static IDataType createArrayType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
+    public static DataTypeCreator creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         IDataType arrayNestedType = DataTypeFactory.get(lexer, serverContext);
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
-                arrayNestedType, DataTypeFactory.get("UInt64", serverContext));
-    }
+                                 arrayNestedType, DataTypeFactory.get("UInt64", serverContext));
+    };
 
     private final String name;
     private final Array defaultValue;

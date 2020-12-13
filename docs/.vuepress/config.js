@@ -43,6 +43,7 @@ module.exports = {
               title: 'Usage',
               children: [
                 ['jdbc_driver', 'JDBC Driver'],
+                ['datasource', 'Datasource'],
                 ['connection_pool', 'Connection Pool'],
                 ['spark_integration', 'Spark Integration'],
               ],

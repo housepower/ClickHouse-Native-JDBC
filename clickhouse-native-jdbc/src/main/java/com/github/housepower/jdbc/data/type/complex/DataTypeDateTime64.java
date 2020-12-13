@@ -33,12 +33,12 @@ import java.time.ZonedDateTime;
 
 public class DataTypeDateTime64 implements IDataType {
 
-    public static DataTypeDateTime64 createDateTime64Type(SQLLexer lexer, ServerContext serverContext) throws SQLException {
+    public static DataTypeCreator creator = (lexer, serverContext) -> {
         if (lexer.isCharacter('(')) {
             Validate.isTrue(lexer.character() == '(');
             int scale = lexer.numberLiteral().intValue();
-            Validate.isTrue(scale >= MIN_SCALE && scale <= MAX_SCALA,
-                    "scale=" + scale + " out of range [" + MIN_SCALE + "," + MAX_SCALA + "]");
+            Validate.isTrue(scale >= DataTypeDateTime64.MIN_SCALE && scale <= DataTypeDateTime64.MAX_SCALA,
+                    "scale=" + scale + " out of range [" + DataTypeDateTime64.MIN_SCALE + "," + DataTypeDateTime64.MAX_SCALA + "]");
             if (lexer.isCharacter(',')) {
                 Validate.isTrue(lexer.character() == ',');
                 Validate.isTrue(lexer.isWhitespace());
@@ -50,8 +50,8 @@ public class DataTypeDateTime64 implements IDataType {
             Validate.isTrue(lexer.character() == ')');
             return new DataTypeDateTime64("DateTime64(" + scale + ")", scale, serverContext);
         }
-        return new DataTypeDateTime64("DateTime64", DEFAULT_SCALE, serverContext);
-    }
+        return new DataTypeDateTime64("DateTime64", DataTypeDateTime64.DEFAULT_SCALE, serverContext);
+    };
 
     // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
     // we should ensure DON'T modify it anywhere.

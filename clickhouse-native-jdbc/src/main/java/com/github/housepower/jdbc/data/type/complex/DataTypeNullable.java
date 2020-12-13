@@ -14,7 +14,6 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
-import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.DataTypeFactory;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
@@ -27,13 +26,13 @@ import java.sql.SQLException;
 
 public class DataTypeNullable implements IDataType {
 
-    public static IDataType createNullableType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
+    public static DataTypeCreator creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         IDataType nestedType = DataTypeFactory.get(lexer, serverContext);
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeNullable(
                 "Nullable(" + nestedType.name() + ")", nestedType, DataTypeFactory.get("UInt8", serverContext));
-    }
+    };
 
     private static final Short IS_NULL = 1;
     private static final Short NON_NULL = 0;
