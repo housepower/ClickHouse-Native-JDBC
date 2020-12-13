@@ -1321,7 +1321,7 @@ class ClickHouseDatabaseMetadataITest extends AbstractITest {
         withNewConnection(connection -> {
             DatabaseMetaData dm = connection.getMetaData();
             assertFalse(dm.supportsResultSetHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT));
-            assertFalse(dm.supportsResultSetHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT));
+            assertTrue(dm.supportsResultSetHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT));
         });
     }
 
