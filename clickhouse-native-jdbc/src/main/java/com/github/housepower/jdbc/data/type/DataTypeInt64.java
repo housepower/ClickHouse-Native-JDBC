@@ -15,13 +15,13 @@
 package com.github.housepower.jdbc.data.type;
 
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.BytesUtil;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -82,15 +82,9 @@ public class DataTypeInt64 implements IDataType {
             throws SQLException, IOException {
         long l = deserializer.readLong();
         if (isUnsigned) {
-            return new BigInteger(1, longToBytes(l));
+            return new BigInteger(1, BytesUtil.longToBytes(l));
         }
         return l;
-    }
-
-    private byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
     }
 
     public BigInteger parseBigIntegerPositive(String num, int bitlen) {

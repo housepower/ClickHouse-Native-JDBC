@@ -31,7 +31,7 @@ public class DecimalTypeITest extends AbstractITest {
         withNewConnection(connection -> {
             BigDecimal value32 = BigDecimal.valueOf(1.32);
             value32 = value32.setScale(2, RoundingMode.HALF_UP);
-            BigDecimal value64 = BigDecimal.valueOf(12343143412341.21D);
+            BigDecimal value64 = new BigDecimal("12343143412341.21");
             value64 = value64.setScale(5, RoundingMode.HALF_UP);
 
             BigDecimal value128 = new BigDecimal(Strings.repeat('1', (38 - 16)));
@@ -48,17 +48,17 @@ public class DecimalTypeITest extends AbstractITest {
             statement.execute("DROP TABLE IF EXISTS decimal_test");
             statement.execute("CREATE TABLE IF NOT EXISTS decimal_test (value32 Decimal(7,2), "
                               + "value64 Decimal(15,5), "
-                              + "value128 Decimal(36, 16),"
-                              + "value256 Decimal(46, 26),"
+                              + "value128 Decimal(38, 16),"
+                              + "value256 Decimal(76, 26),"
                               + "value_array Array(Decimal(5,3))) Engine=Memory()");
             PreparedStatement pstmt = connection.prepareStatement("INSERT INTO decimal_test"
                                                                   + "(value32,value64,value128,value256,value_array) "
                                                                   + "values(?,?,?,?,?);");
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 300; i++) {
                 pstmt.setBigDecimal(1, value32);
                 pstmt.setBigDecimal(2, value64);
-                pstmt.setBigDecimal(3, value64);
-                pstmt.setBigDecimal(4, value64);
+                pstmt.setBigDecimal(3, value128);
+                pstmt.setBigDecimal(4, value256);
                 pstmt.setArray(5, connection.createArrayOf("Decimal(5,3)", valueArray));
                 pstmt.addBatch();
             }
@@ -84,7 +84,7 @@ public class DecimalTypeITest extends AbstractITest {
                     assertEquals(decimalArray[i], valueArray[i]);
                 }
             }
-            assertEquals(3, size);
+            assertEquals(300, size);
             statement.execute("DROP TABLE IF EXISTS decimal_test");
         });
     }

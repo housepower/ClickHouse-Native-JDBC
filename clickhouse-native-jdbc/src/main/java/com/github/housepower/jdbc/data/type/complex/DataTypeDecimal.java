@@ -15,6 +15,7 @@
 package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.BytesUtil;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
@@ -129,16 +130,17 @@ public class DataTypeDecimal implements IDataType {
             }
             case 128: {
                 BigInteger res = targetValue.toBigInteger();
-                serializer.writeLong(res.shiftLeft(64).longValue());
-                serializer.writeLong(targetValue.longValue());
+
+                serializer.writeLong(res.longValue());
+                serializer.writeLong(res.shiftRight(64).longValue());
                 break;
             }
             case 256: {
                 BigInteger res = targetValue.toBigInteger();
-                serializer.writeLong(res.shiftLeft(64 * 3).longValue());
-                serializer.writeLong(res.shiftLeft(64 * 2).longValue());
-                serializer.writeLong(res.shiftLeft(64).longValue());
                 serializer.writeLong(targetValue.longValue());
+                serializer.writeLong(res.shiftRight(64).longValue());
+                serializer.writeLong(res.shiftRight(64 * 2).longValue());
+                serializer.writeLong(res.shiftRight(64 * 3).longValue());
                 break;
             }
             default: {
@@ -166,20 +168,29 @@ public class DataTypeDecimal implements IDataType {
             }
 
             case 128: {
-                long v1 = deserializer.readLong();
-                long v2 = deserializer.readLong();
-                value = new BigDecimal(v1 + "" + v2);
+                long l1 = deserializer.readLong();
+                long l2 = deserializer.readLong();
+
+                BigInteger v1 = new BigInteger(1, BytesUtil.longToBytes(l1));
+                BigInteger v2 = new BigInteger(1, BytesUtil.longToBytes(l2));
+
+                value = new BigDecimal(v1.add(v2.shiftLeft(64)));
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
 
             case 256: {
-                long v1 = deserializer.readLong();
-                long v2 = deserializer.readLong();
-                long v3 = deserializer.readLong();
-                long v4 = deserializer.readLong();
+                long l1 = deserializer.readLong();
+                long l2 = deserializer.readLong();
+                long l3 = deserializer.readLong();
+                long l4 = deserializer.readLong();
 
-                value = new BigDecimal("" + v1 + v2 + v3 + v4);
+                BigInteger v1 = new BigInteger(1, BytesUtil.longToBytes(l1));
+                BigInteger v2 = new BigInteger(1, BytesUtil.longToBytes(l2));
+                BigInteger v3 = new BigInteger(1, BytesUtil.longToBytes(l3));
+                BigInteger v4 = new BigInteger(1, BytesUtil.longToBytes(l4));
+
+                value = new BigDecimal(v1.add(v2.shiftLeft(64)).add(v3.shiftLeft(64 * 2)).add(v4.shiftLeft(64 * 3)));
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
