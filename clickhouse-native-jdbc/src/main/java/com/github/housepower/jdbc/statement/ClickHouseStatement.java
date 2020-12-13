@@ -80,6 +80,7 @@ public class ClickHouseStatement implements SQLStatement {
     public int executeUpdate(String query) throws SQLException {
         LOG.debug("executeUpdate: {}", query);
         cfg.settings().put(SettingKey.max_result_rows, maxRows);
+        cfg.settings().put(SettingKey.result_overflow_mode, "break");
 
         extractDBAndTableName(query);
         Matcher matcher = VALUES_REGEX.matcher(query);
@@ -230,19 +231,6 @@ public class ClickHouseStatement implements SQLStatement {
     @Override
     public boolean isPoolable() throws SQLException {
         return false;
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(getClass())) {
-            return iface.cast(this);
-        }
-        throw new SQLException("Cannot unwrap to " + iface.getName());
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return iface.isAssignableFrom(getClass());
     }
 
     protected Block getSampleBlock(final String insertQuery) throws SQLException {
