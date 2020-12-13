@@ -85,13 +85,13 @@ public class ClickHouseStatement implements SQLStatement {
         Matcher matcher = VALUES_REGEX.matcher(query);
 
         if (matcher.find() && query.trim().toUpperCase(Locale.ROOT).startsWith("INSERT")) {
-            updateCount = 0;
             lastResultSet = null;
             String insertQuery = query.substring(0, matcher.end() - 1);
             block = getSampleBlock(insertQuery);
             block.initWriteBuffer();
             new ValuesInputFormat(matcher.end() - 1, query).fillBlock(block);
-            return connection.sendInsertRequest(block);
+            updateCount = connection.sendInsertRequest(block);
+            return updateCount;
         }
 
         updateCount = -1;
@@ -115,6 +115,7 @@ public class ClickHouseStatement implements SQLStatement {
     @Override
     public boolean getMoreResults() throws SQLException {
         LOG.debug("getMoreResults");
+        updateCount = -1;
         if (lastResultSet != null) {
             lastResultSet.close();
             lastResultSet = null;
