@@ -15,6 +15,7 @@
 package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.BytesUtil;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
@@ -22,6 +23,7 @@ import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -45,6 +47,7 @@ public class DataTypeDecimal implements IDataType {
     private final BigDecimal scaleFactor;
     private final int nobits;
 
+    //@see: https://clickhouse.tech/docs/en/sql-reference/data-types/decimal/
     public DataTypeDecimal(String name, int precision, int scale) {
         this.name = name;
         this.precision = precision;
@@ -54,6 +57,10 @@ public class DataTypeDecimal implements IDataType {
             this.nobits = 32;
         } else if (this.precision <= 18) {
             this.nobits = 64;
+        } else if (this.precision <= 38) {
+            this.nobits = 128;
+        } else if (this.precision <= 76) {
+            this.nobits = 256;
         } else {
             throw new IllegalArgumentException(String.format(Locale.ENGLISH,
                     "Precision[%d] is out of boundary.", precision));
@@ -121,6 +128,21 @@ public class DataTypeDecimal implements IDataType {
                 serializer.writeLong(targetValue.longValue());
                 break;
             }
+            case 128: {
+                BigInteger res = targetValue.toBigInteger();
+
+                serializer.writeLong(res.longValue());
+                serializer.writeLong(res.shiftRight(64).longValue());
+                break;
+            }
+            case 256: {
+                BigInteger res = targetValue.toBigInteger();
+                serializer.writeLong(targetValue.longValue());
+                serializer.writeLong(res.shiftRight(64).longValue());
+                serializer.writeLong(res.shiftRight(64 * 2).longValue());
+                serializer.writeLong(res.shiftRight(64 * 3).longValue());
+                break;
+            }
             default: {
                 throw new RuntimeException(String.format(Locale.ENGLISH,
                         "Unknown precision[%d] & scale[%d]", precision, scale));
@@ -144,6 +166,35 @@ public class DataTypeDecimal implements IDataType {
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
+
+            case 128: {
+                long l1 = deserializer.readLong();
+                long l2 = deserializer.readLong();
+
+                BigInteger v1 = new BigInteger(1, BytesUtil.longToBytes(l1));
+                BigInteger v2 = new BigInteger(1, BytesUtil.longToBytes(l2));
+
+                value = new BigDecimal(v1.add(v2.shiftLeft(64)));
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
+                break;
+            }
+
+            case 256: {
+                long l1 = deserializer.readLong();
+                long l2 = deserializer.readLong();
+                long l3 = deserializer.readLong();
+                long l4 = deserializer.readLong();
+
+                BigInteger v1 = new BigInteger(1, BytesUtil.longToBytes(l1));
+                BigInteger v2 = new BigInteger(1, BytesUtil.longToBytes(l2));
+                BigInteger v3 = new BigInteger(1, BytesUtil.longToBytes(l3));
+                BigInteger v4 = new BigInteger(1, BytesUtil.longToBytes(l4));
+
+                value = new BigDecimal(v1.add(v2.shiftLeft(64)).add(v3.shiftLeft(64 * 2)).add(v4.shiftLeft(64 * 3)));
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
+                break;
+            }
+
             default: {
                 throw new RuntimeException(String.format(Locale.ENGLISH,
                         "Unknown precision[%d] & scale[%d]", precision, scale));
