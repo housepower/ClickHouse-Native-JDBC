@@ -819,18 +819,6 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
                 .addRow("OTHER").build();
     }
 
-    private static void buildAndCondition(StringBuilder dest, List<String> conditions) {
-        Iterator<String> iter = conditions.iterator();
-        if (iter.hasNext()) {
-            String entry = iter.next();
-            dest.append(entry);
-        }
-        while (iter.hasNext()) {
-            String entry = iter.next();
-            dest.append(" AND ").append(entry);
-        }
-    }
-
     @Override
     public ResultSet getColumns(String catalog,
                                 String schemaPattern,
@@ -1276,12 +1264,12 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
 
     @Override
     public boolean supportsResultSetHoldability(int holdability) throws SQLException {
-        return false;
+        return holdability == ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
     @Override
     public int getResultSetHoldability() throws SQLException {
-        return 0;
+        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
     @Override
@@ -1355,19 +1343,6 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(getClass())) {
-            return iface.cast(this);
-        }
-        throw new SQLException("Cannot unwrap to " + iface.getName());
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return iface.isAssignableFrom(getClass());
-    }
-
-    @Override
     public ResultSet getPseudoColumns(String catalog,
                                       String schemaPattern,
                                       String tableNamePattern,
@@ -1385,6 +1360,7 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
         return ClickHouseDatabaseMetadata.LOG;
     }
 
+
     private ResultSet request(String sql) throws SQLException {
         Statement statement = connection.createStatement();
         return statement.executeQuery(sql);
@@ -1397,5 +1373,17 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
                 .columnNames("some")
                 .columnTypes("String")
                 .build();
+    }
+
+    private void buildAndCondition(StringBuilder dest, List<String> conditions) {
+        Iterator<String> iter = conditions.iterator();
+        if (iter.hasNext()) {
+            String entry = iter.next();
+            dest.append(entry);
+        }
+        while (iter.hasNext()) {
+            String entry = iter.next();
+            dest.append(" AND ").append(entry);
+        }
     }
 }
