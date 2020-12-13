@@ -141,6 +141,9 @@ public enum SettingKey {
     max_network_bandwidth_for_all_users(ISettingType.Int64, "The maximum speed of data exchange over the network in bytes per second for all concurrently running queries. Zero means unlimited."),
     format_csv_delimiter(ISettingType.Character, "The character to be considered as a delimiter in CSV data. If setting with a string, a string has to have a length of 1."),
     enable_conditional_computation(ISettingType.Int64, "Enable conditional computations"),
+    allow_experimental_bigint_types(ISettingType.Int64, "Allow Int128, Int256, UInt256 and Decimal256 types"),
+
+
     port(ISettingType.Int32, ""),
     user(ISettingType.String, ""),
     host(ISettingType.String, ""),

@@ -86,7 +86,7 @@ public class DecimalTypeITest extends AbstractITest {
             }
             assertEquals(300, size);
             statement.execute("DROP TABLE IF EXISTS decimal_test");
-        });
+        }, "allow_experimental_bigint_types", 1);
     }
 
 }
