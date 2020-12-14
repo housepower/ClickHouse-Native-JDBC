@@ -140,6 +140,11 @@ public class ClickHouseConnection implements SQLConnection {
         return null;
     }
 
+    @Override
+    public DatabaseMetaData getMetaData() throws SQLException {
+        return null;
+    }
+
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
