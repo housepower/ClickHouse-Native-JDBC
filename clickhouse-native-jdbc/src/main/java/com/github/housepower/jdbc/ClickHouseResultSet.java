@@ -41,6 +41,10 @@ public class ClickHouseResultSet implements SQLResultSet {
     private final ClickHouseStatement statement;
     private final CheckedIterator<DataResponse, SQLException> iterator;
 
+    private boolean isFirst = false;
+    private boolean isAfterLast = false;
+    private boolean isClosed = false;
+
     public ClickHouseResultSet(Block header, String db,
                                String table,
                                CheckedIterator<DataResponse, SQLException> iterator,
@@ -120,6 +124,49 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public BigDecimal getBigDecimal(String name) throws SQLException {
         return this.getBigDecimal(this.findColumn(name));
+    }
+
+    @Override
+    public boolean isBeforeFirst() throws SQLException {
+        return row == -1;
+    }
+
+    @Override
+    public boolean isAfterLast() throws SQLException {
+        return isAfterLast;
+    }
+
+    @Override
+    public boolean isFirst() throws SQLException {
+        return isFirst;
+    }
+
+    @Override
+    public boolean first() throws SQLException {
+        throw new SQLException("TYPE_FORWARD_ONLY");
+    }
+
+    @Override
+    public boolean last() throws SQLException {
+        throw new SQLException("TYPE_FORWARD_ONLY");
+    }
+
+    @Override
+    public void setFetchDirection(int direction) throws SQLException {
+    }
+
+    @Override
+    public int getFetchDirection() throws SQLException {
+        return ResultSet.FETCH_FORWARD;
+    }
+
+    @Override
+    public void setFetchSize(int rows) throws SQLException {
+    }
+
+    @Override
+    public int getFetchSize() throws SQLException {
+        return Integer.MAX_VALUE;
     }
 
     /*===================================================================*/
@@ -241,8 +288,13 @@ public class ClickHouseResultSet implements SQLResultSet {
     /*==================================================================*/
 
     @Override
+    public int getType() throws SQLException {
+        return ResultSet.TYPE_FORWARD_ONLY;
+    }
+
+    @Override
     public void close() throws SQLException {
-        // nothing
+        this.isClosed = true;
     }
 
     @Override
@@ -255,7 +307,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public boolean isClosed() throws SQLException {
-        return false;
+        return this.isClosed;
     }
 
     @Override
@@ -275,7 +327,14 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        return ++row < current.rows() || (row = 0) < (current = fetchBlock()).rows();
+        boolean isBeforeFirst = isBeforeFirst();
+
+        boolean hasNext = ++row < current.rows() || (row = 0) < (current = fetchBlock()).rows();
+
+        isFirst = isBeforeFirst && hasNext;
+        isAfterLast = !hasNext;
+
+        return hasNext;
     }
 
     private Block fetchBlock() throws SQLException {
