@@ -33,7 +33,7 @@ public class ClickHouseConfig {
 
     private final int port;
     private final String address;
-    private final String database;
+    private String database;
     private final String username;
     private final String password;
     private int soTimeout;
@@ -79,6 +79,10 @@ public class ClickHouseConfig {
 
     public String database() {
         return this.database;
+    }
+
+    public String database(String database) {
+        return this.database = database;
     }
 
     public String username() {

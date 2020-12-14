@@ -119,6 +119,27 @@ public class ClickHouseConnection implements SQLConnection {
         return getPhysicalConnection().ping(timeout * 1000, atomicInfo.get().server());
     }
 
+    // ClickHouse support only `database`, we treat it as JDBC `schema`
+    @Override
+    public void setSchema(String schema) throws SQLException {
+        this.atomicInfo.get().server().getConfigure().database(schema);
+    }
+
+    @Override
+    public String getSchema() throws SQLException {
+        return this.atomicInfo.get().server().getConfigure().database();
+    }
+
+    @Override
+    public void setCatalog(String catalog) throws SQLException {
+        // do nothing
+    }
+
+    @Override
+    public String getCatalog() throws SQLException {
+        return null;
+    }
+
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         PhysicalConnection connection = getHealthyPhysicalConnection();
         connection.sendQuery(insertQuery, atomicInfo.get().client(), configure.settings());
