@@ -53,6 +53,11 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
+    public boolean getBoolean(String name) throws SQLException {
+        return this.getBoolean(this.findColumn(name));
+    }
+
+    @Override
     public int getInt(String name) throws SQLException {
         return this.getInt(this.findColumn(name));
     }
@@ -118,6 +123,15 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     /*===================================================================*/
+
+    @Override
+    public boolean getBoolean(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return false;
+        }
+        return (boolean) data;
+    }
 
     @Override
     public int getInt(int index) throws SQLException {
