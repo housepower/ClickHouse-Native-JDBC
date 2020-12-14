@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -53,15 +54,14 @@ public class ClickHouseConnection implements SQLConnection {
 
     private final AtomicBoolean isClosed;
     private final AtomicReference<ClickHouseConfig> cfg;
-    // TODO Since #getHealthyNativeClient() is synchronized, can we remove AtomicReference?
-    private final AtomicReference<NativeContext> nativeCtx;
     // TODO move to NativeClient
     private final AtomicReference<SessionState> state = new AtomicReference<>(SessionState.IDLE);
+    private volatile NativeContext nativeCtx;
 
     protected ClickHouseConnection(ClickHouseConfig cfg, NativeContext nativeCtx) {
         this.isClosed = new AtomicBoolean(false);
         this.cfg = new AtomicReference<>(cfg);
-        this.nativeCtx = new AtomicReference<>(nativeCtx);
+        this.nativeCtx = nativeCtx;
     }
 
     public ClickHouseConfig cfg() {
@@ -69,17 +69,75 @@ public class ClickHouseConnection implements SQLConnection {
     }
 
     public NativeContext.ServerContext serverContext() {
-        return nativeCtx.get().serverCtx();
+        return nativeCtx.serverCtx();
     }
 
     public QueryRequest.ClientContext clientContext() {
-        return nativeCtx.get().clientCtx();
+        return nativeCtx.clientCtx();
+    }
+
+    @Override
+    public void setAutoCommit(boolean autoCommit) throws SQLException {
+    }
+
+    @Override
+    public boolean getAutoCommit() throws SQLException {
+        return true;
+    }
+
+    @Override
+    public void commit() throws SQLException {
+    }
+
+    @Override
+    public void rollback() throws SQLException {
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) throws SQLException {
+    }
+
+    @Override
+    public boolean isReadOnly() throws SQLException {
+        return false;
+    }
+
+    @Override
+    public Map<String, Class<?>> getTypeMap() throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
+    }
+
+    @Override
+    public void setHoldability(int holdability) throws SQLException {
+    }
+
+    @Override
+    public int getHoldability() throws SQLException {
+        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
+    }
+
+    @Override
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+    }
+
+    @Override
+    public int getNetworkTimeout() throws SQLException {
+        return 0;
+    }
+
+    @Override
+    public void abort(Executor executor) throws SQLException {
+        this.close();
     }
 
     @Override
     public void close() throws SQLException {
         if (!isClosed() && isClosed.compareAndSet(false, true)) {
-            NativeClient nativeClient = nativeCtx.get().nativeClient();
+            NativeClient nativeClient = nativeCtx.nativeClient();
             nativeClient.disconnect();
         }
     }
@@ -92,15 +150,15 @@ public class ClickHouseConnection implements SQLConnection {
     @Override
     public Statement createStatement() throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create Statement, because the connection is closed.");
-        return new ClickHouseStatement(this, nativeCtx.get());
+        return new ClickHouseStatement(this, nativeCtx);
     }
 
     @Override
     public PreparedStatement prepareStatement(String query) throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, because the connection is closed.");
         Matcher matcher = VALUES_REGEX.matcher(query);
-        return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this, nativeCtx.get()) :
-                new ClickHousePreparedQueryStatement(this, nativeCtx.get(), query);
+        return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this, nativeCtx) :
+                new ClickHousePreparedQueryStatement(this, nativeCtx, query);
     }
 
     @Override
@@ -131,7 +189,7 @@ public class ClickHouseConnection implements SQLConnection {
     @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create Array, because the connection is closed.");
-        return new ClickHouseArray(DataTypeFactory.get(typeName, nativeCtx.get().serverCtx()), elements);
+        return new ClickHouseArray(DataTypeFactory.get(typeName, nativeCtx.serverCtx()), elements);
     }
 
     @Override
@@ -142,17 +200,7 @@ public class ClickHouseConnection implements SQLConnection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        return getNativeClient().ping(Duration.ofSeconds(timeout), nativeCtx.get().serverCtx());
-    }
-
-    @Override
-    public void setCatalog(String catalog) throws SQLException {
-        // do nothing
-    }
-
-    @Override
-    public String getCatalog() throws SQLException {
-        return null;
+        return getNativeClient().ping(Duration.ofSeconds(timeout), nativeCtx.serverCtx());
     }
 
     // ClickHouse support only `database`, we treat it as JDBC `schema`
@@ -168,61 +216,90 @@ public class ClickHouseConnection implements SQLConnection {
     }
 
     @Override
+    public void setCatalog(String catalog) throws SQLException {
+        // do nothing
+    }
+
+    @Override
+    public String getCatalog() throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void setTransactionIsolation(int level) throws SQLException {
+    }
+
+    @Override
+    public int getTransactionIsolation() throws SQLException {
+        return Connection.TRANSACTION_NONE;
+    }
+
+    @Override
+    public SQLWarning getWarnings() throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void clearWarnings() throws SQLException {
+    }
+
+    @Override
     public DatabaseMetaData getMetaData() throws SQLException {
         return new ClickHouseDatabaseMetadata(cfg().jdbcUrl(), this);
     }
 
+    @Override
+    public Logger logger() {
+        return ClickHouseConnection.LOG;
+    }
+
     public boolean ping(Duration timeout) throws SQLException {
-        return nativeCtx.get().nativeClient().ping(timeout, nativeCtx.get().serverCtx());
+        return nativeCtx.nativeClient().ping(timeout, nativeCtx.serverCtx());
     }
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
         NativeClient nativeClient = getHealthyNativeClient();
-        nativeClient.sendQuery(insertQuery, nativeCtx.get().clientCtx(), cfg.get().settings());
+        nativeClient.sendQuery(insertQuery, nativeCtx.clientCtx(), cfg.get().settings());
         Validate.isTrue(this.state.compareAndSet(SessionState.IDLE, SessionState.WAITING_INSERT),
                 "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
-        return nativeClient.receiveSampleBlock(cfg.get().queryTimeout(), nativeCtx.get().serverCtx());
+        return nativeClient.receiveSampleBlock(cfg.get().queryTimeout(), nativeCtx.serverCtx());
     }
 
     public QueryResult sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
         Validate.isTrue(this.state.get() == SessionState.IDLE,
                 "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         NativeClient nativeClient = getHealthyNativeClient();
-        nativeClient.sendQuery(query, nativeCtx.get().clientCtx(), cfg.settings());
-        return nativeClient.receiveQuery(cfg.queryTimeout(), nativeCtx.get().serverCtx());
+        nativeClient.sendQuery(query, nativeCtx.clientCtx(), cfg.settings());
+        return nativeClient.receiveQuery(cfg.queryTimeout(), nativeCtx.serverCtx());
     }
-
     // when sendInsertRequest we must ensure the connection is healthy
     // the #getSampleBlock() must be called before this method
+
     public int sendInsertRequest(Block block) throws SQLException {
-        Validate.isTrue(this.state.get() == SessionState.WAITING_INSERT,
-                "Call getSampleBlock before insert.");
+        Validate.isTrue(this.state.get() == SessionState.WAITING_INSERT, "Call getSampleBlock before insert.");
 
         NativeClient nativeClient = getNativeClient();
         nativeClient.sendData(block);
         nativeClient.sendData(new Block());
-        nativeClient.receiveEndOfStream(cfg.get().queryTimeout(), nativeCtx.get().serverCtx());
+        nativeClient.receiveEndOfStream(cfg.get().queryTimeout(), nativeCtx.serverCtx());
         Validate.isTrue(this.state.compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE));
         return block.rowCnt();
     }
 
     synchronized private NativeClient getHealthyNativeClient() throws SQLException {
-        NativeContext oldInfo = nativeCtx.get();
-        if (!oldInfo.nativeClient().ping(cfg.get().queryTimeout(), nativeCtx.get().serverCtx())) {
+        NativeContext oldCtx = nativeCtx;
+        if (!oldCtx.nativeClient().ping(cfg.get().queryTimeout(), nativeCtx.serverCtx())) {
             LOG.warn("connection loss with state[{}], create new connection and reset state", state);
-            NativeContext newInfo = createNativeContext(cfg.get());
-            // TODO method is synchronized
-            NativeContext closeableCtx = nativeCtx.compareAndSet(oldInfo, newInfo) ? oldInfo : newInfo;
-            closeableCtx.nativeClient().disconnect();
-            assert oldInfo == closeableCtx;
+            nativeCtx = createNativeContext(cfg.get());
             state.set(SessionState.IDLE);
+            oldCtx.nativeClient().silentDisconnect();
         }
 
-        return nativeCtx.get().nativeClient();
+        return nativeCtx.nativeClient();
     }
 
     private NativeClient getNativeClient() {
-        return nativeCtx.get().nativeClient();
+        return nativeCtx.nativeClient();
     }
 
     public static ClickHouseConnection createClickHouseConnection(ClickHouseConfig configure) throws SQLException {
@@ -253,13 +330,8 @@ public class ClickHouseConnection implements SQLConnection {
                     response.majorVersion(), response.minorVersion(), response.reversion(),
                     configure, timeZone, response.serverDisplayName());
         } catch (SQLException rethrows) {
-            nativeClient.disconnect();
+            nativeClient.silentDisconnect();
             throw rethrows;
         }
-    }
-
-    @Override
-    public Logger logger() {
-        return ClickHouseConnection.LOG;
     }
 }

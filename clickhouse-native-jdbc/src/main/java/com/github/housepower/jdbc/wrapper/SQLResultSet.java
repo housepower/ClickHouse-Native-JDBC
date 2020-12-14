@@ -24,7 +24,7 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.Map;
 
-public interface SQLResultSet extends ResultSet, Logging {
+public interface SQLResultSet extends ResultSet, SQLWrapper, Logging {
 
     @Override
     default boolean next() throws SQLException {
@@ -1157,18 +1157,6 @@ public interface SQLResultSet extends ResultSet, Logging {
     @Override
     default <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
         logger().debug("invoke unimplemented method #getObject(String columnLabel, Class<T> type)");
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    default <T> T unwrap(Class<T> iface) throws SQLException {
-        logger().debug("invoke unimplemented method #unwrap(Class<T> iface) ");
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    default boolean isWrapperFor(Class<?> iface) throws SQLException {
-        logger().debug("invoke unimplemented method #isWrapperFor(Class<?> iface)");
         throw new SQLFeatureNotSupportedException();
     }
 }

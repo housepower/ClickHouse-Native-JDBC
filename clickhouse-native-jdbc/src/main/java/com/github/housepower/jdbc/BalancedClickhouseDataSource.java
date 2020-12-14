@@ -21,6 +21,7 @@ import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.SettingKey;
 import com.github.housepower.jdbc.log.Logger;
 import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.jdbc.wrapper.SQLWrapper;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
  * Furthermore, this class has method { #scheduleActualization(int, TimeUnit) scheduleActualization}
  * which test hosts for availability. By default, this option is turned off.
  */
-public final class BalancedClickhouseDataSource implements DataSource {
+public final class BalancedClickhouseDataSource implements DataSource, SQLWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(BalancedClickhouseDataSource.class);
     private static final Pattern URL_TEMPLATE = Pattern.compile(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX +
@@ -196,25 +197,6 @@ public final class BalancedClickhouseDataSource implements DataSource {
     @Override
     public ClickHouseConnection getConnection(String user, String password) throws SQLException {
         return driver.connect(getAnyUrl(), cfg.withCredentials(user, password));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(getClass())) {
-            return iface.cast(this);
-        }
-        throw new SQLException("Cannot unwrap to " + iface.getName());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return iface.isAssignableFrom(getClass());
     }
 
     /**

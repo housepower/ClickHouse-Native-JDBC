@@ -118,6 +118,7 @@ public enum SettingKey {
     max_bytes_to_read(ISettingType.Int64, "Limit on read bytes (after decompression) from the most 'deep' sources. That is, only in the deepest subquery. When reading from a remote server, it is only checked on a remote server."),
     max_result_rows(ISettingType.Int64, "Limit on result size in rows. Also checked for intermediate data sent from remote servers."),
     max_result_bytes(ISettingType.Int64, "Limit on result size in bytes (uncompressed). Also checked for intermediate data sent from remote servers."),
+    result_overflow_mode(ISettingType.String, "What to do when the limit is exceeded."),
     min_execution_speed(ISettingType.Int64, "In rows per second."),
     timeout_before_checking_execution_speed(ISettingType.Seconds, "Check that the speed is not too low after the specified time has elapsed."),
     max_ast_depth(ISettingType.Int64, "Maximum depth of query syntax tree. Checked after parsing."),

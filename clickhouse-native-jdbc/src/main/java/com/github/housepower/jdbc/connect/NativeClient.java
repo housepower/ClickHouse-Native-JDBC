@@ -135,6 +135,14 @@ public class NativeClient {
         return new ClickHouseQueryResult(() -> receiveResponse(soTimeout, info));
     }
 
+    public void silentDisconnect() {
+        try {
+            disconnect();
+        } catch (Throwable th) {
+            LOG.debug("disconnect throw exception.", th);
+        }
+    }
+
     public void disconnect() throws SQLException {
         try {
             if (socket.isClosed()) {

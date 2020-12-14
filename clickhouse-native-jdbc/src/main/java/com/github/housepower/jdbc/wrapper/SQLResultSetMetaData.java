@@ -20,7 +20,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
-public interface SQLResultSetMetaData extends ResultSetMetaData, Logging {
+public interface SQLResultSetMetaData extends ResultSetMetaData, SQLWrapper, Logging {
     @Override
     default int getColumnCount() throws SQLException {
         logger().debug("invoke unimplemented method #getColumnCount()");
@@ -144,18 +144,6 @@ public interface SQLResultSetMetaData extends ResultSetMetaData, Logging {
     @Override
     default String getColumnClassName(int column) throws SQLException {
         logger().debug("invoke unimplemented method #getColumnClassName(int column)");
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    default <T> T unwrap(Class<T> iface) throws SQLException {
-        logger().debug("invoke unimplemented method #unwrap(Class<T> iface)");
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    default boolean isWrapperFor(Class<?> iface) throws SQLException {
-        logger().debug("invoke unimplemented method #isWrapperFor(Class<?> iface)");
         throw new SQLFeatureNotSupportedException();
     }
 }

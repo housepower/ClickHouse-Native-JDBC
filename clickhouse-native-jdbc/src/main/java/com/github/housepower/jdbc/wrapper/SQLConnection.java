@@ -21,318 +21,317 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-public interface SQLConnection extends Connection, Logging {
+public interface SQLConnection extends Connection, SQLWrapper, Logging {
 
     @Override
     default void setClientInfo(Properties properties) throws SQLClientInfoException {
-logger().debug("invoke unimplemented method #setClientInfo(Properties properties)");
+        logger().debug("invoke unimplemented method #setClientInfo(Properties properties)");
         throw new SQLClientInfoException();
     }
 
     @Override
     default void setClientInfo(String name, String value) throws SQLClientInfoException {
-logger().debug("invoke unimplemented method #setClientInfo(String name, String value)");
+        logger().debug("invoke unimplemented method #setClientInfo(String name, String value)");
         throw new SQLClientInfoException();
     }
 
     @Override
     default Statement createStatement() throws SQLException {
-logger().debug("invoke unimplemented method #createStatement()");
+        logger().debug("invoke unimplemented method #createStatement()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default PreparedStatement prepareStatement(String sql) throws SQLException {
-logger().debug("invoke unimplemented method #prepareStatement(String sql)");
+        logger().debug("invoke unimplemented method #prepareStatement(String sql)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default CallableStatement prepareCall(String sql) throws SQLException {
-logger().debug("invoke unimplemented method #prepareCall(String sql)");
+        logger().debug("invoke unimplemented method #prepareCall(String sql)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default String nativeSQL(String sql) throws SQLException {
-logger().debug("invoke unimplemented method #nativeSQL(String sql)");
+        logger().debug("invoke unimplemented method #nativeSQL(String sql)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void setAutoCommit(boolean autoCommit) throws SQLException {
-logger().debug("invoke unimplemented method #setAutoCommit(boolean autoCommit)");
+        logger().debug("invoke unimplemented method #setAutoCommit(boolean autoCommit)");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default boolean getAutoCommit() throws SQLException {
-logger().debug("invoke unimplemented method #getAutoCommit()");
-        return false;
+        logger().debug("invoke unimplemented method #getAutoCommit()");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void commit() throws SQLException {
-logger().debug("invoke unimplemented method #commit()");
+        logger().debug("invoke unimplemented method #commit()");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void rollback() throws SQLException {
-logger().debug("invoke unimplemented method #rollback()");
+        logger().debug("invoke unimplemented method #rollback()");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void close() throws SQLException {
-logger().debug("invoke unimplemented method #close()");
+        logger().debug("invoke unimplemented method #close()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default boolean isClosed() throws SQLException {
-logger().debug("invoke unimplemented method #isClosed()");
+        logger().debug("invoke unimplemented method #isClosed()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default DatabaseMetaData getMetaData() throws SQLException {
-logger().debug("invoke unimplemented method #getMetaData()");
+        logger().debug("invoke unimplemented method #getMetaData()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void setReadOnly(boolean readOnly) throws SQLException {
-logger().debug("invoke unimplemented method #setReadOnly(boolean readOnly)");
+        logger().debug("invoke unimplemented method #setReadOnly(boolean readOnly)");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default boolean isReadOnly() throws SQLException {
-logger().debug("invoke unimplemented method #isReadOnly()");
-        return false;
+        logger().debug("invoke unimplemented method #isReadOnly()");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void setCatalog(String catalog) throws SQLException {
-logger().debug("invoke unimplemented method #setCatalog(String catalog)");
+        logger().debug("invoke unimplemented method #setCatalog(String catalog)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default String getCatalog() throws SQLException {
-logger().debug("invoke unimplemented method #getCatalog()");
+        logger().debug("invoke unimplemented method #getCatalog()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void setTransactionIsolation(int level) throws SQLException {
-logger().debug("invoke unimplemented method #setTransactionIsolation(int level)");
+        logger().debug("invoke unimplemented method #setTransactionIsolation(int level)");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default int getTransactionIsolation() throws SQLException {
-logger().debug("invoke unimplemented method #getTransactionIsolation()");
-        return Connection.TRANSACTION_NONE;
+        logger().debug("invoke unimplemented method #getTransactionIsolation()");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default SQLWarning getWarnings() throws SQLException {
-logger().debug("invoke unimplemented method #getWarnings()");
-        return null;
+        logger().debug("invoke unimplemented method #getWarnings()");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void clearWarnings() throws SQLException {
-logger().debug("invoke unimplemented method #clearWarnings()");
+        logger().debug("invoke unimplemented method #clearWarnings()");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-logger().debug("invoke unimplemented method #createStatement(int resultSetType, int resultSetConcurrency)");
+        logger().debug("invoke unimplemented method #createStatement(int resultSetType, int resultSetConcurrency)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    default PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-            throws SQLException {
+    default PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        logger().debug("invoke unimplemented method #prepareStatement(String sql, int resultSetType, int resultSetConcurrency)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    default CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency)
-            throws SQLException {
+    default CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        logger().debug("invoke unimplemented method #prepareCall(String sql, int resultSetType, int resultSetConcurrency)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Map<String, Class<?>> getTypeMap() throws SQLException {
-        return null;
+        logger().debug("invoke unimplemented method #getTypeMap()");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-logger().debug("invoke unimplemented method #setTypeMap(Map<String, Class<?>> map)");
+        logger().debug("invoke unimplemented method #setTypeMap(Map<String, Class<?>> map)");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void setHoldability(int holdability) throws SQLException {
-logger().debug("invoke unimplemented method #setHoldability(int holdability)");
+        logger().debug("invoke unimplemented method #setHoldability(int holdability)");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default int getHoldability() throws SQLException {
-logger().debug("invoke unimplemented method #getHoldability()");
-        return 0;
+        logger().debug("invoke unimplemented method #getHoldability()");
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Savepoint setSavepoint() throws SQLException {
-logger().debug("invoke unimplemented method #setSavepoint()");
+        logger().debug("invoke unimplemented method #setSavepoint()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Savepoint setSavepoint(String name) throws SQLException {
-logger().debug("invoke unimplemented method #setSavepoint(String name)");
+        logger().debug("invoke unimplemented method #setSavepoint(String name)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void rollback(Savepoint savepoint) throws SQLException {
-logger().debug("invoke unimplemented method #rollback(Savepoint savepoint)");
+        logger().debug("invoke unimplemented method #rollback(Savepoint savepoint)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void releaseSavepoint(Savepoint savepoint) throws SQLException {
-logger().debug("invoke unimplemented method #releaseSavepoint(Savepoint savepoint)");
+        logger().debug("invoke unimplemented method #releaseSavepoint(Savepoint savepoint)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    default Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-            throws SQLException {
+    default Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        logger().debug("invoke unimplemented method #createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    default PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-                                               int resultSetHoldability) throws SQLException {
+    default PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        logger().debug("invoke unimplemented method #prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    default CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-                                          int resultSetHoldability) throws SQLException {
+    default CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        logger().debug("invoke unimplemented method #prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
-logger().debug("invoke unimplemented method #prepareStatement(String sql, int autoGeneratedKeys)");
+        logger().debug("invoke unimplemented method #prepareStatement(String sql, int autoGeneratedKeys)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
-logger().debug("invoke unimplemented method #prepareStatement(String sql, int[] columnIndexes)");
+        logger().debug("invoke unimplemented method #prepareStatement(String sql, int[] columnIndexes)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
-logger().debug("invoke unimplemented method #prepareStatement(String sql, String[] columnNames)");
+        logger().debug("invoke unimplemented method #prepareStatement(String sql, String[] columnNames)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Clob createClob() throws SQLException {
-logger().debug("invoke unimplemented method #createClob()");
+        logger().debug("invoke unimplemented method #createClob()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Blob createBlob() throws SQLException {
-logger().debug("invoke unimplemented method #createBlob()");
+        logger().debug("invoke unimplemented method #createBlob()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default NClob createNClob() throws SQLException {
-logger().debug("invoke unimplemented method #createNClob()");
+        logger().debug("invoke unimplemented method #createNClob()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default SQLXML createSQLXML() throws SQLException {
-logger().debug("invoke unimplemented method #createSQLXML()");
+        logger().debug("invoke unimplemented method #createSQLXML()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default boolean isValid(int timeout) throws SQLException {
-logger().debug("invoke unimplemented method #isValid(int timeout)");
+        logger().debug("invoke unimplemented method #isValid(int timeout)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default String getClientInfo(String name) throws SQLException {
-logger().debug("invoke unimplemented method #getClientInfo(String name)");
+        logger().debug("invoke unimplemented method #getClientInfo(String name)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Properties getClientInfo() throws SQLException {
-logger().debug("invoke unimplemented method #getClientInfo()");
+        logger().debug("invoke unimplemented method #getClientInfo()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-logger().debug("invoke unimplemented method #createArrayOf(String typeName, Object[] elements)");
+        logger().debug("invoke unimplemented method #createArrayOf(String typeName, Object[] elements)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-logger().debug("invoke unimplemented method #createStruct(String typeName, Object[] attributes)");
+        logger().debug("invoke unimplemented method #createStruct(String typeName, Object[] attributes)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void setSchema(String schema) throws SQLException {
-logger().debug("invoke unimplemented method #setSchema(String schema)");
+        logger().debug("invoke unimplemented method #setSchema(String schema)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default String getSchema() throws SQLException {
-logger().debug("invoke unimplemented method #getSchema()");
+        logger().debug("invoke unimplemented method #getSchema()");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     default void abort(Executor executor) throws SQLException {
-logger().debug("invoke unimplemented method #abort(Executor executor)");
-        this.close();
-    }
-
-    @Override
-    default void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-logger().debug("invoke unimplemented method #setNetworkTimeout(Executor executor, int milliseconds)");
-    }
-
-    @Override
-    default int getNetworkTimeout() throws SQLException {
-logger().debug("invoke unimplemented method #getNetworkTimeout()");
-        return 0;
-    }
-
-    @Override
-    default <T> T unwrap(Class<T> iface) throws SQLException {
+        logger().debug("invoke unimplemented method #abort(Executor executor)");
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    default boolean isWrapperFor(Class<?> iface) throws SQLException {
-logger().debug("invoke unimplemented method #isWrapperFor(Class<?> iface)");
+    default void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        logger().debug("invoke unimplemented method #setNetworkTimeout(Executor executor, int milliseconds)");
+        throw new SQLFeatureNotSupportedException();
+    }
+
+    @Override
+    default int getNetworkTimeout() throws SQLException {
+        logger().debug("invoke unimplemented method #getNetworkTimeout()");
         throw new SQLFeatureNotSupportedException();
     }
 }

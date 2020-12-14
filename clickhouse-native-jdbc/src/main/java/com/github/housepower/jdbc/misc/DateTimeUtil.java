@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-public class DateTimeHelper {
+public class DateTimeUtil {
 
     public static ZoneId chooseTimeZone(NativeContext.ServerContext serverContext) {
         return (boolean) serverContext.getConfigure().settings().getOrDefault(SettingKey.use_client_time_zone, false)

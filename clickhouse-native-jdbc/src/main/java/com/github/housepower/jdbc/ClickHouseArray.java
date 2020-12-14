@@ -20,27 +20,28 @@ import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.wrapper.SQLArray;
 
 import java.sql.SQLException;
+import java.util.StringJoiner;
 
 public class ClickHouseArray implements SQLArray {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClickHouseArray.class);
 
+    private final IDataType itemDataType;
     private final Object[] data;
-    private final IDataType dataType;
 
-    public ClickHouseArray(IDataType dataType, Object[] data) {
-        this.dataType = dataType;
+    public ClickHouseArray(IDataType itemDataType, Object[] data) {
+        this.itemDataType = itemDataType;
         this.data = data;
     }
 
     @Override
     public String getBaseTypeName() throws SQLException {
-        return dataType.name();
+        return itemDataType.name();
     }
 
     @Override
     public int getBaseType() throws SQLException {
-        return dataType.sqlTypeId();
+        return itemDataType.sqlTypeId();
     }
 
     @Override
@@ -57,9 +58,19 @@ public class ClickHouseArray implements SQLArray {
         return ClickHouseArray.LOG;
     }
 
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(",", "[", "]");
+        for (Object item : data) {
+            // TODO format by itemDataType
+            joiner.add(String.valueOf(item));
+        }
+        return joiner.toString();
+    }
+
     public ClickHouseArray slice(int offset, int length) {
         Object[] result = new Object[length];
         if (length >= 0) System.arraycopy(data, offset, result, 0, length);
-        return new ClickHouseArray(dataType, result);
+        return new ClickHouseArray(itemDataType, result);
     }
 }

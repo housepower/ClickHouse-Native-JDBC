@@ -1321,7 +1321,7 @@ class ClickHouseDatabaseMetadataITest extends AbstractITest {
         withNewConnection(connection -> {
             DatabaseMetaData dm = connection.getMetaData();
             assertFalse(dm.supportsResultSetHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT));
-            assertFalse(dm.supportsResultSetHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT));
+            assertTrue(dm.supportsResultSetHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT));
         });
     }
 
@@ -1329,9 +1329,7 @@ class ClickHouseDatabaseMetadataITest extends AbstractITest {
     void getResultSetHoldability() throws Exception {
         withNewConnection(connection -> {
             DatabaseMetaData dm = connection.getMetaData();
-            assertEquals(0, dm.getResultSetHoldability());
-            assertNotEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT, dm.getResultSetHoldability());
-            assertNotEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, dm.getResultSetHoldability());
+            assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, dm.getResultSetHoldability());
         });
     }
 

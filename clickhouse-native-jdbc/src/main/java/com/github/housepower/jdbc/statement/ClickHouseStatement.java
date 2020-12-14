@@ -80,18 +80,19 @@ public class ClickHouseStatement implements SQLStatement {
     public int executeUpdate(String query) throws SQLException {
         LOG.debug("executeUpdate: {}", query);
         cfg.settings().put(SettingKey.max_result_rows, maxRows);
+        cfg.settings().put(SettingKey.result_overflow_mode, "break");
 
         extractDBAndTableName(query);
         Matcher matcher = VALUES_REGEX.matcher(query);
 
         if (matcher.find() && query.trim().toUpperCase(Locale.ROOT).startsWith("INSERT")) {
-            updateCount = 0;
             lastResultSet = null;
             String insertQuery = query.substring(0, matcher.end() - 1);
             block = getSampleBlock(insertQuery);
             block.initWriteBuffer();
             new ValuesInputFormat(matcher.end() - 1, query).fillBlock(block);
-            return connection.sendInsertRequest(block);
+            updateCount = connection.sendInsertRequest(block);
+            return updateCount;
         }
 
         updateCount = -1;
@@ -115,6 +116,7 @@ public class ClickHouseStatement implements SQLStatement {
     @Override
     public boolean getMoreResults() throws SQLException {
         LOG.debug("getMoreResults");
+        updateCount = -1;
         if (lastResultSet != null) {
             lastResultSet.close();
             lastResultSet = null;
@@ -229,19 +231,6 @@ public class ClickHouseStatement implements SQLStatement {
     @Override
     public boolean isPoolable() throws SQLException {
         return false;
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(getClass())) {
-            return iface.cast(this);
-        }
-        throw new SQLException("Cannot unwrap to " + iface.getName());
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return iface.isAssignableFrom(getClass());
     }
 
     protected Block getSampleBlock(final String insertQuery) throws SQLException {

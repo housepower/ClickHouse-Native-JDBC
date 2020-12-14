@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.misc.DateTimeHelper;
+import com.github.housepower.jdbc.misc.DateTimeUtil;
 import org.junit.jupiter.api.Test;
 
 import java.sql.*;
@@ -126,7 +126,7 @@ public class PreparedStatementITest extends AbstractITest {
         LocalDate date = LocalDate.of(2020, 11, 7);
         LocalDateTime serverDateTime = date.atTime(9, 43, 12);
 
-        LocalDateTime clientDateTime = DateTimeHelper.convertTimeZone(serverDateTime, SERVER_TZ, CLIENT_TZ);
+        LocalDateTime clientDateTime = DateTimeUtil.convertTimeZone(serverDateTime, SERVER_TZ, CLIENT_TZ);
         String dateLiteral = date.format(dateFmt);
         String clientDateTimeLiteral = clientDateTime.format(dateTimeFmt);
         String serverDateTimeLiteral = serverDateTime.format(dateTimeFmt);
