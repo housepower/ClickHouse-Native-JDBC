@@ -46,6 +46,9 @@ public class ClickHouseStatement implements SQLStatement {
     private String db;
     private String table = "unknown";
 
+    private int updateCount = -1;
+    private boolean isClosed = false;
+
     public ClickHouseStatement(ClickHouseConnection connection, PhysicalInfo physicalInfo) {
         this.connection = connection;
         this.physicalInfo = physicalInfo;
@@ -77,9 +80,11 @@ public class ClickHouseStatement implements SQLStatement {
             block = getSampleBlock(insertQuery);
             block.initWriteBuffer();
             new ValuesInputFormat(matcher.end() - 1, query).fillBlock(block);
-            return connection.sendInsertRequest(block);
+            updateCount = connection.sendInsertRequest(block);
+            return updateCount;
         }
 
+        updateCount = -1;
         QueryResponse response = connection.sendQueryRequest(query, cfg);
         lastResultSet = new ClickHouseResultSet(response.header(), db, table, response.data().get(), this);
         return 0;
@@ -130,6 +135,7 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public void close() throws SQLException {
+        this.isClosed = true;
     }
 
     // JDBC returns timeout in seconds
@@ -179,10 +185,15 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public int getUpdateCount() throws SQLException {
-        return 0;
+        return updateCount;
     }
 
     public boolean getMoreResults() throws SQLException {
+        updateCount = -1;
+        if (lastResultSet != null) {
+            lastResultSet.close();
+            lastResultSet = null;
+        }
         return false;
     }
 
@@ -253,7 +264,7 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public boolean isClosed() throws SQLException {
-        return false;
+        return this.isClosed;
     }
 
     @Override
