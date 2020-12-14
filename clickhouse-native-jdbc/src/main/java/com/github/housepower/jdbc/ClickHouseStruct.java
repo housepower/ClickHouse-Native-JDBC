@@ -19,6 +19,7 @@ import com.github.housepower.jdbc.wrapper.SQLStruct;
 
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,5 +61,15 @@ public class ClickHouseStruct implements SQLStruct {
             res[i++] = clazz.cast(attributes[attrIndex]);
         }
         return res;
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(",", "(", ")");
+        for (Object item : attributes) {
+            // TODO format by itemDataType
+            joiner.add(String.valueOf(item));
+        }
+        return joiner.toString();
     }
 }

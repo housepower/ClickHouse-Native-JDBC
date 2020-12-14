@@ -197,7 +197,11 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public String getString(int index) throws SQLException {
         Object data = getObject(index);
-        return (String) data;
+        if (data == null) {
+            return null;
+        }
+        // TODO format by IDataType
+        return data.toString();
     }
 
     @Override

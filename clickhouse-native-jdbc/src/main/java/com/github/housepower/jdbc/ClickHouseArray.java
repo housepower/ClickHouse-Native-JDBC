@@ -17,6 +17,7 @@ package com.github.housepower.jdbc;
 import com.github.housepower.jdbc.wrapper.SQLArray;
 
 import java.sql.SQLException;
+import java.util.StringJoiner;
 
 public class ClickHouseArray implements SQLArray {
     private final Object[] data;
@@ -38,5 +39,15 @@ public class ClickHouseArray implements SQLArray {
         Object[] result = new Object[length];
         if (length >= 0) System.arraycopy(data, offset, result, 0, length);
         return new ClickHouseArray(result);
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(",", "[", "]");
+        for (Object item : data) {
+            // TODO format by itemDataType
+            joiner.add(String.valueOf(item));
+        }
+        return joiner.toString();
     }
 }
