@@ -70,6 +70,7 @@ public class ClickHouseStatement implements SQLStatement {
     @Override
     public int executeUpdate(String query) throws SQLException {
         cfg.settings().put(SettingKey.max_result_rows, maxRows);
+        cfg.settings().put(SettingKey.result_overflow_mode, "break");
 
         extractDBAndTableName(query);
         Matcher matcher = VALUES_REGEX.matcher(query);
