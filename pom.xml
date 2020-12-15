@@ -103,7 +103,7 @@
         <google.jsr305.version>3.0.2</google.jsr305.version>
         <jmh.version>1.26</jmh.version>
         <yandex-clickhouse-jdbc.version>0.2.4</yandex-clickhouse-jdbc.version>
-        <mockito.version>3.6.0</mockito.version>
+        <mockito.version>3.6.28</mockito.version>
         <guava.version>16.0.1</guava.version>
         <slf4j.version>1.7.30</slf4j.version>
         <scala.version>2.11.12</scala.version>
