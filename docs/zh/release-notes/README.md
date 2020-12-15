@@ -1,6 +1,20 @@
 发行注记
 ===
 
+v2.4.3 (2020年12月15日)
+---
+### 变更日志
+- (backport) valid connection by ping instead of SELECT 1
+- (backport) explicit upcast ByteBuffer to Buffer (#243)
+- (backport) fix Connection#getCatalog (#249)
+- (backport) fix ClickHouseStatement#getUpdateCount
+- (backport) fix ClickHouseStatement#setMaxRows
+- (backport) ClickHouseResultSet#getString support all types
+- (backport) implement ClickHouseResultSet#getBoolean
+- (backport) implement ClickHouseResultSet#isBeforeFirst, #isAfterLast, #isFirst etc.
+- ClickHouseConnection#getMetaData return null instead of throw exception
+
+
 v2.4.2 (2020年11月20日)
 ---
 ### 变更日志
