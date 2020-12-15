@@ -70,13 +70,6 @@ public class ClickHouseStatement implements SQLStatement {
     }
 
     @Override
-    public ResultSet executeQuery(String query) throws SQLException {
-        LOG.debug("executeQuery: {}", query);
-        executeUpdate(query);
-        return getResultSet();
-    }
-
-    @Override
     public int executeUpdate(String query) throws SQLException {
         LOG.debug("executeUpdate: {}", query);
         cfg.settings().put(SettingKey.max_result_rows, maxRows);
@@ -99,6 +92,13 @@ public class ClickHouseStatement implements SQLStatement {
         QueryResult result = connection.sendQueryRequest(query, cfg);
         lastResultSet = new ClickHouseResultSet(this, cfg, db, table, result.header(), result.data());
         return 0;
+    }
+
+    @Override
+    public ResultSet executeQuery(String query) throws SQLException {
+        LOG.debug("executeQuery: {}", query);
+        executeUpdate(query);
+        return getResultSet();
     }
 
     @Override
@@ -125,17 +125,6 @@ public class ClickHouseStatement implements SQLStatement {
     }
 
     @Override
-    public int getMaxRows() throws SQLException {
-        return (int) maxRows;
-    }
-
-    @Override
-    public void setMaxRows(int max) throws SQLException {
-        Validate.isTrue(max >= 0, "Illegal maxRows value: " + max);
-        maxRows = max;
-    }
-
-    @Override
     public void close() throws SQLException {
         LOG.debug("close Statement");
         this.isClosed = true;
@@ -154,13 +143,25 @@ public class ClickHouseStatement implements SQLStatement {
     }
 
     @Override
-    public int getResultSetConcurrency() throws SQLException {
-        return ResultSet.CONCUR_READ_ONLY;
+    public int getMaxRows() throws SQLException {
+        return (int) maxRows;
     }
 
     @Override
-    public int getResultSetType() throws SQLException {
-        return ResultSet.TYPE_FORWARD_ONLY;
+    public void setMaxRows(int max) throws SQLException {
+        Validate.isTrue(max >= 0, "Illegal maxRows value: " + max);
+        maxRows = max;
+    }
+
+    // JDBC returns timeout in seconds
+    @Override
+    public int getQueryTimeout() {
+        return (int) cfg.queryTimeout().getSeconds();
+    }
+
+    @Override
+    public void setQueryTimeout(int seconds) {
+        this.cfg = cfg.withQueryTimeout(Duration.ofSeconds(seconds));
     }
 
     @Override
@@ -182,19 +183,27 @@ public class ClickHouseStatement implements SQLStatement {
     }
 
     @Override
+    public void setPoolable(boolean poolable) throws SQLException {
+    }
+
+    @Override
+    public boolean isPoolable() throws SQLException {
+        return false;
+    }
+
+    @Override
+    public int getResultSetConcurrency() throws SQLException {
+        return ResultSet.CONCUR_READ_ONLY;
+    }
+
+    @Override
+    public int getResultSetType() throws SQLException {
+        return ResultSet.TYPE_FORWARD_ONLY;
+    }
+
+    @Override
     public ResultSet getGeneratedKeys() throws SQLException {
         return null;
-    }
-
-    // JDBC returns timeout in seconds
-    @Override
-    public int getQueryTimeout() {
-        return (int) cfg.queryTimeout().getSeconds();
-    }
-
-    @Override
-    public void setQueryTimeout(int seconds) {
-        this.cfg = cfg.withQueryTimeout(Duration.ofSeconds(seconds));
     }
 
     @Override
@@ -221,16 +230,12 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public int getResultSetHoldability() throws SQLException {
-        return 0;
+        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
     @Override
-    public void setPoolable(boolean poolable) throws SQLException {
-    }
-
-    @Override
-    public boolean isPoolable() throws SQLException {
-        return false;
+    public Logger logger() {
+        return ClickHouseStatement.LOG;
     }
 
     protected Block getSampleBlock(final String insertQuery) throws SQLException {
@@ -256,10 +261,5 @@ public class ClickHouseStatement implements SQLStatement {
             db = "system";
             table = upperSQL.contains("TABLES") ? "tables" : "databases";
         }
-    }
-
-    @Override
-    public Logger logger() {
-        return ClickHouseStatement.LOG;
     }
 }

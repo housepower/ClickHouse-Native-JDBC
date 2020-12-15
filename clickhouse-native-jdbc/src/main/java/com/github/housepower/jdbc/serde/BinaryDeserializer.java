@@ -43,20 +43,36 @@ public class BinaryDeserializer {
         return number;
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     public short readShort() throws IOException {
-        return (short) ((either.get().readBinary() & 0xFF) + ((either.get().readBinary() & 0xFF) << 8));
+        // @formatter:off
+        return (short) (((either.get().readBinary() & 0xFF) << 0)
+                      + ((either.get().readBinary() & 0xFF) << 8));
+        // @formatter:on
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     public int readInt() throws IOException {
-        return (either.get().readBinary() & 0xFF) + ((either.get().readBinary() & 0xFF) << 8)
-            + ((either.get().readBinary() & 0xFF) << 16) + ((either.get().readBinary() & 0xFF) << 24);
+        // @formatter:off
+        return ((either.get().readBinary() & 0xFF) << 0)
+             + ((either.get().readBinary() & 0xFF) << 8)
+             + ((either.get().readBinary() & 0xFF) << 16)
+             + ((either.get().readBinary() & 0xFF) << 24);
+        // @formatter:on
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     public long readLong() throws IOException {
-        return (either.get().readBinary() & 0xFFL) + ((either.get().readBinary() & 0xFFL) << 8)
-            + ((either.get().readBinary() & 0xFFL) << 16) + ((either.get().readBinary() & 0xFFL) << 24)
-            + ((either.get().readBinary() & 0xFFL) << 32) + ((either.get().readBinary() & 0xFFL) << 40)
-            + ((either.get().readBinary() & 0xFFL) << 48) + ((either.get().readBinary() & 0xFFL) << 56);
+        // @formatter:off
+        return ((either.get().readBinary() & 0xFFL) << 0)
+             + ((either.get().readBinary() & 0xFFL) << 8)
+             + ((either.get().readBinary() & 0xFFL) << 16)
+             + ((either.get().readBinary() & 0xFFL) << 24)
+             + ((either.get().readBinary() & 0xFFL) << 32)
+             + ((either.get().readBinary() & 0xFFL) << 40)
+             + ((either.get().readBinary() & 0xFFL) << 48)
+             + ((either.get().readBinary() & 0xFFL) << 56);
+        // @formatter:on
     }
 
     public boolean readBoolean() throws IOException {
@@ -86,22 +102,31 @@ public class BinaryDeserializer {
         either.select(false);
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     public float readFloat() throws IOException {
-        return Float.intBitsToFloat((either.get().readBinary() & 0xFF) + ((either.get().readBinary() & 0xFF) << 8)
-            + ((either.get().readBinary() & 0xFF) << 16) + ((either.get().readBinary()) << 24));
+        // @formatter:off
+        return Float.intBitsToFloat(
+               ((either.get().readBinary() & 0xFF) << 0)
+             + ((either.get().readBinary() & 0xFF) << 8)
+             + ((either.get().readBinary() & 0xFF) << 16)
+             + ((either.get().readBinary()       ) << 24));
+        // @formatter:on
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     public double readDouble() throws IOException {
+        // @formatter:off
         return Double.longBitsToDouble(
-            (either.get().readBinary() & 0xFFL)
-                + ((either.get().readBinary() & 0xFFL) << 8)
-                + ((either.get().readBinary() & 0xFFL) << 16)
-                + ((either.get().readBinary() & 0xFFL) << 24)
-                + ((either.get().readBinary() & 0xFFL) << 32)
-                + ((either.get().readBinary() & 0xFFL) << 40)
-                + ((either.get().readBinary() & 0xFFL) << 48)
-                + ((either.get().readBinary() & 0xFFL) << 56)
+                ((either.get().readBinary() & 0xFFL) << 0 )
+              + ((either.get().readBinary() & 0xFFL) << 8 )
+              + ((either.get().readBinary() & 0xFFL) << 16)
+              + ((either.get().readBinary() & 0xFFL) << 24)
+              + ((either.get().readBinary() & 0xFFL) << 32)
+              + ((either.get().readBinary() & 0xFFL) << 40)
+              + ((either.get().readBinary() & 0xFFL) << 48)
+              + ((either.get().readBinary() & 0xFFL) << 56)
         );
+        // @formatter:on
     }
 
     public byte[] readBytes(int size) throws IOException {

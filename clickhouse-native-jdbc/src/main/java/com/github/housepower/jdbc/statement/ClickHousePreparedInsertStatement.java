@@ -26,6 +26,25 @@ import java.util.Arrays;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
 
+    private static int computeQuestionMarkSize(String query, int start) throws SQLException {
+        int param = 0;
+        boolean inQuotes = false, inBackQuotes = false;
+        for (int i = 0; i < query.length(); i++) {
+            char ch = query.charAt(i);
+            if (ch == '`') {
+                inBackQuotes = !inBackQuotes;
+            } else if (ch == '\'') {
+                inQuotes = !inQuotes;
+            } else if (!inBackQuotes && !inQuotes) {
+                if (ch == '?') {
+                    Validate.isTrue(i > start, "");
+                    param++;
+                }
+            }
+        }
+        return param;
+    }
+
     private final int posOfData;
     private final String fullQuery;
     private final String insertQuery;
@@ -44,14 +63,11 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         initBlockIfPossible();
     }
 
-    private void initBlockIfPossible() throws SQLException {
-        if (this.blockInit) {
-            return;
-        }
-        this.block = getSampleBlock(insertQuery);
-        this.block.initWriteBuffer();
-        this.blockInit = true;
-        new ValuesWithParametersInputFormat(posOfData, fullQuery).fillBlock(block);
+    // parameterIndex start with 1
+    @Override
+    public void setObject(int parameterIndex, Object x) throws SQLException {
+        initBlockIfPossible();
+        block.setPlaceholderObject(parameterIndex - 1, x);
     }
 
     @Override
@@ -77,17 +93,6 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     @Override
     public void addBatch() throws SQLException {
         addParameters();
-    }
-
-    // parameterIndex start with 1
-    @Override
-    public void setObject(int parameterIndex, Object x) throws SQLException {
-        initBlockIfPossible();
-        block.setPlaceholderObject(parameterIndex - 1, x);
-    }
-
-    private void addParameters() throws SQLException {
-        block.appendRow();
     }
 
     @Override
@@ -116,25 +121,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         super.close();
     }
 
-    private static int computeQuestionMarkSize(String query, int start) throws SQLException {
-        int param = 0;
-        boolean inQuotes = false, inBackQuotes = false;
-        for (int i = 0; i < query.length(); i++) {
-            char ch = query.charAt(i);
-            if (ch == '`') {
-                inBackQuotes = !inBackQuotes;
-            } else if (ch == '\'') {
-                inQuotes = !inQuotes;
-            } else if (!inBackQuotes && !inQuotes) {
-                if (ch == '?') {
-                    Validate.isTrue(i > start, "");
-                    param++;
-                }
-            }
-        }
-        return param;
-    }
-
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(super.toString());
@@ -159,5 +146,19 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             e.printStackTrace();
         }
         return sb.toString();
+    }
+
+    private void initBlockIfPossible() throws SQLException {
+        if (this.blockInit) {
+            return;
+        }
+        this.block = getSampleBlock(insertQuery);
+        this.block.initWriteBuffer();
+        this.blockInit = true;
+        new ValuesWithParametersInputFormat(posOfData, fullQuery).fillBlock(block);
+    }
+
+    private void addParameters() throws SQLException {
+        block.appendRow();
     }
 }

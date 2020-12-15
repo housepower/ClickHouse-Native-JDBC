@@ -27,10 +27,10 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 public class DataTypeString implements IDataType {
-    private Charset charset;
 
-    public static DataTypeCreator
-        creator = (lexer, serverContext) -> new DataTypeString(serverContext);
+    public static DataTypeCreator CREATOR = (lexer, serverContext) -> new DataTypeString(serverContext);
+
+    private final Charset charset;
 
     public DataTypeString(NativeContext.ServerContext serverContext) {
         this.charset = serverContext.getConfigure().charset();
@@ -74,27 +74,22 @@ public class DataTypeString implements IDataType {
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
         if (data instanceof String) {
-            byte []bs = ((String) data).getBytes(charset);
+            byte[] bs = ((String) data).getBytes(charset);
             serializer.writeBytesBinary(bs);
         } else if (data instanceof StringView) {
             serializer.writeStringViewBinary((StringView) data, charset);
         } else {
-            serializer.writeBytesBinary((byte []) data);
+            serializer.writeBytesBinary((byte[]) data);
         }
     }
-
 
     /**
      * deserializeBinary will always returns String
      * for getBytes(idx) method, we encode the String again
-     * @param deserializer
-     * @return
-     * @throws SQLException
-     * @throws IOException
      */
     @Override
     public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        byte []bs = deserializer.readBytesBinary();
+        byte[] bs = deserializer.readBytesBinary();
         return new String(bs, charset);
     }
 
@@ -102,7 +97,7 @@ public class DataTypeString implements IDataType {
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         String[] data = new String[rows];
         for (int row = 0; row < rows; row++) {
-            byte []bs = deserializer.readBytesBinary();
+            byte[] bs = deserializer.readBytesBinary();
             data[row] = new String(bs, charset);
         }
         return data;
@@ -111,16 +106,16 @@ public class DataTypeString implements IDataType {
     @Override
     public String[] getAliases() {
         return new String[]{
-            "LONGBLOB",
-            "MEDIUMBLOB",
-            "TINYBLOB",
-            "MEDIUMTEXT",
-            "CHAR",
-            "VARCHAR",
-            "TEXT",
-            "TINYTEXT",
-            "LONGTEXT",
-            "BLOB" };
+                "LONGBLOB",
+                "MEDIUMBLOB",
+                "TINYBLOB",
+                "MEDIUMTEXT",
+                "CHAR",
+                "VARCHAR",
+                "TEXT",
+                "TINYTEXT",
+                "LONGTEXT",
+                "BLOB"};
     }
 
     @Override

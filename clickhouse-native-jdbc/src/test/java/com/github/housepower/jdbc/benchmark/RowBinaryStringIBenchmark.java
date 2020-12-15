@@ -24,9 +24,6 @@ import java.sql.PreparedStatement;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- *
- */
 public class RowBinaryStringIBenchmark extends AbstractInsertIBenchmark {
     private final String columnType = "String";
 

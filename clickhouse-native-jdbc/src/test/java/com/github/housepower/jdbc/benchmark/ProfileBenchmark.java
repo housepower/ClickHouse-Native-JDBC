@@ -20,9 +20,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Locale;
 
-/**
- *
- */
 public class ProfileBenchmark extends AbstractIBenchmark {
     private static final long n = 10000000;
     private static final long statsOutputFrequency = 10;

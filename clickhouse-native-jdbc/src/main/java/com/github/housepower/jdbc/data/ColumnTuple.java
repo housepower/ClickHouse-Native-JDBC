@@ -24,23 +24,23 @@ import java.sql.SQLException;
 public class ColumnTuple extends AbstractColumn {
 
     // data represents nested column in ColumnArray
-    private final IColumn[] columndataArray;
+    private final IColumn[] columnDataArray;
 
     public ColumnTuple(String name, DataTypeTuple type, Object[] values) {
         super(name, type, values);
 
         IDataType[] types = type.getNestedTypes();
-        columndataArray = new IColumn[types.length];
+        columnDataArray = new IColumn[types.length];
         for (int i = 0; i < types.length; i++) {
-            columndataArray[i] = ColumnFactory.createColumn(null, types[i], null);
+            columnDataArray[i] = ColumnFactory.createColumn(null, types[i], null);
         }
     }
 
     @Override
     public void write(Object object) throws IOException, SQLException {
         ClickHouseStruct tuple = (ClickHouseStruct) object;
-        for (int i = 0; i < columndataArray.length; i++) {
-            columndataArray[i].write(tuple.getAttributes()[i]);
+        for (int i = 0; i < columnDataArray.length; i++) {
+            columnDataArray[i].write(tuple.getAttributes()[i]);
         }
     }
 
@@ -53,7 +53,7 @@ public class ColumnTuple extends AbstractColumn {
 
         // we should to flush all the nested data to serializer
         // because they are using separate buffers.
-        for (IColumn data : columndataArray) {
+        for (IColumn data : columnDataArray) {
             data.flushToSerializer(serializer, true);
         }
 
@@ -66,7 +66,7 @@ public class ColumnTuple extends AbstractColumn {
     public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
         super.setColumnWriterBuffer(buffer);
 
-        for (IColumn data : columndataArray) {
+        for (IColumn data : columnDataArray) {
             data.setColumnWriterBuffer(new ColumnWriterBuffer());
         }
     }

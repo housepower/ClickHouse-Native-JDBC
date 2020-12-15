@@ -22,9 +22,6 @@ import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
-/**
- *
- */
 public class ColumnWriterBuffer {
 
     private final ByteArrayWriter columnWriter;

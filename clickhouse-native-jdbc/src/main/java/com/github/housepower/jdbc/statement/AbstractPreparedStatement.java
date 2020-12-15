@@ -49,21 +49,6 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
-        return getResultSet().getMetaData();
-    }
-
-    @Override
-    public void setURL(int index, URL x) throws SQLException {
-        setObject(index, x);
-    }
-
-    @Override
-    public void setInt(int index, int x) throws SQLException {
-        setObject(index, x);
-    }
-
-    @Override
     public void setBoolean(int index, boolean x) throws SQLException {
         setObject(index, x ? (byte) 1 : (byte) 0);
     }
@@ -74,17 +59,17 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     @Override
-    public void setLong(int index, long x) throws SQLException {
-        setObject(index, x);
-    }
-
-    @Override
-    public void setDate(int index, Date x) throws SQLException {
-        setObject(index, x);
-    }
-
-    @Override
     public void setShort(int index, short x) throws SQLException {
+        setObject(index, x);
+    }
+
+    @Override
+    public void setInt(int index, int x) throws SQLException {
+        setObject(index, x);
+    }
+
+    @Override
+    public void setLong(int index, long x) throws SQLException {
         setObject(index, x);
     }
 
@@ -94,7 +79,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     @Override
-    public void setArray(int index, Array x) throws SQLException {
+    public void setDouble(int index, double x) throws SQLException {
         setObject(index, x);
     }
 
@@ -104,7 +89,17 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     @Override
-    public void setDouble(int index, double x) throws SQLException {
+    public void setTimestamp(int index, Timestamp x) throws SQLException {
+        setObject(index, x);
+    }
+
+    @Override
+    public void setDate(int index, Date x) throws SQLException {
+        setObject(index, x);
+    }
+
+    @Override
+    public void setBigDecimal(int index, BigDecimal x) throws SQLException {
         setObject(index, x);
     }
 
@@ -119,12 +114,12 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     @Override
-    public void setTimestamp(int index, Timestamp x) throws SQLException {
+    public void setURL(int index, URL x) throws SQLException {
         setObject(index, x);
     }
 
     @Override
-    public void setBigDecimal(int index, BigDecimal x) throws SQLException {
+    public void setArray(int index, Array x) throws SQLException {
         setObject(index, x);
     }
 
@@ -136,6 +131,11 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     @Override
     public void setObject(int index, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
         setObject(index, x);
+    }
+
+    @Override
+    public ResultSetMetaData getMetaData() throws SQLException {
+        return getResultSet().getMetaData();
     }
 
     @Override
@@ -159,7 +159,6 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     private boolean assembleParameter(Object parameter, StringBuilder queryBuilder) throws SQLException {
         return assembleSimpleParameter(queryBuilder, parameter)
                 || assembleComplexQuotedParameter(queryBuilder, parameter);
-
     }
 
     private boolean assembleSimpleParameter(StringBuilder queryBuilder, Object parameter) {

@@ -22,9 +22,6 @@ import java.sql.PreparedStatement;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- *
- */
 public class WideColumnDoubleInsertIBenchmark extends AbstractInsertIBenchmark {
     @Benchmark
     @Test

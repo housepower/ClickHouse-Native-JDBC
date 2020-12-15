@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class BinarySerializer {
+
     private final Either<BuffedWriter> either;
     private final boolean enableCompress;
 
@@ -63,27 +64,36 @@ public class BinarySerializer {
         writeVarInt((byte) (x ? 1 : 0));
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     public void writeShort(short i) throws IOException {
-        either.get().writeBinary((byte) (i & 0xFF));
+        // @formatter:off
+        either.get().writeBinary((byte) ((i >> 0) & 0xFF));
         either.get().writeBinary((byte) ((i >> 8) & 0xFF));
+        // @formatter:on
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     public void writeInt(int i) throws IOException {
-        either.get().writeBinary((byte) (i & 0xFF));
-        either.get().writeBinary((byte) ((i >> 8) & 0xFF));
+        // @formatter:off
+        either.get().writeBinary((byte) ((i >> 0)  & 0xFF));
+        either.get().writeBinary((byte) ((i >> 8)  & 0xFF));
         either.get().writeBinary((byte) ((i >> 16) & 0xFF));
         either.get().writeBinary((byte) ((i >> 24) & 0xFF));
+        // @formatter:on
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     public void writeLong(long i) throws IOException {
-        either.get().writeBinary((byte) (i & 0xFF));
-        either.get().writeBinary((byte) ((i >> 8) & 0xFF));
+        // @formatter:off
+        either.get().writeBinary((byte) ((i >> 0)  & 0xFF));
+        either.get().writeBinary((byte) ((i >> 8)  & 0xFF));
         either.get().writeBinary((byte) ((i >> 16) & 0xFF));
         either.get().writeBinary((byte) ((i >> 24) & 0xFF));
         either.get().writeBinary((byte) ((i >> 32) & 0xFF));
         either.get().writeBinary((byte) ((i >> 40) & 0xFF));
         either.get().writeBinary((byte) ((i >> 48) & 0xFF));
         either.get().writeBinary((byte) ((i >> 56) & 0xFF));
+        // @formatter:on
     }
 
     public void writeUTF8StringBinary(String binary) throws IOException {
@@ -92,7 +102,7 @@ public class BinarySerializer {
         either.get().writeBinary(bs);
     }
 
-    public void writeBytesBinary(byte []bs) throws IOException {
+    public void writeBytesBinary(byte[] bs) throws IOException {
         writeVarInt(bs.length);
         either.get().writeBinary(bs);
     }
@@ -124,16 +134,19 @@ public class BinarySerializer {
         writeInt(x);
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     public void writeDouble(double datum) throws IOException {
         long x = Double.doubleToLongBits(datum);
-        either.get().writeBinary((byte) (x & 0xFF));
-        either.get().writeBinary((byte) ((x >>> 8) & 0xFF));
+        // @formatter:off
+        either.get().writeBinary((byte) ((x >>> 0)  & 0xFF));
+        either.get().writeBinary((byte) ((x >>> 8)  & 0xFF));
         either.get().writeBinary((byte) ((x >>> 16) & 0xFF));
         either.get().writeBinary((byte) ((x >>> 24) & 0xFF));
         either.get().writeBinary((byte) ((x >>> 32) & 0xFF));
         either.get().writeBinary((byte) ((x >>> 40) & 0xFF));
         either.get().writeBinary((byte) ((x >>> 48) & 0xFF));
         either.get().writeBinary((byte) ((x >>> 56) & 0xFF));
+        // @formatter:on
     }
 
     public void writeBytes(byte[] bytes) throws IOException {

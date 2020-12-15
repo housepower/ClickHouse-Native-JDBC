@@ -87,7 +87,7 @@ public class DataTypeFactory {
         } else if (dataTypeName.equalsIgnoreCase("Decimal")) {
             return DataTypeDecimal.creator.createDataType(lexer, serverContext);
         } else if (dataTypeName.equalsIgnoreCase("String")) {
-            return DataTypeString.creator.createDataType(lexer, serverContext);
+            return DataTypeString.CREATOR.createDataType(lexer, serverContext);
         } else {
             IDataType dataType = dataTypes.get(dataTypeName.toLowerCase(Locale.ROOT));
             Validate.isTrue(dataType != null, "Unknown data type: " + dataTypeName);

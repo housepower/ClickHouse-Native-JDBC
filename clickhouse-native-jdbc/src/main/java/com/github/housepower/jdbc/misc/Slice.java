@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc.misc;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -132,6 +133,7 @@ public class Slice implements Iterable<Object> {
         }
     }
 
+    @Nonnull
     @Override
     public Iterator<Object> iterator() {
         return new SliceIterator(this);

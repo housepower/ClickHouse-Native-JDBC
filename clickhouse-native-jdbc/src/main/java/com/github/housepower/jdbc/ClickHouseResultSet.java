@@ -72,43 +72,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public int getInt(String name) throws SQLException {
-        return this.getInt(this.findColumn(name));
-    }
-
-    @Override
-    public URL getURL(String name) throws SQLException {
-        return this.getURL(this.findColumn(name));
-    }
-
-    @Override
     public byte getByte(String name) throws SQLException {
         return this.getByte(this.findColumn(name));
-    }
-
-    @Override
-    public byte[] getBytes(String name) throws SQLException {
-        return this.getBytes(this.findColumn(name));
-    }
-
-    @Override
-    public Date getDate(String name) throws SQLException {
-        return this.getDate(this.findColumn(name));
-    }
-
-    @Override
-    public long getLong(String name) throws SQLException {
-        return this.getLong(this.findColumn(name));
-    }
-
-    @Override
-    public Array getArray(String name) throws SQLException {
-        return this.getArray(this.findColumn(name));
-    }
-
-    @Override
-    public float getFloat(String name) throws SQLException {
-        return this.getFloat(this.findColumn(name));
     }
 
     @Override
@@ -117,18 +82,23 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
+    public int getInt(String name) throws SQLException {
+        return this.getInt(this.findColumn(name));
+    }
+
+    @Override
+    public long getLong(String name) throws SQLException {
+        return this.getLong(this.findColumn(name));
+    }
+
+    @Override
+    public float getFloat(String name) throws SQLException {
+        return this.getFloat(this.findColumn(name));
+    }
+
+    @Override
     public double getDouble(String name) throws SQLException {
         return this.getDouble(this.findColumn(name));
-    }
-
-    @Override
-    public String getString(String name) throws SQLException {
-        return this.getString(this.findColumn(name));
-    }
-
-    @Override
-    public Object getObject(String name) throws SQLException {
-        return this.getObject(this.findColumn(name));
     }
 
     @Override
@@ -137,23 +107,160 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
+    public Date getDate(String name) throws SQLException {
+        return this.getDate(this.findColumn(name));
+    }
+
+    @Override
     public BigDecimal getBigDecimal(String name) throws SQLException {
         return this.getBigDecimal(this.findColumn(name));
     }
 
     @Override
-    public boolean isBeforeFirst() throws SQLException {
-        return currentRowNum == -1;
+    public String getString(String name) throws SQLException {
+        return this.getString(this.findColumn(name));
     }
 
     @Override
-    public boolean isAfterLast() throws SQLException {
-        return isAfterLast;
+    public byte[] getBytes(String name) throws SQLException {
+        return this.getBytes(this.findColumn(name));
     }
 
     @Override
-    public boolean isFirst() throws SQLException {
-        return isFirst;
+    public URL getURL(String name) throws SQLException {
+        return this.getURL(this.findColumn(name));
+    }
+
+    @Override
+    public Array getArray(String name) throws SQLException {
+        return this.getArray(this.findColumn(name));
+    }
+
+    @Override
+    public Object getObject(String name) throws SQLException {
+        return this.getObject(this.findColumn(name));
+    }
+
+    @Override
+    public boolean getBoolean(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return false;
+        }
+        return (boolean) data;
+    }
+
+    @Override
+    public byte getByte(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
+        return ((Number) data).byteValue();
+    }
+
+    @Override
+    public short getShort(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
+        return ((Number) data).shortValue();
+    }
+
+    @Override
+    public int getInt(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
+        return ((Number) data).intValue();
+    }
+
+    @Override
+    public long getLong(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
+        return ((Number) data).longValue();
+    }
+
+    @Override
+    public float getFloat(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
+        return ((Number) data).floatValue();
+    }
+
+    @Override
+    public double getDouble(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return 0;
+        }
+        return ((Number) data).doubleValue();
+    }
+
+    @Override
+    public Timestamp getTimestamp(int index) throws SQLException {
+        Object data = getObject(index);
+        return (Timestamp) data;
+    }
+
+    @Override
+    public Date getDate(int index) throws SQLException {
+        Object data = getObject(index);
+        return (Date) data;
+    }
+
+    @Override
+    public BigDecimal getBigDecimal(int index) throws SQLException {
+        Object data = getObject(index);
+        return new BigDecimal(data.toString());
+    }
+
+    @Override
+    public String getString(int index) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return null;
+        }
+        // TODO format by IDataType
+        return data.toString();
+    }
+
+    @Override
+    public byte[] getBytes(int index) throws SQLException {
+        String data = (String) getObject(index);
+        return data.getBytes(cfg.charset());
+    }
+
+    @Override
+    public URL getURL(int index) throws SQLException {
+        try {
+            return new URL(this.getString(index));
+        } catch (MalformedURLException ex) {
+            throw new SQLException(ex.getMessage(), ex);
+        }
+    }
+
+    @Override
+    public Array getArray(int index) throws SQLException {
+        Object data = getObject(index);
+        return (Array) data;
+    }
+
+    @Override
+    public Object getObject(int index) throws SQLException {
+        LOG.trace("get object at row: {}, column: {} from block with column count: {}, row count: {}",
+                currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
+        Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
+                "No row information was obtained. You must call ResultSet.next() before that.");
+        IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
+        return column.value((lastFetchRowIdx = currentRowNum));
     }
 
     @Override
@@ -164,6 +271,21 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public boolean last() throws SQLException {
         throw new SQLException("TYPE_FORWARD_ONLY");
+    }
+
+    @Override
+    public boolean isBeforeFirst() throws SQLException {
+        return currentRowNum == -1;
+    }
+
+    @Override
+    public boolean isFirst() throws SQLException {
+        return isFirst;
+    }
+
+    @Override
+    public boolean isAfterLast() throws SQLException {
+        return isAfterLast;
     }
 
     @Override
@@ -185,141 +307,13 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public boolean getBoolean(int index) throws SQLException {
-        Object data = getObject(index);
-        if (data == null) {
-            return false;
-        }
-        return (boolean) data;
-    }
-
-    @Override
-    public int getInt(int index) throws SQLException {
-        Object data = getObject(index);
-        if (data == null) {
-            return 0;
-        }
-        return ((Number) data).intValue();
-    }
-
-    @Override
-    public URL getURL(int index) throws SQLException {
-        try {
-            return new URL(this.getString(index));
-        } catch (MalformedURLException ex) {
-            throw new SQLException(ex.getMessage(), ex);
-        }
-    }
-
-    @Override
-    public byte getByte(int index) throws SQLException {
-        Object data = getObject(index);
-        if (data == null) {
-            return 0;
-        }
-        return ((Number) data).byteValue();
-    }
-
-    @Override
-    public Date getDate(int index) throws SQLException {
-        Object data = getObject(index);
-        return (Date) data;
-    }
-
-    @Override
-    public long getLong(int index) throws SQLException {
-        Object data = getObject(index);
-        if (data == null) {
-            return 0;
-        }
-        return ((Number) data).longValue();
-    }
-
-    @Override
-    public Array getArray(int index) throws SQLException {
-        Object data = getObject(index);
-        return (Array) data;
-    }
-
-    @Override
-    public float getFloat(int index) throws SQLException {
-        Object data = getObject(index);
-        if (data == null) {
-            return 0;
-        }
-        return ((Number) data).floatValue();
-    }
-
-    @Override
-    public short getShort(int index) throws SQLException {
-        Object data = getObject(index);
-        if (data == null) {
-            return 0;
-        }
-        return ((Number) data).shortValue();
-    }
-
-    @Override
-    public double getDouble(int index) throws SQLException {
-        Object data = getObject(index);
-        if (data == null) {
-            return 0;
-        }
-        return ((Number) data).doubleValue();
-    }
-
-    @Override
-    public String getString(int index) throws SQLException {
-        Object data = getObject(index);
-        if (data == null) {
-            return null;
-        }
-        // TODO format by IDataType
-        return data.toString();
-    }
-
-    @Override
-    public byte[] getBytes(int index) throws SQLException {
-        String data = (String) getObject(index);
-        return data.getBytes(cfg.charset());
-    }
-
-    @Override
-    public Object getObject(int index) throws SQLException {
-        LOG.trace("get object at row: {}, column: {} from block with column count: {}, row count: {}",
-                currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
-        Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
-                "No row information was obtained. You must call ResultSet.next() before that.");
-        IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
-        return column.value((lastFetchRowIdx = currentRowNum));
-    }
-
-    @Override
-    public Timestamp getTimestamp(int index) throws SQLException {
-        Object data = getObject(index);
-        return (Timestamp) data;
-    }
-
-    @Override
-    public BigDecimal getBigDecimal(int index) throws SQLException {
-        Object data = getObject(index);
-        return new BigDecimal(data.toString());
-    }
-
-    /*==================================================================*/
-
-    @Override
     public int getType() throws SQLException {
         return ResultSet.TYPE_FORWARD_ONLY;
     }
 
     @Override
-    public void close() throws SQLException {
-        // TODO check if query responses are completed
-        //  1. if completed, just set isClosed = true
-        //  2. if not, cancel query and consume the rest responses
-        LOG.debug("close ResultSet");
-        this.isClosed = true;
+    public ResultSetMetaData getMetaData() throws SQLException {
+        return new ClickHouseResultSetMetaData(header, db, table);
     }
 
     @Override
@@ -336,11 +330,6 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public boolean isClosed() throws SQLException {
-        return this.isClosed;
-    }
-
-    @Override
     public Statement getStatement() throws SQLException {
         return statement;
     }
@@ -349,11 +338,6 @@ public class ClickHouseResultSet implements SQLResultSet {
     public int findColumn(String name) throws SQLException {
         LOG.trace("find column: {}", name);
         return header.getPositionByName(name);
-    }
-
-    @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
-        return new ClickHouseResultSetMetaData(header, db, table);
     }
 
     @Override
@@ -368,6 +352,20 @@ public class ClickHouseResultSet implements SQLResultSet {
         LOG.trace("check status[after]: has_next: {}, is_before_first: {}, is_first: {}, is_after_last: {}", hasNext, isBeforeFirst(), isFirst, isAfterLast);
 
         return hasNext;
+    }
+
+    @Override
+    public void close() throws SQLException {
+        // TODO check if query responses are completed
+        //  1. if completed, just set isClosed = true
+        //  2. if not, cancel query and consume the rest responses
+        LOG.debug("close ResultSet");
+        this.isClosed = true;
+    }
+
+    @Override
+    public boolean isClosed() throws SQLException {
+        return this.isClosed;
     }
 
     @Override

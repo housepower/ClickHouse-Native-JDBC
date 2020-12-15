@@ -23,6 +23,8 @@ import java.io.IOException;
 
 public class CompressedBuffedWriter implements BuffedWriter {
 
+    private static final int COMPRESSION_HEADER_LENGTH = 9;
+
     private final int capacity;
     private final byte[] writtenBuf;
     private final BuffedWriter writer;
@@ -35,7 +37,6 @@ public class CompressedBuffedWriter implements BuffedWriter {
         this.writtenBuf = new byte[capacity];
         this.writer = writer;
     }
-
 
     @Override
     public void writeBinary(byte byt) throws IOException {
@@ -50,9 +51,9 @@ public class CompressedBuffedWriter implements BuffedWriter {
 
     @Override
     public void writeBinary(byte[] bytes, int offset, int length) throws IOException {
-        while (remaing() < length) {
-            int num = remaing();
-            System.arraycopy(bytes, offset, writtenBuf, position, remaing());
+        while (remaining() < length) {
+            int num = remaining();
+            System.arraycopy(bytes, offset, writtenBuf, position, remaining());
             position += num;
 
             flushToTarget(false);
@@ -64,9 +65,6 @@ public class CompressedBuffedWriter implements BuffedWriter {
         position += length;
         flushToTarget(false);
     }
-
-
-    private static final int COMPRESSION_HEADER_LENGTH = 9;
 
     @Override
     public void flushToTarget(boolean force) throws IOException {
@@ -94,33 +92,35 @@ public class CompressedBuffedWriter implements BuffedWriter {
         return position < capacity;
     }
 
-    private int remaing() {
+    private int remaining() {
         return capacity - position;
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     private byte[] littleEndian(int x) {
         byte[] data = new byte[4];
-
-        data[0] = (byte) (x & 0xFF);
-        data[1] = (byte) ((byte) (x >> 8) & 0xFF);
+        // @formatter:off
+        data[0] = (byte) ((byte) (x >> 0)  & 0xFF);
+        data[1] = (byte) ((byte) (x >> 8)  & 0xFF);
         data[2] = (byte) ((byte) (x >> 16) & 0xFF);
         data[3] = (byte) ((byte) (x >> 24) & 0xFF);
-
+        // @formatter:on
         return data;
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     private byte[] littleEndian(long x) {
         byte[] data = new byte[8];
-
-        data[0] = (byte) (x & 0xFF);
-        data[1] = (byte) ((byte) (x >> 8) & 0xFF);
+        // @formatter:off
+        data[0] = (byte) ((byte) (x >> 0)  & 0xFF);
+        data[1] = (byte) ((byte) (x >> 8)  & 0xFF);
         data[2] = (byte) ((byte) (x >> 16) & 0xFF);
         data[3] = (byte) ((byte) (x >> 24) & 0xFF);
         data[4] = (byte) ((byte) (x >> 32) & 0xFF);
         data[5] = (byte) ((byte) (x >> 40) & 0xFF);
         data[6] = (byte) ((byte) (x >> 48) & 0xFF);
         data[7] = (byte) ((byte) (x >> 56) & 0xFF);
-
+        // @formatter:on
         return data;
     }
 }

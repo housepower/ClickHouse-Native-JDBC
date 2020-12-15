@@ -20,48 +20,14 @@ import com.github.housepower.jdbc.connect.NativeContext;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement {
 
-    public ClickHousePreparedQueryStatement(ClickHouseConnection conn, NativeContext nativeContext, String query) {
-        this(conn, nativeContext, splitQueryByQuestionMark(query));
-    }
-
-    private ClickHousePreparedQueryStatement(ClickHouseConnection conn, NativeContext nativeContext, String[] parts) {
-        super(conn, nativeContext, parts);
-    }
-
-    @Override
-    public boolean execute() throws SQLException {
-        return execute(assembleQueryPartsAndParameters());
-    }
-
-    @Override
-    public int executeUpdate() throws SQLException {
-        return executeUpdate(assembleQueryPartsAndParameters());
-    }
-
-    @Override
-    public int[] executeBatch() throws SQLException {
-        throw new SQLFeatureNotSupportedException("");
-    }
-
-    @Override
-    public ResultSet executeQuery() throws SQLException {
-        return executeQuery(assembleQueryPartsAndParameters());
-    }
-
-    @Override
-    public void setObject(int index, Object x) throws SQLException {
-        parameters[index - 1] = x;
-    }
-
     private static String[] splitQueryByQuestionMark(String query) {
         int lastPos = 0;
-        List<String> queryParts = new ArrayList<String>();
+        List<String> queryParts = new ArrayList<>();
         boolean inQuotes = false, inBackQuotes = false;
         for (int i = 0; i < query.length(); i++) {
             char ch = query.charAt(i);
@@ -80,6 +46,35 @@ public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement 
         return queryParts.toArray(new String[0]);
     }
 
+    public ClickHousePreparedQueryStatement(ClickHouseConnection conn, NativeContext nativeContext, String query) {
+        this(conn, nativeContext, splitQueryByQuestionMark(query));
+    }
+
+    private ClickHousePreparedQueryStatement(ClickHouseConnection conn, NativeContext nativeContext, String[] parts) {
+        super(conn, nativeContext, parts);
+    }
+
+    @Override
+    public void setObject(int index, Object x) throws SQLException {
+        parameters[index - 1] = x;
+    }
+
+    @Override
+    public boolean execute() throws SQLException {
+        return execute(assembleQueryPartsAndParameters());
+    }
+
+    @Override
+    public int executeUpdate() throws SQLException {
+        return executeUpdate(assembleQueryPartsAndParameters());
+    }
+
+    @Override
+    public ResultSet executeQuery() throws SQLException {
+        return executeQuery(assembleQueryPartsAndParameters());
+    }
+
+    @Override
     public String toString() {
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append(super.toString());

@@ -122,9 +122,13 @@ public class CompressedBuffedReader implements BuffedReader {
         return 0x0FF & byt;
     }
 
-
+    @SuppressWarnings({"PointlessBitwiseExpression", "PointlessArithmeticExpression"})
     private int readInt(byte[] bytes, int begin) {
-        return (bytes[begin] & 0xFF) | (bytes[begin + 1] & 0XFF) << 8 |
-            (bytes[begin + 2] & 0xFF) << 16 | (0xFF & bytes[begin + 3]) << 24;
+        // @formatter:off
+        return (bytes[begin + 0] & 0xFF) << 0
+             | (bytes[begin + 1] & 0XFF) << 8
+             | (bytes[begin + 2] & 0xFF) << 16
+             | (bytes[begin + 3] & 0xFF) << 24;
+        // @formatter:on
     }
 }

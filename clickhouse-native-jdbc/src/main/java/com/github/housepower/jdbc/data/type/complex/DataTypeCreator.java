@@ -20,9 +20,7 @@ import com.github.housepower.jdbc.misc.SQLLexer;
 
 import java.sql.SQLException;
 
-/**
- *
- */
 public interface DataTypeCreator {
+
     IDataType createDataType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException;
 }

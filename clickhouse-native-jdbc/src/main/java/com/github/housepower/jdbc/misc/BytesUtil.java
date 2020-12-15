@@ -14,10 +14,8 @@
 
 package com.github.housepower.jdbc.misc;
 
-/**
- *
- */
 public class BytesUtil {
+
     public static byte[] longToBytes(long l) {
         byte[] result = new byte[Long.BYTES];
         for (int i = Long.BYTES - 1; i >= 0; i--) {

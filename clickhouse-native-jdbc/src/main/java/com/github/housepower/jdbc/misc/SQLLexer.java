@@ -49,11 +49,13 @@ public class SQLLexer {
         skipAnyWhitespace();
 
         int start = pos;
-        boolean isHex = false;
-        boolean isBinary = false;
-        boolean isDouble = false;
+        // @formatter:off
+        boolean isHex       = false;
+        boolean isBinary    = false;
+        boolean isDouble    = false;
         boolean hasExponent = false;
-        boolean hasSigned = false;
+        boolean hasSigned   = false;
+        // @formatter:on
 
         if (isCharacter('-') || isCharacter('+')) {
             hasSigned = true;
@@ -61,12 +63,14 @@ public class SQLLexer {
         }
 
         if (pos + 2 < data.length) {
-            if (data[pos] == '0'
-                    && (data[pos + 1] == 'x' || data[pos + 1] == 'X' || data[pos + 1] == 'b' || data[pos + 1] == 'B')) {
-                isHex = data[pos + 1] == 'x' || data[pos + 1] == 'X';
+            // @formatter:off
+            if (data[pos] == '0' && (data[pos + 1] == 'x' || data[pos + 1] == 'X'
+                                  || data[pos + 1] == 'b' || data[pos + 1] == 'B')) {
+                isHex    = data[pos + 1] == 'x' || data[pos + 1] == 'X';
                 isBinary = data[pos + 1] == 'b' || data[pos + 1] == 'B';
                 pos += 2;
             }
+            // @formatter:on
         }
 
         for (; pos < data.length; pos++) {
@@ -136,20 +140,26 @@ public class SQLLexer {
 
     public StringView bareWord() throws SQLException {
         skipAnyWhitespace();
+        // @formatter:off
         if (isCharacter('`')) {
             return stringLiteralWithQuoted('`');
         } else if (isCharacter('"')) {
             return stringLiteralWithQuoted('"');
-        } else if ('_' == data[pos] || (data[pos] >= 'a' && data[pos] <= 'z')
-                || (data[pos] >= 'A' && data[pos] <= 'Z')) {
+        } else if (data[pos] == '_'
+               || (data[pos] >= 'a' && data[pos] <= 'z')
+               || (data[pos] >= 'A' && data[pos] <= 'Z')) {
             int start = pos;
             for (pos++; pos < data.length; pos++) {
-                if (!('_' == data[pos] || (data[pos] >= 'a' && data[pos] <= 'z')
-                        || (data[pos] >= 'A' && data[pos] <= 'Z') || (data[pos] >= '0' && data[pos] <= '9')))
+                if (!('_' == data[pos]
+                  || (data[pos] >= 'a' && data[pos] <= 'z')
+                  || (data[pos] >= 'A' && data[pos] <= 'Z')
+                  || (data[pos] >= '0' && data[pos] <= '9'))) {
                     break;
+                }
             }
             return new StringView(start, pos, data);
         }
+        // @formatter:on
         throw new SQLException("Expect Bare Token.");
     }
 
@@ -166,9 +176,17 @@ public class SQLLexer {
     }
 
     private void skipAnyWhitespace() {
-        for (; pos < data.length; pos++)
-            if (data[pos] != ' ' && data[pos] != '\t' && data[pos] != '\n' && data[pos] != '\r' && data[pos] != '\f')
+        for (; pos < data.length; pos++) {
+            // @formatter:off
+            if (data[pos] != ' '
+             && data[pos] != '\t'
+             && data[pos] != '\n'
+             && data[pos] != '\r'
+             && data[pos] != '\f') {
                 return;
+            }
+            // @formatter:on
+        }
     }
 
     private StringView stringLiteralWithQuoted(char quoted) throws SQLException {

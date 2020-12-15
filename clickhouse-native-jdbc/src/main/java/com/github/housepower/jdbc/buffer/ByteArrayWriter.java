@@ -19,9 +19,6 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- */
 public class ByteArrayWriter implements BuffedWriter {
     private final int blockSize;
     private ByteBuffer buffer;
@@ -32,7 +29,7 @@ public class ByteArrayWriter implements BuffedWriter {
     public ByteArrayWriter(int blockSize) {
         this.blockSize = blockSize;
         this.buffer = ByteBuffer.allocate(blockSize);
-        byteBufferList.add(buffer);
+        this.byteBufferList.add(buffer);
     }
 
     @Override

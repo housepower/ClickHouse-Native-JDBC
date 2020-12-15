@@ -73,7 +73,7 @@ public class BlockSettings {
         }
 
         private final int num;
-        private final Class clazz;
+        private final Class<?> clazz;
         private final Object defaultValue;
 
         public Setting(int num, Object defaultValue) {
