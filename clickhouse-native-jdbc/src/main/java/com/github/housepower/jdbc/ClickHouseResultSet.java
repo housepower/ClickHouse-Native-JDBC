@@ -235,7 +235,10 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public byte[] getBytes(int index) throws SQLException {
         String data = (String) getObject(index);
-        return data.getBytes(cfg.charset());
+        if (data != null)
+           return data.getBytes(cfg.charset());
+        else
+           return null;
     }
 
     @Override
