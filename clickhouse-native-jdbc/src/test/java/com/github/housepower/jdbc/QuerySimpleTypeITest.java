@@ -39,6 +39,19 @@ public class QuerySimpleTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyBooleanColumn() throws Exception {
+        withNewConnection(connect -> {
+            Statement statement = connect.createStatement();
+            ResultSet rs = statement
+                    .executeQuery("SELECT toUInt8("+ 1 + "), toUInt8(" + 0 + ")");
+
+            assertTrue(rs.next());
+            assertEquals(Boolean.TRUE, rs.getBoolean(1));
+            assertEquals(Boolean.FALSE, rs.getBoolean(2));
+        });
+    }
+
+    @Test
     public void successfullyByteColumn() throws Exception {
         withNewConnection(connect -> {
             Statement statement = connect.createStatement();

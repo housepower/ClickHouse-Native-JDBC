@@ -177,7 +177,8 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (data == null) {
             return false;
         }
-        return (boolean) data;
+        Number ndata = (Number) data;
+        return (ndata.shortValue() == 1);
     }
 
     @Override
