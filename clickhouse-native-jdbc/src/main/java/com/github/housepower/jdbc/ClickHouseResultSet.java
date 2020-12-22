@@ -192,8 +192,12 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public URL getURL(int index) throws SQLException {
+        String data = this.getString(index);
+        if (data == null) {
+            return null;
+        }
         try {
-            return new URL(this.getString(index));
+            return new URL(data);
         } catch (MalformedURLException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -283,6 +287,9 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public BigDecimal getBigDecimal(int index) throws SQLException {
         Object data = getObject(index);
+        if (data == null) {
+            return null;
+        }
         return new BigDecimal(data.toString());
     }
 
