@@ -30,6 +30,8 @@ public abstract class AbstractITest implements Serializable {
     protected static final ZoneId SERVER_TZ = ZoneId.of("UTC");
     protected static final String DRIVER_CLASS_NAME = "com.github.housepower.jdbc.ClickHouseDriver";
     protected static final int SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
+    protected static final String SERVER_USER = System.getProperty("CLICK_HOUSE_SERVER_USER", null);
+    protected static final String SERVER_PASSWORD = System.getProperty("CLICK_HOUSE_SERVER_PASSWORD", null);
 
     /**
      * just for compatible with scala
@@ -48,6 +50,12 @@ public abstract class AbstractITest implements Serializable {
                 sb.append("&");
             }
             sb.append(params[i]).append("=").append(params[i + 1]);
+        }
+        if (SERVER_USER != null && SERVER_PASSWORD != null) {
+            sb.append(params.length == 0 ? "?" : "&");
+            sb.append("user=").append(SERVER_USER);
+            sb.append("&");
+            sb.append("password=").append(SERVER_PASSWORD);
         }
         return sb.toString();
     }
