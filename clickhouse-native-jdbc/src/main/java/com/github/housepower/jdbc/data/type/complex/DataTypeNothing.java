@@ -14,26 +14,21 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Types;
+
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.sql.SQLException;
-import java.sql.Types;
 
 public class DataTypeNothing implements IDataType {
 
     public static DataTypeCreator CREATOR = (lexer, serverContext) -> new DataTypeNothing(serverContext);
 
-    private final Charset charset;
-
     public DataTypeNothing(NativeContext.ServerContext serverContext) {
-        this.charset = serverContext.getConfigure().charset();
     }
 
     @Override
@@ -48,7 +43,7 @@ public class DataTypeNothing implements IDataType {
 
     @Override
     public Object defaultValue() {
-        return "";
+        return null;
     }
 
     @Override
@@ -58,7 +53,7 @@ public class DataTypeNothing implements IDataType {
 
     @Override
     public boolean nullable() {
-        return false;
+        return true;
     }
 
     @Override
@@ -73,14 +68,6 @@ public class DataTypeNothing implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof String) {
-            byte[] bs = ((String) data).getBytes(charset);
-            serializer.writeBytesBinary(bs);
-        } else if (data instanceof StringView) {
-            serializer.writeStringViewBinary((StringView) data, charset);
-        } else {
-            serializer.writeBytesBinary((byte[]) data);
-        }
     }
 
     /**

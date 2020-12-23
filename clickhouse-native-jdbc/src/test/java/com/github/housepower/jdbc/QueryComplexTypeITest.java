@@ -241,6 +241,18 @@ public class QueryComplexTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyNullableNothing() throws Exception {
+        withNewConnection(connection -> {
+            Statement statement = connection.createStatement();
+
+            ResultSet rs = statement.executeQuery("SELECT array(null)");
+            assertTrue(rs.next());
+            Array array = rs.getArray(1);
+            assertEquals(array.getBaseTypeName(), "Nullable(Nothing)");
+        });
+    }
+
+    @Test
     public void successfullyTuple() throws Exception {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
