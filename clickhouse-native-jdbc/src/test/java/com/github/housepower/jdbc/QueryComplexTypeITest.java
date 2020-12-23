@@ -233,7 +233,7 @@ public class QueryComplexTypeITest extends AbstractITest {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
 
-            ResultSet rs = statement.executeQuery("SELECT SELECT array()");
+            ResultSet rs = statement.executeQuery("SELECT array()");
 
             assertFalse(rs.next());
         });
