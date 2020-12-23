@@ -229,6 +229,17 @@ public class QueryComplexTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyNothing() throws Exception {
+        withNewConnection(connection -> {
+            Statement statement = connection.createStatement();
+
+            ResultSet rs = statement.executeQuery("SELECT SELECT array()");
+
+            assertFalse(rs.next());
+        });
+    }
+
+    @Test
     public void successfullyTuple() throws Exception {
         withNewConnection(connection -> {
             Statement statement = connection.createStatement();
