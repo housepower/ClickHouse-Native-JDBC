@@ -234,8 +234,9 @@ public class QueryComplexTypeITest extends AbstractITest {
             Statement statement = connection.createStatement();
 
             ResultSet rs = statement.executeQuery("SELECT array()");
-
             assertTrue(rs.next());
+            Array array = rs.getArray(1);
+            assertEquals(array.getBaseTypeName(),"Nothing");
         });
     }
 
