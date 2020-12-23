@@ -53,7 +53,7 @@ public class DataTypeNothing implements IDataType {
 
     @Override
     public boolean nullable() {
-        return true;
+        return false;
     }
 
     @Override
