@@ -14,6 +14,8 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.misc.StrUtil;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -55,8 +57,13 @@ public abstract class AbstractITest implements Serializable {
         // Add user
         sb.append(params.length == 0 ? "?" : "&");
         sb.append("user=").append(SERVER_USER);
+        
         // Add password
-        sb.append("&password=").append(SERVER_PASSWORD);
+        // Currently we ignore the blan password
+        if (!StrUtil.isBlank(SERVER_PASSWORD)) {
+            sb.append("&password=").append(SERVER_PASSWORD);
+        }
+   
         return sb.toString();
     }
 
