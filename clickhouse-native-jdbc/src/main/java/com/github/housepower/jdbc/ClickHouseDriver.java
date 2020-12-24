@@ -70,7 +70,7 @@ public class ClickHouseDriver implements Driver {
             String value = String.valueOf(entry.getValue());
 
             DriverPropertyInfo property = new DriverPropertyInfo(entry.getKey().name(), value);
-            property.description = entry.getKey().describe();
+            property.description = entry.getKey().description();
 
             driverPropertiesInfo[index++] = property;
         }

@@ -17,13 +17,21 @@ package com.github.housepower.jdbc.serde;
 import java.io.IOException;
 import java.time.Duration;
 
-public interface SettingSerde<T> {
+public interface SettingType<T> {
+
+    Class<T> javaClass();
 
     T deserializeURL(String queryParameter);
 
     void serializeSetting(BinarySerializer serializer, T value) throws IOException;
 
-    SettingSerde<Long> Int64 = new SettingSerde<Long>() {
+    SettingType<Long> Int64 = new SettingType<Long>() {
+
+        @Override
+        public Class<Long> javaClass() {
+            return Long.class;
+        }
+
         @Override
         public Long deserializeURL(String queryParameter) {
             return Long.valueOf(queryParameter);
@@ -35,7 +43,13 @@ public interface SettingSerde<T> {
         }
     };
 
-    SettingSerde<Integer> Int32 = new SettingSerde<Integer>() {
+    SettingType<Integer> Int32 = new SettingType<Integer>() {
+
+        @Override
+        public Class<Integer> javaClass() {
+            return Integer.class;
+        }
+
         @Override
         public Integer deserializeURL(String queryParameter) {
             return Integer.valueOf(queryParameter);
@@ -47,7 +61,13 @@ public interface SettingSerde<T> {
         }
     };
 
-    SettingSerde<Float> Float32 = new SettingSerde<Float>() {
+    SettingType<Float> Float32 = new SettingType<Float>() {
+
+        @Override
+        public Class<Float> javaClass() {
+            return Float.class;
+        }
+
         @Override
         public Float deserializeURL(String queryParameter) {
             return Float.valueOf(queryParameter);
@@ -59,7 +79,13 @@ public interface SettingSerde<T> {
         }
     };
 
-    SettingSerde<String> UTF8 = new SettingSerde<String>() {
+    SettingType<String> UTF8 = new SettingType<String>() {
+
+        @Override
+        public Class<String> javaClass() {
+            return String.class;
+        }
+
         @Override
         public String deserializeURL(String queryParameter) {
             return queryParameter;
@@ -71,7 +97,13 @@ public interface SettingSerde<T> {
         }
     };
 
-    SettingSerde<Boolean> Bool = new SettingSerde<Boolean>() {
+    SettingType<Boolean> Bool = new SettingType<Boolean>() {
+
+        @Override
+        public Class<Boolean> javaClass() {
+            return Boolean.class;
+        }
+
         @Override
         public Boolean deserializeURL(String queryParameter) {
             return Boolean.valueOf(queryParameter);
@@ -83,7 +115,13 @@ public interface SettingSerde<T> {
         }
     };
 
-    SettingSerde<Duration> Seconds = new SettingSerde<Duration>() {
+    SettingType<Duration> Seconds = new SettingType<Duration>() {
+
+        @Override
+        public Class<Duration> javaClass() {
+            return Duration.class;
+        }
+
         @Override
         public Duration deserializeURL(String queryParameter) {
             return Duration.ofSeconds(Long.parseLong(queryParameter));
@@ -95,7 +133,13 @@ public interface SettingSerde<T> {
         }
     };
 
-    SettingSerde<Duration> Milliseconds = new SettingSerde<Duration>() {
+    SettingType<Duration> Milliseconds = new SettingType<Duration>() {
+
+        @Override
+        public Class<Duration> javaClass() {
+            return Duration.class;
+        }
+
         @Override
         public Duration deserializeURL(String queryParameter) {
             return Duration.ofMillis(Long.parseLong(queryParameter));
@@ -107,7 +151,13 @@ public interface SettingSerde<T> {
         }
     };
 
-    SettingSerde<Character> Char = new SettingSerde<Character>() {
+    SettingType<Character> Char = new SettingType<Character>() {
+
+        @Override
+        public Class<Character> javaClass() {
+            return Character.class;
+        }
+
         @Override
         public Character deserializeURL(String queryParameter) {
             return queryParameter.charAt(0);

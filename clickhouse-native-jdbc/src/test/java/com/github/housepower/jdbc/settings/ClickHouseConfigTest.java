@@ -57,7 +57,7 @@ class ClickHouseConfigTest {
         assertEquals(Charset.forName("GBK"), cfg.charset());
         assertFalse(cfg.tcpKeepAlive());
         assertEquals("db2", cfg.database());
-        assertEquals("jdbc:clickhouse://1.2.3.4:8123/db2?query_timeout=0&connect_timeout=0&charset=GBK&tcp_keep_alive=false&allow_distributed_ddl=allow_distributed_ddl",
+        assertEquals("jdbc:clickhouse://1.2.3.4:8123/db2?query_timeout=0&connect_timeout=0&charset=GBK&tcp_keep_alive=false&allow_distributed_ddl=true",
                 cfg.jdbcUrl());
     }
 }

@@ -15,6 +15,7 @@
 package com.github.housepower.jdbc.protocol;
 
 import com.github.housepower.jdbc.serde.BinarySerializer;
+import com.github.housepower.jdbc.serde.SettingType;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
 
@@ -70,7 +71,10 @@ public class QueryRequest implements Request {
 
         for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
             serializer.writeUTF8StringBinary(entry.getKey().name());
-            entry.getKey().type().serializeSetting(serializer, entry.getValue());
+            @SuppressWarnings("rawtypes")
+            SettingType type = entry.getKey().type();
+            //noinspection unchecked
+            type.serializeSetting(serializer, entry.getValue());
         }
         serializer.writeUTF8StringBinary("");
         serializer.writeVarInt(stage);

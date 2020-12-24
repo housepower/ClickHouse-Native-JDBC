@@ -22,10 +22,7 @@ import com.github.housepower.jdbc.log.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,13 +57,10 @@ public class ClickhouseJdbcUrlParser {
     public static Map<SettingKey, Object> parseProperties(Properties properties) {
         Map<SettingKey, Object> settings = new HashMap<>();
 
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            for (SettingKey settingKey : SettingKey.values()) {
-                String name = String.valueOf(entry.getKey());
-                if (settingKey.name().equalsIgnoreCase(name)) {
-                    settings.put(settingKey, settingKey.type().deserializeURL(String.valueOf(entry.getValue())));
-                }
-            }
+        for (String name : properties.stringPropertyNames()) {
+            String value = properties.getProperty(name);
+
+            parseSetting(settings, name, value);
         }
 
         return settings;
@@ -134,12 +128,20 @@ public class ClickhouseJdbcUrlParser {
             Validate.ensure(queryParameter.length == 2,
                     "ClickHouse JDBC URL Parameter '" + queryParameters + "' Error, Expected '='.");
 
-            for (SettingKey settingKey : SettingKey.values()) {
-                if (settingKey.name().equalsIgnoreCase(queryParameter[0])) {
-                    parameters.put(settingKey, settingKey.type().deserializeURL(queryParameter[1]));
-                }
-            }
+            String name = queryParameter[0];
+            String value = queryParameter[1];
+
+            parseSetting(parameters, name, value);
         }
         return parameters;
+    }
+
+    private static void parseSetting(Map<SettingKey, Object> settings, String name, String value) {
+        SettingKey settingKey = SettingKey.definedSettingKeys().get(name.toLowerCase(Locale.ROOT));
+        if (settingKey != null) {
+            settings.put(settingKey, settingKey.type().deserializeURL(value));
+        } else {
+            LOG.warn("ignore undefined setting: {}={}", name, value);
+        }
     }
 }
