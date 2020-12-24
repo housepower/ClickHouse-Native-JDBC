@@ -39,6 +39,10 @@ public class ClickHouseDriver implements Driver {
 
     @Override
     public ClickHouseConnection connect(String url, Properties properties) throws SQLException {
+        if (!this.acceptsURL(url)) {
+            return null;
+        }
+
         ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
                 .withJdbcUrl(url)
                 .withProperties(properties)
