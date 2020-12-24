@@ -136,7 +136,7 @@ public final class BalancedClickhouseDataSource implements DataSource, SQLWrappe
 
     static List<String> splitUrl(final String url) {
         Matcher m = URL_TEMPLATE.matcher(url);
-        Validate.ensure(m.matches(), "Incorrect url");
+        Validate.ensure(m.matches(), "Incorrect url: " + url);
         final String database = StrUtil.getOrDefault(m.group(2), "");
         String[] hosts = m.group(1).split(",");
         return Arrays.stream(hosts)
