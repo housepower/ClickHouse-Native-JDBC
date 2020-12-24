@@ -26,14 +26,12 @@ import javax.sql.DataSource;
 
 public abstract class AbstractITest implements Serializable {
 
-    private static final String DEFAULT_USERNAME = "default";
-
     protected static final ZoneId CLIENT_TZ = ZoneId.systemDefault();
     protected static final ZoneId SERVER_TZ = ZoneId.of("UTC");
     protected static final String DRIVER_CLASS_NAME = "com.github.housepower.jdbc.ClickHouseDriver";
     protected static final int SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
-    protected static final String SERVER_USER = System.getProperty("CLICK_HOUSE_SERVER_USER", DEFAULT_USERNAME);
-    protected static final String SERVER_PASSWORD = System.getProperty("CLICK_HOUSE_SERVER_PASSWORD", null);
+    protected static final String SERVER_USER = System.getProperty("CLICK_HOUSE_SERVER_USER", "default");
+    protected static final String SERVER_PASSWORD = System.getProperty("CLICK_HOUSE_SERVER_PASSWORD", "");
 
     /**
      * just for compatible with scala
@@ -53,23 +51,17 @@ public abstract class AbstractITest implements Serializable {
             }
             sb.append(params[i]).append("=").append(params[i + 1]);
         }
-        if (!SERVER_USER.equals(DEFAULT_USERNAME)) {
-            // Add user
-            sb.append(params.length == 0 ? "?" : "&");
-            sb.append("user=").append(SERVER_USER);
-            if (SERVER_PASSWORD != null) {
-                // Add password
-                sb.append("&");
-                sb.append("password=").append(SERVER_PASSWORD);
-            }
+        
+        // Add user
+        sb.append(params.length == 0 ? "?" : "&");
+        sb.append("user=").append(SERVER_USER);
+        if (SERVER_PASSWORD != null) {
+            // Add password
+            sb.append("&");
+            sb.append("password=").append(SERVER_PASSWORD);
         }
-        else {
-            if (SERVER_PASSWORD != null) {
-                // Add password
-                sb.append(params.length == 0 ? "?" : "&");
-                sb.append("password=").append(SERVER_PASSWORD);
-            }
-        }
+        // Add password
+        sb.append("password=").append(SERVER_PASSWORD);
         return sb.toString();
     }
 
