@@ -14,11 +14,13 @@
 
 package com.github.housepower.jdbc.settings;
 
+import com.github.housepower.jdbc.serde.SettingType;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,5 +61,34 @@ class ClickHouseConfigTest {
         assertEquals("db2", cfg.database());
         assertEquals("jdbc:clickhouse://1.2.3.4:8123/db2?query_timeout=0&connect_timeout=0&charset=GBK&tcp_keep_alive=false&allow_distributed_ddl=true",
                 cfg.jdbcUrl());
+    }
+
+    @Test
+    public void testUndefinedSettings() {
+        Properties props = new Properties();
+        props.setProperty("unknown", "unknown");
+        ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
+                .withProperties(props)
+                .build();
+        assertTrue(cfg.settings()
+                .keySet()
+                .stream()
+                .noneMatch(settingKey -> settingKey.name().equalsIgnoreCase("unknown")));
+    }
+
+    @Test
+    public void testUserDefinedSettings() {
+        SettingKey userDefined = SettingKey.builder()
+                .withName("user_defined")
+                .withType(SettingType.UTF8)
+                .build();
+
+        Properties props = new Properties();
+        props.setProperty("user_defined", "haha");
+
+        ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
+                .withProperties(props)
+                .build();
+        assertEquals("haha", cfg.settings().get(userDefined));
     }
 }
