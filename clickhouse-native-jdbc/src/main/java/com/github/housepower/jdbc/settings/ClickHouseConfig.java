@@ -89,13 +89,13 @@ public class ClickHouseConfig {
     public String jdbcUrl() {
         StringBuilder builder = new StringBuilder(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX)
                 .append("//").append(host).append(":").append(port).append("/").append(database)
-                .append("?").append(SettingKey.query_timeout).append("=").append(queryTimeout.getSeconds())
-                .append("&").append(SettingKey.connect_timeout).append("=").append(connectTimeout.getSeconds())
-                .append("&").append(SettingKey.charset).append("=").append(charset)
-                .append("&").append(SettingKey.tcp_keep_alive).append("=").append(tcpKeepAlive);
+                .append("?").append(SettingKey.query_timeout.name()).append("=").append(queryTimeout.getSeconds())
+                .append("&").append(SettingKey.connect_timeout.name()).append("=").append(connectTimeout.getSeconds())
+                .append("&").append(SettingKey.charset.name()).append("=").append(charset)
+                .append("&").append(SettingKey.tcp_keep_alive.name()).append("=").append(tcpKeepAlive);
 
         for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
-            builder.append("&").append(entry.getKey()).append("=").append(entry.getKey());
+            builder.append("&").append(entry.getKey().name()).append("=").append(entry.getValue());
         }
         return builder.toString();
     }
