@@ -52,7 +52,7 @@ public final class BalancedClickhouseDataSource implements DataSource, SQLWrappe
     private static final Logger LOG = LoggerFactory.getLogger(BalancedClickhouseDataSource.class);
     private static final Pattern URL_TEMPLATE = Pattern.compile(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX +
             "//([a-zA-Z0-9_:,.-]+)" +
-            "(/[a-zA-Z0-9_]+" +
+            "((/[a-zA-Z0-9_]+)?" +
             "([?][a-zA-Z0-9_]+[=][a-zA-Z0-9_]+([&][a-zA-Z0-9_]+[=][a-zA-Z0-9_]*)*)?" +
             ")?");
 
