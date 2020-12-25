@@ -32,8 +32,8 @@ public class Dbcp2ITest extends DataSourceITest {
     @Test
     public void testDbcpBasicDataSource() throws Exception {
         Properties prop = new Properties();
-        prop.put("url", getJdbcUrl());
-        prop.put("driverClassName", DRIVER_CLASS_NAME);
+        prop.setProperty("url", getJdbcUrl());
+        prop.setProperty("driverClassName", DRIVER_CLASS_NAME);
         try (BasicDataSource ds = BasicDataSourceFactory.createDataSource(prop)) {
             runSql(ds);
         }

@@ -32,8 +32,8 @@ public class DruidITest extends DataSourceITest {
     @Test
     public void testDruidDataSource() throws Exception {
         Properties prop = new Properties();
-        prop.put("url", getJdbcUrl());
-        prop.put("driverClassName", DRIVER_CLASS_NAME);
+        prop.setProperty("url", getJdbcUrl());
+        prop.setProperty("driverClassName", DRIVER_CLASS_NAME);
         try (DruidDataSource ds = (DruidDataSource) DruidDataSourceFactory.createDataSource(prop)) {
             runSql(ds);
         }
