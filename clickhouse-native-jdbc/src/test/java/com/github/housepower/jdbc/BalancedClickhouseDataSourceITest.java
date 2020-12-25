@@ -162,8 +162,8 @@ public class BalancedClickhouseDataSourceITest {
     @Test
     public void testConstructWithProperties() {
         final Properties properties = new Properties();
-        properties.put("query_timeout", 6789);
-        properties.put("password", "888888");
+        properties.setProperty("query_timeout", "6789");
+        properties.setProperty("password", "888888");
 
         // without connection parameters
         BalancedClickhouseDataSource dataSource = new BalancedClickhouseDataSource(
