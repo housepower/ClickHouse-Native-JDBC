@@ -20,8 +20,7 @@ jobs:
       - run: sed -i 's/TRACE/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
       - run: sed -i 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
 
-      - id: jmh
-        name: Run benchmarks
+      - name: Run benchmarks
         run: |
           mvn -B -Pbenchmark clean integration-test -DskipITs -pl :clickhouse-native-jdbc -am | tee output.log 2>&1
           echo "BENCHMARK_REPORT<<EOF" >> $GITHUB_ENV
