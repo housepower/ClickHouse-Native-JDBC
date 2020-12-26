@@ -27,8 +27,8 @@ jobs:
         name: Run benchmarks
         run: |
          mvn -B -Pbenchmark clean integration-test -DskipITs  | tee a.log 2>&1
-        bench_results=`grep -A 100 'Run complete.' ~/a.log | awk '{if(NF == 7) {print $0}}'`
-         echo '::set-output name=bench_results::${bench_results}'
+         bench_results=`grep -A 100 'Run complete.' ~/a.log | awk '{if(NF == 7) {print $0}}'`
+         echo "::set-output name=bench_results::${bench_results}"
 
       - name: PR Comment
         uses: github-actions-up-and-running/pr-comment@v1.0.1
