@@ -21,3 +21,11 @@ jobs:
       - run: sed -i 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
       - name: Run benchmarks
         run: mvn -B -Pbenchmark clean integration-test -DskipITs
+      - name: PR Comment
+        uses: github-actions-up-and-running/pr-comment@v1.0.1
+        with:
+          repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          message:
+            "Benchmark Results: XXX"
+
+
