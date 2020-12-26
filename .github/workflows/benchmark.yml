@@ -19,5 +19,21 @@ jobs:
         run: docker-compose up -d
       - run: sed -i 's/TRACE/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
       - run: sed -i 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
+
       - name: Run benchmarks
-        run: mvn -B -Pbenchmark clean integration-test -DskipITs
+        run: |
+          mvn -B -Pbenchmark clean integration-test -DskipITs -pl :clickhouse-native-jdbc -am | tee output.log
+          echo "BENCHMARK_REPORT<<EOF" >> $GITHUB_ENV
+          echo "`cat output.log | grep -E '^Benchmark\s.*\sUnits$' -A 100 | grep -E '.*\s(Units|ms/op)$'`" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: PR Comment
+        uses: github-actions-up-and-running/pr-comment@v1.0.1
+        with:
+          repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          message: |
+            Benchmark Report
+            ===
+            ```
+            ${{ env.BENCHMARK_REPORT }}
+            ```
