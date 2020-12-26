@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
+      - outputs:
+        bench_result: ${{ steps.bench.outputs.bench_results }}
+
       - uses: actions/checkout@v2
       - name: Set up JDK
         uses: actions/setup-java@v1
@@ -19,13 +22,19 @@ jobs:
         run: docker-compose up -d
       - run: sed -i 's/TRACE/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
       - run: sed -i 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
-      - name: Run benchmarks
-        run: mvn -B -Pbenchmark clean integration-test -DskipITs
+
+      - id: bench
+        name: Run benchmarks
+        run: |
+         mvn -B -Pbenchmark clean integration-test -DskipITs  | tee a.log 2>&1
+        bench_results=`grep -A 100 'Run complete.' ~/a.log | awk '{if(NF == 7) {print $0}}'`
+         echo '::set-output name=bench_results::${bench_results}'
+
       - name: PR Comment
         uses: github-actions-up-and-running/pr-comment@v1.0.1
         with:
           repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           message:
-            "Benchmark Results: XXX"
+            "${{outputs.bench_result}}"
 
 
