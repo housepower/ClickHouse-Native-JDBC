@@ -31,5 +31,5 @@ jobs:
         uses: github-actions-up-and-running/pr-comment@v1.0.1
         with:
           repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
-          message:
+          message: |
             ${{ steps.jmh.outputs.benchmark_results }}
