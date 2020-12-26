@@ -1,4 +1,4 @@
-name: benchmarks
+name: benchmark
 
 on:
   push:
@@ -10,9 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-      - outputs:
-        bench_result: ${{ steps.bench.outputs.bench_results }}
-
       - uses: actions/checkout@v2
       - name: Set up JDK
         uses: actions/setup-java@v1
@@ -23,11 +20,11 @@ jobs:
       - run: sed -i 's/TRACE/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
       - run: sed -i 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
 
-      - id: bench
+      - id: jmh
         name: Run benchmarks
         run: |
-         mvn -B -Pbenchmark clean integration-test -DskipITs  | tee a.log 2>&1
-         bench_results=`grep -A 100 'Run complete.' ~/a.log | awk '{if(NF == 7) {print $0}}'`
+         mvn -B -Pbenchmark clean integration-test -DskipITs -pl :clickhouse-native-jdbc -am | tee output.log 2>&1
+         bench_results=`grep -A 100 'Run complete.' output.log | awk '{if(NF == 7) {print $0}}'`
          echo "::set-output name=bench_results::${bench_results}"
 
       - name: PR Comment
@@ -35,6 +32,4 @@ jobs:
         with:
           repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           message:
-            "${{outputs.bench_result}}"
-
-
+            "${{jmh.outputs.bench_result}}"
