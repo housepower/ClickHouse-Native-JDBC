@@ -18,15 +18,15 @@ import java.sql.SQLException;
 
 public class SQLLexer {
     private int pos;
-    private final char[] data;
+    private final String data;
 
     public SQLLexer(int pos, String data) {
         this.pos = pos;
-        this.data = data.toCharArray();
+        this.data = data;
     }
 
     public char character() {
-        return eof() ? 0 : data[pos++];
+        return eof() ? 0 : data.charAt(pos++);
     }
 
     // only support dec
@@ -38,11 +38,11 @@ public class SQLLexer {
         if (isCharacter('-') || isCharacter('+'))
             pos++;
 
-        for (; pos < data.length; pos++)
-            if (!isNumericASCII(data[pos]))
+        for (; pos < data.length(); pos++)
+            if (!isNumericASCII(data.charAt(pos)))
                 break;
 
-        return Integer.parseInt(new StringView(start, pos, data).toString());
+        return Integer.parseInt(new StringView(data, start, pos).toString());
     }
 
     public Number numberLiteral() {
@@ -62,42 +62,45 @@ public class SQLLexer {
             pos++;
         }
 
-        if (pos + 2 < data.length) {
+        if (pos + 2 < data.length()) {
             // @formatter:off
-            if (data[pos] == '0' && (data[pos + 1] == 'x' || data[pos + 1] == 'X'
-                                  || data[pos + 1] == 'b' || data[pos + 1] == 'B')) {
-                isHex    = data[pos + 1] == 'x' || data[pos + 1] == 'X';
-                isBinary = data[pos + 1] == 'b' || data[pos + 1] == 'B';
+            if (data.charAt(pos) == '0' && (data.charAt(pos + 1) == 'x' || data.charAt(pos + 1) == 'X'
+                                         || data.charAt(pos + 1) == 'b' || data.charAt(pos + 1) == 'B')) {
+                isHex    = data.charAt(pos + 1) == 'x' || data.charAt(pos + 1) == 'X';
+                isBinary = data.charAt(pos + 1) == 'b' || data.charAt(pos + 1) == 'B';
                 pos += 2;
             }
             // @formatter:on
         }
 
-        for (; pos < data.length; pos++) {
-            if (isHex ? !isHexDigit(data[pos]) : !isNumericASCII(data[pos])) {
+        for (; pos < data.length(); pos++) {
+            if (isHex ? !isHexDigit(data.charAt(pos)) : !isNumericASCII(data.charAt(pos))) {
                 break;
             }
         }
 
-        if (pos < data.length && data[pos] == '.') {
+        if (pos < data.length() && data.charAt(pos) == '.') {
             isDouble = true;
-            for (pos++; pos < data.length; pos++) {
-                if (isHex ? !isHexDigit(data[pos]) : !isNumericASCII(data[pos]))
+            for (pos++; pos < data.length(); pos++) {
+                if (isHex ? !isHexDigit(data.charAt(pos)) : !isNumericASCII(data.charAt(pos)))
                     break;
             }
         }
 
-        if (pos + 1 < data.length
-                && (isHex ? (data[pos] == 'p' || data[pos] == 'P') : (data[pos] == 'e' || data[pos] == 'E'))) {
+        if (pos + 1 < data.length()
+                // @formatter:off
+                && (isHex ? (data.charAt(pos) == 'p' || data.charAt(pos) == 'P')
+                          : (data.charAt(pos) == 'e' || data.charAt(pos) == 'E'))) {
+                // @formatter:on
             hasExponent = true;
             pos++;
 
-            if (pos + 1 < data.length && (data[pos] == '-' || data[pos] == '+')) {
+            if (pos + 1 < data.length() && (data.charAt(pos) == '-' || data.charAt(pos) == '+')) {
                 pos++;
             }
 
-            for (; pos < data.length; pos++) {
-                char ch = data[pos];
+            for (; pos < data.length(); pos++) {
+                char ch = data.charAt(pos);
                 if (!isNumericASCII(ch)) {
                     break;
                 }
@@ -105,17 +108,17 @@ public class SQLLexer {
         }
 
         if (isBinary) {
-            String signed = hasSigned ? data[start] + "" : "";
+            String signed = hasSigned ? data.charAt(start) + "" : "";
             int begin = start + (hasSigned ? 3 : 2);
-            return Long.parseLong(signed + new String(data, begin, pos - begin), 2);
+            return Long.parseLong(signed + new StringView(data, begin, pos).toString(), 2);
         } else if (isDouble || hasExponent) {
-            return Double.valueOf(new String(data, start, pos - start));
+            return Double.valueOf(new StringView(data, start, pos).toString());
         } else if (isHex) {
-            String signed = hasSigned ? data[start] + "" : "";
+            String signed = hasSigned ? data.charAt(start) + "" : "";
             int begin = start + (hasSigned ? 3 : 2);
-            return Long.parseLong(signed + new String(data, begin, pos - begin), 16);
+            return Long.parseLong(signed + new StringView(data, begin, pos), 16);
         } else {
-            return Long.parseLong(new String(data, start, pos - start));
+            return Long.parseLong(new StringView(data, start, pos).toString());
         }
     }
 
@@ -131,11 +134,11 @@ public class SQLLexer {
 
     public boolean eof() {
         skipAnyWhitespace();
-        return pos >= data.length;
+        return pos >= data.length();
     }
 
     public boolean isCharacter(char ch) {
-        return !eof() && data[pos] == ch;
+        return !eof() && data.charAt(pos) == ch;
     }
 
     public StringView bareWord() throws SQLException {
@@ -145,26 +148,26 @@ public class SQLLexer {
             return stringLiteralWithQuoted('`');
         } else if (isCharacter('"')) {
             return stringLiteralWithQuoted('"');
-        } else if (data[pos] == '_'
-               || (data[pos] >= 'a' && data[pos] <= 'z')
-               || (data[pos] >= 'A' && data[pos] <= 'Z')) {
+        } else if (data.charAt(pos) == '_'
+               || (data.charAt(pos) >= 'a' && data.charAt(pos) <= 'z')
+               || (data.charAt(pos) >= 'A' && data.charAt(pos) <= 'Z')) {
             int start = pos;
-            for (pos++; pos < data.length; pos++) {
-                if (!('_' == data[pos]
-                  || (data[pos] >= 'a' && data[pos] <= 'z')
-                  || (data[pos] >= 'A' && data[pos] <= 'Z')
-                  || (data[pos] >= '0' && data[pos] <= '9'))) {
+            for (pos++; pos < data.length(); pos++) {
+                if (!('_' == data.charAt(pos)
+                  || (data.charAt(pos) >= 'a' && data.charAt(pos) <= 'z')
+                  || (data.charAt(pos) >= 'A' && data.charAt(pos) <= 'Z')
+                  || (data.charAt(pos) >= '0' && data.charAt(pos) <= '9'))) {
                     break;
                 }
             }
-            return new StringView(start, pos, data);
+            return new StringView(data, start, pos);
         }
         // @formatter:on
         throw new SQLException("Expect Bare Token.");
     }
 
     public boolean isWhitespace() {
-        return data[pos++] == ' ';
+        return data.charAt(pos++) == ' ';
     }
 
     private boolean isNumericASCII(char c) {
@@ -176,13 +179,13 @@ public class SQLLexer {
     }
 
     private void skipAnyWhitespace() {
-        for (; pos < data.length; pos++) {
+        for (; pos < data.length(); pos++) {
             // @formatter:off
-            if (data[pos] != ' '
-             && data[pos] != '\t'
-             && data[pos] != '\n'
-             && data[pos] != '\r'
-             && data[pos] != '\f') {
+            if (data.charAt(pos) != ' '
+             && data.charAt(pos) != '\t'
+             && data.charAt(pos) != '\n'
+             && data.charAt(pos) != '\r'
+             && data.charAt(pos) != '\f') {
                 return;
             }
             // @formatter:on
@@ -191,12 +194,12 @@ public class SQLLexer {
 
     private StringView stringLiteralWithQuoted(char quoted) throws SQLException {
         int start = pos;
-        Validate.isTrue(data[pos] == quoted);
-        for (pos++; pos < data.length; pos++) {
-            if (data[pos] == '\\')
+        Validate.isTrue(data.charAt(pos) == quoted);
+        for (pos++; pos < data.length(); pos++) {
+            if (data.charAt(pos) == '\\')
                 pos++;
-            else if (data[pos] == quoted)
-                return new StringView(start + 1, pos++, data);
+            else if (data.charAt(pos) == quoted)
+                return new StringView(data, start + 1, pos++);
         }
         throw new SQLException("The String Literal is no Closed.");
     }

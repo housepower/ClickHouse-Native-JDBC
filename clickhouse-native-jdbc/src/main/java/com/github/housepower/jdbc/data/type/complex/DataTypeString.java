@@ -17,7 +17,6 @@ package com.github.housepower.jdbc.data.type.complex;
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
-import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
@@ -73,11 +72,8 @@ public class DataTypeString implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof String) {
-            byte[] bs = ((String) data).getBytes(charset);
-            serializer.writeBytesBinary(bs);
-        } else if (data instanceof StringView) {
-            serializer.writeStringViewBinary((StringView) data, charset);
+        if (data instanceof CharSequence) {
+            serializer.writeStringBinary(data.toString(), charset);
         } else {
             serializer.writeBytesBinary((byte[]) data);
         }
