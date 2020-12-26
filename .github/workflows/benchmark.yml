@@ -23,13 +23,13 @@ jobs:
       - id: jmh
         name: Run benchmarks
         run: |
-         mvn -B -Pbenchmark clean integration-test -DskipITs -pl :clickhouse-native-jdbc -am | tee output.log 2>&1
-         bench_results=`grep -A 100 'Run complete.' output.log | awk '{if(NF == 7) {print $0}}'`
-         echo "::set-output name=bench_results::${bench_results}"
+          mvn -B -Pbenchmark clean integration-test -DskipITs -pl :clickhouse-native-jdbc -am | tee output.log 2>&1
+          benchmark_results=`grep -A 100 'Run complete.' output.log | awk '{if(NF == 7) {print $0}}'`
+          echo "::set-output name=benchmark_results::${benchmark_results}"
 
       - name: PR Comment
         uses: github-actions-up-and-running/pr-comment@v1.0.1
         with:
           repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           message:
-            ${{ steps.jmh.outputs.bench_result }}
+            ${{ steps.jmh.outputs.benchmark_results }}
