@@ -24,8 +24,9 @@ jobs:
         name: Run benchmarks
         run: |
           mvn -B -Pbenchmark clean integration-test -DskipITs -pl :clickhouse-native-jdbc -am | tee output.log 2>&1
-          benchmark_results=`grep -A 100 'Run complete.' output.log | awk '{if(NF == 7) {print $0}}'`
-          echo "::set-output name=benchmark_results::${benchmark_results}"
+          echo "BENCHMARK_REPORT<<EOF" >> $GITHUB_ENV
+          echo "`grep -A 100 'Run complete.' output.log | awk '{if(NF == 7) {print $0}}'`" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: PR Comment
         uses: github-actions-up-and-running/pr-comment@v1.0.1
@@ -33,5 +34,5 @@ jobs:
           repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           message: |
             ```
-            ${{ steps.jmh.outputs.benchmark_results }}
+            ${{ env.BENCHMARK_REPORT }}
             ```
