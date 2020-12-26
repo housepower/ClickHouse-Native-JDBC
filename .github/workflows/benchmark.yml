@@ -32,4 +32,6 @@ jobs:
         with:
           repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           message: |
+            ```
             ${{ steps.jmh.outputs.benchmark_results }}
+            ```
