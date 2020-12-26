@@ -32,4 +32,4 @@ jobs:
         with:
           repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           message:
-            ${{ jmh.outputs.bench_result }}
+            ${{ steps.jmh.outputs.bench_result }}
