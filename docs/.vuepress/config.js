@@ -43,7 +43,7 @@ module.exports = {
               title: 'Usage',
               children: [
                 ['jdbc_driver', 'JDBC Driver'],
-                ['datasource', 'Datasource'],
+                ['connect_to_cluster', 'Connect to Cluster'],
                 ['connection_pool', 'Connection Pool'],
                 ['spark_integration', 'Spark Integration'],
               ],
@@ -97,6 +97,7 @@ module.exports = {
               title: '使用',
               children: [
                 ['jdbc_driver', 'JDBC 驱动'],
+                ['connect_to_cluster', '连接到集群'],
                 ['connection_pool', '连接池'],
                 ['spark_integration', 'Spark 集成'],
               ],

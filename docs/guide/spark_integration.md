@@ -30,7 +30,7 @@ compile "com.github.housepower:clickhouse-integration-spark_2.11:${clickhouse_na
 
 ### Examples
 
-Make sure register `ClickHouseDialects` before using it
+Make sure register `ClickHouseDialect` before using it
 
 ```scala
     JdbcDialects.registerDialect(ClickHouseDialect)
