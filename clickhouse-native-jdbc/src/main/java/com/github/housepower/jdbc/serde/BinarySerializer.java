@@ -17,11 +17,9 @@ package com.github.housepower.jdbc.serde;
 import com.github.housepower.jdbc.buffer.BuffedWriter;
 import com.github.housepower.jdbc.buffer.CompressedBuffedWriter;
 import com.github.housepower.jdbc.misc.Either;
-import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -96,21 +94,18 @@ public class BinarySerializer {
         // @formatter:on
     }
 
-    public void writeUTF8StringBinary(String binary) throws IOException {
-        byte[] bs = binary.getBytes(StandardCharsets.UTF_8);
-        writeVarInt(bs.length);
-        either.get().writeBinary(bs);
+    public void writeUTF8StringBinary(String utf8) throws IOException {
+        writeStringBinary(utf8, StandardCharsets.UTF_8);
+    }
+
+    public void writeStringBinary(String data, Charset charset) throws IOException {
+        byte[] bs = data.getBytes(charset);
+        writeBytesBinary(bs);
     }
 
     public void writeBytesBinary(byte[] bs) throws IOException {
         writeVarInt(bs.length);
         either.get().writeBinary(bs);
-    }
-
-    public void writeStringViewBinary(StringView data, Charset charset) throws IOException {
-        ByteBuffer buf = charset.encode(data.toCharBuffer());
-        writeVarInt(buf.limit() - buf.position());
-        either.get().writeBinary(buf.array(), buf.position(), buf.limit() - buf.position());
     }
 
     public void flushToTarget(boolean force) throws IOException {
