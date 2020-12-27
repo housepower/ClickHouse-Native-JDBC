@@ -52,21 +52,20 @@ Edit and put below configurations into `~/.m2/settings.xml`
 It's only need for **feature release**, you should cut a branch from master.
 
 ```shell script
-git checkout -b 2.5
+git checkout -b 2.6
 ```
 
 ## Bump Release Version
 
 ```shell script
-mvn versions:set -DnewVersion=2.5.0
-mvn versions:commit
-git commit -am '(release) prepare release v2.5.0-rc0'
+mvn versions:set -DgenerateBackupPoms=false -DnewVersion=2.6.0
+git commit -am '(release) prepare release v2.6.0-rc0'
 ```
 
 ## Package and Deploy to Sonatype
 
 ```shell script
-mvn clean deploy -DskipTests -Prelease
+mvn clean deploy -DskipTests -Prelease -Pscala-2.11
 mvn clean deploy -DskipTests -Prelease -Pscala-2.12
 ```
 
@@ -85,7 +84,6 @@ Edit at [GitHub Release Page](https://github.com/housepower/ClickHouse-Native-JD
 ## Bump Development Version
 
 ```shell script
-mvn versions:set -DnewVersion=2.6.0-SNAPSHOT
-mvn versions:commit
+mvn versions:set -DgenerateBackupPoms=false -DnewVersion=2.7.0-SNAPSHOT
 git commit -am '(release) prepare for next development iteration'
 ```

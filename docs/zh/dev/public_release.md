@@ -51,21 +51,20 @@ gpg --list-keys
 只有在发布**特性版本**时, 你才需要从 master 分支上切出分支.
 
 ```shell script
-git checkout -b 2.5
+git checkout -b 2.6
 ```
 
 ## 切换发布版本
 
 ```shell script
-mvn versions:set -DnewVersion=2.5.0
-mvn versions:commit
-git commit -am '(release) prepare release v2.5.0-rc0'
+mvn versions:set -DgenerateBackupPoms=false -DnewVersion=2.6.0
+git commit -am '(release) prepare release v2.6.0-rc0'
 ```
 
 ## 打包并部署到 Sonatype
 
 ```shell script
-mvn clean deploy -DskipTests -Prelease
+mvn clean deploy -DskipTests -Prelease -Pscala-2.12
 mvn clean deploy -DskipTests -Prelease -Pscala-2.12
 ```
 
@@ -84,7 +83,6 @@ mvn clean deploy -DskipTests -Prelease -Pscala-2.12
 ## 切换开发版本
 
 ```shell script
-mvn versions:set -DnewVersion=2.6.0-SNAPSHOT
-mvn versions:commit
+mvn versions:set -DgenerateBackupPoms=false -DnewVersion=2.7.0-SNAPSHOT
 git commit -am '(release) prepare for next development iteration'
 ```
