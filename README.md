@@ -36,8 +36,8 @@ Supported by [JetBrains Open Source License](https://www.jetbrains.com/?from=Cli
 
 ### Limitations
 
-* Not support non-values format.
-* Not support complex values expression, like `INSERT INTO test_table VALUES(toDate(123456))`.
+* Not support insert complex values expression, like `INSERT INTO test_table VALUES(toDate(123456))`, but query is ok.
+* Not support insert non-values format, like `TSV`.
 * Not support more compression method, like `ZSTD`.
 
 ### Import

@@ -35,8 +35,8 @@ ClickHouse Native JDBC
 
 ### 限制
 
-* 不支持 non-values 格式。
-* 不支持复杂表达式语句的批量写入，如：`INSERT INTO test_table VALUES(toDate(123456))`。
+* 不支持复杂表达式语句的批量写入，如：`INSERT INTO test_table VALUES(toDate(123456))`，但查询不受影响。
+* 不支持写入 non-values 格式，如 `TSV`。
 * 不支持 `ZSTD` 压缩。
 
 ### 导入包
