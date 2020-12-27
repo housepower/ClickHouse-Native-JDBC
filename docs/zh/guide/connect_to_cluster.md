@@ -12,14 +12,14 @@
 - 示例代码:
 
 ```java
-singleDataSource = new BalancedClickhouseDataSource("jdbc:clickhouse://127.0.0.1:9000");
+DataSource singleDataSource = new BalancedClickhouseDataSource("jdbc:clickhouse://127.0.0.1:9000");
 
-dualDataSource = new BalancedClickhouseDataSource("jdbc:clickhouse://127.0.0.1:9000,127.0.0.1:9000");
+DataSource dualDataSource = new BalancedClickhouseDataSource("jdbc:clickhouse://127.0.0.1:9000,127.0.0.1:9000");
 
 Connection conn1 = dualDataSource.getConnection();
 conn1.createStatement().execute("CREATE DATABASE IF NOT EXISTS test");
 
-conn2 = dualDataSource.getConnection();
+Connection conn2 = dualDataSource.getConnection();
 conn2.createStatement().execute("DROP TABLE IF EXISTS test.insert_test");
 conn2.createStatement().execute("CREATE TABLE IF NOT EXISTS test.insert_test (i Int32, s String) ENGINE = TinyLog");
 ```
