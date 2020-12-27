@@ -2,9 +2,15 @@ name: build
 
 on:
   push:
-    branches: [ master, 2.4 ]
+    branches:
+      - "master"
+      - "2.4"
+      - "2.5"
   pull_request:
-    branches: [ master, 2.4 ]
+    branches:
+      - "master"
+      - "2.4"
+      - "2.5"
 
 jobs:
   build:
