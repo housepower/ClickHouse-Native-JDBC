@@ -35,6 +35,7 @@ jobs:
 
       - name: PR Comment
         uses: github-actions-up-and-running/pr-comment@v1.0.1
+        if: ${{ github.event_name == 'pull_request' }}
         with:
           repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           message: |
