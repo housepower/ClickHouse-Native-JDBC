@@ -1,6 +1,55 @@
 Release Notes
 ===
 
+v2.5.0 (Dec 27, 2020)
+---
+### Highlight
+- The project static website is available at [Home Page](https://housepower.github.io/ClickHouse-Native-JDBC)
+- The China mirror repo is available at [Gitee](https://gitee.com/housepower/ClickHouse-Native-JDBC)
+- Implemented `BalancedClickhouseDataSource` to support connect to clickhouse cluster
+- Now the JDBC driver works with DataGrip and DBeaver
+- Introduced a log facade which prefer to bind `slf4j` if it exists in classpath, otherwise fallback to JDK `Logger`, and added logs for tracing, debugging and warning
+
+This release contains lots of internal refactors, and currently, this driver guarantee none stable API except JDBC API itself, please be careful if you use the internal API which not belongs to JDBC standard interfaces.
+
+### Changelog
+- (feature) Implement `BalancedClickhouseDataSource` to support multi instances (#205)
+- (bugfix) Fix invalid package clickhouse-integration-spark_2.12 (#206)
+- (feature) Implement `ClickHouseConnection` catalog and schema method (#208)
+- (enhance) Enhance `Number` process
+- (build) Disable deploy `examples` module
+- (test) Integration tests with connection pool (#212)
+- (feature) Support `charset` parameter (#213)
+- (feature) Implement `ClickHousePreparedStatment` `#setBytes` and `#getBytes` (#213)
+- (enhance) Trim space before parsing SQL
+- (feature) Support `tcp_keep_alive` parameter
+- (bugfix) Fix DateTime64 nanos and scale (#217)
+- (bugfix) Reset connection `STATE` when recreate connection (#221)
+- (bugfix) Skip remaining response when ping (#224)
+- (refactor) Decouple `RequestOrResponse` and rename `PhysicalConnection` to `NativeClient` (#225)
+- (feature) Introduce log classes to avoid hard dependence on `slf4j` (#231)
+- (build) Add `debug` Maven profile (#235)
+- (enhance) Add LRU cache for lexer `IDataType` (#236)
+- (feature) Refactor and implement ClickHouseDatabaseMetadata (#233)
+- (feature) Support type alias (#240)
+- (bugfix) Explicit upcast ByteBuffer to Buffer (#243)
+- (deps) Bump ini from 1.3.5 to 1.3.8 (#250)
+- (feature) Support Decimal256 && Decimal128 (#239)
+- (refactor) Refactor and fixup (#246)
+- (deps) bump alibaba druid 1.2.4
+- (deps) bump slf4j 1.7.30
+- (deps) bump mockito 3.6.28
+- (deps) bump jmh 1.27
+- (bugfix) Cast correctly numbers to get a boolean (#256)
+- (bugfix) Added check against null data on `ClickHouseResultSet#getXXX` (#258) (#259)
+- (feature) Handle Nothing datatype (#261)
+- (bugfix) `ClickHouseConnection#connect` should return null for unacceptable url (#267)
+- (enhance) `BalancedClickhouseDataSource` support optional database url
+- (test) Added user & password for ClickHouse unit tests (#264)
+- (feature) Support arbitrary settings (#268)
+- (refactor) Rewrite `StringView` implements `CharSequence` (#270)
+- (workflow) Auto report benchmark report.
+
 v2.4.4 (Dec 27, 2020)
 ---
 ### Changelog
