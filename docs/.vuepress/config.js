@@ -35,6 +35,7 @@ module.exports = {
           { text: 'Deep Dive', link: '/deep-dive/native_protocol' },
           { text: 'Release Notes', link: '/release-notes/'},
           { text: 'GitHub', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
+          { text: 'Gitee', link: 'https://gitee.com/housepower/ClickHouse-Native-JDBC' },
         ],
         sidebar: {
           '/guide/': [
@@ -88,7 +89,8 @@ module.exports = {
           { text: '开发', link: '/zh/dev/contribute' },
           { text: '深入', link: '/zh/deep-dive/native_protocol' },
           { text: '发行注记', link: '/zh/release-notes/' },
-          { text: '源码仓库', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
+          { text: 'GitHub', link: 'https://github.com/housepower/ClickHouse-Native-JDBC' },
+          { text: '码云', link: 'https://gitee.com/housepower/ClickHouse-Native-JDBC' },
         ],
         sidebar: {
           '/zh/guide/': [

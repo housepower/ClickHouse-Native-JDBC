@@ -10,9 +10,9 @@ ClickHouse Native JDBC
 
 [English](README.md) | 简体中文
 
-## [项目主页](https://housepower.github.io/ClickHouse-Native-JDBC/zh/)
+## [项目主页](https://housepower.github.io/ClickHouse-Native-JDBC/zh/) | [GitHub](https://github.com/housepower/ClickHouse-Native-JDBC) | [码云](https://gitee.com/housepower/ClickHouse-Native-JDBC)
 
-这是一个基于原生(TCP)协议实现的 JDBC 驱动，用来访问 [ClickHouse](https://clickhouse.yandex/) ，同时也支持与 [Apache Spark](https://github.com/apache/spark/) 的集成。
+这是一个基于原生(TCP)协议实现的 JDBC 驱动，用于访问 [ClickHouse](https://clickhouse.yandex/) ，同时也支持与 [Apache Spark](https://github.com/apache/spark/) 的集成。
 
 ## 参与贡献
 

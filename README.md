@@ -10,7 +10,7 @@ ClickHouse Native JDBC
 
 English | [简体中文](README_zh.md)
 
-## [Home Page](https://housepower.github.io/ClickHouse-Native-JDBC/)
+## [Home Page](https://housepower.github.io/ClickHouse-Native-JDBC/) | [GitHub](https://github.com/housepower/ClickHouse-Native-JDBC) | [Gitee](https://gitee.com/housepower/ClickHouse-Native-JDBC)
 
 A Native JDBC library for accessing [ClickHouse](https://clickhouse.yandex/) in Java, also provide a library for 
 integrating with [Apache Spark](https://github.com/apache/spark/).
