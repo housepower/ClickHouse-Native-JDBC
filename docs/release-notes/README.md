@@ -1,6 +1,12 @@
 Release Notes
 ===
 
+v2.4.4 (Dec 27, 2020)
+---
+### Changelog
+- (backport) cast correctly numbers to get a boolean (#256)
+- (backport) enhance null check on ClickHouseResultSet#getXXX (#259)
+
 v2.4.3 (Dec 15, 2020)
 ---
 ### Changelog

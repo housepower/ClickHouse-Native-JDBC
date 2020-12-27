@@ -1,6 +1,12 @@
 发行注记
 ===
 
+v2.4.4 (2020年12月27日)
+---
+### 变更日志
+- (backport) cast correctly numbers to get a boolean (#256)
+- (backport) enhance null check on ClickHouseResultSet#getXXX (#259)
+
 v2.4.3 (2020年12月15日)
 ---
 ### 变更日志
