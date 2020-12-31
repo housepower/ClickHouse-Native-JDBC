@@ -116,7 +116,7 @@ public class DataTypeDateTime implements IDataType {
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(deserializer.readInt()), tz);
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(deserializer.readInt()), tz);
     }
 
     @Override
