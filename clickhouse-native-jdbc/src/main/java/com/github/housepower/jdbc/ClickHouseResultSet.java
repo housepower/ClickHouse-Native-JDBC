@@ -14,6 +14,20 @@
 
 package com.github.housepower.jdbc;
 
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.IColumn;
 import com.github.housepower.jdbc.log.Logger;
@@ -24,11 +38,6 @@ import com.github.housepower.jdbc.protocol.DataResponse;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLResultSet;
-
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.*;
 
 public class ClickHouseResultSet implements SQLResultSet {
 
@@ -104,6 +113,11 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public Timestamp getTimestamp(String name) throws SQLException {
         return this.getTimestamp(this.findColumn(name));
+    }
+
+    @Override
+    public Timestamp getTimestamp(String name, Calendar cal) throws SQLException {
+        return this.getTimestamp(this.findColumn(name), cal);
     }
 
     @Override
@@ -208,7 +222,23 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public Timestamp getTimestamp(int index) throws SQLException {
         Object data = getObject(index);
-        return (Timestamp) data;
+        if (data == null) {
+            return null;
+        }
+        ZonedDateTime zdt = (ZonedDateTime) data;
+        return Timestamp.from(Instant.ofEpochSecond(zdt.toEpochSecond()));
+    }
+
+    @Override
+    public Timestamp getTimestamp(int index, Calendar cal) throws SQLException {
+        Object data = getObject(index);
+        if (data == null) {
+            return null;
+        }
+        ZonedDateTime zdt = (ZonedDateTime) data;
+        ZonedDateTime zzdt = zdt.withZoneSameLocal(cal.getTimeZone().toZoneId());
+        Instant i = Instant.ofEpochSecond(zzdt.toEpochSecond(), zzdt.getNano());
+        return Timestamp.from(i);
     }
 
     @Override

@@ -14,6 +14,14 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.DateTimeUtil;
@@ -21,13 +29,6 @@ import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
-
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 public class DataTypeDateTime implements IDataType {
 
@@ -70,7 +71,7 @@ public class DataTypeDateTime implements IDataType {
 
     @Override
     public Class javaTypeClass() {
-        return Timestamp.class;
+        return ZonedDateTime.class;
     }
 
     @Override
@@ -105,24 +106,24 @@ public class DataTypeDateTime implements IDataType {
         Validate.isTrue(lexer.character() == '\'');
 
         ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hours, minutes, seconds, 0, tz);
-        return Timestamp.from(zdt.toInstant());
+        return zdt;
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt((int) ((((Timestamp) data).getTime()) / 1000));
+        serializer.writeInt((int) (((Timestamp) data).getTime()));
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new Timestamp(deserializer.readInt() * 1000L);
+        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(deserializer.readInt()), tz);
     }
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        Timestamp[] data = new Timestamp[rows];
+        ZonedDateTime[] data = new ZonedDateTime[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = new Timestamp(deserializer.readInt() * 1000L);
+            data[row] = (ZonedDateTime) deserializeBinary(deserializer);
         }
         return data;
     }

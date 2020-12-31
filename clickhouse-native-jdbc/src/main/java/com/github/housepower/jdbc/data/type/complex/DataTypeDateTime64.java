@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -90,7 +91,7 @@ public class DataTypeDateTime64 implements IDataType {
 
     @Override
     public Class javaTypeClass() {
-        return Timestamp.class;
+        return ZonedDateTime.class;
     }
 
     @Override
@@ -132,7 +133,16 @@ public class DataTypeDateTime64 implements IDataType {
         Validate.isTrue(lexer.character() == ')');
 
         ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hours, minutes, second, nanos, tz);
-        return Timestamp.from(zdt.toInstant());
+        return zdt;
+    }
+
+    @Override
+    public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
+        ZonedDateTime timestamp = (ZonedDateTime) data;
+        long epochSeconds = timestamp.toEpochSecond();
+        int nanos = timestamp.getNano();
+        long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
+        serializer.writeLong(value);
     }
 
     @Override
@@ -140,26 +150,16 @@ public class DataTypeDateTime64 implements IDataType {
         long value = deserializer.readLong() * POW_10[MAX_SCALA - scale];
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);
-        Timestamp timestamp = new Timestamp(epochSeconds * 1000);
-        if (nanos != 0)
-            timestamp.setNanos(nanos);
-        return timestamp;
-    }
 
-    @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
-        Timestamp timestamp = (Timestamp) data;
-        long epochSeconds = timestamp.getTime() / MILLIS_IN_SECOND;
-        int nanos = timestamp.getNanos();
-        long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
-        serializer.writeLong(value);
+        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds, nanos), tz);
+        return zdt;
     }
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
-        Timestamp[] data = new Timestamp[rows];
+        ZonedDateTime[] data = new ZonedDateTime[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = (Timestamp) deserializeBinary(deserializer);
+            data[row] = (ZonedDateTime) deserializeBinary(deserializer);
         }
         return data;
     }
