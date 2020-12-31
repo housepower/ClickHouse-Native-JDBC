@@ -25,7 +25,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 
@@ -227,7 +226,7 @@ public class ClickHouseResultSet implements SQLResultSet {
             return null;
         }
         ZonedDateTime zdt = (ZonedDateTime) data;
-        return Timestamp.from(Instant.ofEpochSecond(zdt.toEpochSecond(), zdt.getNano()));
+        return new Timestamp(zdt.toEpochSecond()*1000);
     }
 
     @Override
@@ -238,8 +237,7 @@ public class ClickHouseResultSet implements SQLResultSet {
         }
         ZonedDateTime zdt = (ZonedDateTime) data;
         ZonedDateTime zzdt = zdt.withZoneSameLocal(cal.getTimeZone().toZoneId());
-        Instant i = Instant.ofEpochSecond(zzdt.toEpochSecond(), zzdt.getNano());
-        return Timestamp.from(i);
+        return new Timestamp(zzdt.toEpochSecond()*1000);
     }
 
     @Override
@@ -304,7 +302,7 @@ public class ClickHouseResultSet implements SQLResultSet {
         IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
         if (column.type().sqlTypeId() == Types.TIMESTAMP) {
             ZonedDateTime zdt = (ZonedDateTime) column.value((lastFetchRowIdx = currentRowNum));
-            return Timestamp.from(Instant.ofEpochSecond(zdt.toEpochSecond(), zdt.getNano()));
+            return new Timestamp(zdt.toEpochSecond()*1000);
         }
         return column.value((lastFetchRowIdx = currentRowNum));
     }
