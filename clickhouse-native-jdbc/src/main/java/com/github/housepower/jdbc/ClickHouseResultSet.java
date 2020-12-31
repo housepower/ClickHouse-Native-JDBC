@@ -24,6 +24,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
@@ -226,7 +227,7 @@ public class ClickHouseResultSet implements SQLResultSet {
             return null;
         }
         ZonedDateTime zdt = (ZonedDateTime) data;
-        return Timestamp.from(Instant.ofEpochSecond(zdt.toEpochSecond()));
+        return Timestamp.from(Instant.ofEpochSecond(zdt.toEpochSecond(), zdt.getNano()));
     }
 
     @Override
@@ -301,6 +302,10 @@ public class ClickHouseResultSet implements SQLResultSet {
         Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
                 "No row information was obtained. You must call ResultSet.next() before that.");
         IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
+        if (column.type().sqlTypeId() == Types.TIMESTAMP) {
+            ZonedDateTime zdt = (ZonedDateTime) column.value((lastFetchRowIdx = currentRowNum));
+            return Timestamp.from(Instant.ofEpochSecond(zdt.toEpochSecond(), zdt.getNano()));
+        }
         return column.value((lastFetchRowIdx = currentRowNum));
     }
 
