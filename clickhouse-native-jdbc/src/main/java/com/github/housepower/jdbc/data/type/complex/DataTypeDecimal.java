@@ -168,29 +168,25 @@ public class DataTypeDecimal implements IDataType {
             }
 
             case 128: {
-                long l1 = deserializer.readLong();
-                long l2 = deserializer.readLong();
+                long []array = new long[2];
+                array[1] = deserializer.readLong();
+                array[0] = deserializer.readLong();
 
-                BigInteger v1 = new BigInteger(1, BytesUtil.longToBytes(l1));
-                BigInteger v2 = new BigInteger(1, BytesUtil.longToBytes(l2));
-
-                value = new BigDecimal(v1.add(v2.shiftLeft(64)));
+                BigInteger v1 = new BigInteger(BytesUtil.longsToBytes(array));
+                value = new BigDecimal(v1);
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
 
             case 256: {
-                long l1 = deserializer.readLong();
-                long l2 = deserializer.readLong();
-                long l3 = deserializer.readLong();
-                long l4 = deserializer.readLong();
+                long []array = new long[4];
+                array[3] = deserializer.readLong();
+                array[2] = deserializer.readLong();
+                array[1] = deserializer.readLong();
+                array[0] = deserializer.readLong();
 
-                BigInteger v1 = new BigInteger(1, BytesUtil.longToBytes(l1));
-                BigInteger v2 = new BigInteger(1, BytesUtil.longToBytes(l2));
-                BigInteger v3 = new BigInteger(1, BytesUtil.longToBytes(l3));
-                BigInteger v4 = new BigInteger(1, BytesUtil.longToBytes(l4));
-
-                value = new BigDecimal(v1.add(v2.shiftLeft(64)).add(v3.shiftLeft(64 * 2)).add(v4.shiftLeft(64 * 3)));
+                BigInteger v1 = new BigInteger(BytesUtil.longsToBytes(array));
+                value = new BigDecimal(v1);
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
