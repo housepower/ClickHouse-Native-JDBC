@@ -44,7 +44,7 @@ public abstract class AbstractITest implements Serializable {
 
     protected String getJdbcUrl(Object... params) {
         StringBuilder sb = new StringBuilder();
-        sb.append("jdbc:clickhouse://127.0.0.1:").append(SERVER_PORT);
+        sb.append("jdbc:clickhouse://127.0.0.1:").append(SERVER_PORT).append("/tmp");
         for (int i = 0; i + 1 < params.length; i++) {
             if (i == 0) {
                 sb.append("?");

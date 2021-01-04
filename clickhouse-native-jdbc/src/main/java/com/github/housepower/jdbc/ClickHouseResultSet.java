@@ -25,7 +25,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.ZonedDateTime;
 import java.util.Calendar;
 
 import com.github.housepower.jdbc.data.Block;
@@ -34,6 +33,7 @@ import com.github.housepower.jdbc.log.Logger;
 import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.misc.CheckedIterator;
 import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.jdbc.misc.ZonedTimestamp;
 import com.github.housepower.jdbc.protocol.DataResponse;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
@@ -225,8 +225,7 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (data == null) {
             return null;
         }
-        ZonedDateTime zdt = (ZonedDateTime) data;
-        return new Timestamp(zdt.toEpochSecond()*1000);
+        return (Timestamp) data;
     }
 
     @Override
@@ -235,9 +234,7 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (data == null) {
             return null;
         }
-        ZonedDateTime zdt = (ZonedDateTime) data;
-        ZonedDateTime zzdt = zdt.withZoneSameLocal(cal.getTimeZone().toZoneId());
-        return new Timestamp(zzdt.toEpochSecond()*1000);
+        return (Timestamp) data;
     }
 
     @Override
@@ -301,8 +298,10 @@ public class ClickHouseResultSet implements SQLResultSet {
                 "No row information was obtained. You must call ResultSet.next() before that.");
         IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
         if (column.type().sqlTypeId() == Types.TIMESTAMP) {
-            ZonedDateTime zdt = (ZonedDateTime) column.value((lastFetchRowIdx = currentRowNum));
-            return new Timestamp(zdt.toEpochSecond()*1000);
+            ZonedTimestamp zts = (ZonedTimestamp) column.value((lastFetchRowIdx = currentRowNum));
+            Timestamp t = new Timestamp(zts.getTime());
+            t.setNanos(zts.getNanos());
+            return t;
         }
         return column.value((lastFetchRowIdx = currentRowNum));
     }

@@ -14,26 +14,33 @@
 
 package com.github.housepower.jdbc.statement;
 
-import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.misc.DateTimeUtil;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
-
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Date;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Struct;
+import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Matcher;
 
+import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.jdbc.connect.NativeContext;
+import com.github.housepower.jdbc.misc.DateTimeUtil;
+import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.jdbc.misc.ZonedTimestamp;
+import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
+
 public abstract class AbstractPreparedStatement extends ClickHouseStatement implements SQLPreparedStatement {
 
     private final String[] queryParts;
     private final DateTimeFormatter dateFmt;
     private final DateTimeFormatter timestampFmt;
+    protected final ZoneId tz;
 
     protected Object[] parameters;
 
@@ -43,7 +50,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         if (queryParts != null && queryParts.length > 0)
             this.parameters = new Object[queryParts.length];
 
-        ZoneId tz = DateTimeUtil.chooseTimeZone(nativeContext.serverCtx());
+        this.tz = DateTimeUtil.chooseTimeZone(nativeContext.serverCtx());
         this.dateFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ROOT).withZone(tz);
         this.timestampFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ROOT).withZone(tz);
     }
@@ -90,7 +97,8 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void setTimestamp(int index, Timestamp x) throws SQLException {
-        setObject(index, x);
+        ZonedTimestamp zdt = new ZonedTimestamp(x, this.tz);
+        setObject(index, zdt);
     }
 
     @Override
