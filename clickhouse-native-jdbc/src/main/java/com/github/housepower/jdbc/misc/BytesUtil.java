@@ -25,6 +25,20 @@ public class BytesUtil {
         return result;
     }
 
+
+    public static byte[] longsToBytes(final long []longArray) {
+        byte[] result = new byte[Long.BYTES * longArray.length];
+        for (int index = 0; index < longArray.length; index++) {
+            long l = longArray[index];
+
+            for (int i = Long.BYTES - 1; i >= 0; i--) {
+                result[index * Long.BYTES + i] = (byte) (l & 0xFF);
+                l >>= Byte.SIZE;
+            }
+        }
+        return result;
+    }
+
     public static long bytesToLong(final byte[] b) {
         long result = 0;
         for (int i = 0; i < Long.BYTES; i++) {
