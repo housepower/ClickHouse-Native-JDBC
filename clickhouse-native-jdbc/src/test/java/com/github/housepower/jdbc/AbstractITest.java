@@ -34,6 +34,7 @@ public abstract class AbstractITest implements Serializable {
     protected static final int SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
     protected static final String SERVER_USER = System.getProperty("CLICK_HOUSE_SERVER_USER", "default");
     protected static final String SERVER_PASSWORD = System.getProperty("CLICK_HOUSE_SERVER_PASSWORD", "");
+    protected static final String SERVER_DATABASE = System.getProperty("CLICK_HOUSE_SERVER_DATABASE");
 
     /**
      * just for compatible with scala
@@ -45,6 +46,9 @@ public abstract class AbstractITest implements Serializable {
     protected String getJdbcUrl(Object... params) {
         StringBuilder sb = new StringBuilder();
         sb.append("jdbc:clickhouse://127.0.0.1:").append(SERVER_PORT);
+        if (SERVER_DATABASE != null) {
+            sb.append("/").append(SERVER_DATABASE);
+        }
         for (int i = 0; i + 1 < params.length; i++) {
             if (i == 0) {
                 sb.append("?");
