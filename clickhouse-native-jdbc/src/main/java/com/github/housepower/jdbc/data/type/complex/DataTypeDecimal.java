@@ -207,4 +207,9 @@ public class DataTypeDecimal implements IDataType {
         }
         return data;
     }
+
+    @Override
+    public boolean isSigned() {
+        return true;
+    }
 }

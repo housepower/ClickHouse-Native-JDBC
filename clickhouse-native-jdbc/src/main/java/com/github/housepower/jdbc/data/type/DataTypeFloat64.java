@@ -90,4 +90,9 @@ public class DataTypeFloat64 implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().doubleValue();
     }
+
+    @Override
+    public boolean isSigned() {
+        return true;
+    }
 }

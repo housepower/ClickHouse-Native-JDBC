@@ -105,4 +105,9 @@ public class DataTypeInt32 implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue() & 0xffffffff;
     }
+
+    @Override
+    public boolean isSigned() {
+        return !isUnsigned;
+    }
 }
