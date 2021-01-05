@@ -14,22 +14,22 @@
 
 package com.github.housepower.jdbc.misc;
 
-public class Either<T> {
+public class Switcher<T> {
     private final T left;
     private final T right;
 
-    private boolean isLeft = true;
+    private boolean isRight = true;
 
-    public Either(T left, T right) {
+    public Switcher(T left, T right) {
         this.left = left;
         this.right = right;
     }
 
     public void select(boolean isRight) {
-        isLeft = !isRight;
+        this.isRight = isRight;
     }
 
     public T get() {
-        return isLeft ? left : right;
+        return this.isRight ? right : left;
     }
 }

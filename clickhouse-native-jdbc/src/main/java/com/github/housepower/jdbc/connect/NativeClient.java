@@ -56,7 +56,7 @@ public class NativeClient {
 
             return new NativeClient(socket,
                     new BinarySerializer(new SocketBuffedWriter(socket), true),
-                    new BinaryDeserializer(new SocketBuffedReader(socket)));
+                    new BinaryDeserializer(new SocketBuffedReader(socket), true));
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
