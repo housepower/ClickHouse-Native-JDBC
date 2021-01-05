@@ -129,8 +129,8 @@ public class PreparedStatementITest extends AbstractITest {
         LocalDateTime serverDateTime = date.atTime(9, 43, 12);
 
         LocalDateTime clientDateTime = DateTimeUtil.convertTimeZone(serverDateTime, SERVER_TZ, CLIENT_TZ);
-        Calendar server_tz_cal = Calendar.getInstance(getTimeZone(SERVER_TZ));
-        Calendar client_tz_cal = Calendar.getInstance(getTimeZone(CLIENT_TZ));
+        Calendar server_tz_cal = Calendar.getInstance(getTimeZone(SERVER_TZ), Locale.ROOT);
+        Calendar client_tz_cal = Calendar.getInstance(getTimeZone(CLIENT_TZ), Locale.ROOT);
         String dateLiteral = date.format(dateFmt);
         String clientDateTimeLiteral = clientDateTime.format(dateTimeFmt);
         String serverDateTimeLiteral = serverDateTime.format(dateTimeFmt);
