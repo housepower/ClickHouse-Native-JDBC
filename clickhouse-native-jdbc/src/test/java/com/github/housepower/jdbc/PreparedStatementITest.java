@@ -21,8 +21,10 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Locale;
 
+import static java.util.TimeZone.getTimeZone;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PreparedStatementITest extends AbstractITest {
@@ -127,6 +129,8 @@ public class PreparedStatementITest extends AbstractITest {
         LocalDateTime serverDateTime = date.atTime(9, 43, 12);
 
         LocalDateTime clientDateTime = DateTimeUtil.convertTimeZone(serverDateTime, SERVER_TZ, CLIENT_TZ);
+        Calendar server_tz_cal = Calendar.getInstance(getTimeZone(SERVER_TZ));
+        Calendar client_tz_cal = Calendar.getInstance(getTimeZone(CLIENT_TZ));
         String dateLiteral = date.format(dateFmt);
         String clientDateTimeLiteral = clientDateTime.format(dateTimeFmt);
         String serverDateTimeLiteral = serverDateTime.format(dateTimeFmt);
@@ -156,9 +160,17 @@ public class PreparedStatementITest extends AbstractITest {
             assertEquals(date.toEpochDay(), rs.getDate(3).toLocalDate().toEpochDay());
             assertEquals(date.toEpochDay(), rs.getDate(4).toLocalDate().toEpochDay());
             assertEquals(clientDateTime, rs.getTimestamp(5).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(5, server_tz_cal).toLocalDateTime());
+            assertEquals(serverDateTime, rs.getTimestamp(5, client_tz_cal).toLocalDateTime());
             assertEquals(clientDateTime, rs.getTimestamp(6).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(6, server_tz_cal).toLocalDateTime());
+            assertEquals(serverDateTime, rs.getTimestamp(6, client_tz_cal).toLocalDateTime());
             assertEquals(clientDateTime, rs.getTimestamp(7).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(7, server_tz_cal).toLocalDateTime());
+            assertEquals(serverDateTime, rs.getTimestamp(7, client_tz_cal).toLocalDateTime());
             assertEquals(clientDateTime, rs.getTimestamp(8).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(8, server_tz_cal).toLocalDateTime());
+            assertEquals(serverDateTime, rs.getTimestamp(8, client_tz_cal).toLocalDateTime());
             assertFalse(rs.next());
         });
 
@@ -180,9 +192,17 @@ public class PreparedStatementITest extends AbstractITest {
             assertEquals(date.toEpochDay(), rs.getDate(3).toLocalDate().toEpochDay());
             assertEquals(date.toEpochDay(), rs.getDate(4).toLocalDate().toEpochDay());
             assertEquals(clientDateTime, rs.getTimestamp(5).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(5, server_tz_cal).toLocalDateTime());
+            assertEquals(serverDateTime, rs.getTimestamp(5, client_tz_cal).toLocalDateTime());
             assertEquals(clientDateTime, rs.getTimestamp(6).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(6, server_tz_cal).toLocalDateTime());
+            assertEquals(serverDateTime, rs.getTimestamp(6, client_tz_cal).toLocalDateTime());
             assertEquals(clientDateTime, rs.getTimestamp(7).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(7, server_tz_cal).toLocalDateTime());
+            assertEquals(serverDateTime, rs.getTimestamp(7, client_tz_cal).toLocalDateTime());
             assertEquals(clientDateTime, rs.getTimestamp(8).toLocalDateTime());
+            assertEquals(clientDateTime, rs.getTimestamp(8, server_tz_cal).toLocalDateTime());
+            assertEquals(serverDateTime, rs.getTimestamp(8, client_tz_cal).toLocalDateTime());
             assertFalse(rs.next());
         }, "use_client_time_zone", true);
     }

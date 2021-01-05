@@ -28,7 +28,7 @@ import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.misc.ZonedTimestamp;
+import com.github.housepower.jdbc.misc.TimeZonedTimestamp;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
@@ -133,13 +133,13 @@ public class DataTypeDateTime64 implements IDataType {
         Validate.isTrue(lexer.character() == ')');
 
         ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hours, minutes, second, nanos, tz);
-        ZonedTimestamp zts = new ZonedTimestamp(Timestamp.from(zdt.toInstant()), tz);
+        TimeZonedTimestamp zts = new TimeZonedTimestamp(Timestamp.from(zdt.toInstant()), tz);
         return zts;
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
-        ZonedTimestamp timestamp = (ZonedTimestamp) data;
+        TimeZonedTimestamp timestamp = (TimeZonedTimestamp) data;
         long epochSeconds = timestamp.getTime()/1000L;
         int nanos = timestamp.getNanos();
         long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
@@ -152,15 +152,15 @@ public class DataTypeDateTime64 implements IDataType {
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);
 
-        ZonedTimestamp timestamp = new ZonedTimestamp(epochSeconds * 1000, nanos, tz);
+        TimeZonedTimestamp timestamp = new TimeZonedTimestamp(epochSeconds * 1000, nanos, tz);
         return timestamp;
     }
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
-        ZonedTimestamp[] data = new ZonedTimestamp[rows];
+        TimeZonedTimestamp[] data = new TimeZonedTimestamp[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = (ZonedTimestamp) deserializeBinary(deserializer);
+            data[row] = (TimeZonedTimestamp) deserializeBinary(deserializer);
         }
         return data;
     }

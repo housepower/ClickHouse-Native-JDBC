@@ -32,7 +32,7 @@ import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.misc.ZonedTimestamp;
+import com.github.housepower.jdbc.misc.TimeZonedTimestamp;
 import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
 
 public abstract class AbstractPreparedStatement extends ClickHouseStatement implements SQLPreparedStatement {
@@ -97,7 +97,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void setTimestamp(int index, Timestamp x) throws SQLException {
-        ZonedTimestamp zdt = new ZonedTimestamp(x, this.tz);
+        TimeZonedTimestamp zdt = new TimeZonedTimestamp(x, this.tz);
         setObject(index, zdt);
     }
 
