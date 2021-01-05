@@ -30,13 +30,15 @@ class ClickHouseResultSetMetaDataITest extends AbstractITest {
                                          .builder(6, ((ClickHouseConnection) connection).serverContext())
                                          .cfg(((ClickHouseConnection) connection).cfg())
                                          .columnNames("a1", "a2", "a3", "a4", "a5", "a6")
-                                         .columnTypes("String", "UInt32", "Int32", "Float32", "Float64", "Decimal(76, 26)")
+                                         .columnTypes("String", "UInt32", "Int64", "Float32", "Float64", "Decimal(76, 26)")
                                          .build();
 
             assertEquals("a1", rs.getMetaData().getColumnName(1));
 
-            assertEquals(true, rs.getMetaData().isSigned(2));
-            assertEquals(false, rs.getMetaData().isSigned(3));
+            assertEquals(false, rs.getMetaData().isSigned(2));
+            assertEquals(true, rs.getMetaData().isSigned(3));
+            assertEquals(true, rs.getMetaData().isSigned(4));
+            assertEquals(true, rs.getMetaData().isSigned(5));
 
             assertEquals(8, rs.getMetaData().getPrecision(4));
             assertEquals(17, rs.getMetaData().getPrecision(5));

@@ -104,4 +104,9 @@ public class DataTypeInt8 implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().byteValue();
     }
+
+    @Override
+    public boolean isSigned() {
+        return !isUnsigned;
+    }
 }

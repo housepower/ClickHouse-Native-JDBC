@@ -57,4 +57,8 @@ public interface IDataType {
     default String[] getAliases() {
         return new String[0];
     }
+
+    default boolean isSigned() {
+        return false;
+    }
 }

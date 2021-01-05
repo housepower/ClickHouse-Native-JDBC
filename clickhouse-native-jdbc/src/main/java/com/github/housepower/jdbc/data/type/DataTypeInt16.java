@@ -104,4 +104,9 @@ public class DataTypeInt16 implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().shortValue();
     }
+
+    @Override
+    public boolean isSigned() {
+        return !isUnsigned;
+    }
 }
