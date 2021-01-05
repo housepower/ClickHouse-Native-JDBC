@@ -33,7 +33,7 @@ import com.github.housepower.jdbc.log.Logger;
 import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.misc.CheckedIterator;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.misc.ZonedTimestamp;
+import com.github.housepower.jdbc.misc.TimeZonedTimestamp;
 import com.github.housepower.jdbc.protocol.DataResponse;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
@@ -224,8 +224,11 @@ public class ClickHouseResultSet implements SQLResultSet {
         Object data = getObject(index);
         if (data == null) {
             return null;
-        }
-        return (Timestamp) data;
+        }        
+        Object o = getObjectInternal(index);
+        TimeZonedTimestamp zts = (TimeZonedTimestamp) o;
+        Timestamp t = zts.convert(null);
+        return t;
     }
 
     @Override
@@ -234,7 +237,10 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (data == null) {
             return null;
         }
-        return (Timestamp) data;
+        Object o = getObjectInternal(index);
+        TimeZonedTimestamp zts = (TimeZonedTimestamp) o;
+        Timestamp t = zts.convert(cal);
+        return t;
     }
 
     @Override
@@ -292,17 +298,23 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public Object getObject(int index) throws SQLException {
+        Object o = getObjectInternal(index);
+        IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
+        if (column.type().sqlTypeId() == Types.TIMESTAMP) {
+            TimeZonedTimestamp zts = (TimeZonedTimestamp) o;
+            Timestamp t = new Timestamp(zts.getTime());
+            t.setNanos(zts.getNanos());
+            return t;
+        }
+        return column.value((lastFetchRowIdx = currentRowNum));
+    }
+
+    private Object getObjectInternal(int index) throws SQLException {
         LOG.trace("get object at row: {}, column: {} from block with column count: {}, row count: {}",
                 currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
         Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
                 "No row information was obtained. You must call ResultSet.next() before that.");
         IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
-        if (column.type().sqlTypeId() == Types.TIMESTAMP) {
-            ZonedTimestamp zts = (ZonedTimestamp) column.value((lastFetchRowIdx = currentRowNum));
-            Timestamp t = new Timestamp(zts.getTime());
-            t.setNanos(zts.getNanos());
-            return t;
-        }
         return column.value((lastFetchRowIdx = currentRowNum));
     }
 

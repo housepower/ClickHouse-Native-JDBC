@@ -26,7 +26,7 @@ import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.misc.ZonedTimestamp;
+import com.github.housepower.jdbc.misc.TimeZonedTimestamp;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
@@ -106,24 +106,24 @@ public class DataTypeDateTime implements IDataType {
         Validate.isTrue(lexer.character() == '\'');
 
         ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hours, minutes, seconds, 0, tz);
-        return new ZonedTimestamp(zdt.toEpochSecond()*1000, tz);
+        return new TimeZonedTimestamp(zdt.toEpochSecond()*1000, tz);
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt((int) (((ZonedTimestamp) data).getTime() / 1000L));
+        serializer.writeInt((int) (((TimeZonedTimestamp) data).getTime() / 1000L));
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new ZonedTimestamp(deserializer.readInt() * 1000L, tz);
+        return new TimeZonedTimestamp(deserializer.readInt() * 1000L, tz);
     }
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        ZonedTimestamp[] data = new ZonedTimestamp[rows];
+        TimeZonedTimestamp[] data = new TimeZonedTimestamp[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = (ZonedTimestamp) deserializeBinary(deserializer);
+            data[row] = (TimeZonedTimestamp) deserializeBinary(deserializer);
         }
         return data;
     }
