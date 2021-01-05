@@ -117,4 +117,9 @@ public class DataTypeInt64 implements IDataType {
     public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue();
     }
+
+    @Override
+    public boolean isSigned() {
+        return !isUnsigned;
+    }
 }
