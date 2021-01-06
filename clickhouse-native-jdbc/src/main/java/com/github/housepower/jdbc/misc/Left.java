@@ -16,6 +16,7 @@ package com.github.housepower.jdbc.misc;
 
 import com.github.housepower.jdbc.exception.InvalidOperationException;
 
+import java.util.Locale;
 import java.util.function.Function;
 
 public class Left<L, R> implements Either<L, R> {
@@ -53,6 +54,6 @@ public class Left<L, R> implements Either<L, R> {
 
     @Override
     public String toString() {
-        return String.format("Left(%s)", value);
+        return String.format(Locale.ROOT, "Left(%s)", value);
     }
 }
