@@ -22,8 +22,8 @@ import java.util.Arrays;
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.Block;
+import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.misc.TimeZonedTimestamp;
 import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
@@ -69,7 +69,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     @Override
     public void setObject(int parameterIndex, Object x) throws SQLException {
         if (x instanceof Timestamp) {
-            x = new TimeZonedTimestamp((Timestamp) x, tz);
+            x = DateTimeUtil.fromTimestampTz((Timestamp) x, tz);
         }
         initBlockIfPossible();
         block.setPlaceholderObject(parameterIndex - 1, x);
