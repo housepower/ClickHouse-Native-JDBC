@@ -221,24 +221,22 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public Timestamp getTimestamp(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getObjectInternal(index);
         if (data == null) {
             return null;
-        }        
-        Object o = getObjectInternal(index);
-        TimeZonedTimestamp zts = (TimeZonedTimestamp) o;
+        }
+        TimeZonedTimestamp zts = (TimeZonedTimestamp) data;
         Timestamp t = zts.convert(null);
         return t;
     }
 
     @Override
     public Timestamp getTimestamp(int index, Calendar cal) throws SQLException {
-        Object data = getObject(index);
+        Object data = getObjectInternal(index);
         if (data == null) {
             return null;
         }
-        Object o = getObjectInternal(index);
-        TimeZonedTimestamp zts = (TimeZonedTimestamp) o;
+        TimeZonedTimestamp zts = (TimeZonedTimestamp) data;
         Timestamp t = zts.convert(cal);
         return t;
     }
