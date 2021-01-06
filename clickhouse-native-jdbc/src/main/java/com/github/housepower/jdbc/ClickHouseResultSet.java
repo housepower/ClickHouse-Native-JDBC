@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 
 import com.github.housepower.jdbc.data.Block;
@@ -32,8 +33,8 @@ import com.github.housepower.jdbc.data.IColumn;
 import com.github.housepower.jdbc.log.Logger;
 import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.misc.CheckedIterator;
+import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.misc.TimeZonedTimestamp;
 import com.github.housepower.jdbc.protocol.DataResponse;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
@@ -225,8 +226,8 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (data == null) {
             return null;
         }
-        TimeZonedTimestamp zts = (TimeZonedTimestamp) data;
-        Timestamp t = zts.convert(null);
+        ZonedDateTime zts = (ZonedDateTime) data;
+        Timestamp t = DateTimeUtil.convert(zts, null);
         return t;
     }
 
@@ -236,8 +237,8 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (data == null) {
             return null;
         }
-        TimeZonedTimestamp zts = (TimeZonedTimestamp) data;
-        Timestamp t = zts.convert(cal);
+        ZonedDateTime zts = (ZonedDateTime) data;
+        Timestamp t = DateTimeUtil.convert(zts, cal.getTimeZone().toZoneId());
         return t;
     }
 
@@ -302,9 +303,8 @@ public class ClickHouseResultSet implements SQLResultSet {
         }
         IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
         if (column.type().sqlTypeId() == Types.TIMESTAMP) {
-            TimeZonedTimestamp zts = (TimeZonedTimestamp) o;
-            Timestamp t = new Timestamp(zts.getTime());
-            t.setNanos(zts.getNanos());
+            ZonedDateTime zts = (ZonedDateTime) o;
+            Timestamp t = DateTimeUtil.convert(zts, null);
             return t;
         }
         return column.value((lastFetchRowIdx = currentRowNum));
