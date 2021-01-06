@@ -297,6 +297,9 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public Object getObject(int index) throws SQLException {
         Object o = getObjectInternal(index);
+        if (o == null) {
+            return null;
+        }
         IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
         if (column.type().sqlTypeId() == Types.TIMESTAMP) {
             TimeZonedTimestamp zts = (TimeZonedTimestamp) o;
