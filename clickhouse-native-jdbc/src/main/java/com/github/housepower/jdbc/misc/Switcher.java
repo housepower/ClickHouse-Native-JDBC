@@ -14,25 +14,22 @@
 
 package com.github.housepower.jdbc.misc;
 
-import java.util.function.Function;
+public class Switcher<T> {
+    private final T left;
+    private final T right;
 
-public interface Either<L, R> {
+    private boolean isRight = true;
 
-    static <L1, R1> Either<L1, R1> left(L1 value) {
-        return new Left<>(value);
+    public Switcher(T left, T right) {
+        this.left = left;
+        this.right = right;
     }
 
-    static <L1, R1> Either<L1, R1> right(R1 value) {
-        return new Right<>(value);
+    public void select(boolean isRight) {
+        this.isRight = isRight;
     }
 
-    boolean isRight();
-
-    <R1> Either<L, R1> map(Function<R, R1> f);
-
-    <R1> Either<L, R1> flatMap(Function<R, Either<L, R1>> f);
-
-    L getLeft();
-
-    R getRight();
+    public T get() {
+        return this.isRight ? right : left;
+    }
 }

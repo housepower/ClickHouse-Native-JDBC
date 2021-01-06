@@ -12,27 +12,19 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.misc;
+package com.github.housepower.jdbc.exception;
 
-import java.util.function.Function;
+public class InvalidOperationException extends ClickHouseException {
 
-public interface Either<L, R> {
-
-    static <L1, R1> Either<L1, R1> left(L1 value) {
-        return new Left<>(value);
+    public InvalidOperationException(String message) {
+        super(message);
     }
 
-    static <L1, R1> Either<L1, R1> right(R1 value) {
-        return new Right<>(value);
+    public InvalidOperationException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    boolean isRight();
-
-    <R1> Either<L, R1> map(Function<R, R1> f);
-
-    <R1> Either<L, R1> flatMap(Function<R, Either<L, R1>> f);
-
-    L getLeft();
-
-    R getRight();
+    public InvalidOperationException(Throwable cause) {
+        super(cause);
+    }
 }
