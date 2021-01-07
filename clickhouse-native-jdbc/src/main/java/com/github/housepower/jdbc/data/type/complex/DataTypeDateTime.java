@@ -18,8 +18,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
@@ -41,16 +40,15 @@ public class DataTypeDateTime implements IDataType {
         return new DataTypeDateTime("DateTime", serverContext);
     };
 
-    // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
-    // we should ensure DON'T modify it anywhere.
-    private static final Timestamp DEFAULT_VALUE = new Timestamp(0);
-    private final ZoneId tz;
-
+    private static final LocalDateTime EPOCH_LOCAL_DT = LocalDateTime.of(1970, 1, 1, 0, 0);
     private final String name;
+    private final ZoneId tz;
+    private final ZonedDateTime defaultValue;
 
     public DataTypeDateTime(String name, NativeContext.ServerContext serverContext) {
         this.name = name;
         this.tz = DateTimeUtil.chooseTimeZone(serverContext);
+        this.defaultValue = EPOCH_LOCAL_DT.atZone(tz);
     }
 
     @Override
@@ -65,11 +63,16 @@ public class DataTypeDateTime implements IDataType {
 
     @Override
     public Object defaultValue() {
-        return DEFAULT_VALUE;
+        return defaultValue;
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
+        return ZonedDateTime.class;
+    }
+
+    @Override
+    public Class jdbcJavaType() {
         return Timestamp.class;
     }
 

@@ -47,7 +47,7 @@ public class DataTypeNothing implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return Object.class;
     }
 

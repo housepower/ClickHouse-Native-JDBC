@@ -29,7 +29,7 @@ import java.time.LocalDate;
 public class DataTypeDate implements IDataType {
     // Since `Date` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
     // we should ensure DON'T modify it anywhere.
-    private static final Date DEFAULT_VALUE = Date.valueOf(LocalDate.ofEpochDay(0));
+    private static final LocalDate DEFAULT_VALUE = LocalDate.ofEpochDay(0);
 
     public DataTypeDate() {
     }
@@ -50,7 +50,12 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
+        return LocalDate.class;
+    }
+
+    @Override
+    public Class jdbcJavaType() {
         return Date.class;
     }
 

@@ -73,7 +73,7 @@ public class DataTypeArray implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return Array.class;
     }
 

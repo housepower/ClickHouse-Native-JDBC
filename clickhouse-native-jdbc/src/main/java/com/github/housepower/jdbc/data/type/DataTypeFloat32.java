@@ -43,7 +43,7 @@ public class DataTypeFloat32 implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return Float.class;
     }
 

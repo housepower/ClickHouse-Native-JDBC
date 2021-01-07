@@ -83,7 +83,7 @@ public class DataTypeTuple implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return Struct.class;
     }
 
