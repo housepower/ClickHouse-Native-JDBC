@@ -88,7 +88,7 @@ public class SQLLexer {
         }
 
         if (pos + 1 < data.length()
-            // @formatter:off
+                // @formatter:off
                 && (isHex ? (data.charAt(pos) == 'p' || data.charAt(pos) == 'P')
                           : (data.charAt(pos) == 'e' || data.charAt(pos) == 'E'))) {
                 // @formatter:on

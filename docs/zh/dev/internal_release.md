@@ -1,7 +1,8 @@
 内部发布手册
 ==========
 
-::: tip 内部发布是指部署到私服 Nexus 仓库. 请确保你有公司私服的访问权限.
+::: tip
+内部发布是指部署到私服 Nexus 仓库. 请确保你有公司私服的访问权限.
 :::
 
 ## 设置私服 Nexus 认证
@@ -33,8 +34,8 @@ mvn clean deploy -Prelease -DskipTests -DskipITs \
     -Ddeploy.repo.release.url={REPALCE_ME}
 ```
 
-::: tip 用以下命令强制刷新 SNAPSHOT 依赖:
-
+::: tip
+用以下命令强制刷新 SNAPSHOT 依赖:
 - Maven: `mvn clean compile --update-snapshots`
 - Gradle: `gradlew clean build --refresh-dependencies`
-  :::
+:::

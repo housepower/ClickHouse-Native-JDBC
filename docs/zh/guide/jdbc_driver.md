@@ -2,14 +2,13 @@
 
 ### 使用要求
 
-- Java 8/11.
+- Java 8/11. 
 
 **注意:** 我们只基于 Java LTS 版本做测试。
 
 ### 导入包
 
 - Gradle
-
 ```groovy
 // (推荐) shaded 版本，自 2.3-stable 起可用
 compile "com.github.housepower:clickhouse-native-jdbc-shaded:${clickhouse_native_jdbc_version}"
@@ -36,6 +35,7 @@ compile "com.github.housepower:clickhouse-native-jdbc:${clickhouse_native_jdbc_v
 </dependency>
 ```
 
+
 ### 示例
 
 查询示例，更多参考 [SimpleQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/SimpleQuery.java)
@@ -53,8 +53,7 @@ try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.
 }
 ```
 
-DDL、DML
-示例，更多参考 [ExecuteQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/ExecuteQuery.java)
+DDL、DML 示例，更多参考 [ExecuteQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/ExecuteQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {

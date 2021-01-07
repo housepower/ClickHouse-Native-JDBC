@@ -1,27 +1,20 @@
 Benchmark
 =========
-Benchmarks are run by the `github-workflow` docker integration-test,
-eg [here](https://pipelines.actions.githubusercontent.com/QbHe5hNOfFaRrXVIS27533x1xALCRW60s95Fnk3uNRnLoX4ScD/_apis/pipelines/1/runs/12/signedlogcontent/3?urlExpires=2020-08-02T12%3A52%3A27.0078520Z&urlSigningMethod=HMACV1&urlSignature=Zn3fh71kxFaHRNgjA8OZZVGUz0It45KTCe7DR8MeVtU%3D)
-
-- All benchmark codes could be seen in
-  the [test code directory](https://github.com/housepower/ClickHouse-Native-JDBC/clickhouse-native-jdbc/src/test/java/com/github/housepower/jdbc/benchmark)
-  , you can do the bench on your machine too.
-- Both  `Clickhouse-Native-JDBC` and `clickhouse-jdbc` are good jdbc clients. And `clickhouse-jdbc` are maintained
-  better, this benchmarks only show your some difference, users could choose freely according to their needs.
+Benchmarks are run by the `github-workflow` docker integration-test, eg [here](https://pipelines.actions.githubusercontent.com/QbHe5hNOfFaRrXVIS27533x1xALCRW60s95Fnk3uNRnLoX4ScD/_apis/pipelines/1/runs/12/signedlogcontent/3?urlExpires=2020-08-02T12%3A52%3A27.0078520Z&urlSigningMethod=HMACV1&urlSignature=Zn3fh71kxFaHRNgjA8OZZVGUz0It45KTCe7DR8MeVtU%3D)
+- All benchmark codes could be seen in the [test code directory](https://github.com/housepower/ClickHouse-Native-JDBC/clickhouse-native-jdbc/src/test/java/com/github/housepower/jdbc/benchmark), you can do the bench on your machine too.
+- Both  `Clickhouse-Native-JDBC` and `clickhouse-jdbc` are good jdbc clients. And `clickhouse-jdbc` are maintained better, 
+    this benchmarks only show your some difference, users could choose freely according to their needs.
 - The result's score means the avg_time to process one operation, lower is better.
-- With string type of JDBC batch insertion, `Clickhouse-Native-JDBC` and `clickhouse-jdbc` are almost the similar
-  performance.
-- With other types of JDBC batch insertion or selection, `Clickhouse-Native-JDBC` may be 1~4 times better
-  than `clickhouse-jdbc`.
-- `clickhouse-jdbc` RowBinary insert performs similar performance vs `Clickhouse-Native-JDBC`, it's not jdbc standared
-  yet it's pretty efficient for the client because it sends data by row stream rather than one big block, but it's not
-  columnar based and may cause the clickhouse-server CPU higher load (On my machine, this's maybe 3 times overload by
-  loop benchmark).
+- With string type of JDBC batch insertion, `Clickhouse-Native-JDBC` and `clickhouse-jdbc` are almost the similar performance.
+- With other types of JDBC batch insertion or selection, `Clickhouse-Native-JDBC` may be 1~4 times better than `clickhouse-jdbc`.
+- `clickhouse-jdbc` RowBinary insert performs similar performance vs `Clickhouse-Native-JDBC`, 
+    it's not jdbc standared yet it's pretty efficient for the client because it sends data by row stream rather than one big block,
+    but it's not columnar based and may cause the clickhouse-server CPU higher load (On my machine, this's maybe 3 times overload by loop benchmark).
 - Here are the benchmark Params:
     - `batchSize`: insert batch size.
     - `columnNum`: insert column number, used in the WideColumn/RowBinary benchmarks.
     - `selectNumber`: select row size.
-
+    
 ```
 2020-08-02T12:25:50.4413277Z Benchmark                                           (batchSize)  (columnNum)  (selectNumber)  Mode  Cnt      Score   Error  Units
 2020-08-02T12:25:50.4415993Z InsertIBenchmark.benchInsertHttp                         200000           20             N/A  avgt         364.841          ms/op

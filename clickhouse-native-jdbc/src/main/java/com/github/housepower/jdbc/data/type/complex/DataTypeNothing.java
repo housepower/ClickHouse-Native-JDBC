@@ -88,7 +88,7 @@ public class DataTypeNothing implements IDataType {
     @Override
     public String[] getAliases() {
         return new String[]{
-            "NULL"};
+                "NULL"};
     }
 
     @Override

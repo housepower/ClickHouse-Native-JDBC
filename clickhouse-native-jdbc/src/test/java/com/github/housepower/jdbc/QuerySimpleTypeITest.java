@@ -30,7 +30,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
         withNewConnection(connect -> {
             Statement statement = connect.createStatement();
             ResultSet rs = statement.executeQuery(
-                "SELECT toInt8(" + Byte.MIN_VALUE + ") as a , toUInt8(" + Byte.MAX_VALUE + ") as b");
+                    "SELECT toInt8(" + Byte.MIN_VALUE + ") as a , toUInt8(" + Byte.MAX_VALUE + ") as b");
 
             assertTrue(rs.next());
             assertEquals(Byte.MIN_VALUE, rs.getByte("a"));
@@ -43,7 +43,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
         withNewConnection(connect -> {
             Statement statement = connect.createStatement();
             ResultSet rs = statement
-                .executeQuery("SELECT toUInt8(" + 1 + "), toUInt8(" + 0 + ")");
+                    .executeQuery("SELECT toUInt8("+ 1 + "), toUInt8(" + 0 + ")");
 
             assertTrue(rs.next());
             assertEquals(Boolean.TRUE, rs.getBoolean(1));
@@ -56,7 +56,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
         withNewConnection(connect -> {
             Statement statement = connect.createStatement();
             ResultSet rs = statement
-                .executeQuery("SELECT toInt8(" + Byte.MIN_VALUE + "), toUInt8(" + Byte.MAX_VALUE + ")");
+                    .executeQuery("SELECT toInt8(" + Byte.MIN_VALUE + "), toUInt8(" + Byte.MAX_VALUE + ")");
 
             assertTrue(rs.next());
             assertEquals(Byte.MIN_VALUE, rs.getByte(1));
@@ -69,7 +69,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
         withNewConnection(connect -> {
             Statement statement = connect.createStatement();
             ResultSet rs = statement
-                .executeQuery("SELECT toInt16(" + Short.MIN_VALUE + "), toUInt16(" + Short.MAX_VALUE + ")");
+                    .executeQuery("SELECT toInt16(" + Short.MIN_VALUE + "), toUInt16(" + Short.MAX_VALUE + ")");
 
             assertTrue(rs.next());
             assertEquals(Short.MIN_VALUE, rs.getShort(1));
@@ -82,7 +82,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
         withNewConnection(connect -> {
             Statement statement = connect.createStatement();
             ResultSet rs = statement
-                .executeQuery("SELECT toInt32(" + Integer.MIN_VALUE + "), toUInt32(" + Integer.MAX_VALUE + ")");
+                    .executeQuery("SELECT toInt32(" + Integer.MIN_VALUE + "), toUInt32(" + Integer.MAX_VALUE + ")");
 
             assertTrue(rs.next());
             assertEquals(Integer.MIN_VALUE, rs.getInt(1));
@@ -106,7 +106,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
         withNewConnection(connect -> {
             Statement statement = connect.createStatement();
             ResultSet rs = statement
-                .executeQuery("SELECT toInt64(" + Long.MIN_VALUE + "), toUInt64(" + Long.MAX_VALUE + ")");
+                    .executeQuery("SELECT toInt64(" + Long.MIN_VALUE + "), toUInt64(" + Long.MAX_VALUE + ")");
 
             assertTrue(rs.next());
             assertEquals(Long.MIN_VALUE, rs.getLong(1));
@@ -119,7 +119,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
         withNewConnection(connect -> {
             Statement statement = connect.createStatement();
             ResultSet rs = statement
-                .executeQuery("SELECT toFloat32(" + Float.MIN_VALUE + "), toFloat32(" + Float.MAX_VALUE + ")");
+                    .executeQuery("SELECT toFloat32(" + Float.MIN_VALUE + "), toFloat32(" + Float.MAX_VALUE + ")");
 
             assertTrue(rs.next());
             assertEquals(Float.MIN_VALUE, rs.getFloat(1), 0.000000000001);
@@ -155,7 +155,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
         withNewConnection(connect -> {
             Statement statement = connect.createStatement();
             ResultSet rs = statement.executeQuery(
-                "SELECT number as a1, toString(number) as a2, now() as a3, today() as a4 from numbers(1)");
+                    "SELECT number as a1, toString(number) as a2, now() as a3, today() as a4 from numbers(1)");
 
             assertTrue(rs.next());
             ResultSetMetaData metaData = rs.getMetaData();

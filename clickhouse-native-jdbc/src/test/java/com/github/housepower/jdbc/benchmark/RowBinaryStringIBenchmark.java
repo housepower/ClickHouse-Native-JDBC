@@ -34,7 +34,7 @@ public class RowBinaryStringIBenchmark extends AbstractInsertIBenchmark {
             wideColumnPrepare(connection, columnType);
             String params = Strings.repeat("?, ", columnNum);
             PreparedStatement
-                pstmt = connection.prepareStatement("INSERT INTO " + getTableName() + " values(" + params.substring(0, params.length() - 2) + ")");
+                    pstmt = connection.prepareStatement("INSERT INTO " + getTableName() + " values(" + params.substring(0, params.length() - 2) + ")");
             for (int i = 0; i < batchSize; i++) {
                 for (int j = 0; j < columnNum; j++) {
                     pstmt.setObject(j + 1, j + 1 + "");

@@ -2,7 +2,6 @@ ClickHouse 数据类型
 ====================
 
 ## Version
-
 ```
 SELECT version()
 

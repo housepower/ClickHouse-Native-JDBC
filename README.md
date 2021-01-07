@@ -12,30 +12,27 @@ English | [简体中文](README_zh.md)
 
 ## [Home Page](https://housepower.github.io/ClickHouse-Native-JDBC/) | [GitHub](https://github.com/housepower/ClickHouse-Native-JDBC) | [Gitee](https://gitee.com/housepower/ClickHouse-Native-JDBC)
 
-A Native JDBC library for accessing [ClickHouse](https://clickhouse.yandex/) in Java, also provide a library for
+A Native JDBC library for accessing [ClickHouse](https://clickhouse.yandex/) in Java, also provide a library for 
 integrating with [Apache Spark](https://github.com/apache/spark/).
 
 ## CONTRIBUTE
 
-We welcome anyone that wants to help out in any way, whether that includes reporting problems, helping with
-documentations, or contributing code changes to fix bugs, add tests, or implement new features. Please
-follow [Contributing Guide](CONTRIBUTE.md).
+We welcome anyone that wants to help out in any way, whether that includes reporting problems, helping with documentations, or contributing code changes to fix bugs, add tests, or implement new features. Please follow [Contributing Guide](CONTRIBUTE.md).
 
-Supported by [JetBrains Open Source License](https://www.jetbrains.com/?from=ClickHouse-Native-JDBC) 2020-2021.
+Supported by [JetBrains Open Source License](https://www.jetbrains.com/?from=ClickHouse-Native-JDBC) 2020-2021. 
 
 ## JDBC Driver
 
 ### Requirements
 
-- Java 8/11.
+- Java 8/11. 
 
 **Notes:** We only do test with Java LTS versions.
 
 ### Differences from [yandex/clickhouse-jdbc](https://github.com/yandex/clickhouse-jdbc)
 
 * Data is organized and compressed by columns.
-* Implemented in the TCP Protocol, with higher performance than HTTP, here is
-  the [benchmark report](docs/dev/benchmark.md).
+* Implemented in the TCP Protocol, with higher performance than HTTP, here is the [benchmark report](docs/dev/benchmark.md).
 
 ### Limitations
 
@@ -46,7 +43,6 @@ Supported by [JetBrains Open Source License](https://www.jetbrains.com/?from=Cli
 ### Import
 
 - Gradle
-
 ```groovy
 // (recommended) shaded version, available since 2.3-stable
 compile "com.github.housepower:clickhouse-native-jdbc-shaded:${clickhouse_native_jdbc_version}"
@@ -80,8 +76,8 @@ compile "com.github.housepower:clickhouse-native-jdbc:${clickhouse_native_jdbc_v
 - Java 8, Scala 2.11/2.12, Spark 2.4.x
 - Or Java 8/11, Scala 2.12, Spark 3.0.x
 
-**Notes:** Spark 2.3.x(EOL) should also work fine. Actually we do test on both Java 8 and Java 11, but Spark official
-support on Java 11 since 3.0.0.
+**Notes:** Spark 2.3.x(EOL) should also work fine. Actually we do test on both Java 8 and Java 11, 
+but Spark official support on Java 11 since 3.0.0.
 
 ### Import
 

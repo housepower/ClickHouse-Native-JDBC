@@ -46,101 +46,101 @@ public class TestHarness extends AbstractITest {
 
     private void initAllTypes() {
         types.add(new DataTypeApply(
-            () -> "Int8",
-            (i) -> i % 128,
-            MAX_EXPR,
-            (rows) -> 127.0)
+                () -> "Int8",
+                (i) -> i % 128,
+                MAX_EXPR,
+                (rows) -> 127.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "Int16",
-            (i) -> i % 32768,
-            MAX_EXPR,
-            (rows) -> 32767.0)
+                () -> "Int16",
+                (i) -> i % 32768,
+                MAX_EXPR,
+                (rows) -> 32767.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "Int32",
-            (i) -> 3,
-            SUM_EXPR,
-            (rows) -> rows * 3.0)
+                () -> "Int32",
+                (i) -> 3,
+                SUM_EXPR,
+                (rows) -> rows * 3.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "Int64",
-            (i) -> 4,
-            SUM_EXPR,
-            (rows) -> rows * 4.0)
+                () -> "Int64",
+                (i) -> 4,
+                SUM_EXPR,
+                (rows) -> rows * 4.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "UInt8",
-            (i) -> i % 256,
-            MAX_EXPR,
-            (rows) -> 255.0)
+                () -> "UInt8",
+                (i) -> i % 256,
+                MAX_EXPR,
+                (rows) -> 255.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "UInt16",
-            (i) -> i % 65536,
-            MAX_EXPR,
-            (rows) -> 65535.0)
+                () -> "UInt16",
+                (i) -> i % 65536,
+                MAX_EXPR,
+                (rows) -> 65535.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "UInt32",
-            (i) -> 3,
-            SUM_EXPR,
-            (rows) -> rows * 3.0)
+                () -> "UInt32",
+                (i) -> 3,
+                SUM_EXPR,
+                (rows) -> rows * 3.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "UInt64",
-            (i) -> 4,
-            SUM_EXPR,
-            (rows) -> rows * 4.0)
+                () -> "UInt64",
+                (i) -> 4,
+                SUM_EXPR,
+                (rows) -> rows * 4.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "Float32",
-            (i) -> 5.0f,
-            SUM_EXPR,
-            (rows) -> rows * 5.0)
+                () -> "Float32",
+                (i) -> 5.0f,
+                SUM_EXPR,
+                (rows) -> rows * 5.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "Float64",
-            (i) -> 6.0,
-            SUM_EXPR,
-            (rows) -> rows * 6.0)
+                () -> "Float64",
+                (i) -> 6.0,
+                SUM_EXPR,
+                (rows) -> rows * 6.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "Nullable(Float64)",
-            (i) -> 6.0,
-            SUM_EXPR,
-            (rows) -> rows * 6.0)
+                () -> "Nullable(Float64)",
+                (i) -> 6.0,
+                SUM_EXPR,
+                (rows) -> rows * 6.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "String",
-            (i) -> "00" + i,
-            (col) -> "sum(toInt64(" + col + ") % 4)",
-            (rows) -> (rows / 4.0 * (1 + 2 + 3)))
+                () -> "String",
+                (i) -> "00" + i,
+                (col) -> "sum(toInt64(" + col + ") % 4)",
+                (rows) -> (rows / 4.0 * (1 + 2 + 3)))
         );
 
         types.add(new DataTypeApply(
-            () -> "DateTime",
-            (i) -> new Timestamp(i / 1000 * 1000),
-            MAX_EXPR,
-            (rows) -> new Timestamp(rows).getTime() / 1000 * 1.0)
+                () -> "DateTime",
+                (i) -> new Timestamp(i / 1000 * 1000),
+                MAX_EXPR,
+                (rows) -> new Timestamp(rows).getTime() / 1000 * 1.0)
         );
 
         types.add(new DataTypeApply(
-            () -> "Array(String)",
-            (i) -> new Object[]{"00" + i},
-            (col) -> "sum(toInt64(" + col + "[1]) % 4)",
-            (rows) -> (rows / 4.0 * (1 + 2 + 3)))
+                () -> "Array(String)",
+                (i) -> new Object[]{"00" + i},
+                (col) -> "sum(toInt64(" + col + "[1]) % 4)",
+                (rows) -> (rows / 4.0 * (1 + 2 + 3)))
         );
     }
 
@@ -170,7 +170,7 @@ public class TestHarness extends AbstractITest {
                 for (int i = 0; i < types.size(); i++) {
                     if (types.get(i).name.get().startsWith("Array(")) {
                         Array array =
-                            connection.createArrayOf("String", (Object[]) types.get(i).data.apply(row));
+                                connection.createArrayOf("String", (Object[]) types.get(i).data.apply(row));
                         stmt.setObject(i + 1, array);
                     } else {
                         stmt.setObject(i + 1, types.get(i).data.apply(row));
@@ -208,7 +208,7 @@ public class TestHarness extends AbstractITest {
                 String typeName = types.get(i).name.get();
                 Double result = rs.getDouble(i + 1);
                 assertEquals(results[i], result,
-                    () -> "Check Agg Error Type: " + typeName);
+                        () -> "Check Agg Error Type: " + typeName);
             }
         });
     }
@@ -226,18 +226,18 @@ public class TestHarness extends AbstractITest {
                         Number actually = (Number) (rs.getObject(i + 1));
 
                         assertEquals(expected.intValue(), actually.intValue(),
-                            () -> "Check Item Error Type: " + typeName + ", at row: " + r[0]);
+                                () -> "Check Item Error Type: " + typeName + ", at row: " + r[0]);
                         continue;
                     } else if (types.get(i).data.apply(r[0]) instanceof Object[]) {
                         Object[] expected = (Object[]) types.get(i).data.apply(r[0]);
                         Object[] actually = (Object[]) rs.getArray(i + 1).getArray();
 
                         assertArrayEquals(expected, actually,
-                            () -> "Check Item Error Type: " + typeName + ", at row: " + r[0]);
+                                () -> "Check Item Error Type: " + typeName + ", at row: " + r[0]);
                         continue;
                     }
                     assertEquals(types.get(i).data.apply(r[0]), rs.getObject(i + 1),
-                        () -> "Check Item Error Type: " + typeName + ", at row: " + r[0]);
+                            () -> "Check Item Error Type: " + typeName + ", at row: " + r[0]);
                 }
                 r[0]++;
             }
@@ -274,9 +274,9 @@ public class TestHarness extends AbstractITest {
         }
 
         return String.format(Locale.ROOT, "INSERT INTO %s (%s) VALUES (%s)",
-            tableName,
-            Joiner.on(",").join(cols),
-            Joiner.on(",").join(quotas));
+                tableName,
+                Joiner.on(",").join(cols),
+                Joiner.on(",").join(quotas));
     }
 
     public static class DataTypeApply {

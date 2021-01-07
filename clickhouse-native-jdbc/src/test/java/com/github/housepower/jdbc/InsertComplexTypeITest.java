@@ -180,9 +180,9 @@ public class InsertComplexTypeITest extends AbstractITest {
 
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_tuple Tuple(String, UInt8),"
-                + " tuple_array  Tuple(Array(Nullable(String)), Nullable(UInt8)),"
-                + " array_tuple Array(Tuple(UInt32, Nullable(String)) )"
-                + " )ENGINE=Log");
+                                   + " tuple_array  Tuple(Array(Nullable(String)), Nullable(UInt8)),"
+                                   + " array_tuple Array(Tuple(UInt32, Nullable(String)) )"
+                                   + " )ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES( ('test_string', 1), (['1'], 32), [(32, '1'), (22, NULL) ] )");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
             assertTrue(rs.next());
@@ -190,7 +190,7 @@ public class InsertComplexTypeITest extends AbstractITest {
                 new Object[]{"test_string", (short) (1)},
                 ((Struct) rs.getObject(1)).getAttributes());
 
-            Object[] objs = ((Struct) rs.getObject(2)).getAttributes();
+            Object []objs = ((Struct) rs.getObject(2)).getAttributes();
 
             ClickHouseArray arr = (ClickHouseArray) (objs[0]);
             assertArrayEquals(new Object[]{"1"}, (Object[]) arr.getArray());

@@ -44,9 +44,9 @@ public class ClickHouseDriver implements Driver {
         }
 
         ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
-            .withJdbcUrl(url)
-            .withProperties(properties)
-            .build();
+                .withJdbcUrl(url)
+                .withProperties(properties)
+                .build();
         return connect(url, cfg);
     }
 
@@ -60,9 +60,9 @@ public class ClickHouseDriver implements Driver {
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties properties) throws SQLException {
         ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
-            .withJdbcUrl(url)
-            .withProperties(properties)
-            .build();
+                .withJdbcUrl(url)
+                .withProperties(properties)
+                .build();
         int index = 0;
         DriverPropertyInfo[] driverPropertiesInfo = new DriverPropertyInfo[cfg.settings().size()];
 

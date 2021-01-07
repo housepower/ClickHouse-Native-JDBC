@@ -36,6 +36,7 @@ Note left of 客户端: 我将解析 DataResponse 成 ResultSet
 
 一些小的查询请求，可以以字符串SQL的方式和服务端交互，但这不利于批量数据的插入。ClickHouse 提供了另外原生的批量导入协议支持，这样我们可以直接往ClickHouse发送block数据。
 
+
 ```mermaid
 sequenceDiagram
 客户端 -> 服务端: 发送Insert请求到服务端 (也称之 PreparedStatement)
@@ -51,5 +52,5 @@ Note right of 服务端: 空的 block 来了,  <br/> 请求结束
 Note right of 服务端: State: 空闲
 ```
 
-
+ 
 

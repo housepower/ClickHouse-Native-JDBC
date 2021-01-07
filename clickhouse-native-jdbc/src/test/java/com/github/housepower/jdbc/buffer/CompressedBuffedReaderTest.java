@@ -28,7 +28,7 @@ public class CompressedBuffedReaderTest {
     public void successfullyReadCompressedData() throws Exception {
 
         CompressedBuffedReader compressedBuffed = new CompressedBuffedReader(
-            new FragmentBuffedReader(compressedData(new byte[]{1, 2, 3}), compressedData(new byte[]{4, 5, 6, 7}))
+            new FragmentBuffedReader(compressedData(new byte[] {1, 2, 3}), compressedData(new byte[] {4, 5, 6, 7}))
         );
 
         assertEquals(compressedBuffed.readBinary(), 1);

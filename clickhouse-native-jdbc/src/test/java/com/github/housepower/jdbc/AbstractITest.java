@@ -57,17 +57,17 @@ public abstract class AbstractITest implements Serializable {
             }
             sb.append(params[i]).append("=").append(params[i + 1]);
         }
-
+        
         // Add user
         sb.append(params.length < 2 ? "?" : "&");
         sb.append("user=").append(SERVER_USER);
-
+        
         // Add password
         // Currently we ignore the blan password
         if (!StrUtil.isBlank(SERVER_PASSWORD)) {
             sb.append("&password=").append(SERVER_PASSWORD);
         }
-
+   
         return sb.toString();
     }
 

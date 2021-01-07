@@ -33,8 +33,8 @@ public class QueryRandomITest extends AbstractITest {
 
             statement.executeQuery("DROP TABLE IF EXISTS test_random");
             statement.executeQuery("CREATE TABLE test_random "
-                + "(name String, value UInt32, arr Array(Float64), day Date, time DateTime, dc Decimal(7,2))"
-                + "ENGINE = GenerateRandom(1, 8, 8)");
+                                   + "(name String, value UInt32, arr Array(Float64), day Date, time DateTime, dc Decimal(7,2))"
+                                   + "ENGINE = GenerateRandom(1, 8, 8)");
 
             ResultSet rs = statement.executeQuery("SELECT * FROM test_random limit 10000");
 
@@ -54,9 +54,9 @@ public class QueryRandomITest extends AbstractITest {
                 assertEquals(Timestamp.class, time.getClass());
                 assertEquals(BigDecimal.class, dc.getClass());
 
-                i++;
+                i ++;
             }
-            assertEquals(i, 10000);
+            assertEquals(i , 10000);
             statement.executeQuery("DROP TABLE IF EXISTS test_random");
         }, "use_client_time_zone", true);
     }

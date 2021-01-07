@@ -102,16 +102,16 @@ public class DataTypeString implements IDataType {
     @Override
     public String[] getAliases() {
         return new String[]{
-            "LONGBLOB",
-            "MEDIUMBLOB",
-            "TINYBLOB",
-            "MEDIUMTEXT",
-            "CHAR",
-            "VARCHAR",
-            "TEXT",
-            "TINYTEXT",
-            "LONGTEXT",
-            "BLOB"};
+                "LONGBLOB",
+                "MEDIUMBLOB",
+                "TINYBLOB",
+                "MEDIUMTEXT",
+                "CHAR",
+                "VARCHAR",
+                "TEXT",
+                "TINYTEXT",
+                "LONGTEXT",
+                "BLOB"};
     }
 
     @Override

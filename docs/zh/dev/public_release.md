@@ -1,31 +1,28 @@
 公开发布手册
 =====================
 
-::: warning 公开发布是指部署到 Maven Central. 只有核心项目成员才有权限发布到公开仓库.
+::: warning
+公开发布是指部署到 Maven Central. 只有核心项目成员才有权限发布到公开仓库.
 :::
 
 ## 设置 GPG
 
 在 macOS 上安装
-
 ```shell script
 brew install gnupg
 ```
 
 如果没有秘钥, 生成一个秘钥
-
 ```shell script
 gpg --full-generate-key
 ```
 
 公开公有秘钥
-
 ```shell script
 gpg --send-keys [key-id] --keyserver hkp://subkeys.pgp.net
 ```
 
 查看秘钥
-
 ```shell script
 gpg --list-keys
 ```

@@ -1,9 +1,8 @@
 ClickHouse Native JDBC
 ======================
-这是一个用原生(TCP)协议实现的 JDBC 驱动，用来访问 [ClickHouse](https://clickhouse.yandex/)
-，同时也支持与 [Apache Spark](https://github.com/apache/spark/) 的集成。
+这是一个用原生(TCP)协议实现的 JDBC 驱动，用来访问 [ClickHouse](https://clickhouse.yandex/) ，同时也支持与 [Apache Spark](https://github.com/apache/spark/) 的集成。
 
-本项目受 [JetBrains Open Source License](https://www.jetbrains.com/?from=ClickHouse-Native-JDBC) 2020-2021 赞助支持.
+本项目受 [JetBrains Open Source License](https://www.jetbrains.com/?from=ClickHouse-Native-JDBC) 2020-2021 赞助支持. 
 
 ## JDBC 驱动
 

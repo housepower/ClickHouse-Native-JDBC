@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- *
  */
 public class InsertIBenchmark extends AbstractInsertIBenchmark {
     AtomicInteger tableMaxId = new AtomicInteger();
@@ -41,8 +40,8 @@ public class InsertIBenchmark extends AbstractInsertIBenchmark {
         String testTable = "test_" + tableId;
 
         stmt.executeQuery("DROP TABLE IF EXISTS " + testTable);
-        stmt.executeQuery("CREATE TABLE " + testTable + " (number UInt32, name String, birthTime DateTime, birthDay Date) Engine = Log");
-        PreparedStatement pstmt = connection.prepareStatement("INSERT INTO " + testTable + " values(?, ?, ?, ?)");
+        stmt.executeQuery("CREATE TABLE " + testTable +" (number UInt32, name String, birthTime DateTime, birthDay Date) Engine = Log");
+        PreparedStatement pstmt = connection.prepareStatement("INSERT INTO "  + testTable +" values(?, ?, ?, ?)");
 
 
         for (int i = 0; i < batchSize; i++) {
@@ -52,7 +51,7 @@ public class InsertIBenchmark extends AbstractInsertIBenchmark {
             pstmt.setDate(4, date);
             pstmt.addBatch();
         }
-        int[] res = pstmt.executeBatch();
+        int []res = pstmt.executeBatch();
         assertEquals(res.length, batchSize);
         stmt.executeQuery("DROP TABLE " + testTable);
     };

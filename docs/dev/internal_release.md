@@ -1,8 +1,9 @@
 Internal Release Manuel
 =======================
 
-::: tip Internal Release means deploy to private Nexus Repository. Please make sure you are granted to access your
-company private Nexus Repository.
+::: tip
+Internal Release means deploy to private Nexus Repository. Please make sure you are granted to access 
+your company private Nexus Repository.
 :::
 
 ## Setup Nexus Authentication
@@ -34,8 +35,8 @@ mvn clean deploy -Prelease -DskipTests -DskipITs \
     -Ddeploy.repo.release.url={REPALCE_ME}
 ```
 
-::: tip To force refresh snapshot dependencies:
-
+::: tip
+To force refresh snapshot dependencies:
 - Maven: `mvn clean compile --update-snapshots`
 - Gradle: `gradlew clean build --refresh-dependencies`
-  :::
+:::

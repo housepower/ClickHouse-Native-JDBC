@@ -69,7 +69,7 @@ public class BlockSettings {
         public static final Setting BUCKET_NUM = new Setting(2, -1);
 
         public static Setting[] defaultValues() {
-            return new Setting[]{IS_OVERFLOWS, BUCKET_NUM};
+            return new Setting[] {IS_OVERFLOWS, BUCKET_NUM};
         }
 
         private final int num;

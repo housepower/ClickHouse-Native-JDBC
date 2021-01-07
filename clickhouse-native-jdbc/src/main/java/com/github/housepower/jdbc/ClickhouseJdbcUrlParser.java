@@ -126,7 +126,7 @@ public class ClickhouseJdbcUrlParser {
         while (tokenizer.hasMoreTokens()) {
             String[] queryParameter = tokenizer.nextToken().split("=", 2);
             Validate.ensure(queryParameter.length == 2,
-                "ClickHouse JDBC URL Parameter '" + queryParameters + "' Error, Expected '='.");
+                    "ClickHouse JDBC URL Parameter '" + queryParameters + "' Error, Expected '='.");
 
             String name = queryParameter[0];
             String value = queryParameter[1];

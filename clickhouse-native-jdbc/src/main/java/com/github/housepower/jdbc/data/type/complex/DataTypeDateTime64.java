@@ -38,7 +38,7 @@ public class DataTypeDateTime64 implements IDataType {
             Validate.isTrue(lexer.character() == '(');
             int scale = lexer.numberLiteral().intValue();
             Validate.isTrue(scale >= DataTypeDateTime64.MIN_SCALE && scale <= DataTypeDateTime64.MAX_SCALA,
-                "scale=" + scale + " out of range [" + DataTypeDateTime64.MIN_SCALE + "," + DataTypeDateTime64.MAX_SCALA + "]");
+                    "scale=" + scale + " out of range [" + DataTypeDateTime64.MIN_SCALE + "," + DataTypeDateTime64.MAX_SCALA + "]");
             if (lexer.isCharacter(',')) {
                 Validate.isTrue(lexer.character() == ',');
                 Validate.isTrue(lexer.isWhitespace());
@@ -125,7 +125,7 @@ public class DataTypeDateTime64 implements IDataType {
         int minutes = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == ':');
         BigDecimal _seconds = BigDecimal.valueOf(lexer.numberLiteral().doubleValue())
-            .setScale(scale, BigDecimal.ROUND_HALF_UP);
+                .setScale(scale, BigDecimal.ROUND_HALF_UP);
         int second = _seconds.intValue();
         int nanos = _seconds.subtract(BigDecimal.valueOf(second)).movePointRight(9).intValue();
         Validate.isTrue(lexer.character() == '\'');

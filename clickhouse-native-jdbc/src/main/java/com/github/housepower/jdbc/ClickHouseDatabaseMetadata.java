@@ -638,29 +638,29 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
                                    String procedureNamePattern) throws SQLException {
 
         return ClickHouseResultSetBuilder
-            .builder(9, connection.serverContext())
-            .cfg(connection.cfg())
-            .columnNames(
-                "PROCEDURE_CAT",
-                "PROCEDURE_SCHEM",
-                "PROCEDURE_NAME",
-                "RES_1",
-                "RES_2",
-                "RES_3",
-                "REMARKS",
-                "PROCEDURE_TYPE",
-                "SPECIFIC_NAME")
-            .columnTypes(
-                "String",
-                "String",
-                "String",
-                "String",
-                "String",
-                "String",
-                "String",
-                "UInt8",
-                "String")
-            .build();
+                .builder(9, connection.serverContext())
+                .cfg(connection.cfg())
+                .columnNames(
+                        "PROCEDURE_CAT",
+                        "PROCEDURE_SCHEM",
+                        "PROCEDURE_NAME",
+                        "RES_1",
+                        "RES_2",
+                        "RES_3",
+                        "REMARKS",
+                        "PROCEDURE_TYPE",
+                        "SPECIFIC_NAME")
+                .columnTypes(
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "UInt8",
+                        "String")
+                .build();
     }
 
     @Override
@@ -669,19 +669,19 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
                                          String procedureNamePattern,
                                          String columnNamePattern) throws SQLException {
         return ClickHouseResultSetBuilder
-            .builder(20, connection.serverContext())
-            .cfg(connection.cfg())
-            .columnNames(
-                "1", "2", "3", "4", "5",
-                "6", "7", "8", "9", "10",
-                "11", "12", "13", "14", "15",
-                "16", "17", "18", "19", "20")
-            .columnTypes(
-                "UInt32", "UInt32", "UInt32", "UInt32", "UInt32",
-                "UInt32", "UInt32", "UInt32", "UInt32", "UInt32",
-                "UInt32", "UInt32", "UInt32", "UInt32", "UInt32",
-                "UInt32", "UInt32", "UInt32", "UInt32", "UInt32")
-            .build();
+                .builder(20, connection.serverContext())
+                .cfg(connection.cfg())
+                .columnNames(
+                        "1", "2", "3", "4", "5",
+                        "6", "7", "8", "9", "10",
+                        "11", "12", "13", "14", "15",
+                        "16", "17", "18", "19", "20")
+                .columnTypes(
+                        "UInt32", "UInt32", "UInt32", "UInt32", "UInt32",
+                        "UInt32", "UInt32", "UInt32", "UInt32", "UInt32",
+                        "UInt32", "UInt32", "UInt32", "UInt32", "UInt32",
+                        "UInt32", "UInt32", "UInt32", "UInt32", "UInt32")
+                .build();
     }
 
     @Override
@@ -714,30 +714,30 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
         ResultSet result = request(sql);
 
         ClickHouseResultSetBuilder builder = ClickHouseResultSetBuilder
-            .builder(10, connection.serverContext())
-            .cfg(connection.cfg())
-            .columnNames(
-                "TABLE_CAT",
-                "TABLE_SCHEM",
-                "TABLE_NAME",
-                "TABLE_TYPE",
-                "REMARKS",
-                "TYPE_CAT",
-                "TYPE_SCHEM",
-                "TYPE_NAME",
-                "SELF_REFERENCING_COL_NAME",
-                "REF_GENERATION")
-            .columnTypes(
-                "String",
-                "String",
-                "String",
-                "String",
-                "String",
-                "String",
-                "String",
-                "String",
-                "String",
-                "String");
+                .builder(10, connection.serverContext())
+                .cfg(connection.cfg())
+                .columnNames(
+                        "TABLE_CAT",
+                        "TABLE_SCHEM",
+                        "TABLE_NAME",
+                        "TABLE_TYPE",
+                        "REMARKS",
+                        "TYPE_CAT",
+                        "TYPE_SCHEM",
+                        "TYPE_NAME",
+                        "SELF_REFERENCING_COL_NAME",
+                        "REF_GENERATION")
+                .columnTypes(
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "String");
 
         List<String> typeList = types != null ? Arrays.asList(types) : null;
         while (result.next()) {
@@ -800,23 +800,23 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
     @Override
     public ResultSet getCatalogs() throws SQLException {
         return ClickHouseResultSetBuilder
-            .builder(1, connection.serverContext())
-            .cfg(connection.cfg())
-            .columnNames("TABLE_CAT")
-            .columnTypes("String")
-            .addRow(DEFAULT_CATALOG).build();
+                .builder(1, connection.serverContext())
+                .cfg(connection.cfg())
+                .columnNames("TABLE_CAT")
+                .columnTypes("String")
+                .addRow(DEFAULT_CATALOG).build();
     }
 
     @Override
     public ResultSet getTableTypes() throws SQLException {
         return ClickHouseResultSetBuilder
-            .builder(1, connection.serverContext())
-            .cfg(connection.cfg())
-            .columnNames("TABLE_TYPE")
-            .columnTypes("String")
-            .addRow("TABLE")
-            .addRow("VIEW")
-            .addRow("OTHER").build();
+                .builder(1, connection.serverContext())
+                .cfg(connection.cfg())
+                .columnNames("TABLE_TYPE")
+                .columnTypes("String")
+                .addRow("TABLE")
+                .addRow("VIEW")
+                .addRow("OTHER").build();
     }
 
     @Override
@@ -827,10 +827,10 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
         StringBuilder query;
         if (connection.serverContext().version().compareTo("1.1.54237") > 0) {
             query = new StringBuilder(
-                "SELECT database, table, name, type, default_kind as default_type, default_expression ");
+                    "SELECT database, table, name, type, default_kind as default_type, default_expression ");
         } else {
             query = new StringBuilder(
-                "SELECT database, table, name, type, default_type, default_expression ");
+                    "SELECT database, table, name, type, default_type, default_expression ");
         }
         query.append("FROM system.columns ");
         List<String> predicates = new ArrayList<>();
@@ -848,58 +848,58 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
             buildAndCondition(query, predicates);
         }
         ClickHouseResultSetBuilder builder = ClickHouseResultSetBuilder
-            .builder(24, connection.serverContext())
-            .cfg(connection.cfg())
-            .columnNames(
-                "TABLE_CAT",
-                "TABLE_SCHEM",
-                "TABLE_NAME",
-                "COLUMN_NAME",
-                "DATA_TYPE",
-                "TYPE_NAME",
-                "COLUMN_SIZE",
-                "BUFFER_LENGTH",
-                "DECIMAL_DIGITS",
-                "NUM_PREC_RADIX",
-                "NULLABLE",
-                "REMARKS",
-                "COLUMN_DEF",
-                "SQL_DATA_TYPE",
-                "SQL_DATETIME_SUB",
-                "CHAR_OCTET_LENGTH",
-                "ORDINAL_POSITION",
-                "IS_NULLABLE",
-                "SCOPE_CATALOG",
-                "SCOPE_SCHEMA",
-                "SCOPE_TABLE",
-                "SOURCE_DATA_TYPE",
-                "IS_AUTOINCREMENT",
-                "IS_GENERATEDCOLUMN")
-            .columnTypes(
-                "String",
-                "String",
-                "String",
-                "String",
-                "Int32",
-                "String",
-                "Int32",
-                "Int32",
-                "Int32",
-                "Int32",
-                "Int32",
-                "String",
-                "String",
-                "Int32",
-                "Int32",
-                "Int32",
-                "Int32",
-                "String",
-                "String",
-                "String",
-                "String",
-                "Int32",
-                "String",
-                "String");
+                .builder(24, connection.serverContext())
+                .cfg(connection.cfg())
+                .columnNames(
+                        "TABLE_CAT",
+                        "TABLE_SCHEM",
+                        "TABLE_NAME",
+                        "COLUMN_NAME",
+                        "DATA_TYPE",
+                        "TYPE_NAME",
+                        "COLUMN_SIZE",
+                        "BUFFER_LENGTH",
+                        "DECIMAL_DIGITS",
+                        "NUM_PREC_RADIX",
+                        "NULLABLE",
+                        "REMARKS",
+                        "COLUMN_DEF",
+                        "SQL_DATA_TYPE",
+                        "SQL_DATETIME_SUB",
+                        "CHAR_OCTET_LENGTH",
+                        "ORDINAL_POSITION",
+                        "IS_NULLABLE",
+                        "SCOPE_CATALOG",
+                        "SCOPE_SCHEMA",
+                        "SCOPE_TABLE",
+                        "SOURCE_DATA_TYPE",
+                        "IS_AUTOINCREMENT",
+                        "IS_GENERATEDCOLUMN")
+                .columnTypes(
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "Int32",
+                        "String",
+                        "Int32",
+                        "Int32",
+                        "Int32",
+                        "Int32",
+                        "Int32",
+                        "String",
+                        "String",
+                        "Int32",
+                        "Int32",
+                        "Int32",
+                        "Int32",
+                        "String",
+                        "String",
+                        "String",
+                        "String",
+                        "Int32",
+                        "String",
+                        "String");
         ResultSet descTable = request(query.toString());
         int colNum = 1;
         while (descTable.next()) {
@@ -1026,76 +1026,76 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
     @Override
     public ResultSet getTypeInfo() throws SQLException {
         ClickHouseResultSetBuilder builder = ClickHouseResultSetBuilder
-            .builder(18, connection.serverContext())
-            .cfg(connection.cfg())
-            .columnNames(
-                "TYPE_NAME",
-                "DATA_TYPE",
-                "PRECISION",
-                "LITERAL_PREFIX",
-                "LITERAL_SUFFIX",
-                "CREATE_PARAMS",
-                "NULLABLE",
-                "CASE_SENSITIVE",
-                "SEARCHABLE",
-                "UNSIGNED_ATTRIBUTE",
-                "FIXED_PREC_SCALE",
-                "AUTO_INCREMENT",
-                "LOCAL_TYPE_NAME",
-                "MINIMUM_SCALE",
-                "MAXIMUM_SCALE",
-                "SQL_DATA_TYPE",
-                "SQL_DATETIME_SUB",
-                "NUM_PREC_RADIX")
-            .columnTypes(
-                "String",
-                "Int32",
-                "Int32",
-                "String",
-                "String",
-                "String",
-                "Int32",
-                "Int8",
-                "Int32",
-                "Int8",
-                "Int8",
-                "Int8",
-                "String",
-                "Int32",
-                "Int32",
-                "Int32",
-                "Int32",
-                "Int32")
-            .addRow(
-                "String", Types.VARCHAR,
-                null,       // precision - todo
-                '\'', '\'', null,
-                typeNoNulls, true, typeSearchable,
-                true,       // unsigned
-                true,       // fixed precision (money)
-                false,      //auto-incr
-                null,
-                null, null, // scale - should be fixed
-                null, null,
-                10
-            );
+                .builder(18, connection.serverContext())
+                .cfg(connection.cfg())
+                .columnNames(
+                        "TYPE_NAME",
+                        "DATA_TYPE",
+                        "PRECISION",
+                        "LITERAL_PREFIX",
+                        "LITERAL_SUFFIX",
+                        "CREATE_PARAMS",
+                        "NULLABLE",
+                        "CASE_SENSITIVE",
+                        "SEARCHABLE",
+                        "UNSIGNED_ATTRIBUTE",
+                        "FIXED_PREC_SCALE",
+                        "AUTO_INCREMENT",
+                        "LOCAL_TYPE_NAME",
+                        "MINIMUM_SCALE",
+                        "MAXIMUM_SCALE",
+                        "SQL_DATA_TYPE",
+                        "SQL_DATETIME_SUB",
+                        "NUM_PREC_RADIX")
+                .columnTypes(
+                        "String",
+                        "Int32",
+                        "Int32",
+                        "String",
+                        "String",
+                        "String",
+                        "Int32",
+                        "Int8",
+                        "Int32",
+                        "Int8",
+                        "Int8",
+                        "Int8",
+                        "String",
+                        "Int32",
+                        "Int32",
+                        "Int32",
+                        "Int32",
+                        "Int32")
+                .addRow(
+                        "String", Types.VARCHAR,
+                        null,       // precision - todo
+                        '\'', '\'', null,
+                        typeNoNulls, true, typeSearchable,
+                        true,       // unsigned
+                        true,       // fixed precision (money)
+                        false,      //auto-incr
+                        null,
+                        null, null, // scale - should be fixed
+                        null, null,
+                        10
+                );
         int[] sizes = {8, 16, 32, 64};
         boolean[] signed = {true, false};
         for (int size : sizes) {
             for (boolean b : signed) {
                 String name = (b ? "" : "U") + "Int" + size;
                 builder.addRow(
-                    name, (size <= 16 ? Types.INTEGER : Types.BIGINT),
-                    null,       // precision - todo
-                    null, null, null,
-                    typeNoNulls, true, typePredBasic,
-                    !b,         // unsigned
-                    true,       // fixed precision (money)
-                    false,      //auto-incr
-                    null,
-                    null, null, // scale - should be fixed
-                    null, null,
-                    10
+                        name, (size <= 16 ? Types.INTEGER : Types.BIGINT),
+                        null,       // precision - todo
+                        null, null, null,
+                        typeNoNulls, true, typePredBasic,
+                        !b,         // unsigned
+                        true,       // fixed precision (money)
+                        false,      //auto-incr
+                        null,
+                        null, null, // scale - should be fixed
+                        null, null,
+                        10
                 );
             }
         }
@@ -1103,42 +1103,42 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
         for (int floatSize : floatSizes) {
             String name = "Float" + floatSize;
             builder.addRow(
-                name, Types.FLOAT,
-                null,       // precision - todo
+                    name, Types.FLOAT,
+                    null,       // precision - todo
+                    null, null, null,
+                    typeNoNulls, true, typePredBasic,
+                    false,      // unsigned
+                    true,       // fixed precision (money)
+                    false,      //auto-incr
+                    null,
+                    null, null, // scale - should be fixed
+                    null, null,
+                    10);
+        }
+        builder.addRow(
+                "Date", Types.DATE,
+                null, // precision - todo
                 null, null, null,
                 typeNoNulls, true, typePredBasic,
-                false,      // unsigned
-                true,       // fixed precision (money)
-                false,      //auto-incr
+                false, // unsigned
+                true, // fixed precision (money)
+                false, //auto-incr
                 null,
                 null, null, // scale - should be fixed
                 null, null,
                 10);
-        }
         builder.addRow(
-            "Date", Types.DATE,
-            null, // precision - todo
-            null, null, null,
-            typeNoNulls, true, typePredBasic,
-            false, // unsigned
-            true, // fixed precision (money)
-            false, //auto-incr
-            null,
-            null, null, // scale - should be fixed
-            null, null,
-            10);
-        builder.addRow(
-            "DateTime", Types.TIMESTAMP,
-            null, // precision - todo
-            null, null, null,
-            typeNoNulls, true, typePredBasic,
-            false, // unsigned
-            true, // fixed precision (money)
-            false, //auto-incr
-            null,
-            null, null, // scale - should be fixed
-            null, null,
-            10);
+                "DateTime", Types.TIMESTAMP,
+                null, // precision - todo
+                null, null, null,
+                typeNoNulls, true, typePredBasic,
+                false, // unsigned
+                true, // fixed precision (money)
+                false, //auto-incr
+                null,
+                null, null, // scale - should be fixed
+                null, null,
+                10);
         return builder.build();
     }
 
@@ -1368,11 +1368,11 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
 
     private ResultSet getEmptyResultSet() throws SQLException {
         return ClickHouseResultSetBuilder
-            .builder(1, connection.serverContext())
-            .cfg(connection.cfg())
-            .columnNames("some")
-            .columnTypes("String")
-            .build();
+                .builder(1, connection.serverContext())
+                .cfg(connection.cfg())
+                .columnNames("some")
+                .columnTypes("String")
+                .build();
     }
 
     private void buildAndCondition(StringBuilder dest, List<String> conditions) {

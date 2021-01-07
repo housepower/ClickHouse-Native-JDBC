@@ -141,8 +141,8 @@ public class PreparedStatementITest extends AbstractITest {
         // use server_time_zone
         withNewConnection(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT " +
-                "toDate('" + dateLiteral + "'),               toDate(?),     toDate(?),     toDate(?), " +
-                "toDateTime('" + serverDateTimeLiteral + "'), toDateTime(?), toDateTime(?), toDateTime(?)");
+                    "toDate('" + dateLiteral + "'),               toDate(?),     toDate(?),     toDate(?), " +
+                    "toDateTime('" + serverDateTimeLiteral + "'), toDateTime(?), toDateTime(?), toDateTime(?)");
             preparedStatement.setDate(1, Date.valueOf(date));
             preparedStatement.setString(2, dateLiteral);
             preparedStatement.setShort(3, (short) date.toEpochDay());
@@ -165,8 +165,8 @@ public class PreparedStatementITest extends AbstractITest {
         // use client_time_zone
         withNewConnection(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT " +
-                "toDate('" + dateLiteral + "'),               toDate(?),     toDate(?),     toDate(?), " +
-                "toDateTime('" + serverDateTimeLiteral + "'), toDateTime(?), toDateTime(?), toDateTime(?)");
+                    "toDate('" + dateLiteral + "'),               toDate(?),     toDate(?),     toDate(?), " +
+                    "toDateTime('" + serverDateTimeLiteral + "'), toDateTime(?), toDateTime(?), toDateTime(?)");
             preparedStatement.setDate(1, Date.valueOf(date));
             preparedStatement.setString(2, dateLiteral);
             preparedStatement.setShort(3, (short) date.toEpochDay());
@@ -194,11 +194,11 @@ public class PreparedStatementITest extends AbstractITest {
 
             statement.execute("DROP TABLE IF EXISTS test");
             statement.execute("CREATE TABLE test(" +
-                "id UInt8, " +
-                "day Date, " +
-                "time DateTime, " +
-                "flag Boolean" +
-                ")ENGINE = Log");
+                    "id UInt8, " +
+                    "day Date, " +
+                    "time DateTime, " +
+                    "flag Boolean" +
+                    ")ENGINE = Log");
 
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?, ?)");
 

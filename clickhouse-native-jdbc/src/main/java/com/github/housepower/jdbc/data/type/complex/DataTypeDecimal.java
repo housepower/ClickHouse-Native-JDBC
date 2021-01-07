@@ -38,7 +38,7 @@ public class DataTypeDecimal implements IDataType {
         Number scale = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeDecimal("Decimal(" + precision.intValue() + "," + scale.intValue() + ")",
-            precision.intValue(), scale.intValue());
+                precision.intValue(), scale.intValue());
     };
 
     private final String name;
@@ -63,7 +63,7 @@ public class DataTypeDecimal implements IDataType {
             this.nobits = 256;
         } else {
             throw new IllegalArgumentException(String.format(Locale.ENGLISH,
-                "Precision[%d] is out of boundary.", precision));
+                    "Precision[%d] is out of boundary.", precision));
         }
     }
 
@@ -145,7 +145,7 @@ public class DataTypeDecimal implements IDataType {
             }
             default: {
                 throw new RuntimeException(String.format(Locale.ENGLISH,
-                    "Unknown precision[%d] & scale[%d]", precision, scale));
+                        "Unknown precision[%d] & scale[%d]", precision, scale));
             }
         }
     }
@@ -168,7 +168,7 @@ public class DataTypeDecimal implements IDataType {
             }
 
             case 128: {
-                long[] array = new long[2];
+                long []array = new long[2];
                 array[1] = deserializer.readLong();
                 array[0] = deserializer.readLong();
 
@@ -179,7 +179,7 @@ public class DataTypeDecimal implements IDataType {
             }
 
             case 256: {
-                long[] array = new long[4];
+                long []array = new long[4];
                 array[3] = deserializer.readLong();
                 array[2] = deserializer.readLong();
                 array[1] = deserializer.readLong();
@@ -193,7 +193,7 @@ public class DataTypeDecimal implements IDataType {
 
             default: {
                 throw new RuntimeException(String.format(Locale.ENGLISH,
-                    "Unknown precision[%d] & scale[%d]", precision, scale));
+                        "Unknown precision[%d] & scale[%d]", precision, scale));
             }
         }
         return value;

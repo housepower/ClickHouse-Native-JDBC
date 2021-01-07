@@ -41,7 +41,7 @@ public class BatchInsertITest extends AbstractITest {
             statement.execute("DROP TABLE IF EXISTS test");
             statement.execute("CREATE TABLE test(id Int8, age UInt8, name String, name2 String)ENGINE=Log");
             PreparedStatement preparedStatement = connection
-                .prepareStatement("INSERT INTO test VALUES(?, 1, ?, ?)");
+                    .prepareStatement("INSERT INTO test VALUES(?, 1, ?, ?)");
 
             for (int i = 0; i < Byte.MAX_VALUE; i++) {
                 preparedStatement.setByte(1, (byte) i);
@@ -103,7 +103,7 @@ public class BatchInsertITest extends AbstractITest {
 
             stmt.executeQuery("DROP TABLE IF EXISTS test");
             stmt.executeQuery(
-                "create table test(day Date, name Nullable(String), name2 Nullable(FixedString(10)) ) Engine=Memory");
+                    "create table test(day Date, name Nullable(String), name2 Nullable(FixedString(10)) ) Engine=Memory");
             PreparedStatement pstmt = connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?)");
             for (int i = 0; i < insertBatchSize; i++) {
                 pstmt.setDate(1, new Date(System.currentTimeMillis()));
@@ -136,7 +136,7 @@ public class BatchInsertITest extends AbstractITest {
             }
 
             rs = stmt.executeQuery(
-                "select countIf(isNull(name)), countIf(isNotNull(name)), countIf(isNotNull(name2))  from test;");
+                    "select countIf(isNull(name)), countIf(isNotNull(name)), countIf(isNotNull(name2))  from test;");
             assertTrue(rs.next());
             assertEquals(insertBatchSize / 2, rs.getInt(1));
             assertEquals(insertBatchSize / 2, rs.getInt(2));
@@ -155,9 +155,9 @@ public class BatchInsertITest extends AbstractITest {
 
             statement.execute("DROP TABLE IF EXISTS test");
             statement.execute(
-                "CREATE TABLE test(value0 Array(String), value1 Array(Float64), value2 Array(Array(Int32)), array3 Array(Nullable(Float64)))ENGINE=Log");
+                    "CREATE TABLE test(value0 Array(String), value1 Array(Float64), value2 Array(Array(Int32)), array3 Array(Nullable(Float64)))ENGINE=Log");
             PreparedStatement preparedStatement = connection
-                .prepareStatement("INSERT INTO test VALUES(?, ?, [[1,2,3]], ?)");
+                    .prepareStatement("INSERT INTO test VALUES(?, ?, [[1,2,3]], ?)");
 
             List<String> array0 = Arrays.asList("aa", "bb", "cc");
             List<Double> array1 = Arrays.asList(1.2, 2.2, 3.2);

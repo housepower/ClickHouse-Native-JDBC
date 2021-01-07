@@ -2,7 +2,6 @@ ClickHouse DateTypes
 ====================
 
 ## Version
-
 ```
 SELECT version()
 

@@ -149,7 +149,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         for (int i = 0; i < queryParts.length; i++) {
             if (i - 1 >= 0 && i - 1 < parameters.length) {
                 Validate.isTrue(assembleParameter(parameters[i - 1], queryBuilder),
-                    "UNKNOWN DataType :" + (parameters[i - 1] == null ? null : parameters[i - 1].getClass()));
+                        "UNKNOWN DataType :" + (parameters[i - 1] == null ? null : parameters[i - 1].getClass()));
             }
             queryBuilder.append(queryParts[i]);
         }
@@ -158,7 +158,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     private boolean assembleParameter(Object parameter, StringBuilder queryBuilder) throws SQLException {
         return assembleSimpleParameter(queryBuilder, parameter)
-            || assembleComplexQuotedParameter(queryBuilder, parameter);
+                || assembleComplexQuotedParameter(queryBuilder, parameter);
     }
 
     private boolean assembleSimpleParameter(StringBuilder queryBuilder, Object parameter) {

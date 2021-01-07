@@ -24,11 +24,11 @@ class ClickHouseResultSetBuilderITest extends AbstractITest {
     public void testBuildEmptyResultSet() throws Exception {
         withNewConnection(connection -> {
             ClickHouseResultSet rs = ClickHouseResultSetBuilder
-                .builder(1, ((ClickHouseConnection) connection).serverContext())
-                .cfg(((ClickHouseConnection) connection).cfg())
-                .columnNames("some")
-                .columnTypes("String")
-                .build();
+                    .builder(1, ((ClickHouseConnection) connection).serverContext())
+                    .cfg(((ClickHouseConnection) connection).cfg())
+                    .columnNames("some")
+                    .columnTypes("String")
+                    .build();
             assertEquals(1, rs.getMetaData().getColumnCount());
             assertEquals("some", rs.getMetaData().getColumnName(1));
             assertFalse(rs.next());
@@ -39,13 +39,13 @@ class ClickHouseResultSetBuilderITest extends AbstractITest {
     public void testBuildResultSetWithRow() throws Exception {
         withNewConnection(connection -> {
             ClickHouseResultSet rs = ClickHouseResultSetBuilder
-                .builder(1, ((ClickHouseConnection) connection).serverContext())
-                .cfg(((ClickHouseConnection) connection).cfg())
-                .columnNames("some")
-                .columnTypes("String")
-                .addRow("A")
-                .addRow("B")
-                .build();
+                    .builder(1, ((ClickHouseConnection) connection).serverContext())
+                    .cfg(((ClickHouseConnection) connection).cfg())
+                    .columnNames("some")
+                    .columnTypes("String")
+                    .addRow("A")
+                    .addRow("B")
+                    .build();
             assertTrue(rs.next());
             assertTrue(rs.next());
             assertFalse(rs.next());

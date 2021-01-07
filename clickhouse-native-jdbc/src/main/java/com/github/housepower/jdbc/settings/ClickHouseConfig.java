@@ -88,11 +88,11 @@ public class ClickHouseConfig {
 
     public String jdbcUrl() {
         StringBuilder builder = new StringBuilder(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX)
-            .append("//").append(host).append(":").append(port).append("/").append(database)
-            .append("?").append(SettingKey.query_timeout.name()).append("=").append(queryTimeout.getSeconds())
-            .append("&").append(SettingKey.connect_timeout.name()).append("=").append(connectTimeout.getSeconds())
-            .append("&").append(SettingKey.charset.name()).append("=").append(charset)
-            .append("&").append(SettingKey.tcp_keep_alive.name()).append("=").append(tcpKeepAlive);
+                .append("//").append(host).append(":").append(port).append("/").append(database)
+                .append("?").append(SettingKey.query_timeout.name()).append("=").append(queryTimeout.getSeconds())
+                .append("&").append(SettingKey.connect_timeout.name()).append("=").append(connectTimeout.getSeconds())
+                .append("&").append(SettingKey.charset.name()).append("=").append(charset)
+                .append("&").append(SettingKey.tcp_keep_alive.name()).append("=").append(tcpKeepAlive);
 
         for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
             builder.append("&").append(entry.getKey().name()).append("=").append(entry.getValue());
@@ -106,65 +106,65 @@ public class ClickHouseConfig {
 
     public ClickHouseConfig withHostPort(String host, int port) {
         return Builder.builder(this)
-            .host(host)
-            .port(port)
-            .build();
+                .host(host)
+                .port(port)
+                .build();
     }
 
     public ClickHouseConfig withDatabase(String database) {
         return Builder.builder(this)
-            .database(database)
-            .build();
+                .database(database)
+                .build();
     }
 
     public ClickHouseConfig withCredentials(String user, String password) {
         return Builder.builder(this)
-            .user(user)
-            .password(password)
-            .build();
+                .user(user)
+                .password(password)
+                .build();
     }
 
     public ClickHouseConfig withQueryTimeout(Duration timeout) {
         return Builder.builder(this)
-            .queryTimeout(timeout)
-            .build();
+                .queryTimeout(timeout)
+                .build();
     }
 
     public ClickHouseConfig withTcpKeepAlive(boolean enable) {
         return Builder.builder(this)
-            .tcpKeepAlive(enable)
-            .build();
+                .tcpKeepAlive(enable)
+                .build();
     }
 
     public ClickHouseConfig withCharset(Charset charset) {
         return Builder.builder(this)
-            .charset(charset)
-            .build();
+                .charset(charset)
+                .build();
     }
 
     public ClickHouseConfig withSettings(Map<SettingKey, Object> settings) {
         return Builder.builder(this)
-            .withSettings(settings)
-            .build();
+                .withSettings(settings)
+                .build();
     }
 
     public ClickHouseConfig withJdbcUrl(String url) {
         return Builder.builder(this)
-            .withJdbcUrl(url)
-            .build();
+                .withJdbcUrl(url)
+                .build();
     }
 
     public ClickHouseConfig withProperties(Properties properties) {
         return Builder.builder(this)
-            .withProperties(properties)
-            .build();
+                .withProperties(properties)
+                .build();
     }
 
     public ClickHouseConfig with(String url, Properties properties) {
         return Builder.builder(this)
-            .withJdbcUrl(url)
-            .withProperties(properties)
-            .build();
+                .withJdbcUrl(url)
+                .withProperties(properties)
+                .build();
     }
 
     public boolean tcpKeepAlive() {
@@ -192,16 +192,16 @@ public class ClickHouseConfig {
 
         public static Builder builder(ClickHouseConfig cfg) {
             return new Builder()
-                .host(cfg.host())
-                .port(cfg.port())
-                .database(cfg.database())
-                .user(cfg.user())
-                .password(cfg.password())
-                .connectTimeout(cfg.connectTimeout())
-                .queryTimeout(cfg.queryTimeout())
-                .charset(cfg.charset())
-                .tcpKeepAlive(cfg.tcpKeepAlive())
-                .withSettings(cfg.settings());
+                    .host(cfg.host())
+                    .port(cfg.port())
+                    .database(cfg.database())
+                    .user(cfg.user())
+                    .password(cfg.password())
+                    .connectTimeout(cfg.connectTimeout())
+                    .queryTimeout(cfg.queryTimeout())
+                    .charset(cfg.charset())
+                    .tcpKeepAlive(cfg.tcpKeepAlive())
+                    .withSettings(cfg.settings());
         }
 
         public Builder withSetting(SettingKey key, Object value) {
@@ -297,7 +297,7 @@ public class ClickHouseConfig {
             purgeSettings();
 
             return new ClickHouseConfig(
-                host, port, database, user, password, queryTimeout, connectTimeout, tcpKeepAlive, charset, settings);
+                    host, port, database, user, password, queryTimeout, connectTimeout, tcpKeepAlive, charset, settings);
         }
 
         private void revisit() {

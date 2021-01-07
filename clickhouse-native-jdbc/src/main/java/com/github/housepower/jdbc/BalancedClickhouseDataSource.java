@@ -51,10 +51,10 @@ public final class BalancedClickhouseDataSource implements DataSource, SQLWrappe
 
     private static final Logger LOG = LoggerFactory.getLogger(BalancedClickhouseDataSource.class);
     private static final Pattern URL_TEMPLATE = Pattern.compile(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX +
-        "//([a-zA-Z0-9_:,.-]+)" +
-        "((/[a-zA-Z0-9_]+)?" +
-        "([?][a-zA-Z0-9_]+[=][a-zA-Z0-9_]+([&][a-zA-Z0-9_]+[=][a-zA-Z0-9_]*)*)?" +
-        ")?");
+            "//([a-zA-Z0-9_:,.-]+)" +
+            "((/[a-zA-Z0-9_]+)?" +
+            "([?][a-zA-Z0-9_]+[=][a-zA-Z0-9_]+([&][a-zA-Z0-9_]+[=][a-zA-Z0-9_]*)*)?" +
+            ")?");
 
     private PrintWriter printWriter;
     private int loginTimeoutSeconds = 0;
@@ -109,11 +109,11 @@ public final class BalancedClickhouseDataSource implements DataSource, SQLWrappe
         Validate.ensure(!urls.isEmpty(), "Incorrect ClickHouse jdbc url list. It must be not empty");
 
         this.cfg = ClickHouseConfig.Builder.builder()
-            .withJdbcUrl(urls.get(0))
-            .withSettings(settings)
-            .host("undefined")
-            .port(0)
-            .build();
+                .withJdbcUrl(urls.get(0))
+                .withSettings(settings)
+                .host("undefined")
+                .port(0)
+                .build();
 
         List<String> allUrls = new ArrayList<>(urls.size());
         for (final String url : urls) {
@@ -140,8 +140,8 @@ public final class BalancedClickhouseDataSource implements DataSource, SQLWrappe
         final String database = StrUtil.getOrDefault(m.group(2), "");
         String[] hosts = m.group(1).split(",");
         return Arrays.stream(hosts)
-            .map(host -> ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX + "//" + host + database)
-            .collect(Collectors.toList());
+                .map(host -> ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX + "//" + host + database)
+                .collect(Collectors.toList());
     }
 
     private boolean ping(final String url) {

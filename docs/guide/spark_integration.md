@@ -5,8 +5,8 @@
 - Java 8, Scala 2.11/2.12, Spark 2.4.x
 - Or Java 8/11, Scala 2.12, Spark 3.0.x
 
-**Notes:** Spark 2.3.x(EOL) should also work fine. Actually we do test on both Java 8 and Java 11, but Spark official
-support on Java 11 since 3.0.0.
+**Notes:** Spark 2.3.x(EOL) should also work fine. Actually we do test on both Java 8 and Java 11, 
+but Spark official support on Java 11 since 3.0.0.
 
 ### Import
 
@@ -66,5 +66,4 @@ df.write
     .save
 ```
 
-See
-also [SparkOnClickHouseITest](https://github.com/housepower/ClickHouse-Native-JDBC/clickhouse-integration/clickhouse-integration-spark/src/test/scala/com.github.housepower.jdbc.spark/SparkOnClickHouseITest.scala)
+See also [SparkOnClickHouseITest](https://github.com/housepower/ClickHouse-Native-JDBC/clickhouse-integration/clickhouse-integration-spark/src/test/scala/com.github.housepower.jdbc.spark/SparkOnClickHouseITest.scala)
