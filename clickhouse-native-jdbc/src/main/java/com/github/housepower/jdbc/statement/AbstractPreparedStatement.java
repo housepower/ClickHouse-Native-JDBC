@@ -22,6 +22,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Struct;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -101,7 +102,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void setDate(int index, Date x) throws SQLException {
-        setObject(index, x);
+        setObject(index, x.toLocalDate());
     }
 
     @Override
@@ -174,8 +175,8 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
             return assembleWithoutQuotedParameter(queryBuilder, parameter);
         } else if (parameter instanceof String) {
             return assembleQuotedParameter(queryBuilder, String.valueOf(parameter));
-        } else if (parameter instanceof Date) {
-            return assembleQuotedParameter(queryBuilder, dateFmt.format(((Date) parameter).toLocalDate()));
+        } else if (parameter instanceof LocalDate) {
+            return assembleQuotedParameter(queryBuilder, dateFmt.format((LocalDate) parameter));
         } else if (parameter instanceof Timestamp) {
             return assembleQuotedParameter(queryBuilder, timestampFmt.format(((Timestamp) parameter).toInstant()));
         }
