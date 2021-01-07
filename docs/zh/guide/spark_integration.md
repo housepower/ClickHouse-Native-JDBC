@@ -29,7 +29,7 @@ compile "com.github.housepower:clickhouse-integration-spark_2.11:${clickhouse_na
 
 ### 示例
 
-请确保在使用前注册 `ClickHouseDialect` 
+请确保在使用前注册 `ClickHouseDialect`
 
 ```scala
     JdbcDialects.registerDialect(ClickHouseDialect)

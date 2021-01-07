@@ -25,7 +25,7 @@ public class DateTimeUtil {
 
     public static ZoneId chooseTimeZone(NativeContext.ServerContext serverContext) {
         return (boolean) serverContext.getConfigure().settings().getOrDefault(SettingKey.use_client_time_zone, false)
-                ? ZoneId.systemDefault() : serverContext.timeZone();
+            ? ZoneId.systemDefault() : serverContext.timeZone();
     }
 
     public static LocalDateTime convertTimeZone(LocalDateTime localDateTime, ZoneId from, ZoneId to) {

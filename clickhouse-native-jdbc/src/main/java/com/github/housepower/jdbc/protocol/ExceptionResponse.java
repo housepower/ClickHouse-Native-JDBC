@@ -30,7 +30,7 @@ public class ExceptionResponse implements Response {
 
         if (deserializer.readBoolean()) {
             return new ClickHouseSQLException(
-                    code, name + message + ". Stack trace:\n\n" + stackTrace, readExceptionFrom(deserializer));
+                code, name + message + ". Stack trace:\n\n" + stackTrace, readExceptionFrom(deserializer));
         }
 
         return new ClickHouseSQLException(code, name + message + ". Stack trace:\n\n" + stackTrace);

@@ -3,16 +3,21 @@ Release Notes
 
 v2.5.0 (Dec 27, 2020)
 ---
+
 ### Highlight
+
 - The project static website is available at [Home Page](https://housepower.github.io/ClickHouse-Native-JDBC)
 - The China mirror repo is available at [Gitee](https://gitee.com/housepower/ClickHouse-Native-JDBC)
 - Implemented `BalancedClickhouseDataSource` to support connect to clickhouse cluster
 - Now the JDBC driver works with DataGrip and DBeaver
-- Introduced a log facade which prefer to bind `slf4j` if it exists in classpath, otherwise fallback to JDK `Logger`, and added logs for tracing, debugging and warning
+- Introduced a log facade which prefer to bind `slf4j` if it exists in classpath, otherwise fallback to JDK `Logger`,
+  and added logs for tracing, debugging and warning
 
-This release contains lots of internal refactors, and currently, this driver guarantee none stable API except JDBC API itself, please be careful if you use the internal API which not belongs to JDBC standard interfaces.
+This release contains lots of internal refactors, and currently, this driver guarantee none stable API except JDBC API
+itself, please be careful if you use the internal API which not belongs to JDBC standard interfaces.
 
 ### Changelog
+
 - (feature) Implement `BalancedClickhouseDataSource` to support multi instances (#205)
 - (bugfix) Fix invalid package clickhouse-integration-spark_2.12 (#206)
 - (feature) Implement `ClickHouseConnection` catalog and schema method (#208)
@@ -52,13 +57,17 @@ This release contains lots of internal refactors, and currently, this driver gua
 
 v2.4.4 (Dec 27, 2020)
 ---
+
 ### Changelog
+
 - (backport) cast correctly numbers to get a boolean (#256)
 - (backport) enhance null check on ClickHouseResultSet#getXXX (#259)
 
 v2.4.3 (Dec 15, 2020)
 ---
+
 ### Changelog
+
 - (backport) valid connection by ping instead of SELECT 1
 - (backport) explicit upcast ByteBuffer to Buffer (#243)
 - (backport) fix Connection#getCatalog (#249)
@@ -69,37 +78,45 @@ v2.4.3 (Dec 15, 2020)
 - (backport) implement ClickHouseResultSet#isBeforeFirst, #isAfterLast, #isFirst etc.
 - ClickHouseConnection#getMetaData return null instead of throw exception
 
-
 v2.4.2 (Nov 20, 2020)
 ---
+
 ### Changelog
+
 - Trim space before parsing SQL
 - Fix DateTime64 nanos and scale (#217)
 - Reset connection STATE when recreate connection (#221)
 - Skip remaining responses when consume PingResponse (#224)
 - Minor tunes
 
-
 v2.4.1 (Nov 15, 2020)
 ---
-### Changelog
-- Fix invalid package clickhouse-integration-spark_2.12 (#206)
 
+### Changelog
+
+- Fix invalid package clickhouse-integration-spark_2.12 (#206)
 
 v2.4.0 (Nov 9, 2020)
 ---
+
 ### Highlight
-- Since this release v2.4.0, we switch to [semantic versioning](https://semver.org/), and the bug fix version would be available quickly.
-- We introduce a new module `clickhouse-integration-spark` base on Spark Jdbc DataSource API for integrating with Spark, check detail at [README](https://github.com/housepower/ClickHouse-Native-JDBC#integration-with-spark)
-- In the past few weeks, we were more focus on code quality, fixed all [LGTM](https://lgtm.com/projects/g/housepower/ClickHouse-Native-JDBC/alerts/) alerts and got A+ score.
+
+- Since this release v2.4.0, we switch to [semantic versioning](https://semver.org/), and the bug fix version would be
+  available quickly.
+- We introduce a new module `clickhouse-integration-spark` base on Spark Jdbc DataSource API for integrating with Spark,
+  check detail at [README](https://github.com/housepower/ClickHouse-Native-JDBC#integration-with-spark)
+- In the past few weeks, we were more focus on code quality, fixed
+  all [LGTM](https://lgtm.com/projects/g/housepower/ClickHouse-Native-JDBC/alerts/) alerts and got A+ score.
 
 ### Changelog
+
 - Implement `clickhouse-integration-spark` base on Spark Jdbc DataSource API (#170 #184)
 - Batch insert support nullable types in arrays and nested types (#144 #194)
 - Support Boolean (#196)
 - Fix timezone issue (#195)
 - Fix potential concurrence issue (#191)
-- Code refactor, fixed all [LGTM](https://lgtm.com/projects/g/housepower/ClickHouse-Native-JDBC/alerts/) alerts and got A+ score.
+- Code refactor, fixed all [LGTM](https://lgtm.com/projects/g/housepower/ClickHouse-Native-JDBC/alerts/) alerts and got
+  A+ score.
 - Refactor `ClickHouseStatement` inheritance tree (#201)
 - Migrate to mockito3 (#175)
 - Migrate to org.lz4:lz4-java (#174)
@@ -111,13 +128,15 @@ v2.4.0 (Nov 9, 2020)
 - Improve Docs and Readme
 - Add missing license headers
 
-
 v2.3 (Oct 25, 2020)
 ---
+
 ### Highlight
+
 - Provide shaded version `clickhouse-native-jdbc-shaded` since this release, see detail at README.md
 
 ### Changelog
+
 - Fixed `SQLFeatureNotSupportedException` in several scenarios (#142 thanks @dcastanier) (thanks @sundy-li)
 - Fixed return value for executeBatch in PreparedInsertStatement (#145 thanks @tauitdnmd)
 - Fixed jdbc url parse (#148 thanks @tauitdnmd)
@@ -128,7 +147,6 @@ v2.3 (Oct 25, 2020)
 - Integration Test with Spark 2.4.7&Scala 2.11 (thanks @sundy-li)
 - Bump junit from 4.11 to 4.13.1
 
-
-::: tip
-You can find early releases at [GitHub Release Page](https://github.com/housepower/ClickHouse-Native-JDBC/releases)
+::: tip You can find early releases
+at [GitHub Release Page](https://github.com/housepower/ClickHouse-Native-JDBC/releases)
 :::

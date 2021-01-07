@@ -33,10 +33,10 @@ public class Main {
         System.setProperty("java.class.path", classpath.toString());
 
         Options options = new OptionsBuilder().include(Main.class.getSimpleName())
-                .forks(1).mode(Mode.AverageTime)
-                .include("./*IBenchmark")
-                .warmupIterations(0).measurementIterations(1)
-                .build();
+            .forks(1).mode(Mode.AverageTime)
+            .include("./*IBenchmark")
+            .warmupIterations(0).measurementIterations(1)
+            .build();
         new Runner(options).run();
     }
 }

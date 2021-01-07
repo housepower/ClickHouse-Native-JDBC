@@ -49,20 +49,20 @@ public class DecimalTypeITest extends AbstractITest {
             value256Neg = value256Neg.setScale(26, RoundingMode.HALF_UP);
 
             BigDecimal[] valueArray = new BigDecimal[]{
-                    BigDecimal.valueOf(412341.21D).setScale(3, RoundingMode.HALF_UP),
-                    BigDecimal.valueOf(512341.25D).setScale(3, RoundingMode.HALF_UP)
+                BigDecimal.valueOf(412341.21D).setScale(3, RoundingMode.HALF_UP),
+                BigDecimal.valueOf(512341.25D).setScale(3, RoundingMode.HALF_UP)
             };
             Statement statement = connection.createStatement();
             statement.execute("DROP TABLE IF EXISTS decimal_test");
             statement.execute("CREATE TABLE IF NOT EXISTS decimal_test (value32 Decimal(7,2), "
-                              + "value64 Decimal(15,5), "
-                              + "value128 Decimal(38, 16),"
-                              + "value256 Decimal(76, 26),"
-                              + "value256_neg Decimal(76, 26),"
-                              + "value_array Array(Decimal(5,3))) Engine=Memory()");
+                + "value64 Decimal(15,5), "
+                + "value128 Decimal(38, 16),"
+                + "value256 Decimal(76, 26),"
+                + "value256_neg Decimal(76, 26),"
+                + "value_array Array(Decimal(5,3))) Engine=Memory()");
             PreparedStatement pstmt = connection.prepareStatement("INSERT INTO decimal_test"
-                                                                  + "(value32,value64,value128,value256,value256_neg,value_array) "
-                                                                  + "values(?,?,?,?,?,?);");
+                + "(value32,value64,value128,value256,value256_neg,value_array) "
+                + "values(?,?,?,?,?,?);");
             for (int i = 0; i < 300; i++) {
                 pstmt.setBigDecimal(1, value32);
                 pstmt.setBigDecimal(2, value64);
@@ -115,7 +115,7 @@ public class DecimalTypeITest extends AbstractITest {
         long l2 = res.shiftRight(64).longValue();
 
         // v =  -1820000
-        long []arr = new long[]{l2, l1};
+        long[] arr = new long[]{l2, l1};
         BigInteger v = new BigInteger(longsToBytes(arr));
         BigDecimal value = new BigDecimal(v);
         value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);

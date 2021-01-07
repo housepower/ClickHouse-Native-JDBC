@@ -36,12 +36,11 @@ try (HikariDataSource ds = new HikariDataSource(conf)) {
 }
 ```
 
-
 ### Alibaba Druid
 
 在 Maven `pom.xml` 添加依赖.
 
-```xml  
+```xml
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>druid</artifactId>

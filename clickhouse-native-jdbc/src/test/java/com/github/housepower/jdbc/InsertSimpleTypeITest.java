@@ -149,11 +149,11 @@ public class InsertSimpleTypeITest extends AbstractITest {
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
             assertTrue(rs.next());
             assertEquals(
-                    LocalDate.of(2000, 1, 1).toEpochDay(),
-                    rs.getDate(1).toLocalDate().toEpochDay());
+                LocalDate.of(2000, 1, 1).toEpochDay(),
+                rs.getDate(1).toLocalDate().toEpochDay());
             assertEquals(
-                    LocalDate.of(2000, 1, 31).toEpochDay(),
-                    rs.getDate(2).toLocalDate().toEpochDay());
+                LocalDate.of(2000, 1, 31).toEpochDay(),
+                rs.getDate(2).toLocalDate().toEpochDay());
 
             assertFalse(rs.next());
             statement.executeQuery("DROP TABLE IF EXISTS test");
@@ -239,8 +239,8 @@ public class InsertSimpleTypeITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(i8 UInt8, i16 UInt16, i32 UInt32, i64 UInt64)ENGINE=Log");
 
             String insertSQL = "INSERT INTO test VALUES(" + ((1 << 8) - 1) +
-                    "," + ((1 << 16) - 1) +
-                    ",4294967295,-9223372036854775808)";
+                "," + ((1 << 16) - 1) +
+                ",4294967295,-9223372036854775808)";
 
             statement.executeQuery(insertSQL);
 
@@ -264,7 +264,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyCharset() throws Exception {
-        String []charsets = new String[]{ "UTF-8", "GB2312", "UTF-16"};
+        String[] charsets = new String[]{"UTF-8", "GB2312", "UTF-16"};
         for (String charset : charsets) {
             withNewConnection(connection -> {
                 Statement statement = connection.createStatement();
@@ -273,8 +273,8 @@ public class InsertSimpleTypeITest extends AbstractITest {
                 statement.executeQuery("CREATE TABLE test(s1 String, s2 String)ENGINE=Log");
 
                 String insertSQL = "INSERT INTO test VALUES('" + "我爱中国" +
-                                   "','" + "我爱地球" +
-                                   "')";
+                    "','" + "我爱地球" +
+                    "')";
 
                 statement.executeQuery(insertSQL);
 

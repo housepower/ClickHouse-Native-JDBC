@@ -158,7 +158,7 @@ public class ClickHouseConnection implements SQLConnection {
         Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, because the connection is closed.");
         Matcher matcher = VALUES_REGEX.matcher(query);
         return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this, nativeCtx) :
-                new ClickHousePreparedQueryStatement(this, nativeCtx, query);
+            new ClickHousePreparedQueryStatement(this, nativeCtx, query);
     }
 
     @Override
@@ -261,13 +261,13 @@ public class ClickHouseConnection implements SQLConnection {
         NativeClient nativeClient = getHealthyNativeClient();
         nativeClient.sendQuery(insertQuery, nativeCtx.clientCtx(), cfg.get().settings());
         Validate.isTrue(this.state.compareAndSet(SessionState.IDLE, SessionState.WAITING_INSERT),
-                "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
+            "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         return nativeClient.receiveSampleBlock(cfg.get().queryTimeout(), nativeCtx.serverCtx());
     }
 
     public QueryResult sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
         Validate.isTrue(this.state.get() == SessionState.IDLE,
-                "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
+            "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
         NativeClient nativeClient = getHealthyNativeClient();
         nativeClient.sendQuery(query, nativeCtx.clientCtx(), cfg.settings());
         return nativeClient.receiveQuery(cfg.queryTimeout(), nativeCtx.serverCtx());
@@ -327,8 +327,8 @@ public class ClickHouseConnection implements SQLConnection {
             HelloResponse response = nativeClient.receiveHello(configure.queryTimeout(), null);
             ZoneId timeZone = ZoneId.of(response.serverTimeZone());
             return new NativeContext.ServerContext(
-                    response.majorVersion(), response.minorVersion(), response.reversion(),
-                    configure, timeZone, response.serverDisplayName());
+                response.majorVersion(), response.minorVersion(), response.reversion(),
+                configure, timeZone, response.serverDisplayName());
         } catch (SQLException rethrows) {
             nativeClient.silentDisconnect();
             throw rethrows;

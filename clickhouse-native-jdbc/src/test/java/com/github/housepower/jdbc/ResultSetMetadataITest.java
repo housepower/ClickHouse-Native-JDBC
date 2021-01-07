@@ -33,7 +33,7 @@ public class ResultSetMetadataITest extends AbstractITest {
             statement.executeQuery("CREATE TABLE test(a UInt8, b UInt64, c FixedString(3) )ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES (1, 2, '4' )");
             ResultSet rs = statement.executeQuery("SELECT * FROM test");
-            ResultSetMetaData metadata =  rs.getMetaData();
+            ResultSetMetaData metadata = rs.getMetaData();
 
             assertEquals("test", metadata.getTableName(1));
             assertEquals("default", metadata.getCatalogName(1));

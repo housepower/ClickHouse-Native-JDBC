@@ -27,11 +27,11 @@ class ClickHouseResultSetMetaDataITest extends AbstractITest {
     void getDriverMinorVersion() throws Exception {
         withNewConnection(connection -> {
             ClickHouseResultSet rs = ClickHouseResultSetBuilder
-                                         .builder(6, ((ClickHouseConnection) connection).serverContext())
-                                         .cfg(((ClickHouseConnection) connection).cfg())
-                                         .columnNames("a1", "a2", "a3", "a4", "a5", "a6")
-                                         .columnTypes("String", "UInt32", "Int64", "Float32", "Float64", "Decimal(76, 26)")
-                                         .build();
+                .builder(6, ((ClickHouseConnection) connection).serverContext())
+                .cfg(((ClickHouseConnection) connection).cfg())
+                .columnNames("a1", "a2", "a3", "a4", "a5", "a6")
+                .columnTypes("String", "UInt32", "Int64", "Float32", "Float64", "Decimal(76, 26)")
+                .build();
 
             assertEquals("a1", rs.getMetaData().getColumnName(1));
 

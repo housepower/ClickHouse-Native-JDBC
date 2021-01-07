@@ -31,7 +31,7 @@ public class DataTypeNullable implements IDataType {
         IDataType nestedType = DataTypeFactory.get(lexer, serverContext);
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeNullable(
-                "Nullable(" + nestedType.name() + ")", nestedType, DataTypeFactory.get("UInt8", serverContext));
+            "Nullable(" + nestedType.name() + ")", nestedType, DataTypeFactory.get("UInt8", serverContext));
     };
 
     private static final Short IS_NULL = 1;

@@ -191,7 +191,7 @@ public class QueryComplexTypeITest extends AbstractITest {
             Statement statement = connection.createStatement();
 
             ResultSet rs = statement.executeQuery(
-                    "SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v), [toNullable(10000), toNullable(10001)] from numbers(10)");
+                "SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v), [toNullable(10000), toNullable(10001)] from numbers(10)");
 
             for (int i = 0; i < 10; i++) {
                 assertTrue(rs.next());

@@ -1,29 +1,32 @@
 Public Release Manuel
 =====================
 
-::: warning
-Public Release means deploy to Maven Central. Only core team members are granted to 
-deploy into Public Repository.
+::: warning Public Release means deploy to Maven Central. Only core team members are granted to deploy into Public
+Repository.
 :::
 
 ## Setup GPG
 
 Install on macOS
+
 ```shell script
 brew install gnupg
 ```
 
 Generate key if you don't have it.
+
 ```shell script
 gpg --full-generate-key
 ```
 
 Publish public key
+
 ```shell script
 gpg --send-keys [key-id] --keyserver hkp://subkeys.pgp.net
 ```
 
 Show keys
+
 ```shell script
 gpg --list-keys
 ```

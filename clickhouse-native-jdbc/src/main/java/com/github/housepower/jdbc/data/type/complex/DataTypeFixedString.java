@@ -94,16 +94,16 @@ public class DataTypeFixedString implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
-            throws SQLException, IOException {
+        throws SQLException, IOException {
         if (data instanceof String) {
             writeBytes(((String) data).getBytes(charset), serializer);
         } else {
-            writeBytes(((byte []) (data)), serializer);
+            writeBytes(((byte[]) (data)), serializer);
         }
     }
 
     private void writeBytes(byte[] bs, BinarySerializer serializer)
-            throws IOException, SQLException {
+        throws IOException, SQLException {
         byte[] res;
         if (bs.length > n) {
             throw new SQLException("The size of FixString column is too large, got " + bs.length);

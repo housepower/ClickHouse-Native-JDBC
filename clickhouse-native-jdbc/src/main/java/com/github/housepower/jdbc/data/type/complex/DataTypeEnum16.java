@@ -47,11 +47,11 @@ public class DataTypeEnum16 implements IDataType {
                     if (index > 0)
                         builder.append(",");
                     builder.append("'").append(enumNames.get(index)).append("'")
-                            .append(" = ").append(enumValues.get(index));
+                        .append(" = ").append(enumValues.get(index));
                 }
                 builder.append(")");
                 return new DataTypeEnum16(builder.toString(),
-                        enumNames.toArray(new String[0]), enumValues.toArray(new Short[0]));
+                    enumNames.toArray(new String[0]), enumValues.toArray(new Short[0]));
             }
         }
         throw new SQLException("DataType Enum16 size must be less than 65535");

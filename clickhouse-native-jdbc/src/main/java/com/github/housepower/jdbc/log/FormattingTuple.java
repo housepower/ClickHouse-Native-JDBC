@@ -41,7 +41,7 @@ package com.github.housepower.jdbc.log;
 
 /**
  * Holds the results of formatting done by {@link MessageFormatter}.
- * 
+ *
  * @author Joern Huxhorn
  */
 public class FormattingTuple {

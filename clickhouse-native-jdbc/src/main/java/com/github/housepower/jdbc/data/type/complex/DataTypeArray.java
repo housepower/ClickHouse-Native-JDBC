@@ -37,7 +37,7 @@ public class DataTypeArray implements IDataType {
         IDataType arrayNestedType = DataTypeFactory.get(lexer, serverContext);
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
-                                 arrayNestedType, DataTypeFactory.get("UInt64", serverContext));
+            arrayNestedType, DataTypeFactory.get("UInt64", serverContext));
     };
 
     private final String name;
@@ -139,7 +139,7 @@ public class DataTypeArray implements IDataType {
 
         Object[] offsets = offsetIDataType.deserializeBinaryBulk(rows, deserializer);
         ClickHouseArray res = new ClickHouseArray(elemDataType,
-                elemDataType.deserializeBinaryBulk(((BigInteger) offsets[rows - 1]).intValue(), deserializer));
+            elemDataType.deserializeBinaryBulk(((BigInteger) offsets[rows - 1]).intValue(), deserializer));
 
         for (int row = 0, lastOffset = 0; row < rows; row++) {
             BigInteger offset = (BigInteger) offsets[row];

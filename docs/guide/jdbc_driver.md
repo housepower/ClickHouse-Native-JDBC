@@ -2,13 +2,14 @@
 
 ### Requirements
 
-- Java 8/11. 
+- Java 8/11.
 
 **Notes:** We only do test with Java LTS versions.
 
 ### Import
 
 - Gradle
+
 ```groovy
 // (recommended) shaded version, available since 2.3-stable
 compile "com.github.housepower:clickhouse-native-jdbc-shaded:${clickhouse_native_jdbc_version}"
@@ -35,10 +36,10 @@ compile "com.github.housepower:clickhouse-native-jdbc:${clickhouse_native_jdbc_v
 </dependency>
 ```
 
-
 ### Examples
 
-Select query, see also [SimpleQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/SimpleQuery.java)
+Select query, see
+also [SimpleQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/SimpleQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {
@@ -53,7 +54,8 @@ try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.
 }
 ```
 
-All DDL,DML queries, see also [ExecuteQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/ExecuteQuery.java)
+All DDL,DML queries, see
+also [ExecuteQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/ExecuteQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {
@@ -71,7 +73,8 @@ try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.
 }
 ```
 
-Batch insert query, see also [BatchQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/BatchQuery.java)
+Batch insert query, see
+also [BatchQuery](https://github.com/housepower/ClickHouse-Native-JDBC/tree/master/examples/src/main/java/examples/BatchQuery.java)
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {

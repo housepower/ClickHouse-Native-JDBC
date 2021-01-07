@@ -47,11 +47,11 @@ public class DataTypeEnum8 implements IDataType {
                     if (index > 0)
                         builder.append(",");
                     builder.append("'").append(enumNames.get(index)).append("'")
-                            .append(" = ").append(enumValues.get(index));
+                        .append(" = ").append(enumValues.get(index));
                 }
                 builder.append(")");
                 return new DataTypeEnum8(builder.toString(),
-                        enumNames.toArray(new String[0]), enumValues.toArray(new Byte[0]));
+                    enumNames.toArray(new String[0]), enumValues.toArray(new Byte[0]));
             }
         }
         throw new SQLException("DataType Enum8 size must be less than 256");

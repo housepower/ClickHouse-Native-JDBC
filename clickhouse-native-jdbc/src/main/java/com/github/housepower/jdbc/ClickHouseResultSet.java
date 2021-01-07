@@ -267,9 +267,9 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public Object getObject(int index) throws SQLException {
         LOG.trace("get object at row: {}, column: {} from block with column count: {}, row count: {}",
-                currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
+            currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
         Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
-                "No row information was obtained. You must call ResultSet.next() before that.");
+            "No row information was obtained. You must call ResultSet.next() before that.");
         IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
         return column.value((lastFetchRowIdx = currentRowNum));
     }

@@ -24,7 +24,7 @@ import java.sql.SQLException;
 public class ExtremesResponse implements Response {
 
     public static ExtremesResponse readFrom(
-            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
+        BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
         return new ExtremesResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
     }
 

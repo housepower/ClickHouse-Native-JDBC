@@ -125,8 +125,8 @@ public class Block {
 
     public IColumn getColumnByPosition(int position) throws SQLException {
         Validate.isTrue(position < columns.length,
-                "Position " + position +
-                        " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
+            "Position " + position +
+                " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
         return columns[position];
     }
 
@@ -137,8 +137,8 @@ public class Block {
 
     public Object getObject(int columnIndex) throws SQLException {
         Validate.isTrue(columnIndex < columns.length,
-                "Position " + columnIndex +
-                        " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
+            "Position " + columnIndex +
+                " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
         return rowData[columnIndex];
     }
 

@@ -29,7 +29,7 @@ public class SocketBuffedReaderTest {
     @Test
     public void successfullyReadTwoIntValue() throws Exception {
         SocketBuffedReader buffedReader = new SocketBuffedReader(
-            fragmentInput(new byte[] {1, 0, 0, 0, 2}, new byte[] {0, 3, 4}), 6);
+            fragmentInput(new byte[]{1, 0, 0, 0, 2}, new byte[]{0, 3, 4}), 6);
 
         assertEquals(buffedReader.readBinary(), 1);
 

@@ -25,6 +25,7 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
+ *
  */
 public class SelectIBenchmark extends AbstractIBenchmark {
     @Param({"500000", "10000000"})
@@ -40,7 +41,7 @@ public class SelectIBenchmark extends AbstractIBenchmark {
             rs.getTimestamp(3);
             rs.getDate(4);
         }
-        assertEquals((selectNumber-1) * selectNumber / 2, sum);
+        assertEquals((selectNumber - 1) * selectNumber / 2, sum);
     };
 
     @Benchmark

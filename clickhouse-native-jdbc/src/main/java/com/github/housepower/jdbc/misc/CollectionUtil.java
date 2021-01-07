@@ -41,8 +41,8 @@ public class CollectionUtil {
 
     public static List<String> filterIgnoreCase(List<String> set, String keyword) {
         return set.stream()
-                .filter(key -> key.equalsIgnoreCase(keyword))
-                .collect(Collectors.toList());
+            .filter(key -> key.equalsIgnoreCase(keyword))
+            .collect(Collectors.toList());
     }
 
     public static Map<String, String> filterKeyIgnoreCase(Properties properties, String keyword) {
@@ -53,24 +53,24 @@ public class CollectionUtil {
 
     public static <V> Map<String, V> filterKeyIgnoreCase(Map<String, V> map, String keyword) {
         return map.entrySet().stream()
-                .filter(entry -> entry.getKey().equalsIgnoreCase(keyword))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            .filter(entry -> entry.getKey().equalsIgnoreCase(keyword))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public static <K, V> Map<K, V> mergeMapKeepFirst(Map<K, V> one, Map<K, V> other) {
         return Stream.concat(one.entrySet().stream(), other.entrySet().stream()).collect(
-                Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (former, latter) -> former));
+            Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (former, latter) -> former));
     }
 
     public static <K, V> Map<K, V> mergeMapKeepLast(Map<K, V> one, Map<K, V> other) {
         return Stream.concat(one.entrySet().stream(), other.entrySet().stream()).collect(
-                Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (former, latter) -> latter));
+            Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (former, latter) -> latter));
     }
 
     public static <K, V> void mergeMapInPlaceKeepFirst(Map<K, V> one, @Nullable Map<K, V> other) {

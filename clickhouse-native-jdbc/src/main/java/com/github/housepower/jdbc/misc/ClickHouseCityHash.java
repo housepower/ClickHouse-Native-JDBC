@@ -33,13 +33,13 @@ public class ClickHouseCityHash {
 
     private static long toLongLE(byte[] b, int i) {
         return (((long) b[i + 7] << 56) +
-                ((long) (b[i + 6] & 255) << 48) +
-                ((long) (b[i + 5] & 255) << 40) +
-                ((long) (b[i + 4] & 255) << 32) +
-                ((long) (b[i + 3] & 255) << 24) +
-                ((b[i + 2] & 255) << 16) +
-                ((b[i + 1] & 255) << 8) +
-                ((b[i + 0] & 255) << 0));
+            ((long) (b[i + 6] & 255) << 48) +
+            ((long) (b[i + 5] & 255) << 40) +
+            ((long) (b[i + 4] & 255) << 32) +
+            ((long) (b[i + 3] & 255) << 24) +
+            ((b[i + 2] & 255) << 16) +
+            ((b[i + 1] & 255) << 8) +
+            ((b[i + 0] & 255) << 0));
     }
 
     private static long toIntLE(byte[] b, int i) {
@@ -104,8 +104,8 @@ public class ClickHouseCityHash {
 
 
     private static long[] weakHashLen32WithSeeds(
-            long w, long x, long y, long z,
-            long a, long b) {
+        long w, long x, long y, long z,
+        long a, long b) {
 
         a += w;
         b = rotate(b + a + z, 21);
@@ -118,12 +118,12 @@ public class ClickHouseCityHash {
 
     private static long[] weakHashLen32WithSeeds(byte[] s, int pos, long a, long b) {
         return weakHashLen32WithSeeds(
-                fetch64(s, pos + 0),
-                fetch64(s, pos + 8),
-                fetch64(s, pos + 16),
-                fetch64(s, pos + 24),
-                a,
-                b
+            fetch64(s, pos + 0),
+            fetch64(s, pos + 8),
+            fetch64(s, pos + 16),
+            fetch64(s, pos + 24),
+            a,
+            b
         );
     }
 
@@ -232,8 +232,8 @@ public class ClickHouseCityHash {
         y = hashLen16(y, w[0]);
 
         return new long[]{
-                hashLen16(x + v[1], w[1]) + y,
-                hashLen16(x + w[1], y + v[1])
+            hashLen16(x + v[1], w[1]) + y,
+            hashLen16(x + w[1], y + v[1])
         };
     }
 
@@ -241,16 +241,16 @@ public class ClickHouseCityHash {
 
         if (len >= 16) {
             return cityHash128WithSeed(
-                    s, pos + 16,
-                    len - 16,
-                    fetch64(s, pos) ^ k3,
-                    fetch64(s, pos + 8)
+                s, pos + 16,
+                len - 16,
+                fetch64(s, pos) ^ k3,
+                fetch64(s, pos + 8)
             );
         } else if (len >= 8) {
             return cityHash128WithSeed(
-                    new byte[0], 0, 0,
-                    fetch64(s, pos) ^ (len * k0),
-                    fetch64(s, pos + len - 8) ^ k1
+                new byte[0], 0, 0,
+                fetch64(s, pos) ^ (len * k0),
+                fetch64(s, pos + len - 8) ^ k1
             );
         } else {
             return cityHash128WithSeed(s, pos, len, k0, k1);

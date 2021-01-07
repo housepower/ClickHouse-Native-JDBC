@@ -27,6 +27,7 @@ import ru.yandex.clickhouse.domain.ClickHouseFormat;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
+ *
  */
 public class RowBinaryIntIBenchmark extends AbstractInsertIBenchmark {
     private final String columnType = "Int32";
@@ -40,12 +41,12 @@ public class RowBinaryIntIBenchmark extends AbstractInsertIBenchmark {
             PreparedStatement
                 pstmt = connection.prepareStatement("INSERT INTO " + getTableName() + " values(" + params.substring(0, params.length() - 2) + ")");
             for (int i = 0; i < batchSize; i++) {
-                for (int j = 0; j < columnNum; j++ ) {
+                for (int j = 0; j < columnNum; j++) {
                     pstmt.setObject(j + 1, j + 1);
                 }
                 pstmt.addBatch();
             }
-            int []res = pstmt.executeBatch();
+            int[] res = pstmt.executeBatch();
             assertEquals(res.length, batchSize);
 
             wideColumnAfter(connection);
@@ -60,7 +61,7 @@ public class RowBinaryIntIBenchmark extends AbstractInsertIBenchmark {
             ClickHouseStatement sth = (ClickHouseStatement) connection.createStatement();
             sth.write().send("INSERT INTO " + getTableName(), stream -> {
                 for (int i = 0; i < batchSize; i++) {
-                    for (int j = 0; j < columnNum; j++ ) {
+                    for (int j = 0; j < columnNum; j++) {
                         stream.writeInt32(j + 1);
                     }
                 }

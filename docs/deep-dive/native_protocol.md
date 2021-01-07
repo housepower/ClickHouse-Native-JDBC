@@ -21,7 +21,7 @@ Note left of Client: I got server infos
 
 ## Query
 
-After the connection established and hello request/response, we can send plain sql strings to query the data. 
+After the connection established and hello request/response, we can send plain sql strings to query the data.
 
 ```mermaid
 sequenceDiagram
@@ -34,7 +34,8 @@ Note left of Client: I will deserialize them to the ResultSets.
 
 ## Insert
 
-The plain query which send sql literal to the server, but it's not efficient for batch inserts. ClickHouse provides another type of data request for batch inserts that we can send blocks to the server directly.
+The plain query which send sql literal to the server, but it's not efficient for batch inserts. ClickHouse provides
+another type of data request for batch inserts that we can send blocks to the server directly.
 
 ```mermaid
 sequenceDiagram
@@ -51,5 +52,5 @@ Note right of Server: A empty block just comes,  <br/> which means the client fi
 Note right of Server: State: Idle.
 ```
 
- 
+
 

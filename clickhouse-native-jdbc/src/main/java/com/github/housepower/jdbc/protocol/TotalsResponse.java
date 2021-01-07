@@ -24,7 +24,7 @@ import java.sql.SQLException;
 public class TotalsResponse implements Response {
 
     public static TotalsResponse readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info)
-            throws IOException, SQLException {
+        throws IOException, SQLException {
         return new TotalsResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
     }
 

@@ -24,7 +24,7 @@ import java.sql.SQLException;
 public class DataResponse implements Response {
 
     public static DataResponse readFrom(
-            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
+        BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
 
         String name = deserializer.readUTF8StringBinary();
 

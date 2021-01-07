@@ -73,13 +73,13 @@ public class DataTypeInt64 implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer)
-            throws SQLException, IOException {
+        throws SQLException, IOException {
         serializer.writeLong(((Number) data).longValue());
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer)
-            throws SQLException, IOException {
+        throws SQLException, IOException {
         long l = deserializer.readLong();
         if (isUnsigned) {
             return new BigInteger(1, BytesUtil.longToBytes(l));
@@ -97,7 +97,7 @@ public class DataTypeInt64 implements IDataType {
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
-            throws SQLException, IOException {
+        throws SQLException, IOException {
         Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = this.deserializeBinary(deserializer);

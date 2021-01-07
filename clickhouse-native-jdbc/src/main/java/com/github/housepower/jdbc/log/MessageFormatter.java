@@ -55,7 +55,7 @@ import java.util.Map;
  * <pre>
  * MessageFormatter.format(&quot;Hi {}.&quot;, &quot;there&quot;)
  * </pre>
- *
+ * <p>
  * will return the string "Hi there.".
  * <p>
  * The {} pair is called the <em>formatting anchor</em>. It serves to designate
@@ -69,7 +69,7 @@ import java.util.Map;
  * <pre>
  * MessageFormatter.format(&quot;Set {1,2,3} is not equal to {}.&quot;, &quot;1,2&quot;);
  * </pre>
- *
+ * <p>
  * will return the string "Set {1,2,3} is not equal to 1,2.".
  *
  * <p>
@@ -82,7 +82,7 @@ import java.util.Map;
  * <pre>
  * MessageFormatter.format(&quot;Set \\{} is not equal to {}.&quot;, &quot;1,2&quot;);
  * </pre>
- *
+ * <p>
  * will return the string "Set {} is not equal to 1,2.".
  *
  * <p>
@@ -92,7 +92,7 @@ import java.util.Map;
  * <pre>
  * MessageFormatter.format(&quot;File name is C:\\\\{}.&quot;, &quot;file.zip&quot;);
  * </pre>
- *
+ * <p>
  * will return the string "File name is C:\file.zip".
  *
  * <p>
@@ -125,22 +125,19 @@ final public class MessageFormatter {
      * <pre>
      * MessageFormatter.format(&quot;Hi {}.&quot;, &quot;there&quot;);
      * </pre>
-     *
+     * <p>
      * will return the string "Hi there.".
      * <p>
      *
-     * @param messagePattern
-     *          The message pattern which will be parsed and formatted
-     * @param arg
-     *          The argument to be substituted in place of the formatting anchor
+     * @param messagePattern The message pattern which will be parsed and formatted
+     * @param arg            The argument to be substituted in place of the formatting anchor
      * @return The formatted message
      */
     public static FormattingTuple format(String messagePattern, Object arg) {
-        return arrayFormat(messagePattern, new Object[] { arg });
+        return arrayFormat(messagePattern, new Object[]{arg});
     }
 
     /**
-     *
      * Performs a two argument substitution for the 'messagePattern' passed as
      * parameter.
      * <p>
@@ -149,21 +146,18 @@ final public class MessageFormatter {
      * <pre>
      * MessageFormatter.format(&quot;Hi {}. My name is {}.&quot;, &quot;Alice&quot;, &quot;Bob&quot;);
      * </pre>
-     *
+     * <p>
      * will return the string "Hi Alice. My name is Bob.".
      *
-     * @param messagePattern
-     *          The message pattern which will be parsed and formatted
-     * @param arg1
-     *          The argument to be substituted in place of the first formatting
-     *          anchor
-     * @param arg2
-     *          The argument to be substituted in place of the second formatting
-     *          anchor
+     * @param messagePattern The message pattern which will be parsed and formatted
+     * @param arg1           The argument to be substituted in place of the first formatting
+     *                       anchor
+     * @param arg2           The argument to be substituted in place of the second formatting
+     *                       anchor
      * @return The formatted message
      */
     public static FormattingTuple format(final String messagePattern, Object arg1, Object arg2) {
-        return arrayFormat(messagePattern, new Object[] { arg1, arg2 });
+        return arrayFormat(messagePattern, new Object[]{arg1, arg2});
     }
 
 

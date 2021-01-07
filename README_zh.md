@@ -12,19 +12,20 @@ ClickHouse Native JDBC
 
 ## [项目主页](https://housepower.github.io/ClickHouse-Native-JDBC/zh/) | [GitHub](https://github.com/housepower/ClickHouse-Native-JDBC) | [码云](https://gitee.com/housepower/ClickHouse-Native-JDBC)
 
-这是一个基于原生(TCP)协议实现的 JDBC 驱动，用于访问 [ClickHouse](https://clickhouse.yandex/) ，同时也支持与 [Apache Spark](https://github.com/apache/spark/) 的集成。
+这是一个基于原生(TCP)协议实现的 JDBC 驱动，用于访问 [ClickHouse](https://clickhouse.yandex/)
+，同时也支持与 [Apache Spark](https://github.com/apache/spark/) 的集成。
 
 ## 参与贡献
 
 我们欢迎大家以各种形式参与项目贡献，可以是报告问题、完善文档、修复 bug、添加测试用例、实现新特性等。请参考 [贡献指南](CONTRIBUTE.md)。
 
-本项目受 [JetBrains Open Source License](https://www.jetbrains.com/?from=ClickHouse-Native-JDBC) 2020-2021 赞助支持. 
+本项目受 [JetBrains Open Source License](https://www.jetbrains.com/?from=ClickHouse-Native-JDBC) 2020-2021 赞助支持.
 
 ## JDBC 驱动
 
 ### 使用要求
 
-- Java 8/11. 
+- Java 8/11.
 
 **注意:** 我们只基于 Java LTS 版本做测试。
 
@@ -42,6 +43,7 @@ ClickHouse Native JDBC
 ### 导入包
 
 - Gradle
+
 ```groovy
 // (推荐) shaded 版本，自 2.3-stable 起可用
 compile "com.github.housepower:clickhouse-native-jdbc-shaded:${clickhouse_native_jdbc_version}"

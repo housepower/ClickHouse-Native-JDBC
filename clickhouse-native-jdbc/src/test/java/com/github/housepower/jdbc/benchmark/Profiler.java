@@ -95,7 +95,7 @@ public class Profiler {
         String totalElapsedMillisStr = fixedLengthString(String.valueOf(elapsedMillis), 6);
         String millisPassedFromLastLogStr = fixedLengthString(String.valueOf(elapsedDeltaMillis), 6);
         System.out.println(percentCompleteStr + " Total memory (MB): " + totalMemoryStr + ", used memory (MB): "
-                + usedMemoryStr + ", time elapsed: " + totalElapsedMillisStr
-                + "(+" + millisPassedFromLastLogStr + " ms)");
+            + usedMemoryStr + ", time elapsed: " + totalElapsedMillisStr
+            + "(+" + millisPassedFromLastLogStr + " ms)");
     }
 }

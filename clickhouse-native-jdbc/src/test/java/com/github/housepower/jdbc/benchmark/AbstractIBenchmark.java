@@ -46,11 +46,11 @@ public class AbstractIBenchmark {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                          .include(".*")
-                          .warmupIterations(0)
-                          .measurementIterations(1)
-                          .forks(2)
-                          .build();
+            .include(".*")
+            .warmupIterations(0)
+            .measurementIterations(1)
+            .forks(2)
+            .build();
 
         new Runner(opt).run();
     }
