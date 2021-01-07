@@ -33,7 +33,11 @@ public class LoggerFactory {
     }
 
     public static Logger getLogger(String name) {
-        return getLogger(name);
+        return adaptor.getLogger(name);
+    }
+
+    public static LoggerFactoryAdaptor currentAdaptor() {
+        return adaptor;
     }
 
     // for testing
