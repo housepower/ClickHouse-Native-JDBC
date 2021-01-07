@@ -109,14 +109,14 @@ public class DataTypeDateTime implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        ZonedDateTime obj = (ZonedDateTime) data;
-        serializer.writeInt((int) DateTimeUtil.toEpochSecond(obj));
+        ZonedDateTime zdt = (ZonedDateTime) data;
+        serializer.writeInt((int) DateTimeUtil.toEpochSecond(zdt));
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        ZonedDateTime zdt = DateTimeUtil.fromEpochSecondTz(deserializer.readInt(), 0, tz);
-        return zdt;
+        int epochSeconds = deserializer.readInt();
+        return DateTimeUtil.toZonedDateTime(epochSeconds, 0, tz);
     }
 
     @Override

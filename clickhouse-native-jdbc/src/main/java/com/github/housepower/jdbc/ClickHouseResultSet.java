@@ -24,7 +24,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 
@@ -227,7 +226,7 @@ public class ClickHouseResultSet implements SQLResultSet {
             return null;
         }
         ZonedDateTime zts = (ZonedDateTime) data;
-        Timestamp t = DateTimeUtil.convert(zts, null);
+        Timestamp t = DateTimeUtil.toTimestamp(zts, null);
         return t;
     }
 
@@ -238,7 +237,7 @@ public class ClickHouseResultSet implements SQLResultSet {
             return null;
         }
         ZonedDateTime zts = (ZonedDateTime) data;
-        Timestamp t = DateTimeUtil.convert(zts, cal.getTimeZone().toZoneId());
+        Timestamp t = DateTimeUtil.toTimestamp(zts, cal.getTimeZone().toZoneId());
         return t;
     }
 
@@ -297,17 +296,14 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public Object getObject(int index) throws SQLException {
-        Object o = getObjectInternal(index);
-        if (o == null) {
+        Object obj = getObjectInternal(index);
+        if (obj == null) {
             return null;
         }
-        IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
-        if (column.type().sqlTypeId() == Types.TIMESTAMP) {
-            ZonedDateTime zts = (ZonedDateTime) o;
-            Timestamp t = DateTimeUtil.convert(zts, null);
-            return t;
+        if (obj instanceof ZonedDateTime) {
+            return DateTimeUtil.toTimestamp((ZonedDateTime) obj, null);
         }
-        return column.value((lastFetchRowIdx = currentRowNum));
+        return obj;
     }
 
     private Object getObjectInternal(int index) throws SQLException {

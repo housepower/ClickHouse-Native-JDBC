@@ -131,8 +131,7 @@ public class DataTypeDateTime64 implements IDataType {
         Validate.isTrue(lexer.character() == '\'');
         Validate.isTrue(lexer.character() == ')');
 
-        ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hours, minutes, second, nanos, tz);
-        return zdt;
+        return ZonedDateTime.of(year, month, day, hours, minutes, second, nanos, tz);
     }
 
     @Override
@@ -150,8 +149,7 @@ public class DataTypeDateTime64 implements IDataType {
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);
 
-        ZonedDateTime timestamp = DateTimeUtil.fromEpochSecondTz(epochSeconds, nanos, tz);
-        return timestamp;
+        return DateTimeUtil.toZonedDateTime(epochSeconds, nanos, tz);
     }
 
     @Override

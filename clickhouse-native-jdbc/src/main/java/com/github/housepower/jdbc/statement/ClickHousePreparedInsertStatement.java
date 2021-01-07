@@ -69,7 +69,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     @Override
     public void setObject(int parameterIndex, Object x) throws SQLException {
         if (x instanceof Timestamp) {
-            x = DateTimeUtil.fromTimestampTz((Timestamp) x, tz);
+            x = DateTimeUtil.toZonedDateTime((Timestamp) x, tz);
         }
         initBlockIfPossible();
         block.setPlaceholderObject(parameterIndex - 1, x);
