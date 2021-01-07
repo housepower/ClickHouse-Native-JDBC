@@ -14,17 +14,15 @@
 
 package com.github.housepower.jdbc.statement;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Arrays;
-
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
 
@@ -68,11 +66,8 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     // parameterIndex start with 1
     @Override
     public void setObject(int parameterIndex, Object x) throws SQLException {
-        if (x instanceof Timestamp) {
-            x = DateTimeUtil.toZonedDateTime((Timestamp) x, tz);
-        }
         initBlockIfPossible();
-        block.setPlaceholderObject(parameterIndex - 1, x);
+        block.setPlaceholderObject(parameterIndex - 1, convertObjectIfNecessary(x));
     }
 
     @Override

@@ -24,8 +24,10 @@ import java.sql.Struct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.regex.Matcher;
 
@@ -97,7 +99,12 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void setTimestamp(int index, Timestamp x) throws SQLException {
-        setObject(index, x);
+        setObject(index, DateTimeUtil.toZonedDateTime(x, tz));
+    }
+
+    @Override
+    public void setTimestamp(int index, Timestamp x, Calendar cal) throws SQLException {
+        setObject(index, DateTimeUtil.toZonedDateTime(x, cal.getTimeZone().toZoneId()));
     }
 
     @Override
@@ -140,6 +147,17 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         setObject(index, x);
     }
 
+    protected Object convertObjectIfNecessary(Object obj) {
+        Object result = obj;
+        if (obj instanceof Date) {
+            result = ((Date) obj).toLocalDate();
+        }
+        if (obj instanceof Timestamp) {
+            result = DateTimeUtil.toZonedDateTime((Timestamp) obj, tz);
+        }
+        return result;
+    }
+
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         return getResultSet().getMetaData();
@@ -177,8 +195,8 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
             return assembleQuotedParameter(queryBuilder, String.valueOf(parameter));
         } else if (parameter instanceof LocalDate) {
             return assembleQuotedParameter(queryBuilder, dateFmt.format((LocalDate) parameter));
-        } else if (parameter instanceof Timestamp) {
-            return assembleQuotedParameter(queryBuilder, timestampFmt.format(((Timestamp) parameter).toInstant()));
+        } else if (parameter instanceof ZonedDateTime) {
+            return assembleQuotedParameter(queryBuilder, timestampFmt.format((ZonedDateTime) parameter));
         }
         return false;
     }
