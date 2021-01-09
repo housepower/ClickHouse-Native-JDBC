@@ -17,6 +17,9 @@ package com.github.housepower.jdbc.misc;
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.settings.SettingKey;
 
+import javax.annotation.Nullable;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -32,7 +35,26 @@ public class DateTimeUtil {
         return localDateTime.atZone(from).withZoneSameInstant(to).toLocalDateTime();
     }
 
-    public static long toEpochMilli(ZonedDateTime zdt) {
+    public static long toEpochMilli(final ZonedDateTime zdt) {
         return zdt.toInstant().toEpochMilli();
+    }
+
+    public static long toEpochSecond(final ZonedDateTime zdt) {
+        return zdt.toInstant().getEpochSecond();
+    }
+
+    public static ZonedDateTime toZonedDateTime(final long seconds, final int nanos, final ZoneId tz) {
+        Instant i = Instant.ofEpochSecond(seconds, nanos);
+        return ZonedDateTime.ofInstant(i, tz);
+    }
+
+    public static ZonedDateTime toZonedDateTime(final Timestamp x, final ZoneId tz) {
+        Instant i = Instant.ofEpochSecond(x.getTime() / 1000, x.getNanos());
+        return ZonedDateTime.ofInstant(i, tz);
+    }
+
+    public static Timestamp toTimestamp(final ZonedDateTime zdt, @Nullable final ZoneId tz) {
+        ZonedDateTime _zdt = tz == null ? zdt : zdt.withZoneSameLocal(tz);
+        return Timestamp.from(_zdt.toInstant());
     }
 }

@@ -83,7 +83,7 @@ public class DataTypeEnum16 implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return String.class;
     }
 

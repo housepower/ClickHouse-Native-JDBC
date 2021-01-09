@@ -14,21 +14,31 @@
 
 package com.github.housepower.jdbc;
 
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.IColumn;
 import com.github.housepower.jdbc.log.Logger;
 import com.github.housepower.jdbc.log.LoggerFactory;
 import com.github.housepower.jdbc.misc.CheckedIterator;
+import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.protocol.DataResponse;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLResultSet;
-
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.*;
 
 public class ClickHouseResultSet implements SQLResultSet {
 
@@ -107,6 +117,11 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
+    public Timestamp getTimestamp(String name, Calendar cal) throws SQLException {
+        return this.getTimestamp(this.findColumn(name), cal);
+    }
+
+    @Override
     public Date getDate(String name) throws SQLException {
         return this.getDate(this.findColumn(name));
     }
@@ -143,7 +158,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public boolean getBoolean(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return false;
         }
@@ -153,7 +168,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public byte getByte(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return 0;
         }
@@ -162,7 +177,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public short getShort(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return 0;
         }
@@ -171,7 +186,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public int getInt(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return 0;
         }
@@ -180,7 +195,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public long getLong(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return 0;
         }
@@ -189,7 +204,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public float getFloat(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return 0;
         }
@@ -198,7 +213,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public double getDouble(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return 0;
         }
@@ -207,19 +222,35 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public Timestamp getTimestamp(int index) throws SQLException {
-        Object data = getObject(index);
-        return (Timestamp) data;
+        Object data = getInternalObject(index);
+        if (data == null) {
+            return null;
+        }
+        ZonedDateTime zts = (ZonedDateTime) data;
+        return DateTimeUtil.toTimestamp(zts, null);
+    }
+
+    @Override
+    public Timestamp getTimestamp(int index, Calendar cal) throws SQLException {
+        Object data = getInternalObject(index);
+        if (data == null) {
+            return null;
+        }
+        ZonedDateTime zts = (ZonedDateTime) data;
+        return DateTimeUtil.toTimestamp(zts, cal.getTimeZone().toZoneId());
     }
 
     @Override
     public Date getDate(int index) throws SQLException {
-        Object data = getObject(index);
-        return (Date) data;
+        LocalDate date = (LocalDate) getInternalObject(index);
+        if (date == null)
+            return null;
+        return Date.valueOf(date);
     }
 
     @Override
     public BigDecimal getBigDecimal(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return null;
         }
@@ -228,7 +259,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public String getString(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return null;
         }
@@ -238,7 +269,7 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public byte[] getBytes(int index) throws SQLException {
-        String data = (String) getObject(index);
+        String data = (String) getInternalObject(index);
         if (data == null) {
             return null;
         }
@@ -260,12 +291,26 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public Array getArray(int index) throws SQLException {
-        Object data = getObject(index);
+        Object data = getInternalObject(index);
         return (Array) data;
     }
 
     @Override
     public Object getObject(int index) throws SQLException {
+        Object obj = getInternalObject(index);
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof ZonedDateTime) {
+            return DateTimeUtil.toTimestamp((ZonedDateTime) obj, null);
+        }
+        if (obj instanceof LocalDate) {
+            return Date.valueOf(((LocalDate) obj));
+        }
+        return obj;
+    }
+
+    private Object getInternalObject(int index) throws SQLException {
         LOG.trace("get object at row: {}, column: {} from block with column count: {}, row count: {}",
                 currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
         Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),

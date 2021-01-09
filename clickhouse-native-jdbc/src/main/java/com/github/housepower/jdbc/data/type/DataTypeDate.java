@@ -29,7 +29,7 @@ import java.time.LocalDate;
 public class DataTypeDate implements IDataType {
     // Since `Date` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
     // we should ensure DON'T modify it anywhere.
-    private static final Date DEFAULT_VALUE = Date.valueOf(LocalDate.ofEpochDay(0));
+    private static final LocalDate DEFAULT_VALUE = LocalDate.ofEpochDay(0);
 
     public DataTypeDate() {
     }
@@ -50,7 +50,12 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
+        return LocalDate.class;
+    }
+
+    @Override
+    public Class jdbcJavaType() {
         return Date.class;
     }
 
@@ -71,22 +76,22 @@ public class DataTypeDate implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        long epochDay = ((Date) data).toLocalDate().toEpochDay();
+        long epochDay = ((LocalDate) data).toEpochDay();
         serializer.writeShort((short) epochDay);
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        short daysSinceEpoch = deserializer.readShort();
-        return new Date(3600L * 24 * 1000 * daysSinceEpoch);
+        short epochDay = deserializer.readShort();
+        return LocalDate.ofEpochDay(epochDay);
     }
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
-        Date[] data = new Date[rows];
+        LocalDate[] data = new LocalDate[rows];
         for (int row = 0; row < rows; row++) {
-            short daysSinceEpoch = deserializer.readShort();
-            data[row] = Date.valueOf(LocalDate.ofEpochDay(daysSinceEpoch));
+            short epochDay = deserializer.readShort();
+            data[row] = LocalDate.ofEpochDay(epochDay);
         }
         return data;
     }
@@ -106,7 +111,6 @@ public class DataTypeDate implements IDataType {
         int day = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '\'');
 
-        LocalDate date = LocalDate.of(year, month, day);
-        return Date.valueOf(date);
+        return LocalDate.of(year, month, day);
     }
 }

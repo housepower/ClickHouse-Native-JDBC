@@ -51,7 +51,7 @@ public class DataTypeString implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return String.class;
     }
 

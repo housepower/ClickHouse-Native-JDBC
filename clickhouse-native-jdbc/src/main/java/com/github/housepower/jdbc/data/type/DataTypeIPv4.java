@@ -43,7 +43,7 @@ public class DataTypeIPv4 implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return Integer.class;
     }
 
