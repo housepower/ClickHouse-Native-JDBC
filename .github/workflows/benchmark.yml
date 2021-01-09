@@ -39,8 +39,9 @@ jobs:
         with:
           repo-token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           message: |
-            Benchmark Report
-            ===
-            ```
+            <details>
+              <summary>BENCHMARK_REPORT</summary>
+              ```
             ${{ env.BENCHMARK_REPORT }}
-            ```
+              ```
+            </details>
