@@ -83,7 +83,7 @@ public class DataTypeDecimal implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return BigDecimal.class;
     }
 

@@ -68,8 +68,13 @@ public class DataTypeNullable implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
-        return nestedDataType.javaTypeClass();
+    public Class javaType() {
+        return nestedDataType.javaType();
+    }
+
+    @Override
+    public Class jdbcJavaType() {
+        return nestedDataType.jdbcJavaType();
     }
 
     @Override

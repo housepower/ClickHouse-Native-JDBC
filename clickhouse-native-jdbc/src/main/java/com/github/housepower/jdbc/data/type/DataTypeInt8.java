@@ -50,7 +50,7 @@ public class DataTypeInt8 implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return Byte.class;
     }
 

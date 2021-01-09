@@ -68,7 +68,7 @@ public class DataTypeFixedString implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return String.class;
     }
 

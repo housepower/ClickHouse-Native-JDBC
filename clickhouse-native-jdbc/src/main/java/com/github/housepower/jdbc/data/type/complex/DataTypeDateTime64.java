@@ -14,6 +14,15 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import com.github.housepower.jdbc.connect.NativeContext.ServerContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.DateTimeUtil;
@@ -22,14 +31,6 @@ import com.github.housepower.jdbc.misc.StringView;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 public class DataTypeDateTime64 implements IDataType {
 
@@ -53,9 +54,7 @@ public class DataTypeDateTime64 implements IDataType {
         return new DataTypeDateTime64("DateTime64", DataTypeDateTime64.DEFAULT_SCALE, serverContext);
     };
 
-    // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
-    // we should ensure DON'T modify it anywhere.
-    public static final Timestamp DEFAULT_VALUE = new Timestamp(0);
+    private static final LocalDateTime EPOCH_LOCAL_DT = LocalDateTime.of(1970, 1, 1, 0, 0);
     public static final int NANOS_IN_SECOND = 1_000_000_000;
     public static final int MILLIS_IN_SECOND = 1000;
     public static final int[] POW_10 = {1, 10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000};
@@ -66,11 +65,13 @@ public class DataTypeDateTime64 implements IDataType {
     private final String name;
     private final int scale;
     private final ZoneId tz;
+    private final ZonedDateTime defaultValue;
 
     public DataTypeDateTime64(String name, int scala, ServerContext serverContext) {
         this.name = name;
         this.scale = scala;
         this.tz = DateTimeUtil.chooseTimeZone(serverContext);
+        this.defaultValue = EPOCH_LOCAL_DT.atZone(tz);
     }
 
     @Override
@@ -85,11 +86,16 @@ public class DataTypeDateTime64 implements IDataType {
 
     @Override
     public Object defaultValue() {
-        return DEFAULT_VALUE;
+        return defaultValue;
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
+        return ZonedDateTime.class;
+    }
+
+    @Override
+    public Class jdbcJavaType() {
         return Timestamp.class;
     }
 
@@ -131,8 +137,16 @@ public class DataTypeDateTime64 implements IDataType {
         Validate.isTrue(lexer.character() == '\'');
         Validate.isTrue(lexer.character() == ')');
 
-        ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hours, minutes, second, nanos, tz);
-        return Timestamp.from(zdt.toInstant());
+        return ZonedDateTime.of(year, month, day, hours, minutes, second, nanos, tz);
+    }
+
+    @Override
+    public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
+        ZonedDateTime zdt = (ZonedDateTime) data;
+        long epochSeconds = DateTimeUtil.toEpochSecond(zdt);
+        int nanos = zdt.getNano();
+        long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
+        serializer.writeLong(value);
     }
 
     @Override
@@ -140,26 +154,15 @@ public class DataTypeDateTime64 implements IDataType {
         long value = deserializer.readLong() * POW_10[MAX_SCALA - scale];
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);
-        Timestamp timestamp = new Timestamp(epochSeconds * 1000);
-        if (nanos != 0)
-            timestamp.setNanos(nanos);
-        return timestamp;
-    }
 
-    @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
-        Timestamp timestamp = (Timestamp) data;
-        long epochSeconds = timestamp.getTime() / MILLIS_IN_SECOND;
-        int nanos = timestamp.getNanos();
-        long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
-        serializer.writeLong(value);
+        return DateTimeUtil.toZonedDateTime(epochSeconds, nanos, tz);
     }
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
-        Timestamp[] data = new Timestamp[rows];
+        ZonedDateTime[] data = new ZonedDateTime[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = (Timestamp) deserializeBinary(deserializer);
+            data[row] = (ZonedDateTime) deserializeBinary(deserializer);
         }
         return data;
     }

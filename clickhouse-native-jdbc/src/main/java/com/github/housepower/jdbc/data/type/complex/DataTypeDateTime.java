@@ -14,6 +14,12 @@
 
 package com.github.housepower.jdbc.data.type.complex;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.time.*;
+
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.DateTimeUtil;
@@ -21,13 +27,6 @@ import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
-
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 public class DataTypeDateTime implements IDataType {
 
@@ -41,16 +40,15 @@ public class DataTypeDateTime implements IDataType {
         return new DataTypeDateTime("DateTime", serverContext);
     };
 
-    // Since `Timestamp` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
-    // we should ensure DON'T modify it anywhere.
-    private static final Timestamp DEFAULT_VALUE = new Timestamp(0);
-    private final ZoneId tz;
-
+    private static final LocalDateTime EPOCH_LOCAL_DT = LocalDateTime.of(1970, 1, 1, 0, 0);
     private final String name;
+    private final ZoneId tz;
+    private final ZonedDateTime defaultValue;
 
     public DataTypeDateTime(String name, NativeContext.ServerContext serverContext) {
         this.name = name;
         this.tz = DateTimeUtil.chooseTimeZone(serverContext);
+        this.defaultValue = EPOCH_LOCAL_DT.atZone(tz);
     }
 
     @Override
@@ -65,11 +63,16 @@ public class DataTypeDateTime implements IDataType {
 
     @Override
     public Object defaultValue() {
-        return DEFAULT_VALUE;
+        return defaultValue;
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
+        return ZonedDateTime.class;
+    }
+
+    @Override
+    public Class jdbcJavaType() {
         return Timestamp.class;
     }
 
@@ -104,25 +107,26 @@ public class DataTypeDateTime implements IDataType {
         int seconds = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '\'');
 
-        ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hours, minutes, seconds, 0, tz);
-        return Timestamp.from(zdt.toInstant());
+        return ZonedDateTime.of(year, month, day, hours, minutes, seconds, 0, tz);
     }
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt((int) ((((Timestamp) data).getTime()) / 1000));
+        ZonedDateTime zdt = (ZonedDateTime) data;
+        serializer.writeInt((int) DateTimeUtil.toEpochSecond(zdt));
     }
 
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new Timestamp(deserializer.readInt() * 1000L);
+        int epochSeconds = deserializer.readInt();
+        return DateTimeUtil.toZonedDateTime(epochSeconds, 0, tz);
     }
 
     @Override
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        Timestamp[] data = new Timestamp[rows];
+        ZonedDateTime[] data = new ZonedDateTime[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = new Timestamp(deserializer.readInt() * 1000L);
+            data[row] = (ZonedDateTime) deserializeBinary(deserializer);
         }
         return data;
     }

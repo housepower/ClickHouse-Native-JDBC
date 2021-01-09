@@ -50,7 +50,7 @@ public class DataTypeInt16 implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return Short.class;
     }
 

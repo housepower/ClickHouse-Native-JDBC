@@ -52,7 +52,7 @@ public class DataTypeInt64 implements IDataType {
     }
 
     @Override
-    public Class javaTypeClass() {
+    public Class javaType() {
         return Long.class;
     }
 

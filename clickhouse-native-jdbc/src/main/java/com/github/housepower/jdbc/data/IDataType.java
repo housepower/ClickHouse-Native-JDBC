@@ -32,7 +32,11 @@ public interface IDataType {
 
     Object defaultValue();
 
-    Class javaTypeClass();
+    Class javaType();
+
+    default Class jdbcJavaType() {
+        return javaType();
+    }
 
     boolean nullable();
 
