@@ -42,6 +42,7 @@ jobs:
             <details>
               <summary>BENCHMARK_REPORT</summary>
 
+            ```
             ${{ env.BENCHMARK_REPORT }}
-
+            ```
             </details>
