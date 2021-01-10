@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-public class ClickHouseSQLExceptionITTest extends AbstractITest {
+public class ClickHouseSQLExceptionITest extends AbstractITest {
 
     @Test
     public void errorCodeShouldBeAssigned() throws Exception {
