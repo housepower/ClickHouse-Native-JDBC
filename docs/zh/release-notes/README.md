@@ -1,6 +1,19 @@
 发行注记
 ===
 
+v2.5.2 (2021年1月11日)
+---
+### 变更日志
+- (bugfix) Fix ResultSetMetaData.isSigned (#281 #283)
+- (bugfix) Fix LoggerFactory#getLogger (#287)
+- (enhance) Set ClickHouseSQLException errorCode correctly (#290) Thanks @baibaichen
+- (feature) Rework stuffs related to time api (#288) Thanks @sbouchex
+
+v2.5.1 (2021年1月4日)
+---
+### 变更日志
+- (bugfix) Fix Negative Decimal serde (#279)
+
 v2.5.0 (2020年12月27日)
 ---
 ### 主要内容

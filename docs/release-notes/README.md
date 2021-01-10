@@ -1,6 +1,19 @@
 Release Notes
 ===
 
+v2.5.2 (Jan 11, 2021)
+---
+### Changelog
+- (bugfix) Fix ResultSetMetaData.isSigned (#281 #283)
+- (bugfix) Fix LoggerFactory#getLogger (#287)
+- (enhance) Set ClickHouseSQLException errorCode correctly (#290) Thanks @baibaichen
+- (feature) Rework stuffs related to time api (#288) Thanks @sbouchex
+
+v2.5.1 (Jan 4, 2021)
+---
+### Changelog
+- (bugfix) Fix Negative Decimal serde (#279)
+
 v2.5.0 (Dec 27, 2020)
 ---
 ### Highlight
