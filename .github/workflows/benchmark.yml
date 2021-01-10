@@ -39,8 +39,10 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            Benchmark Report
-            ===
+            <details>
+              <summary>BENCHMARK_REPORT</summary>
+
             ```
             ${{ env.BENCHMARK_REPORT }}
             ```
+            </details>
