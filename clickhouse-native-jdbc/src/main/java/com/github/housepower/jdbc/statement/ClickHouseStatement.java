@@ -65,13 +65,11 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public boolean execute(String query) throws SQLException {
-        LOG.debug("execute: {}", query);
         return executeQuery(query) != null;
     }
 
     @Override
     public int executeUpdate(String query) throws SQLException {
-        LOG.debug("executeUpdate: {}", query);
         cfg.settings().put(SettingKey.max_result_rows, maxRows);
         cfg.settings().put(SettingKey.result_overflow_mode, "break");
 
@@ -96,26 +94,22 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public ResultSet executeQuery(String query) throws SQLException {
-        LOG.debug("executeQuery: {}", query);
         executeUpdate(query);
         return getResultSet();
     }
 
     @Override
     public int getUpdateCount() throws SQLException {
-        LOG.debug("getUpdateCount: {}", updateCount);
         return updateCount;
     }
 
     @Override
     public ResultSet getResultSet() {
-        LOG.debug("getResultSet: {}", lastResultSet);
         return lastResultSet;
     }
 
     @Override
     public boolean getMoreResults() throws SQLException {
-        LOG.debug("getMoreResults");
         updateCount = -1;
         if (lastResultSet != null) {
             lastResultSet.close();

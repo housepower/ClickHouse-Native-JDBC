@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class DataTypeFloat32 implements IDataType {
-
-    private static final Float DEFAULT_VALUE = 0.0F;
+public class DataTypeFloat32 implements IDataType<Float, Float> {
 
     @Override
     public String name() {
@@ -38,18 +36,13 @@ public class DataTypeFloat32 implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
-        return DEFAULT_VALUE;
+    public Float defaultValue() {
+        return 0.0F;
     }
 
     @Override
-    public Class javaType() {
+    public Class<Float> javaType() {
         return Float.class;
-    }
-
-    @Override
-    public boolean nullable() {
-        return false;
     }
 
     @Override
@@ -63,22 +56,13 @@ public class DataTypeFloat32 implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(Float data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeFloat(((Number) data).floatValue());
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws IOException {
+    public Float deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         return deserializer.readFloat();
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
-        Float[] data = new Float[rows];
-        for (int row = 0; row < rows; row++) {
-            data[row] = deserializer.readFloat();
-        }
-        return data;
     }
 
     @Override
@@ -87,7 +71,7 @@ public class DataTypeFloat32 implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Float deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().floatValue();
     }
 

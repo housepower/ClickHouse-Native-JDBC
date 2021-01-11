@@ -88,11 +88,6 @@ public class DataTypeEnum16 implements IDataType {
     }
 
     @Override
-    public boolean nullable() {
-        return false;
-    }
-
-    @Override
     public int getPrecision() {
         return 0;
     }
@@ -136,14 +131,5 @@ public class DataTypeEnum16 implements IDataType {
             }
         }
         throw new SQLException("");
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        String[] data = new String[rows];
-        for (int row = 0; row < rows; row++) {
-            data[row] = (String) deserializeBinary(deserializer);
-        }
-        return data;
     }
 }

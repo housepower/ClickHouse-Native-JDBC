@@ -29,9 +29,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Locale;
 
-public class DataTypeDecimal implements IDataType {
+public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal> {
 
-    public static DataTypeCreator creator = (lexer, serverContext) -> {
+    public static DataTypeCreator<BigDecimal, BigDecimal> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         Number precision = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ',');
@@ -78,18 +78,13 @@ public class DataTypeDecimal implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
-        return new BigDecimal(0);
+    public BigDecimal defaultValue() {
+        return BigDecimal.ZERO;
     }
 
     @Override
-    public Class javaType() {
+    public Class<BigDecimal> javaType() {
         return BigDecimal.class;
-    }
-
-    @Override
-    public boolean nullable() {
-        return false;
     }
 
     @Override
@@ -103,7 +98,7 @@ public class DataTypeDecimal implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public BigDecimal deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         BigDecimal result;
         if (lexer.isCharacter('\'')) {
             String v = lexer.stringLiteral();
@@ -117,8 +112,8 @@ public class DataTypeDecimal implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
-        BigDecimal targetValue = ((BigDecimal) data).multiply(scaleFactor);
+    public void serializeBinary(BigDecimal data, BinarySerializer serializer) throws IOException {
+        BigDecimal targetValue = data.multiply(scaleFactor);
         switch (this.nobits) {
             case 32: {
                 serializer.writeInt(targetValue.intValue());
@@ -151,7 +146,7 @@ public class DataTypeDecimal implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public BigDecimal deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         BigDecimal value;
         switch (this.nobits) {
             case 32: {
@@ -197,15 +192,6 @@ public class DataTypeDecimal implements IDataType {
             }
         }
         return value;
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        BigDecimal[] data = new BigDecimal[rows];
-        for (int row = 0; row < rows; row++) {
-            data[row] = (BigDecimal) this.deserializeBinary(deserializer);
-        }
-        return data;
     }
 
     @Override

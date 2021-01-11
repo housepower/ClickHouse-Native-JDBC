@@ -88,11 +88,6 @@ public class DataTypeTuple implements IDataType {
     }
 
     @Override
-    public boolean nullable() {
-        return false;
-    }
-
-    @Override
     public int getPrecision() {
         return 0;
     }
@@ -110,15 +105,6 @@ public class DataTypeTuple implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        Object[] attrs = new Object[nestedTypes.length];
-        for (int i = 0; i < nestedTypes.length; i++) {
-            attrs[i] = nestedTypes[i].deserializeBinary(deserializer);
-        }
-        return new ClickHouseStruct("Tuple", attrs);
-    }
-
-    @Override
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
         for (int i = 0; i < nestedTypes.length; i++) {
             Object[] elemsData = new Object[data.length];
@@ -127,6 +113,15 @@ public class DataTypeTuple implements IDataType {
             }
             nestedTypes[i].serializeBinaryBulk(elemsData, serializer);
         }
+    }
+
+    @Override
+    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        Object[] attrs = new Object[nestedTypes.length];
+        for (int i = 0; i < nestedTypes.length; i++) {
+            attrs[i] = nestedTypes[i].deserializeBinary(deserializer);
+        }
+        return new ClickHouseStruct("Tuple", attrs);
     }
 
     @Override

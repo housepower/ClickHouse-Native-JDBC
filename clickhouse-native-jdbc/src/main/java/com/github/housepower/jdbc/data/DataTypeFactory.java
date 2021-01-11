@@ -20,15 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.data.type.DataTypeDate;
-import com.github.housepower.jdbc.data.type.DataTypeFloat32;
-import com.github.housepower.jdbc.data.type.DataTypeFloat64;
-import com.github.housepower.jdbc.data.type.DataTypeIPv4;
-import com.github.housepower.jdbc.data.type.DataTypeInt16;
-import com.github.housepower.jdbc.data.type.DataTypeInt32;
-import com.github.housepower.jdbc.data.type.DataTypeInt64;
-import com.github.housepower.jdbc.data.type.DataTypeInt8;
-import com.github.housepower.jdbc.data.type.DataTypeUUID;
+import com.github.housepower.jdbc.data.type.*;
 import com.github.housepower.jdbc.data.type.complex.DataTypeArray;
 import com.github.housepower.jdbc.data.type.complex.DataTypeCreator;
 import com.github.housepower.jdbc.data.type.complex.DataTypeDateTime;
@@ -47,10 +39,10 @@ import com.github.housepower.jdbc.misc.Validate;
 
 
 public class DataTypeFactory {
-    private static final LRUCache<String, IDataType> DATA_TYPE_CACHE = new LRUCache<>(1024);
+    private static final LRUCache<String, IDataType<?, ?>> DATA_TYPE_CACHE = new LRUCache<>(1024);
 
-    public static IDataType get(String type, NativeContext.ServerContext serverContext) throws SQLException {
-        IDataType dataType = DATA_TYPE_CACHE.get(type);
+    public static IDataType<?, ?> get(String type, NativeContext.ServerContext serverContext) throws SQLException {
+        IDataType<?, ?> dataType = DATA_TYPE_CACHE.get(type);
         if (dataType != null) {
             DATA_TYPE_CACHE.put(type, dataType);
             return dataType;
@@ -64,9 +56,9 @@ public class DataTypeFactory {
         return dataType;
     }
 
-    private static final Map<String, IDataType> dataTypes = initialDataTypes();
+    private static final Map<String, IDataType<?, ?>> dataTypes = initialDataTypes();
 
-    public static IDataType get(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
+    public static IDataType<?, ?> get(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException {
         String dataTypeName = String.valueOf(lexer.bareWord());
 
         if (dataTypeName.equalsIgnoreCase("Tuple")) {
@@ -92,7 +84,7 @@ public class DataTypeFactory {
         } else if (dataTypeName.equalsIgnoreCase("Nothing")) {
             return DataTypeNothing.CREATOR.createDataType(lexer, serverContext);
         } else {
-            IDataType dataType = dataTypes.get(dataTypeName.toLowerCase(Locale.ROOT));
+            IDataType<?, ?> dataType = dataTypes.get(dataTypeName.toLowerCase(Locale.ROOT));
             Validate.isTrue(dataType != null, "Unknown data type: " + dataTypeName);
             return dataType;
         }
@@ -101,8 +93,8 @@ public class DataTypeFactory {
     /**
      * Some framework like Spark JDBC will convert all types name to lower case
      */
-    private static Map<String, IDataType> initialDataTypes() {
-        Map<String, IDataType> creators = new HashMap<>();
+    private static Map<String, IDataType<?, ?>> initialDataTypes() {
+        Map<String, IDataType<?, ?>> creators = new HashMap<>();
 
         registerType(creators, new DataTypeIPv4());
         registerType(creators, new DataTypeUUID());
@@ -114,16 +106,16 @@ public class DataTypeFactory {
         registerType(creators, new DataTypeInt32("Int32"));
         registerType(creators, new DataTypeInt64("Int64"));
 
-        registerType(creators, new DataTypeInt8("UInt8"));
-        registerType(creators, new DataTypeInt16("UInt16"));
-        registerType(creators, new DataTypeInt32("UInt32"));
-        registerType(creators, new DataTypeInt64("UInt64"));
+        registerType(creators, new DataTypeUInt8("UInt8"));
+        registerType(creators, new DataTypeUInt16("UInt16"));
+        registerType(creators, new DataTypeUInt32("UInt32"));
+        registerType(creators, new DataTypeUInt64("UInt64"));
 
         registerType(creators, new DataTypeDate());
         return creators;
     }
 
-    private static void registerType(Map<String, IDataType> creators, IDataType type) {
+    private static void registerType(Map<String, IDataType<?, ?>> creators, IDataType<?, ?> type) {
         creators.put(type.name().toLowerCase(Locale.ROOT), type);
         for (String typeName : type.getAliases()) {
             creators.put(typeName.toLowerCase(Locale.ROOT), type);
@@ -132,11 +124,12 @@ public class DataTypeFactory {
 
     // TODO
     private static Map<String, DataTypeCreator> initComplexDataTypes() {
-        Map<String, DataTypeCreator> creators = new HashMap<>();
-        return creators;
+        return new HashMap<>();
     }
 
-    private static void registerComplexType(Map<String, DataTypeCreator> creators, IDataType type, DataTypeCreator creator) {
+    private static void registerComplexType(
+            Map<String, DataTypeCreator> creators, IDataType<?, ?> type, DataTypeCreator creator) {
+
         creators.put(type.name().toLowerCase(Locale.ROOT), creator);
         for (String typeName : type.getAliases()) {
             creators.put(typeName.toLowerCase(Locale.ROOT), creator);

@@ -32,9 +32,9 @@ import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
-public class DataTypeDateTime64 implements IDataType {
+public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
 
-    public static DataTypeCreator creator = (lexer, serverContext) -> {
+    public static DataTypeCreator<ZonedDateTime, Timestamp> creator = (lexer, serverContext) -> {
         if (lexer.isCharacter('(')) {
             Validate.isTrue(lexer.character() == '(');
             int scale = lexer.numberLiteral().intValue();
@@ -85,23 +85,18 @@ public class DataTypeDateTime64 implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
+    public ZonedDateTime defaultValue() {
         return defaultValue;
     }
 
     @Override
-    public Class javaType() {
+    public Class<ZonedDateTime> javaType() {
         return ZonedDateTime.class;
     }
 
     @Override
-    public Class jdbcJavaType() {
+    public Class<Timestamp> jdbcJavaType() {
         return Timestamp.class;
-    }
-
-    @Override
-    public boolean nullable() {
-        return false;
     }
 
     @Override
@@ -115,7 +110,7 @@ public class DataTypeDateTime64 implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public ZonedDateTime deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         StringView dataTypeName = lexer.bareWord();
         Validate.isTrue(dataTypeName.checkEquals("toDateTime64"));
         Validate.isTrue(lexer.character() == '(');
@@ -141,29 +136,19 @@ public class DataTypeDateTime64 implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws IOException {
-        ZonedDateTime zdt = (ZonedDateTime) data;
-        long epochSeconds = DateTimeUtil.toEpochSecond(zdt);
-        int nanos = zdt.getNano();
+    public void serializeBinary(ZonedDateTime data, BinarySerializer serializer) throws IOException {
+        long epochSeconds = DateTimeUtil.toEpochSecond(data);
+        int nanos = data.getNano();
         long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
         serializer.writeLong(value);
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws IOException {
+    public ZonedDateTime deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         long value = deserializer.readLong() * POW_10[MAX_SCALA - scale];
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);
 
         return DateTimeUtil.toZonedDateTime(epochSeconds, nanos, tz);
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
-        ZonedDateTime[] data = new ZonedDateTime[rows];
-        for (int row = 0; row < rows; row++) {
-            data[row] = (ZonedDateTime) deserializeBinary(deserializer);
-        }
-        return data;
     }
 }

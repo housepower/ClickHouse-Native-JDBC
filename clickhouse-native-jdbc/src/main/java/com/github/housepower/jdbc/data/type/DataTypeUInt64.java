@@ -14,55 +14,52 @@
 
 package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.BytesUtil;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.sql.SQLException;
-import java.sql.Types;
 
-public class DataTypeIPv4 implements IDataType<Long, Long> {
+public class DataTypeUInt64 implements BaseDataTypeInt64<BigInteger, BigInteger> {
+
+    private final String name;
+
+    public DataTypeUInt64(String name) {
+        this.name = name;
+    }
 
     @Override
     public String name() {
-        return "IPv4";
+        return name;
     }
 
     @Override
-    public int sqlTypeId() {
-        return Types.INTEGER;
+    public BigInteger defaultValue() {
+        return BigInteger.ZERO;
     }
 
     @Override
-    public Long defaultValue() {
-        return 0L;
-    }
-
-    @Override
-    public Class<Long> javaType() {
-        return Long.class;
+    public Class<BigInteger> javaType() {
+        return BigInteger.class;
     }
 
     @Override
     public int getPrecision() {
-        return 0;
+        return 19;
     }
 
     @Override
-    public int getScale() {
-        return 15;
+    public void serializeBinary(BigInteger data, BinarySerializer serializer) throws SQLException, IOException {
+        serializer.writeLong(((Number) data).longValue());
     }
 
     @Override
-    public void serializeBinary(Long data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt(((Number) data).intValue());
-    }
-
-    @Override
-    public Long deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readInt() & 0xffffffffL;
+    public BigInteger deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        long l = deserializer.readLong();
+        return new BigInteger(1, BytesUtil.longToBytes(l));
     }
 
     @Override
@@ -71,7 +68,7 @@ public class DataTypeIPv4 implements IDataType<Long, Long> {
     }
 
     @Override
-    public Long deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.numberLiteral().longValue() & 0xffffffffL;
+    public BigInteger deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return BigInteger.valueOf(lexer.numberLiteral().longValue());
     }
 }

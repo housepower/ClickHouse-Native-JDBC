@@ -14,26 +14,19 @@
 
 package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.misc.BytesUtil;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.sql.SQLException;
-import java.sql.Types;
 
-public class DataTypeInt64 implements IDataType {
+public class DataTypeInt64 implements BaseDataTypeInt64<Long, Long> {
 
-    private static final Long DEFAULT_VALUE = 0L;
     private final String name;
-    private final boolean isUnsigned;
 
     public DataTypeInt64(String name) {
         this.name = name;
-        this.isUnsigned = name.startsWith("U");
     }
 
     @Override
@@ -42,84 +35,42 @@ public class DataTypeInt64 implements IDataType {
     }
 
     @Override
-    public int sqlTypeId() {
-        return Types.BIGINT;
+    public Long defaultValue() {
+        return 0L;
     }
 
     @Override
-    public Object defaultValue() {
-        return DEFAULT_VALUE;
-    }
-
-    @Override
-    public Class javaType() {
+    public Class<Long> javaType() {
         return Long.class;
     }
 
     @Override
-    public boolean nullable() {
-        return false;
-    }
-
-    @Override
     public int getPrecision() {
-        return isUnsigned ? 19 : 20;
+        return 20;
     }
 
     @Override
-    public int getScale() {
-        return 0;
-    }
-
-    @Override
-    public void serializeBinary(Object data, BinarySerializer serializer)
-            throws SQLException, IOException {
+    public void serializeBinary(Long data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeLong(((Number) data).longValue());
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer)
-            throws SQLException, IOException {
-        long l = deserializer.readLong();
-        if (isUnsigned) {
-            return new BigInteger(1, BytesUtil.longToBytes(l));
-        }
-        return l;
-    }
-
-    public BigInteger parseBigIntegerPositive(String num, int bitlen) {
-        BigInteger b = new BigInteger(num);
-        if (b.compareTo(BigInteger.ZERO) < 0) {
-            b = b.add(BigInteger.ONE.shiftLeft(bitlen));
-        }
-        return b;
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
-            throws SQLException, IOException {
-        Object[] data = new Object[rows];
-        for (int row = 0; row < rows; row++) {
-            data[row] = this.deserializeBinary(deserializer);
-        }
-        return data;
+    public Long deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        return deserializer.readLong();
     }
 
     @Override
     public String[] getAliases() {
-        if (isUnsigned) {
-            return new String[0];
-        }
         return new String[]{"BIGINT"};
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Long deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue();
     }
 
     @Override
     public boolean isSigned() {
-        return !isUnsigned;
+        return true;
     }
 }

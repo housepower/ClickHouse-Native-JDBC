@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class DataTypeFloat64 implements IDataType {
-
-    private static final Double DEFAULT_VALUE = 0.0D;
+public class DataTypeFloat64 implements IDataType<Double, Double> {
 
     @Override
     public String name() {
@@ -38,18 +36,13 @@ public class DataTypeFloat64 implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
-        return DEFAULT_VALUE;
+    public Double defaultValue() {
+        return 0.0D;
     }
 
     @Override
-    public Class javaType() {
+    public Class<Double> javaType() {
         return Double.class;
-    }
-
-    @Override
-    public boolean nullable() {
-        return false;
     }
 
     @Override
@@ -63,7 +56,7 @@ public class DataTypeFloat64 implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(Double data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeDouble(((Number) data).doubleValue());
     }
 
@@ -73,21 +66,12 @@ public class DataTypeFloat64 implements IDataType {
     }
 
     @Override
-    public Double[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
-        Double[] data = new Double[rows];
-        for (int row = 0; row < rows; row++) {
-            data[row] = deserializer.readDouble();
-        }
-        return data;
-    }
-
-    @Override
     public String[] getAliases() {
         return new String[]{"DOUBLE"};
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Double deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().doubleValue();
     }
 

@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.time.LocalDate;
 
-public class DataTypeDate implements IDataType {
+public class DataTypeDate implements IDataType<LocalDate, Date> {
     // Since `Date` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
     // we should ensure DON'T modify it anywhere.
     private static final LocalDate DEFAULT_VALUE = LocalDate.ofEpochDay(0);
@@ -45,23 +45,18 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
+    public LocalDate defaultValue() {
         return DEFAULT_VALUE;
     }
 
     @Override
-    public Class javaType() {
+    public Class<LocalDate> javaType() {
         return LocalDate.class;
     }
 
     @Override
-    public Class jdbcJavaType() {
+    public Class<Date> jdbcJavaType() {
         return Date.class;
-    }
-
-    @Override
-    public boolean nullable() {
-        return false;
     }
 
     @Override
@@ -75,25 +70,15 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        long epochDay = ((LocalDate) data).toEpochDay();
+    public void serializeBinary(LocalDate data, BinarySerializer serializer) throws SQLException, IOException {
+        long epochDay = data.toEpochDay();
         serializer.writeShort((short) epochDay);
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws IOException {
+    public LocalDate deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         short epochDay = deserializer.readShort();
         return LocalDate.ofEpochDay(epochDay);
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
-        LocalDate[] data = new LocalDate[rows];
-        for (int row = 0; row < rows; row++) {
-            short epochDay = deserializer.readShort();
-            data[row] = LocalDate.ofEpochDay(epochDay);
-        }
-        return data;
     }
 
     @Override
@@ -102,7 +87,7 @@ public class DataTypeDate implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public LocalDate deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '\'');
         int year = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '-');

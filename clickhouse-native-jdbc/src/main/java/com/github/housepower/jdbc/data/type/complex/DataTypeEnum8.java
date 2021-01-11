@@ -78,18 +78,13 @@ public class DataTypeEnum8 implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
+    public Byte defaultValue() {
         return values[0];
     }
 
     @Override
-    public Class javaType() {
+    public Class<String> javaType() {
         return String.class;
-    }
-
-    @Override
-    public boolean nullable() {
-        return false;
     }
 
     @Override
@@ -103,7 +98,7 @@ public class DataTypeEnum8 implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public String deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.stringLiteral();
     }
 
@@ -128,7 +123,7 @@ public class DataTypeEnum8 implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         byte value = deserializer.readByte();
         for (int i = 0; i < values.length; i++) {
             if (values[i].equals(value)) {
@@ -136,14 +131,5 @@ public class DataTypeEnum8 implements IDataType {
             }
         }
         throw new SQLException("");
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        String[] data = new String[rows];
-        for (int row = 0; row < rows; row++) {
-            data[row] = (String) deserializeBinary(deserializer);
-        }
-        return data;
     }
 }

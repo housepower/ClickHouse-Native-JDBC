@@ -154,7 +154,7 @@ public class TestHarness extends AbstractITest {
         }
         sb.append(" ) Engine=Memory");
         String sql = sb.toString();
-        LOG.debug("CREATE TABLE DDL: \n{}", sql);
+        LOG.trace("CREATE TABLE DDL: \n{}", sql);
 
         withNewConnection(connection -> {
             Statement stmt = connection.createStatement();

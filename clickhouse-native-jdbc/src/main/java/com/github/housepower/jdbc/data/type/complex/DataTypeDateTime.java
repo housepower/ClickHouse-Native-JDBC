@@ -28,9 +28,9 @@ import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
-public class DataTypeDateTime implements IDataType {
+public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
 
-    public static DataTypeCreator creator = (lexer, serverContext) -> {
+    public static DataTypeCreator<ZonedDateTime, Timestamp> creator = (lexer, serverContext) -> {
         if (lexer.isCharacter('(')) {
             Validate.isTrue(lexer.character() == '(');
             String dataTimeZone = lexer.stringLiteral();
@@ -62,23 +62,18 @@ public class DataTypeDateTime implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
+    public ZonedDateTime defaultValue() {
         return defaultValue;
     }
 
     @Override
-    public Class javaType() {
+    public Class<ZonedDateTime> javaType() {
         return ZonedDateTime.class;
     }
 
     @Override
-    public Class jdbcJavaType() {
+    public Class<Timestamp> jdbcJavaType() {
         return Timestamp.class;
-    }
-
-    @Override
-    public boolean nullable() {
-        return false;
     }
 
     @Override
@@ -92,7 +87,7 @@ public class DataTypeDateTime implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public ZonedDateTime deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '\'');
         int year = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '-');
@@ -111,24 +106,14 @@ public class DataTypeDateTime implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        ZonedDateTime zdt = (ZonedDateTime) data;
-        serializer.writeInt((int) DateTimeUtil.toEpochSecond(zdt));
+    public void serializeBinary(ZonedDateTime data, BinarySerializer serializer) throws SQLException, IOException {
+        serializer.writeInt((int) DateTimeUtil.toEpochSecond(data));
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public ZonedDateTime deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         int epochSeconds = deserializer.readInt();
         return DateTimeUtil.toZonedDateTime(epochSeconds, 0, tz);
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        ZonedDateTime[] data = new ZonedDateTime[rows];
-        for (int row = 0; row < rows; row++) {
-            data[row] = (ZonedDateTime) deserializeBinary(deserializer);
-        }
-        return data;
     }
 
     @Override

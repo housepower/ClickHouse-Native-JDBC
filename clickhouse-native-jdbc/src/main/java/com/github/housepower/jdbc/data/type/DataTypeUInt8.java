@@ -21,11 +21,11 @@ import com.github.housepower.jdbc.serde.BinarySerializer;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class DataTypeInt8 implements BaseDataTypeInt8<Byte, Byte> {
+public class DataTypeUInt8 implements BaseDataTypeInt8<Short, Short> {
 
     private final String name;
 
-    public DataTypeInt8(String name) {
+    public DataTypeUInt8(String name) {
         this.name = name;
     }
 
@@ -35,42 +35,33 @@ public class DataTypeInt8 implements BaseDataTypeInt8<Byte, Byte> {
     }
 
     @Override
-    public Byte defaultValue() {
+    public Short defaultValue() {
         return 0;
     }
 
     @Override
-    public Class<Byte> javaType() {
-        return Byte.class;
+    public Class<Short> javaType() {
+        return Short.class;
     }
 
     @Override
     public int getPrecision() {
-        return 4;
+        return 3;
     }
 
     @Override
-    public void serializeBinary(Byte data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(Short data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeByte(((Number) data).byteValue());
     }
 
     @Override
-    public Byte deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        return deserializer.readByte();
+    public Short deserializeBinary(BinaryDeserializer deserializer) throws IOException {
+        byte b = deserializer.readByte();
+        return (short) (b & 0xff);
     }
 
     @Override
-    public String[] getAliases() {
-        return new String[]{"TINYINT"};
-    }
-
-    @Override
-    public Byte deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.numberLiteral().byteValue();
-    }
-
-    @Override
-    public boolean isSigned() {
-        return true;
+    public Short deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return lexer.numberLiteral().shortValue();
     }
 }

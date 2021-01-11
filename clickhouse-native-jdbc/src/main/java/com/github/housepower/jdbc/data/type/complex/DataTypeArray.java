@@ -78,11 +78,6 @@ public class DataTypeArray implements IDataType {
     }
 
     @Override
-    public boolean nullable() {
-        return false;
-    }
-
-    @Override
     public int getPrecision() {
         return 0;
     }

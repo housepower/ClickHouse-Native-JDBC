@@ -56,11 +56,6 @@ public class DataTypeString implements IDataType {
     }
 
     @Override
-    public boolean nullable() {
-        return false;
-    }
-
-    @Override
     public int getPrecision() {
         return 0;
     }
@@ -87,16 +82,6 @@ public class DataTypeString implements IDataType {
     public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         byte[] bs = deserializer.readBytesBinary();
         return new String(bs, charset);
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        String[] data = new String[rows];
-        for (int row = 0; row < rows; row++) {
-            byte[] bs = deserializer.readBytesBinary();
-            data[row] = new String(bs, charset);
-        }
-        return data;
     }
 
     @Override

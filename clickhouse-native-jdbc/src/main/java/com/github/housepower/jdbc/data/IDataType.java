@@ -21,42 +21,49 @@ import com.github.housepower.jdbc.serde.BinarySerializer;
 import java.io.IOException;
 import java.sql.SQLException;
 
-// It would be nice if we introduce a Generic Type, `IDataType<T>`, then we can avoid using `Object` and type cast.
-// Unfortunately Java not support unsigned number, UInt8(u_byte) must be represented by Int16(short), which will
-// break the Generic Type constriction and cause compile failed.
-public interface IDataType {
+public interface IDataType<CK, JDBC> {
 
     String name();
 
     int sqlTypeId();
 
-    Object defaultValue();
+    CK defaultValue();
 
-    Class javaType();
+    Class<CK> javaType();
 
-    default Class jdbcJavaType() {
-        return javaType();
+    @SuppressWarnings("unchecked")
+    default Class<JDBC> jdbcJavaType() {
+        return (Class<JDBC>) javaType();
     }
 
-    boolean nullable();
+    default boolean nullable() {
+        return false;
+    }
 
     int getPrecision();
 
     int getScale();
 
-    Object deserializeTextQuoted(SQLLexer lexer) throws SQLException;
+    CK deserializeTextQuoted(SQLLexer lexer) throws SQLException;
 
-    Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;
+    CK deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;
 
-    void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException;
+    void serializeBinary(CK data, BinarySerializer serializer) throws SQLException, IOException;
 
-    default void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (Object d : data) {
+    default void serializeBinaryBulk(CK[] data, BinarySerializer serializer) throws SQLException, IOException {
+        for (CK d : data) {
             serializeBinary(d, serializer);
         }
     }
 
-    Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException;
+    @SuppressWarnings("unchecked")
+    default CK[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
+        CK[] data = (CK[]) new Object[rows];
+        for (int row = 0; row < rows; row++) {
+            data[row] = this.deserializeBinary(deserializer);
+        }
+        return data;
+    }
 
     default String[] getAliases() {
         return new String[0];

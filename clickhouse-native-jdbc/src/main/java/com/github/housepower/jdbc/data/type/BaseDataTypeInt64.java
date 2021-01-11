@@ -12,16 +12,23 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.data.type.complex;
+package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.misc.SQLLexer;
+import java.math.BigInteger;
+import java.sql.Types;
 
-import java.sql.SQLException;
+public interface BaseDataTypeInt64<CK, JDBC> extends BaseDataTypeInt<CK, JDBC> {
 
-@FunctionalInterface
-public interface DataTypeCreator<CK, JDBC> {
+    @Override
+    default int sqlTypeId() {
+        return Types.BIGINT;
+    }
 
-    IDataType<CK, JDBC> createDataType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException;
+    default BigInteger parseBigIntegerPositive(String num, int bitlen) {
+        BigInteger b = new BigInteger(num);
+        if (b.compareTo(BigInteger.ZERO) < 0) {
+            b = b.add(BigInteger.ONE.shiftLeft(bitlen));
+        }
+        return b;
+    }
 }

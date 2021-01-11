@@ -24,9 +24,10 @@ import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
-public class DataTypeNothing implements IDataType {
+public class DataTypeNothing implements IDataType<Object, Object> {
 
-    public static DataTypeCreator CREATOR = (lexer, serverContext) -> new DataTypeNothing(serverContext);
+    public static DataTypeCreator<Object, Object> CREATOR =
+            (lexer, serverContext) -> new DataTypeNothing(serverContext);
 
     public DataTypeNothing(NativeContext.ServerContext serverContext) {
     }
@@ -47,13 +48,8 @@ public class DataTypeNothing implements IDataType {
     }
 
     @Override
-    public Class javaType() {
+    public Class<Object> javaType() {
         return Object.class;
-    }
-
-    @Override
-    public boolean nullable() {
-        return false;
     }
 
     @Override
@@ -70,25 +66,14 @@ public class DataTypeNothing implements IDataType {
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
     }
 
-    /**
-     * deserializeBinary will always returns String
-     * for getBytes(idx) method, we encode the String again
-     */
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         return new Object();
     }
 
     @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        Object[] data = new Object[rows];
-        return data;
-    }
-
-    @Override
     public String[] getAliases() {
-        return new String[]{
-                "NULL"};
+        return new String[]{"NULL"};
     }
 
     @Override

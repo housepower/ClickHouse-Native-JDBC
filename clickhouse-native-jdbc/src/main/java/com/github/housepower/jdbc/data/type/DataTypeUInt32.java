@@ -14,25 +14,24 @@
 
 package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Types;
 
-public class DataTypeIPv4 implements IDataType<Long, Long> {
+public class DataTypeUInt32 implements BaseDataTypeInt32<Long, Long> {
 
-    @Override
-    public String name() {
-        return "IPv4";
+    private final String name;
+
+    public DataTypeUInt32(String name) {
+        this.name = name;
     }
 
     @Override
-    public int sqlTypeId() {
-        return Types.INTEGER;
+    public String name() {
+        return name;
     }
 
     @Override
@@ -47,12 +46,7 @@ public class DataTypeIPv4 implements IDataType<Long, Long> {
 
     @Override
     public int getPrecision() {
-        return 0;
-    }
-
-    @Override
-    public int getScale() {
-        return 15;
+        return 10;
     }
 
     @Override
@@ -62,16 +56,12 @@ public class DataTypeIPv4 implements IDataType<Long, Long> {
 
     @Override
     public Long deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readInt() & 0xffffffffL;
-    }
-
-    @Override
-    public String[] getAliases() {
-        return new String[0];
+        int res = deserializer.readInt();
+        return 0xffffffffL & res;
     }
 
     @Override
     public Long deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.numberLiteral().longValue() & 0xffffffffL;
+        return lexer.numberLiteral().longValue();
     }
 }

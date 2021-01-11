@@ -21,11 +21,11 @@ import com.github.housepower.jdbc.serde.BinarySerializer;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class DataTypeInt8 implements BaseDataTypeInt8<Byte, Byte> {
+public class DataTypeUInt16 implements BaseDataTypeInt16<Integer, Integer> {
 
     private final String name;
 
-    public DataTypeInt8(String name) {
+    public DataTypeUInt16(String name) {
         this.name = name;
     }
 
@@ -35,42 +35,33 @@ public class DataTypeInt8 implements BaseDataTypeInt8<Byte, Byte> {
     }
 
     @Override
-    public Byte defaultValue() {
+    public Integer defaultValue() {
         return 0;
     }
 
     @Override
-    public Class<Byte> javaType() {
-        return Byte.class;
+    public Class<Integer> javaType() {
+        return Integer.class;
     }
 
     @Override
     public int getPrecision() {
-        return 4;
+        return 5;
     }
 
     @Override
-    public void serializeBinary(Byte data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeByte(((Number) data).byteValue());
+    public void serializeBinary(Integer data, BinarySerializer serializer) throws SQLException, IOException {
+        serializer.writeShort(((Number) data).shortValue());
     }
 
     @Override
-    public Byte deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        return deserializer.readByte();
+    public Integer deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        short s = deserializer.readShort();
+        return s & 0xffff;
     }
 
     @Override
-    public String[] getAliases() {
-        return new String[]{"TINYINT"};
-    }
-
-    @Override
-    public Byte deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.numberLiteral().byteValue();
-    }
-
-    @Override
-    public boolean isSigned() {
-        return true;
+    public Integer deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return lexer.numberLiteral().intValue();
     }
 }

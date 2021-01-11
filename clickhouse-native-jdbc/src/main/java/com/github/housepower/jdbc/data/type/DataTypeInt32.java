@@ -14,24 +14,19 @@
 
 package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Types;
 
-public class DataTypeInt32 implements IDataType {
+public class DataTypeInt32 implements BaseDataTypeInt32<Integer, Integer> {
 
-    private static final Integer DEFAULT_VALUE = 0;
     private final String name;
-    private final boolean isUnsigned;
 
     public DataTypeInt32(String name) {
         this.name = name;
-        this.isUnsigned = name.startsWith("U");
     }
 
     @Override
@@ -40,74 +35,42 @@ public class DataTypeInt32 implements IDataType {
     }
 
     @Override
-    public int sqlTypeId() {
-        return Types.INTEGER;
-    }
-
-    @Override
-    public Object defaultValue() {
-        return DEFAULT_VALUE;
-    }
-
-    @Override
-    public Class javaType() {
-        return Integer.class;
-    }
-
-    @Override
-    public boolean nullable() {
-        return false;
-    }
-
-    @Override
-    public int getPrecision() {
-        return isUnsigned ? 10 : 11;
-    }
-
-    @Override
-    public int getScale() {
+    public Integer defaultValue() {
         return 0;
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+    public Class<Integer> javaType() {
+        return Integer.class;
+    }
+
+    @Override
+    public int getPrecision() {
+        return 11;
+    }
+
+    @Override
+    public void serializeBinary(Integer data, BinarySerializer serializer) throws SQLException, IOException {
         serializer.writeInt(((Number) data).intValue());
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        int res = deserializer.readInt();
-        if (isUnsigned) {
-            return 0xffffffffL & res;
-        }
-        return res;
-    }
-
-    @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer)
-            throws SQLException, IOException {
-        Object[] data = new Object[rows];
-        for (int row = 0; row < rows; row++) {
-            data[row] = this.deserializeBinary(deserializer);
-        }
-        return data;
+    public Integer deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        return deserializer.readInt();
     }
 
     @Override
     public String[] getAliases() {
-        if (isUnsigned) {
-            return new String[0];
-        }
         return new String[]{"INT", "INTEGER"};
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.numberLiteral().longValue() & 0xffffffff;
+    public Integer deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return lexer.numberLiteral().intValue();
     }
 
     @Override
     public boolean isSigned() {
-        return !isUnsigned;
+        return true;
     }
 }

@@ -12,16 +12,14 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.data.type.complex;
+package com.github.housepower.jdbc.data.type;
 
-import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.misc.SQLLexer;
+import java.sql.Types;
 
-import java.sql.SQLException;
+public interface BaseDataTypeInt8<CK, JDBC> extends BaseDataTypeInt<CK, JDBC> {
 
-@FunctionalInterface
-public interface DataTypeCreator<CK, JDBC> {
-
-    IDataType<CK, JDBC> createDataType(SQLLexer lexer, NativeContext.ServerContext serverContext) throws SQLException;
+    @Override
+    default int sqlTypeId() {
+        return Types.TINYINT;
+    }
 }

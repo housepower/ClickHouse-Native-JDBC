@@ -161,7 +161,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
             ResultSetMetaData metaData = rs.getMetaData();
             assertEquals("a1", metaData.getColumnName(1));
             assertEquals("UInt64", metaData.getColumnTypeName(1));
-            assertEquals("java.lang.Long", metaData.getColumnClassName(1));
+            assertEquals("java.math.BigInteger", metaData.getColumnClassName(1));
 
             assertEquals("a2", metaData.getColumnName(2));
             assertEquals("String", metaData.getColumnTypeName(2));
