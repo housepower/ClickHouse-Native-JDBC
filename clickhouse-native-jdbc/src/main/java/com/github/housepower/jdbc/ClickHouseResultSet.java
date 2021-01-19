@@ -269,11 +269,14 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public byte[] getBytes(int index) throws SQLException {
-        String data = (String) getInternalObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return null;
         }
-        return data.getBytes(cfg.charset());
+        if (data instanceof String) {
+            return ((String) data).getBytes(cfg.charset());
+        }
+        throw new ClickHouseSQLException(-1, "Currently not support getBytes from class: " + data.getClass());
     }
 
     @Override
@@ -307,6 +310,10 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (obj instanceof LocalDate) {
             return Date.valueOf(((LocalDate) obj));
         }
+        // It's not necessary, because we always return a String, but keep it here for future refactor.
+        // if (obj instanceof BytesCharSeq) {
+        //    return ((BytesCharSeq) obj).bytes();
+        // }
         return obj;
     }
 

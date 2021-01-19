@@ -27,8 +27,7 @@ import java.sql.Types;
 import java.time.LocalDate;
 
 public class DataTypeDate implements IDataType<LocalDate, Date> {
-    // Since `Date` is mutable, and `defaultValue()` will return ref instead of a copy for performance,
-    // we should ensure DON'T modify it anywhere.
+
     private static final LocalDate DEFAULT_VALUE = LocalDate.ofEpochDay(0);
 
     public DataTypeDate() {

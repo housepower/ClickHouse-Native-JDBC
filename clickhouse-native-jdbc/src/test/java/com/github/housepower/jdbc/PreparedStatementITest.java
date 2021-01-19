@@ -226,6 +226,7 @@ public class PreparedStatementITest extends AbstractITest {
             // 2018-07-02 03:00:00  Asia/Shanghai
             long time = 1530403200 + 19 * 3600;
 
+            // FIXME support setByte on UInt8
             preparedStatement.setByte(1, (byte) 1);
             preparedStatement.setDate(2, new Date(time * 1000));
             preparedStatement.setTimestamp(3, new Timestamp(time * 1000));

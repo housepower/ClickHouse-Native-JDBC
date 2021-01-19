@@ -16,6 +16,7 @@ package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.BytesCharSeq;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
@@ -25,9 +26,9 @@ import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class DataTypeString implements IDataType {
+public class DataTypeString implements IDataType<CharSequence, String> {
 
-    public static DataTypeCreator CREATOR = (lexer, serverContext) -> new DataTypeString(serverContext);
+    public static DataTypeCreator<CharSequence, String> CREATOR = (lexer, serverContext) -> new DataTypeString(serverContext);
 
     private final Charset charset;
 
@@ -46,12 +47,17 @@ public class DataTypeString implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
+    public String defaultValue() {
         return "";
     }
 
     @Override
-    public Class javaType() {
+    public Class<CharSequence> javaType() {
+        return CharSequence.class;
+    }
+
+    @Override
+    public Class<String> jdbcJavaType() {
         return String.class;
     }
 
@@ -66,11 +72,11 @@ public class DataTypeString implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof CharSequence) {
-            serializer.writeStringBinary(data.toString(), charset);
+    public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
+        if (data instanceof BytesCharSeq) {
+            serializer.writeBytesBinary(((BytesCharSeq) data).bytes());
         } else {
-            serializer.writeBytesBinary((byte[]) data);
+            serializer.writeStringBinary(data.toString(), charset);
         }
     }
 
@@ -82,6 +88,11 @@ public class DataTypeString implements IDataType {
     public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         byte[] bs = deserializer.readBytesBinary();
         return new String(bs, charset);
+    }
+
+    @Override
+    public CharSequence deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return lexer.stringView();
     }
 
     @Override
@@ -97,10 +108,5 @@ public class DataTypeString implements IDataType {
                 "TINYTEXT",
                 "LONGTEXT",
                 "BLOB"};
-    }
-
-    @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.stringView();
     }
 }

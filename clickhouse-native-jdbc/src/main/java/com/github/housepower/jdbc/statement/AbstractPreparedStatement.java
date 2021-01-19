@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.connect.NativeContext;
+import com.github.housepower.jdbc.misc.BytesCharSeq;
 import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
@@ -124,7 +125,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void setBytes(int index, byte[] x) throws SQLException {
-        setObject(index, x);
+        setObject(index, new BytesCharSeq(x));
     }
 
     @Override
@@ -154,6 +155,9 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         }
         if (obj instanceof Timestamp) {
             result = DateTimeUtil.toZonedDateTime((Timestamp) obj, tz);
+        }
+        if (obj instanceof byte[]) {
+            result = new BytesCharSeq((byte[]) obj);
         }
         return result;
     }
