@@ -65,9 +65,9 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     // parameterIndex start with 1
     @Override
-    public void setObject(int parameterIndex, Object x) throws SQLException {
+    public void setObject(int idx, Object x) throws SQLException {
         initBlockIfPossible();
-        block.setPlaceholderObject(parameterIndex - 1, convertObjectIfNecessary(x));
+        block.setPlaceholderObject(idx - 1, convertObjectIfNecessary(block.getColumnByPosition(idx - 1).type(), x));
     }
 
     @Override

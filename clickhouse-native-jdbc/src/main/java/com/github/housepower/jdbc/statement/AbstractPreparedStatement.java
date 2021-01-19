@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.connect.NativeContext;
+import com.github.housepower.jdbc.data.IDataType;
 import com.github.housepower.jdbc.misc.BytesCharSeq;
 import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.Validate;
@@ -148,7 +149,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         setObject(index, x);
     }
 
-    protected Object convertObjectIfNecessary(Object obj) {
+    protected Object convertObjectIfNecessary(IDataType<?, ?> type, Object obj) {
         Object result = obj;
         if (obj instanceof Date) {
             result = ((Date) obj).toLocalDate();
@@ -159,6 +160,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         if (obj instanceof byte[]) {
             result = new BytesCharSeq((byte[]) obj);
         }
+        // TODO handle number cast
         return result;
     }
 

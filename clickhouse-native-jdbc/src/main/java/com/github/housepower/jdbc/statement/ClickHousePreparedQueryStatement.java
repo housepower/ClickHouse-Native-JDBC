@@ -55,8 +55,8 @@ public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement 
     }
 
     @Override
-    public void setObject(int index, Object x) throws SQLException {
-        parameters[index - 1] = convertObjectIfNecessary(x);
+    public void setObject(int idx, Object x) throws SQLException {
+        parameters[idx - 1] = convertObjectIfNecessary(block.getColumnByPosition(idx - 1).type(), x);
     }
 
     @Override
