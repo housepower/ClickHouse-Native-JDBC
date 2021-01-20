@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class DataTypeEnum8 implements IDataType {
 
@@ -111,15 +112,11 @@ public class DataTypeEnum8 implements IDataType {
             }
         }
 
-        StringBuilder message = new StringBuilder("Expected ");
-        for (int i = 0; i < names.length; i++) {
-            if (i > 0)
-                message.append(" OR ");
-            message.append(names[i]);
-        }
-        message.append(", but was ").append(data);
+        StringJoiner joiner = new StringJoiner(" OR ", "Expected ", ", but was " + data);
+        for (String s : names)
+            joiner.add(s);
 
-        throw new SQLException(message.toString());
+        throw new SQLException(joiner.toString());
     }
 
     @Override

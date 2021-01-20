@@ -38,6 +38,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.UUID;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
 
@@ -182,7 +183,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     // TODO we actually need a type cast system rather than put all type cast stuffs here
     private Object convertToCkDataType(IDataType<?, ?> type, Object obj) throws ClickHouseSQLException {
         if (obj == null) {
-            if (type.nullable())
+            if (type.nullable() || type instanceof DataTypeNothing)
                 return null;
             throw new ClickHouseSQLException(-1, "type[" + type.name() + "] doesn't support null value");
         }
@@ -253,7 +254,17 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             if (obj instanceof Number)
                 return ((Number) obj).doubleValue();
         }
-        // TODO cast more type, i.e. Nullable, Array, Nothing, UUID, Tuple, Enum16, Enum8, IPv4
+        if (type instanceof DataTypeUUID) {
+            if (obj instanceof UUID)
+                return obj;
+            if (obj instanceof String) {
+                return UUID.fromString((String) obj);
+            }
+        }
+        if (type instanceof DataTypeNothing) {
+            return null;
+        }
+        // TODO cast more type, i.e. Nullable, Array, Tuple, Enum16, Enum8, IPv4
         return obj;
     }
 }

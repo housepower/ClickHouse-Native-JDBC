@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.UUID;
 
-public class DataTypeUUID implements IDataType<String, String> {
+public class DataTypeUUID implements IDataType<UUID, String> {
 
     @Override
     public String name() {
@@ -37,12 +37,17 @@ public class DataTypeUUID implements IDataType<String, String> {
     }
 
     @Override
-    public String defaultValue() {
-        return "";
+    public UUID defaultValue() {
+        return null;
     }
 
     @Override
-    public Class<String> javaType() {
+    public Class<UUID> javaType() {
+        return UUID.class;
+    }
+
+    @Override
+    public Class<String> jdbcJavaType() {
         return String.class;
     }
 
@@ -57,24 +62,18 @@ public class DataTypeUUID implements IDataType<String, String> {
     }
 
     @Override
-    public String deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.stringLiteral();
+    public UUID deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return UUID.fromString(lexer.stringLiteral());
     }
 
     @Override
-    public void serializeBinary(String data, BinarySerializer serializer) throws SQLException, IOException {
-        UUID uuid = UUID.fromString(String.valueOf(data));
-        serializer.writeLong(uuid.getMostSignificantBits());
-        serializer.writeLong(uuid.getLeastSignificantBits());
+    public void serializeBinary(UUID data, BinarySerializer serializer) throws SQLException, IOException {
+        serializer.writeLong(data.getMostSignificantBits());
+        serializer.writeLong(data.getLeastSignificantBits());
     }
 
     @Override
-    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new UUID(deserializer.readLong(), deserializer.readLong()).toString();
-    }
-
-    @Override
-    public String[] getAliases() {
-        return new String[0];
+    public UUID deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        return new UUID(deserializer.readLong(), deserializer.readLong());
     }
 }
