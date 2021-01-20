@@ -15,8 +15,8 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.log.Logger;
-import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.jdbc.wrapper.SQLArray;
 
 import java.sql.SQLException;

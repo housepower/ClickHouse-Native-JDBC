@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.log;
+package com.github.housepower.log;
 
 import java.util.ResourceBundle;
 

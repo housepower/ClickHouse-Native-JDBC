@@ -14,8 +14,8 @@
 
 package com.github.housepower.jdbc.wrapper;
 
-import com.github.housepower.jdbc.exception.NotImplementedException;
-import com.github.housepower.jdbc.log.Logging;
+import com.github.housepower.exception.NotImplementedException;
+import com.github.housepower.log.Logging;
 
 import java.sql.*;
 

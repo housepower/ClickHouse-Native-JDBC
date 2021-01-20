@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.misc;
 
-import com.github.housepower.jdbc.exception.InvalidValueException;
+import com.github.housepower.exception.InvalidValueException;
 
 import javax.annotation.Nullable;
 import java.sql.SQLException;

@@ -37,7 +37,7 @@
  *
  */
 
-package com.github.housepower.jdbc.log;
+package com.github.housepower.log;
 
 /**
  * Holds the results of formatting done by {@link MessageFormatter}.

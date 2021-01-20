@@ -15,7 +15,7 @@
 package com.github.housepower.jdbc.protocol;
 
 import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.exception.NotImplementedException;
+import com.github.housepower.exception.NotImplementedException;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 
 import java.io.IOException;

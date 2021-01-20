@@ -12,12 +12,15 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.exception;
+package com.github.housepower.exception;
 
 /**
- * <p> Use {@link ClickHouseException} internal, wrapped with {@link java.sql.SQLException} only on JDBC interfaces.
+ * Use {@link ClickHouseException} internal, wrapped with {@link java.sql.SQLException} only on JDBC interfaces.
  * throw unchecked exception rather than checked exception.
- * <p> Please avoid using CheckedException internal. See detail at <a>https://www.artima.com/intv/handcuffs.html</a>
+ * <p>
+ * Please avoid using CheckedException internal. See detail at <a>https://www.artima.com/intv/handcuffs.html</a>.
+ * <p>
+ * TODO: support error_code
  */
 public abstract class ClickHouseException extends RuntimeException {
 

@@ -16,6 +16,7 @@ package com.github.housepower.jdbc.data.type.complex;
 
 import com.github.housepower.jdbc.connect.NativeContext;
 import com.github.housepower.jdbc.data.IDataType;
+import com.github.housepower.jdbc.misc.BytesCharSeq;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.misc.Validate;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
@@ -26,9 +27,9 @@ import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class DataTypeFixedString implements IDataType {
+public class DataTypeFixedString implements IDataType<CharSequence, String> {
 
-    public static DataTypeCreator creator = (lexer, serverContext) -> {
+    public static DataTypeCreator<CharSequence, String> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         Number fixedStringN = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ')');
@@ -63,12 +64,17 @@ public class DataTypeFixedString implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
+    public String defaultValue() {
         return defaultValue;
     }
 
     @Override
-    public Class<String> javaType() {
+    public Class<CharSequence> javaType() {
+        return CharSequence.class;
+    }
+
+    @Override
+    public Class<String> jdbcJavaType() {
         return String.class;
     }
 
@@ -83,16 +89,11 @@ public class DataTypeFixedString implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
-        return lexer.stringLiteral();
-    }
-
-    @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof String) {
-            writeBytes(((String) data).getBytes(charset), serializer);
+    public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
+        if (data instanceof BytesCharSeq) {
+            writeBytes((((BytesCharSeq) data).bytes()), serializer);
         } else {
-            writeBytes(((byte []) (data)), serializer);
+            writeBytes(data.toString().getBytes(charset), serializer);
         }
     }
 
@@ -111,8 +112,13 @@ public class DataTypeFixedString implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         return new String(deserializer.readBytes(n), charset);
+    }
+
+    @Override
+    public CharSequence deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+        return lexer.stringLiteral();
     }
 
     @Override

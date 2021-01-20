@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.misc;
 
-import com.github.housepower.jdbc.exception.InvalidOperationException;
+import com.github.housepower.exception.InvalidOperationException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

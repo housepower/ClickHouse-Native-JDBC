@@ -30,8 +30,8 @@ import java.util.Calendar;
 
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.IColumn;
-import com.github.housepower.jdbc.log.Logger;
-import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.jdbc.misc.CheckedIterator;
 import com.github.housepower.jdbc.misc.DateTimeUtil;
 import com.github.housepower.jdbc.misc.Validate;

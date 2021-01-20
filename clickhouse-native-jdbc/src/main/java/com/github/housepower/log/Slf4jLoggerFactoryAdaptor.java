@@ -12,19 +12,12 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.exception;
+package com.github.housepower.log;
 
-public class InvalidOperationException extends ClickHouseException {
+public class Slf4jLoggerFactoryAdaptor implements LoggerFactoryAdaptor {
 
-    public InvalidOperationException(String message) {
-        super(message);
-    }
-
-    public InvalidOperationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidOperationException(Throwable cause) {
-        super(cause);
+    @Override
+    public Logger getLogger(String name) {
+        return new Slf4jLogger(org.slf4j.LoggerFactory.getLogger(name));
     }
 }

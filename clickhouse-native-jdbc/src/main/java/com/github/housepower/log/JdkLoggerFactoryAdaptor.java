@@ -12,18 +12,12 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.log;
+package com.github.housepower.log;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+public class JdkLoggerFactoryAdaptor implements LoggerFactoryAdaptor {
 
-class JdkLoggerTest {
-
-    @Test
-    @Disabled("suppress error log")
-    public void testLogWithThrowable() {
-        LoggerFactoryAdaptor adaptor = new JdkLoggerFactoryAdaptor();
-        Logger log = adaptor.getLogger("test");
-        log.warn("error message, {}", "1", new RuntimeException("abc"));
+    @Override
+    public Logger getLogger(String name) {
+        return new JdkLogger(java.util.logging.Logger.getLogger(name));
     }
 }

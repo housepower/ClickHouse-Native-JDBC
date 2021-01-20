@@ -12,19 +12,19 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.exception;
+package com.github.housepower.exception;
 
-public class InvalidValueException extends ClickHouseException {
+public class NotImplementedException extends ClickHouseException {
 
-    public InvalidValueException(String message) {
+    public NotImplementedException(String message) {
         super(message);
     }
 
-    public InvalidValueException(String message, Throwable cause) {
+    public NotImplementedException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public InvalidValueException(Throwable cause) {
+    public NotImplementedException(Throwable cause) {
         super(cause);
     }
 }

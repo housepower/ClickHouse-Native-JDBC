@@ -12,9 +12,19 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.log;
+package com.github.housepower.exception;
 
-public interface Logging {
+public class InvalidValueException extends ClickHouseException {
 
-    Logger logger();
+    public InvalidValueException(String message) {
+        super(message);
+    }
+
+    public InvalidValueException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public InvalidValueException(Throwable cause) {
+        super(cause);
+    }
 }

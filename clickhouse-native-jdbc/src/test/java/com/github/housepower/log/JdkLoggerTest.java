@@ -12,19 +12,18 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.exception;
+package com.github.housepower.log;
 
-public class NotImplementedException extends ClickHouseException {
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-    public NotImplementedException(String message) {
-        super(message);
-    }
+class JdkLoggerTest {
 
-    public NotImplementedException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NotImplementedException(Throwable cause) {
-        super(cause);
+    @Test
+    @Disabled("suppress error log")
+    public void testLogWithThrowable() {
+        LoggerFactoryAdaptor adaptor = new JdkLoggerFactoryAdaptor();
+        Logger log = adaptor.getLogger("test");
+        log.warn("error message, {}", "1", new RuntimeException("abc"));
     }
 }

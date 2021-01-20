@@ -24,8 +24,8 @@ import com.github.housepower.jdbc.serde.BinarySerializer;
 import com.github.housepower.jdbc.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.settings.SettingKey;
-import com.github.housepower.jdbc.log.Logger;
-import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.jdbc.stream.QueryResult;
 import com.github.housepower.jdbc.stream.ClickHouseQueryResult;
 
@@ -149,7 +149,7 @@ public class NativeClient {
                 LOG.info("socket already closed, ignore");
                 return;
             }
-            LOG.debug("flush and close socket");
+            LOG.trace("flush and close socket");
             serializer.flushToTarget(true);
             socket.close();
         } catch (IOException ex) {

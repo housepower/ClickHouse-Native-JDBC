@@ -12,14 +12,19 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.log;
+package com.github.housepower.exception;
 
-public interface LoggerFactoryAdaptor {
+public class NoDefaultValueException extends ClickHouseException {
 
-    Logger getLogger(String name);
-
-    default Logger getLogger(Class<?> clazz) {
-        return getLogger(clazz.getName());
+    public NoDefaultValueException(String message) {
+        super(message);
     }
 
+    public NoDefaultValueException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public NoDefaultValueException(Throwable cause) {
+        super(cause);
+    }
 }

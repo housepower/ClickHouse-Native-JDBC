@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc.misc;
 
-import com.github.housepower.jdbc.exception.InvalidOperationException;
+import com.github.housepower.exception.InvalidOperationException;
 
 import java.util.Locale;
 import java.util.function.Function;

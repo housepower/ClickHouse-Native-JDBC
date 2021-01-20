@@ -36,7 +36,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.housepower.jdbc.log;
+package com.github.housepower.log;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

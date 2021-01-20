@@ -12,12 +12,14 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.log;
+package com.github.housepower.log;
 
-public class Slf4jLoggerFactoryAdaptor implements LoggerFactoryAdaptor {
+public interface LoggerFactoryAdaptor {
 
-    @Override
-    public Logger getLogger(String name) {
-        return new Slf4jLogger(org.slf4j.LoggerFactory.getLogger(name));
+    Logger getLogger(String name);
+
+    default Logger getLogger(Class<?> clazz) {
+        return getLogger(clazz.getName());
     }
+
 }

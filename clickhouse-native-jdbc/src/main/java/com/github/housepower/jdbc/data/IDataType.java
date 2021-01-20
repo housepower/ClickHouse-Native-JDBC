@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc.data;
 
+import com.github.housepower.exception.NoDefaultValueException;
 import com.github.housepower.jdbc.misc.SQLLexer;
 import com.github.housepower.jdbc.serde.BinaryDeserializer;
 import com.github.housepower.jdbc.serde.BinarySerializer;
@@ -27,7 +28,10 @@ public interface IDataType<CK, JDBC> {
 
     int sqlTypeId();
 
-    CK defaultValue();
+    // TODO detect column default value from sample block
+    default CK defaultValue() {
+        throw new NoDefaultValueException("Column[" + name() + "] doesn't has default value");
+    }
 
     Class<CK> javaType();
 

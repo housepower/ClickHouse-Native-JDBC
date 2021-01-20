@@ -16,8 +16,8 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.data.Block;
 import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
-import com.github.housepower.jdbc.log.Logger;
-import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.jdbc.wrapper.SQLResultSetMetaData;
 
 import java.sql.ResultSetMetaData;
