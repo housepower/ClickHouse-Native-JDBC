@@ -14,17 +14,17 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.connect.SessionState;
-import com.github.housepower.jdbc.connect.NativeClient;
-import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.data.DataTypeFactory;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.protocol.HelloResponse;
-import com.github.housepower.jdbc.protocol.QueryRequest;
-import com.github.housepower.jdbc.stream.QueryResult;
-import com.github.housepower.jdbc.settings.ClickHouseConfig;
-import com.github.housepower.jdbc.settings.ClickHouseDefines;
+import com.github.housepower.client.SessionState;
+import com.github.housepower.client.NativeClient;
+import com.github.housepower.client.NativeContext;
+import com.github.housepower.data.Block;
+import com.github.housepower.data.DataTypeFactory;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.protocol.HelloResponse;
+import com.github.housepower.protocol.QueryRequest;
+import com.github.housepower.stream.QueryResult;
+import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
 import com.github.housepower.jdbc.statement.ClickHousePreparedQueryStatement;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;

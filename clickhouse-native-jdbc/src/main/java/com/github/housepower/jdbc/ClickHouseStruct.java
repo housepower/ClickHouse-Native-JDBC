@@ -16,7 +16,7 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.misc.Validate;
 import com.github.housepower.jdbc.wrapper.SQLStruct;
 
 import java.sql.SQLException;

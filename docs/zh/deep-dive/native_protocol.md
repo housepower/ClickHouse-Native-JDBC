@@ -17,7 +17,7 @@ Note left of 客户端: 获取到了服务相关信息
 
 - 请求有非常多种不同的 requests/response, 上述 `hello` 为其中一种。
 
-- 可以在 `com.github.housepower.jdbc.protocol` 包下面找到所有的 requests/response 类型。
+- 可以在 `com.github.housepower.protocol` 包下面找到所有的 requests/response 类型。
 
 ## 查询
 

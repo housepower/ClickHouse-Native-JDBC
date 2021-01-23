@@ -28,15 +28,15 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 
-import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.data.IColumn;
+import com.github.housepower.data.Block;
+import com.github.housepower.data.IColumn;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.jdbc.misc.CheckedIterator;
-import com.github.housepower.jdbc.misc.DateTimeUtil;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.protocol.DataResponse;
-import com.github.housepower.jdbc.settings.ClickHouseConfig;
+import com.github.housepower.misc.CheckedIterator;
+import com.github.housepower.misc.DateTimeUtil;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.protocol.DataResponse;
+import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLResultSet;
 

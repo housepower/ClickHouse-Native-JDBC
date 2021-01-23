@@ -15,10 +15,10 @@
 package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.misc.BytesCharSeq;
-import com.github.housepower.jdbc.misc.DateTimeUtil;
-import com.github.housepower.jdbc.misc.Validate;
+import com.github.housepower.client.NativeContext;
+import com.github.housepower.misc.BytesCharSeq;
+import com.github.housepower.misc.DateTimeUtil;
+import com.github.housepower.misc.Validate;
 import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
 
 import java.math.BigDecimal;

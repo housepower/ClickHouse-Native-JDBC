@@ -14,12 +14,12 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.settings.ClickHouseConfig;
-import com.github.housepower.jdbc.settings.ClickHouseDefines;
-import com.github.housepower.jdbc.stream.QueryResult;
-import com.github.housepower.jdbc.stream.QueryResultBuilder;
+import com.github.housepower.client.NativeContext;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.settings.ClickHouseDefines;
+import com.github.housepower.stream.QueryResult;
+import com.github.housepower.stream.QueryResultBuilder;
 
 import java.sql.SQLException;
 import java.util.Arrays;

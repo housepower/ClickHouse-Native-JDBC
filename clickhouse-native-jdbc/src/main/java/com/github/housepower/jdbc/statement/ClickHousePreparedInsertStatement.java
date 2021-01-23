@@ -16,15 +16,15 @@ package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseSQLException;
-import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.data.type.*;
-import com.github.housepower.jdbc.data.type.complex.*;
-import com.github.housepower.jdbc.misc.BytesCharSeq;
-import com.github.housepower.jdbc.misc.DateTimeUtil;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
+import com.github.housepower.client.NativeContext;
+import com.github.housepower.data.Block;
+import com.github.housepower.data.IDataType;
+import com.github.housepower.data.type.*;
+import com.github.housepower.data.type.complex.*;
+import com.github.housepower.misc.BytesCharSeq;
+import com.github.housepower.misc.DateTimeUtil;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.stream.ValuesWithParametersInputFormat;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 

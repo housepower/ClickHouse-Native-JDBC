@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.misc.DateTimeUtil;
+import com.github.housepower.misc.DateTimeUtil;
 import org.junit.jupiter.api.Test;
 
 import java.sql.*;

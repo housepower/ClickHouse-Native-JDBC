@@ -17,10 +17,10 @@ package com.github.housepower.jdbc;
 import com.github.housepower.exception.InvalidValueException;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.jdbc.misc.StrUtil;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.settings.ClickHouseConfig;
-import com.github.housepower.jdbc.settings.SettingKey;
+import com.github.housepower.misc.StrUtil;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.settings.SettingKey;
 import com.github.housepower.jdbc.wrapper.SQLWrapper;
 
 import java.io.PrintWriter;
