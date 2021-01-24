@@ -60,9 +60,9 @@ public interface IDataType<CK, JDBC> {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    default CK[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        CK[] data = (CK[]) new Object[rows];
+    // fuck type erasure
+    default Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
+        Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = this.deserializeBinary(deserializer);
         }

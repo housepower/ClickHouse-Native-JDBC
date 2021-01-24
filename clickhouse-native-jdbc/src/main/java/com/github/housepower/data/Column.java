@@ -21,7 +21,7 @@ import java.sql.SQLException;
 
 public class Column extends AbstractColumn {
 
-    public Column(String name, IDataType type, Object[] values) {
+    public Column(String name, IDataType<?, ?> type, Object[] values) {
         super(name, type, values);
         this.values = values;
     }

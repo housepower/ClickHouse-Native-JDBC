@@ -80,7 +80,7 @@ public class NativeClient {
 
     public boolean ping(Duration soTimeout, NativeContext.ServerContext info) {
         try {
-            sendRequest(new PingRequest());
+            sendRequest(PingRequest.INSTANCE);
             while (true) {
                 Response response = receiveResponse(soTimeout, info);
 

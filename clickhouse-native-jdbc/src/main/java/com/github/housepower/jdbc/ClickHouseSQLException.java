@@ -25,6 +25,7 @@ public class ClickHouseSQLException extends SQLException {
     public ClickHouseSQLException(int code, String message, Throwable cause) {
         super(message, null, code, cause);
     }
+
     public int getCode() {
         return getErrorCode();
     }

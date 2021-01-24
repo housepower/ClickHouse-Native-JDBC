@@ -29,11 +29,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataTypeTuple implements IDataType {
+public class DataTypeTuple implements IDataType<ClickHouseStruct, Struct> {
 
-    public static DataTypeCreator creator = (lexer, serverContext) -> {
+    public static DataTypeCreator<ClickHouseStruct, Struct> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
-        List<IDataType> nestedDataTypes = new ArrayList<>();
+        List<IDataType<?, ?>> nestedDataTypes = new ArrayList<>();
 
         for (; ; ) {
             nestedDataTypes.add(DataTypeFactory.get(lexer, serverContext));
@@ -51,14 +51,10 @@ public class DataTypeTuple implements IDataType {
         }
     };
 
-    public IDataType[] getNestedTypes() {
-        return nestedTypes;
-    }
-
     private final String name;
-    private final IDataType[] nestedTypes;
+    private final IDataType<?, ?>[] nestedTypes;
 
-    public DataTypeTuple(String name, IDataType[] nestedTypes) {
+    public DataTypeTuple(String name, IDataType<?, ?>[] nestedTypes) {
         this.name = name;
         this.nestedTypes = nestedTypes;
     }
@@ -74,16 +70,21 @@ public class DataTypeTuple implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
-        Object[] attrs = new Object[nestedTypes.length];
-        for (int i = 0; i < nestedTypes.length; i++) {
-            attrs[i] = nestedTypes[i].defaultValue();
+    public ClickHouseStruct defaultValue() {
+        Object[] attrs = new Object[getNestedTypes().length];
+        for (int i = 0; i < getNestedTypes().length; i++) {
+            attrs[i] = getNestedTypes()[i].defaultValue();
         }
         return new ClickHouseStruct("Tuple", attrs);
     }
 
     @Override
-    public Class javaType() {
+    public Class<ClickHouseStruct> javaType() {
+        return ClickHouseStruct.class;
+    }
+
+    @Override
+    public Class<Struct> jdbcJavaType() {
         return Struct.class;
     }
 
@@ -98,41 +99,41 @@ public class DataTypeTuple implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        for (int i = 0; i < nestedTypes.length; i++) {
-            nestedTypes[i].serializeBinary(((Struct) data).getAttributes()[i], serializer);
+    public void serializeBinary(ClickHouseStruct data, BinarySerializer serializer) throws SQLException, IOException {
+        for (int i = 0; i < getNestedTypes().length; i++) {
+            getNestedTypes()[i].serializeBinary(data.getAttributes()[i], serializer);
         }
     }
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (int i = 0; i < nestedTypes.length; i++) {
+    public void serializeBinaryBulk(ClickHouseStruct[] data, BinarySerializer serializer) throws SQLException, IOException {
+        for (int i = 0; i < getNestedTypes().length; i++) {
             Object[] elemsData = new Object[data.length];
             for (int row = 0; row < data.length; row++) {
                 elemsData[row] = ((Struct) data[row]).getAttributes()[i];
             }
-            nestedTypes[i].serializeBinaryBulk(elemsData, serializer);
+            getNestedTypes()[i].serializeBinaryBulk(elemsData, serializer);
         }
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        Object[] attrs = new Object[nestedTypes.length];
-        for (int i = 0; i < nestedTypes.length; i++) {
-            attrs[i] = nestedTypes[i].deserializeBinary(deserializer);
+    public ClickHouseStruct deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        Object[] attrs = new Object[getNestedTypes().length];
+        for (int i = 0; i < getNestedTypes().length; i++) {
+            attrs[i] = getNestedTypes()[i].deserializeBinary(deserializer);
         }
         return new ClickHouseStruct("Tuple", attrs);
     }
 
     @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
+    public ClickHouseStruct[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         Object[][] rowsWithElems = getRowsWithElems(rows, deserializer);
 
-        Struct[] rowsData = new Struct[rows];
+        ClickHouseStruct[] rowsData = new ClickHouseStruct[rows];
         for (int row = 0; row < rows; row++) {
-            Object[] elemsData = new Object[nestedTypes.length];
+            Object[] elemsData = new Object[getNestedTypes().length];
 
-            for (int elemIndex = 0; elemIndex < nestedTypes.length; elemIndex++) {
+            for (int elemIndex = 0; elemIndex < getNestedTypes().length; elemIndex++) {
                 elemsData[elemIndex] = rowsWithElems[elemIndex][row];
             }
             rowsData[row] = new ClickHouseStruct("Tuple", elemsData);
@@ -141,23 +142,27 @@ public class DataTypeTuple implements IDataType {
     }
 
     private Object[][] getRowsWithElems(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
-        Object[][] rowsWithElems = new Object[nestedTypes.length][];
-        for (int index = 0; index < nestedTypes.length; index++) {
-            rowsWithElems[index] = nestedTypes[index].deserializeBinaryBulk(rows, deserializer);
+        Object[][] rowsWithElems = new Object[getNestedTypes().length][];
+        for (int index = 0; index < getNestedTypes().length; index++) {
+            rowsWithElems[index] = getNestedTypes()[index].deserializeBinaryBulk(rows, deserializer);
         }
         return rowsWithElems;
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public ClickHouseStruct deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '(');
-        Object[] tupleData = new Object[nestedTypes.length];
-        for (int i = 0; i < nestedTypes.length; i++) {
+        Object[] tupleData = new Object[getNestedTypes().length];
+        for (int i = 0; i < getNestedTypes().length; i++) {
             if (i > 0)
                 Validate.isTrue(lexer.character() == ',');
-            tupleData[i] = nestedTypes[i].deserializeTextQuoted(lexer);
+            tupleData[i] = getNestedTypes()[i].deserializeTextQuoted(lexer);
         }
         Validate.isTrue(lexer.character() == ')');
         return new ClickHouseStruct("Tuple", tupleData);
+    }
+
+    public IDataType[] getNestedTypes() {
+        return nestedTypes;
     }
 }

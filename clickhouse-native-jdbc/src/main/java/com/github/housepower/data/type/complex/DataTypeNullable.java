@@ -39,14 +39,13 @@ public class DataTypeNullable implements IDataType {
 
     private final String name;
     private final IDataType nestedDataType;
+    private final IDataType nullMapDataType;
 
     public IDataType getNestedDataType() {
         return nestedDataType;
     }
 
-    private final IDataType nullMapDataType;
-
-    public DataTypeNullable(String name, IDataType nestedDataType, IDataType nullMapIDataType) throws SQLException {
+    public DataTypeNullable(String name, IDataType nestedDataType, IDataType nullMapIDataType) {
         this.name = name;
         this.nestedDataType = nestedDataType;
         this.nullMapDataType = nullMapIDataType;
@@ -110,15 +109,6 @@ public class DataTypeNullable implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        boolean isNull = (deserializer.readByte() == (byte) 1);
-        if (isNull) {
-            return null;
-        }
-        return this.nestedDataType.deserializeBinary(deserializer);
-    }
-
-    @Override
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
         Short[] isNull = new Short[data.length];
         for (int i = 0; i < data.length; i++) {
@@ -127,6 +117,15 @@ public class DataTypeNullable implements IDataType {
         }
         nullMapDataType.serializeBinaryBulk(isNull, serializer);
         nestedDataType.serializeBinaryBulk(data, serializer);
+    }
+
+    @Override
+    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        boolean isNull = (deserializer.readByte() == (byte) 1);
+        if (isNull) {
+            return null;
+        }
+        return this.nestedDataType.deserializeBinary(deserializer);
     }
 
     @Override

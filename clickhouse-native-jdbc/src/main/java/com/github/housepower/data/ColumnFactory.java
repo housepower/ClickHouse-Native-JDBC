@@ -22,7 +22,7 @@ import java.sql.Types;
 
 public class ColumnFactory {
 
-    public static IColumn createColumn(String name, IDataType type, Object[] values) {
+    public static IColumn createColumn(String name, IDataType<?, ?> type, Object[] values) {
         if (type.sqlTypeId() == Types.ARRAY) {
             return new ColumnArray(name, (DataTypeArray) type, values);
         } else if (type.nullable()) {

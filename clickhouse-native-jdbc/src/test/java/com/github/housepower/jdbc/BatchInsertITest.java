@@ -166,7 +166,7 @@ public class BatchInsertITest extends AbstractITest {
             for (int i = 0; i < Byte.MAX_VALUE; i++) {
                 preparedStatement.setArray(1, connection.createArrayOf("String", array0.toArray()));
                 preparedStatement.setArray(2, connection.createArrayOf("Float64", array1.toArray()));
-                preparedStatement.setArray(3, connection.createArrayOf("Array(Int32)", array3.toArray()));
+                preparedStatement.setArray(3, connection.createArrayOf("Nullable(Float64)", array3.toArray()));
 
                 preparedStatement.addBatch();
             }

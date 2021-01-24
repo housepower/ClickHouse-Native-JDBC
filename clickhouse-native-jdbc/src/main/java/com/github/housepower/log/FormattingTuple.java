@@ -46,8 +46,6 @@ package com.github.housepower.log;
  */
 public class FormattingTuple {
 
-    static public FormattingTuple NULL = new FormattingTuple(null);
-
     private final String message;
     private final Throwable throwable;
     private final Object[] argArray;

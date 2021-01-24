@@ -17,13 +17,13 @@ package com.github.housepower.data;
 public abstract class AbstractColumn implements IColumn {
 
     protected final String name;
-    protected final IDataType type;
+    protected final IDataType<?, ?> type;
 
     // Note: values is only for reading
     protected Object[] values;
     protected ColumnWriterBuffer buffer;
 
-    public AbstractColumn(String name, IDataType type, Object[] values) {
+    public AbstractColumn(String name, IDataType<?, ?> type, Object[] values) {
         this.name = name;
         this.type = type;
         this.values = values;

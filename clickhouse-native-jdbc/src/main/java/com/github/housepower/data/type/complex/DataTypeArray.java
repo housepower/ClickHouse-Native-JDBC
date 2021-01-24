@@ -14,43 +14,43 @@
 
 package com.github.housepower.data.type.complex;
 
-import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.data.DataTypeFactory;
 import com.github.housepower.data.IDataType;
+import com.github.housepower.data.type.DataTypeInt64;
+import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class DataTypeArray implements IDataType {
+// TODO avoid using ClickHouseArray because it's a subclass of java.sql.Array
+public class DataTypeArray implements IDataType<ClickHouseArray, Array> {
 
-    public static DataTypeCreator creator = (lexer, serverContext) -> {
+    public static DataTypeCreator<ClickHouseArray, Array> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
-        IDataType arrayNestedType = DataTypeFactory.get(lexer, serverContext);
+        IDataType<?, ?> arrayNestedType = DataTypeFactory.get(lexer, serverContext);
         Validate.isTrue(lexer.character() == ')');
         return new DataTypeArray("Array(" + arrayNestedType.name() + ")",
-                                 arrayNestedType, DataTypeFactory.get("UInt64", serverContext));
+                arrayNestedType, (DataTypeInt64) DataTypeFactory.get("Int64", serverContext));
     };
 
     private final String name;
-    private final Array defaultValue;
+    private final ClickHouseArray defaultValue;
 
-    public IDataType getElemDataType() {
-        return elemDataType;
-    }
 
-    private final IDataType elemDataType;
-    private final IDataType offsetIDataType;
+    private final IDataType<?, ?> elemDataType;
+    // Change from UInt64 to Int64 because we mapping UInt64 to BigInteger
+    private final DataTypeInt64 offsetIDataType;
 
-    public DataTypeArray(String name, IDataType elemDataType, IDataType offsetIDataType) throws SQLException {
+    public DataTypeArray(String name, IDataType<?, ?> elemDataType, DataTypeInt64 offsetIDataType) throws SQLException {
         this.name = name;
         this.elemDataType = elemDataType;
         this.offsetIDataType = offsetIDataType;
@@ -68,12 +68,17 @@ public class DataTypeArray implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
+    public ClickHouseArray defaultValue() {
         return defaultValue;
     }
 
     @Override
-    public Class javaType() {
+    public Class<ClickHouseArray> javaType() {
+        return ClickHouseArray.class;
+    }
+
+    @Override
+    public Class<Array> jdbcJavaType() {
         return Array.class;
     }
 
@@ -88,7 +93,7 @@ public class DataTypeArray implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public ClickHouseArray deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '[');
         List<Object> arrayData = new ArrayList<>();
         for (; ; ) {
@@ -105,42 +110,46 @@ public class DataTypeArray implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        Object[] arr = (Object[]) data;
-        for (Object f : arr) {
+    public void serializeBinary(ClickHouseArray data, BinarySerializer serializer) throws SQLException, IOException {
+        for (Object f : data.getArray()) {
             getElemDataType().serializeBinary(f, serializer);
         }
     }
 
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
-        offsetIDataType.serializeBinary(data.length, serializer);
+    public void serializeBinaryBulk(ClickHouseArray[] data, BinarySerializer serializer) throws SQLException, IOException {
+        offsetIDataType.serializeBinary((long) data.length, serializer);
         getElemDataType().serializeBinaryBulk(data, serializer);
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        Long offset = (Long) offsetIDataType.deserializeBinary(deserializer);
-        return elemDataType.deserializeBinaryBulk(offset.intValue(), deserializer);
+    public ClickHouseArray deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        Long offset = offsetIDataType.deserializeBinary(deserializer);
+        Object[] data = getElemDataType().deserializeBinaryBulk(offset.intValue(), deserializer);
+        return new ClickHouseArray(elemDataType, data);
     }
 
     @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
-        ClickHouseArray[] data = new ClickHouseArray[rows];
+    public ClickHouseArray[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
+        ClickHouseArray[] arrays = new ClickHouseArray[rows];
         if (rows == 0) {
-            return data;
+            return arrays;
         }
 
-        Object[] offsets = offsetIDataType.deserializeBinaryBulk(rows, deserializer);
+        int[] offsets = Arrays.stream(offsetIDataType.deserializeBinaryBulk(rows, deserializer)).mapToInt(value -> ((Long) value).intValue()).toArray();
         ClickHouseArray res = new ClickHouseArray(elemDataType,
-                elemDataType.deserializeBinaryBulk(((BigInteger) offsets[rows - 1]).intValue(), deserializer));
+                elemDataType.deserializeBinaryBulk(offsets[rows - 1], deserializer));
 
         for (int row = 0, lastOffset = 0; row < rows; row++) {
-            BigInteger offset = (BigInteger) offsets[row];
-            data[row] = res.slice(lastOffset, offset.intValue() - lastOffset);
-            lastOffset = offset.intValue();
+            int offset = offsets[row];
+            arrays[row] = res.slice(lastOffset, offset - lastOffset);
+            lastOffset = offset;
         }
-        return data;
+        return arrays;
+    }
+
+    public IDataType getElemDataType() {
+        return elemDataType;
     }
 }

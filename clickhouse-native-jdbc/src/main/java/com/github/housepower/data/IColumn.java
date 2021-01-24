@@ -25,7 +25,7 @@ public interface IColumn {
 
     String name();
 
-    IDataType type();
+    IDataType<?, ?> type();
 
     Object value(int idx);
 

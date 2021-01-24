@@ -17,6 +17,7 @@ package com.github.housepower.data;
 import com.github.housepower.data.type.complex.DataTypeNullable;
 import com.github.housepower.serde.BinarySerializer;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -35,13 +36,18 @@ public class ColumnNullable extends AbstractColumn {
     }
 
     @Override
-    public void write(Object object) throws IOException, SQLException {
-        nullableSign.add(object == null ? (byte) 1 : 0);
-        data.write(object == null ? type.defaultValue() : object);
+    public void write(@Nullable Object object) throws IOException, SQLException {
+        if (object == null) {
+            nullableSign.add((byte) 1);
+            data.write(type.defaultValue()); // write whatever for padding
+        } else {
+            nullableSign.add((byte) 0);
+            data.write(object);
+        }
     }
 
     @Override
-    public void flushToSerializer(BinarySerializer serializer, boolean immediate) throws IOException, SQLException {
+    public void flushToSerializer(BinarySerializer serializer, boolean immediate) throws IOException {
         if (isExported()) {
             serializer.writeUTF8StringBinary(name);
             serializer.writeUTF8StringBinary(type.name());

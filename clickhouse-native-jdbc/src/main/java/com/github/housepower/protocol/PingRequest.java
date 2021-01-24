@@ -20,6 +20,8 @@ import java.io.IOException;
 
 public class PingRequest implements Request {
 
+    public static final PingRequest INSTANCE = new PingRequest();
+
     @Override
     public ProtoType type() {
         return ProtoType.REQUEST_PING;

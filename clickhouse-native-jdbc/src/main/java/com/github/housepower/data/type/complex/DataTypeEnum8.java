@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class DataTypeEnum8 implements IDataType {
+public class DataTypeEnum8 implements IDataType<String, String> {
 
-    public static DataTypeCreator creator = (lexer, serverContext) -> {
+    public static DataTypeCreator<String, String> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         List<Byte> enumValues = new ArrayList<>();
         List<String> enumNames = new ArrayList<>();
@@ -79,8 +79,8 @@ public class DataTypeEnum8 implements IDataType {
     }
 
     @Override
-    public Byte defaultValue() {
-        return values[0];
+    public String defaultValue() {
+        return names[0];
     }
 
     @Override
@@ -104,7 +104,7 @@ public class DataTypeEnum8 implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(String data, BinarySerializer serializer) throws SQLException, IOException {
         for (int i = 0; i < names.length; i++) {
             if (data.equals(names[i])) {
                 serializer.writeByte(values[i]);

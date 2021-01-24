@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc.statement;
 
+import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseSQLException;
 import com.github.housepower.client.NativeContext;
@@ -21,6 +22,7 @@ import com.github.housepower.data.Block;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.data.type.*;
 import com.github.housepower.data.type.complex.*;
+import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.misc.BytesCharSeq;
 import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
@@ -39,6 +41,8 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
+
+import static com.github.housepower.misc.ExceptionUtil.unchecked;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
 
@@ -264,7 +268,23 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         if (type instanceof DataTypeNothing) {
             return null;
         }
-        // TODO cast more type, i.e. Nullable, Array, Tuple, Enum16, Enum8, IPv4
+        if (type instanceof DataTypeNullable) {
+            // handled null at first, so obj also not null here
+            return convertToCkDataType(((DataTypeNullable) type).getNestedDataType(), obj);
+        }
+        if (type instanceof DataTypeArray) {
+            if (!(obj instanceof ClickHouseArray)) {
+                throw new ClickHouseSQLException(-1, "require ClickHouseArray for column: " + type.name() + ", but found " + obj.getClass());
+            }
+            return ((ClickHouseArray) obj).mapElements(unchecked(this::convertToCkDataType));
+        }
+        if (type instanceof DataTypeTuple) {
+            if (!(obj instanceof ClickHouseStruct)) {
+                throw new ClickHouseSQLException(-1, "require ClickHouseStruct for column: " + type.name() + ", but found " + obj.getClass());
+            }
+            return ((ClickHouseStruct) obj).mapAttributes(((DataTypeTuple) type).getNestedTypes(), unchecked(this::convertToCkDataType));
+        }
+        LOG.debug("unhandled type: {}", obj.getClass());
         return obj;
     }
 }

@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.SQLException;
 
+// I see some binary protocol frameworks such as Protobuf chose an alternative way to represent UInt64 by long,
+// and use special tools to calculate it. Since currently we don't guarantee any stable APIs except JDBC APIs,
+// so we have an opportunity to change it later.
 public class DataTypeUInt64 implements BaseDataTypeInt64<BigInteger, BigInteger> {
 
     private final String name;

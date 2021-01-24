@@ -14,22 +14,10 @@
 
 package com.github.housepower.jdbc;
 
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.Array;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
-
 import com.github.housepower.data.Block;
 import com.github.housepower.data.IColumn;
+import com.github.housepower.jdbc.statement.ClickHouseStatement;
+import com.github.housepower.jdbc.wrapper.SQLResultSet;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.CheckedIterator;
@@ -37,8 +25,14 @@ import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.DataResponse;
 import com.github.housepower.settings.ClickHouseConfig;
-import com.github.housepower.jdbc.statement.ClickHouseStatement;
-import com.github.housepower.jdbc.wrapper.SQLResultSet;
+
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
 
 public class ClickHouseResultSet implements SQLResultSet {
 

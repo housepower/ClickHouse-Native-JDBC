@@ -26,9 +26,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataTypeEnum16 implements IDataType {
+public class DataTypeEnum16 implements IDataType<String, String> {
 
-    public static DataTypeCreator creator = (lexer, serverContext) -> {
+    public static DataTypeCreator<String, String> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         List<Short> enumValues = new ArrayList<>();
         List<String> enumNames = new ArrayList<>();
@@ -78,12 +78,12 @@ public class DataTypeEnum16 implements IDataType {
     }
 
     @Override
-    public Object defaultValue() {
-        return values[0];
+    public String defaultValue() {
+        return names[0];
     }
 
     @Override
-    public Class javaType() {
+    public Class<String> javaType() {
         return String.class;
     }
 
@@ -98,12 +98,12 @@ public class DataTypeEnum16 implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public String deserializeTextQuoted(SQLLexer lexer) throws SQLException {
         return lexer.stringLiteral();
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(String data, BinarySerializer serializer) throws SQLException, IOException {
         for (int i = 0; i < names.length; i++) {
             if (data.equals(names[i])) {
                 serializer.writeShort(values[i]);
@@ -123,7 +123,7 @@ public class DataTypeEnum16 implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         short value = deserializer.readShort();
         for (int i = 0; i < values.length; i++) {
             if (values[i].equals(value)) {

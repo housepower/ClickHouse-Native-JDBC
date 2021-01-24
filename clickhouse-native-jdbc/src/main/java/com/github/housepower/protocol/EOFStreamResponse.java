@@ -18,8 +18,10 @@ import com.github.housepower.serde.BinaryDeserializer;
 
 public class EOFStreamResponse implements Response {
 
+    public static final EOFStreamResponse INSTANCE = new EOFStreamResponse();
+
     public static Response readFrom(BinaryDeserializer deserializer) {
-        return new EOFStreamResponse();
+        return INSTANCE;
     }
 
     @Override

@@ -123,12 +123,12 @@ public class DataTypeFactory {
     }
 
     // TODO
-    private static Map<String, DataTypeCreator> initComplexDataTypes() {
+    private static Map<String, DataTypeCreator<?, ?>> initComplexDataTypes() {
         return new HashMap<>();
     }
 
     private static void registerComplexType(
-            Map<String, DataTypeCreator> creators, IDataType<?, ?> type, DataTypeCreator creator) {
+            Map<String, DataTypeCreator<?, ?>> creators, IDataType<?, ?> type, DataTypeCreator<?, ?> creator) {
 
         creators.put(type.name().toLowerCase(Locale.ROOT), creator);
         for (String typeName : type.getAliases()) {

@@ -21,8 +21,10 @@ import java.sql.SQLException;
 
 public class PongResponse implements Response {
 
+    public static final PongResponse INSTANCE = new PongResponse();
+
     public static PongResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
-        return new PongResponse();
+        return INSTANCE;
     }
 
     @Override

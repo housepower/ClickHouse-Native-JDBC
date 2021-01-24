@@ -37,7 +37,7 @@ public class ColumnArray extends AbstractColumn {
 
     @Override
     public void write(Object object) throws IOException, SQLException {
-        Object[] arr = (Object[]) ((ClickHouseArray) object).getArray();
+        Object[] arr = ((ClickHouseArray) object).getArray();
 
         offsets.add(offsets.isEmpty() ? arr.length : offsets.get((offsets.size() - 1)) + arr.length);
         for (Object field : arr) {
@@ -60,7 +60,7 @@ public class ColumnArray extends AbstractColumn {
         }
     }
 
-    public void flushOffsets(BinarySerializer serializer) throws IOException, SQLException {
+    public void flushOffsets(BinarySerializer serializer) throws IOException {
         for (long offsetList : offsets) {
             serializer.writeLong(offsetList);
         }
