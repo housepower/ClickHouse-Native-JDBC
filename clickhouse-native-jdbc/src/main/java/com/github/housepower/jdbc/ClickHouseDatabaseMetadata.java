@@ -31,8 +31,6 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClickHouseDatabaseMetadata.class);
 
-    private static final String DEFAULT_CATALOG = "default";
-
     private final String url;
     private final ClickHouseConnection connection;
 
@@ -742,7 +740,7 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
         List<String> typeList = types != null ? Arrays.asList(types) : null;
         while (result.next()) {
             List<String> row = new ArrayList<>();
-            row.add(DEFAULT_CATALOG);
+            row.add(ClickHouseDefines.DEFAULT_CATALOG);
             row.add(result.getString(1));
             row.add(result.getString(2));
             String type, e = result.getString(3).intern();
@@ -782,7 +780,7 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
 
     @Override
     public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-        String sql = "select name as TABLE_SCHEM, '" + DEFAULT_CATALOG + "' as TABLE_CATALOG from system.databases";
+        String sql = "select name as TABLE_SCHEM, '" + ClickHouseDefines.DEFAULT_CATALOG + "' as TABLE_CATALOG from system.databases";
         if (catalog != null) {
             sql += " where TABLE_CATALOG = '" + catalog + '\'';
         }
@@ -804,7 +802,7 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
                 .cfg(connection.cfg())
                 .columnNames("TABLE_CAT")
                 .columnTypes("String")
-                .addRow(DEFAULT_CATALOG).build();
+                .addRow(ClickHouseDefines.DEFAULT_CATALOG).build();
     }
 
     @Override
@@ -905,7 +903,7 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
         while (descTable.next()) {
             List<Object> row = new ArrayList<>();
             //catalog name
-            row.add(DEFAULT_CATALOG);
+            row.add(ClickHouseDefines.DEFAULT_CATALOG);
             //database name
             row.add(descTable.getString("database"));
             //table name
