@@ -55,7 +55,7 @@ public class DataTypeUInt32 implements BaseDataTypeInt32<Long, Long> {
     }
 
     @Override
-    public Long deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Long deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue();
     }
 }

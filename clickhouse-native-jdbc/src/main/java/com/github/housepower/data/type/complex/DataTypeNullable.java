@@ -92,7 +92,7 @@ public class DataTypeNullable implements IDataType {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Object deserializeText(SQLLexer lexer) throws SQLException {
         if (lexer.isCharacter('n') || lexer.isCharacter('N')) {
             Validate.isTrue(Character.toLowerCase(lexer.character()) == 'n');
             Validate.isTrue(Character.toLowerCase(lexer.character()) == 'u');
@@ -100,7 +100,7 @@ public class DataTypeNullable implements IDataType {
             Validate.isTrue(Character.toLowerCase(lexer.character()) == 'l');
             return null;
         }
-        return nestedDataType.deserializeTextQuoted(lexer);
+        return nestedDataType.deserializeText(lexer);
     }
 
     @Override

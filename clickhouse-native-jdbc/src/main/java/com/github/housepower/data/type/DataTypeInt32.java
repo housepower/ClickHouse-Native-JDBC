@@ -59,7 +59,7 @@ public class DataTypeInt32 implements BaseDataTypeInt32<Integer, Integer> {
     }
 
     @Override
-    public Integer deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Integer deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().intValue();
     }
 

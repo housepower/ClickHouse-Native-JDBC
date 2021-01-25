@@ -71,7 +71,7 @@ public class DataTypeIPv4 implements IDataType<Long, Long> {
     }
 
     @Override
-    public Long deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Long deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue() & 0xffffffffL;
     }
 }

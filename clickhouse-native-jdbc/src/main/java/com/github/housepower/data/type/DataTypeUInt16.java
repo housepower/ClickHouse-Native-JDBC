@@ -55,7 +55,7 @@ public class DataTypeUInt16 implements BaseDataTypeInt16<Integer, Integer> {
     }
 
     @Override
-    public Integer deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Integer deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().intValue();
     }
 }

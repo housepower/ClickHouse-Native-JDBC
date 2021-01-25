@@ -93,7 +93,7 @@ public class DataTypeArray implements IDataType<ClickHouseArray, Array> {
     }
 
     @Override
-    public ClickHouseArray deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public ClickHouseArray deserializeText(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '[');
         List<Object> arrayData = new ArrayList<>();
         for (; ; ) {
@@ -104,7 +104,7 @@ public class DataTypeArray implements IDataType<ClickHouseArray, Array> {
             if (lexer.isCharacter(',')) {
                 lexer.character();
             }
-            arrayData.add(elemDataType.deserializeTextQuoted(lexer));
+            arrayData.add(elemDataType.deserializeText(lexer));
         }
         return new ClickHouseArray(elemDataType, arrayData.toArray());
     }

@@ -86,7 +86,7 @@ public class DataTypeDate implements IDataType<LocalDate, Date> {
     }
 
     @Override
-    public LocalDate deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public LocalDate deserializeText(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '\'');
         int year = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '-');

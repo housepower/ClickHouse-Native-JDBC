@@ -47,7 +47,7 @@ public class ValuesInputFormat implements InputFormat {
                     Validate.isTrue(lexer.character() == ',');
                 }
                 constIdxFlags.set(columnIdx);
-                block.setConstObject(columnIdx, block.getColumnByPosition(columnIdx).type().deserializeTextQuoted(lexer));
+                block.setConstObject(columnIdx, block.getColumnByPosition(columnIdx).type().deserializeText(lexer));
             }
             Validate.isTrue(lexer.character() == ')');
             block.appendRow();
