@@ -21,8 +21,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8
-      - name: Start clickhouse-server
-        run: docker-compose up -d
       - run: sed -i 's/TRACE/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
       - run: sed -i 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
 
