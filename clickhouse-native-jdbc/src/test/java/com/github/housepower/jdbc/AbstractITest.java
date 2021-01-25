@@ -15,6 +15,10 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.misc.StrUtil;
+import org.junit.jupiter.api.BeforeAll;
+import org.testcontainers.containers.ClickHouseContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -26,15 +30,35 @@ import java.util.Enumeration;
 
 import javax.sql.DataSource;
 
+@Testcontainers
 public abstract class AbstractITest implements Serializable {
 
     protected static final ZoneId CLIENT_TZ = ZoneId.systemDefault();
     protected static final ZoneId SERVER_TZ = ZoneId.of("UTC");
     protected static final String DRIVER_CLASS_NAME = "com.github.housepower.jdbc.ClickHouseDriver";
-    protected static final int SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
-    protected static final String SERVER_USER = System.getProperty("CLICK_HOUSE_SERVER_USER", "default");
-    protected static final String SERVER_PASSWORD = System.getProperty("CLICK_HOUSE_SERVER_PASSWORD", "");
-    protected static final String SERVER_DATABASE = System.getProperty("CLICK_HOUSE_SERVER_DATABASE");
+
+    public static final String CLICKHOUSE_IMAGE = System.getProperty("CLICKHOUSE_IMAGE", "yandex/clickhouse-server:20.8");
+
+    protected static final String CLICKHOUSE_USER = System.getProperty("CLICKHOUSE_USER", "default");
+    protected static final String CLICKHOUSE_PASSWORD = System.getProperty("CLICKHOUSE_PASSWORD", "");
+    protected static final String CLICKHOUSE_DB = System.getProperty("CLICKHOUSE_DB", "");
+
+    @Container
+    public static ClickHouseContainer container = (ClickHouseContainer) new ClickHouseContainer(CLICKHOUSE_IMAGE)
+            .withEnv("CLICKHOUSE_USER", CLICKHOUSE_USER)
+            .withEnv("CLICKHOUSE_PASSWORD", CLICKHOUSE_PASSWORD)
+            .withEnv("CLICKHOUSE_DB", CLICKHOUSE_DB);
+
+    protected static String CK_HOST;
+    protected static String CK_IP;
+    protected static int CK_PORT;
+
+    @BeforeAll
+    public static void extractContainerInfo() {
+        CK_HOST = container.getHost();
+        CK_IP = container.getContainerIpAddress();
+        CK_PORT = container.getMappedPort(ClickHouseContainer.NATIVE_PORT);
+    }
 
     /**
      * just for compatible with scala
@@ -45,29 +69,26 @@ public abstract class AbstractITest implements Serializable {
 
     protected String getJdbcUrl(Object... params) {
         StringBuilder sb = new StringBuilder();
-        sb.append("jdbc:clickhouse://127.0.0.1:").append(SERVER_PORT);
-        if (SERVER_DATABASE != null) {
-            sb.append("/").append(SERVER_DATABASE);
+        int port = container.getMappedPort(ClickHouseContainer.NATIVE_PORT);
+        sb.append("jdbc:clickhouse://").append(container.getHost()).append(":").append(port);
+        if (StrUtil.isNotEmpty(CLICKHOUSE_DB)) {
+            sb.append("/").append(container.getDatabaseName());
         }
         for (int i = 0; i + 1 < params.length; i++) {
-            if (i == 0) {
-                sb.append("?");
-            } else {
-                sb.append("&");
-            }
+            sb.append(i == 0 ? "?" : "&");
             sb.append(params[i]).append("=").append(params[i + 1]);
         }
-        
+
         // Add user
         sb.append(params.length < 2 ? "?" : "&");
-        sb.append("user=").append(SERVER_USER);
-        
+        sb.append("user=").append(container.getUsername());
+
         // Add password
-        // Currently we ignore the blan password
-        if (!StrUtil.isBlank(SERVER_PASSWORD)) {
-            sb.append("&password=").append(SERVER_PASSWORD);
+        // ignore blank password
+        if (!StrUtil.isBlank(CLICKHOUSE_PASSWORD)) {
+            sb.append("&password=").append(container.getPassword());
         }
-   
+
         return sb.toString();
     }
 

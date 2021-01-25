@@ -22,24 +22,25 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BalancedClickhouseDataSourceITest {
+public class BalancedClickhouseDataSourceITest extends AbstractITest {
 
-    private static BalancedClickhouseDataSource dataSource;
-    private static BalancedClickhouseDataSource doubleDataSource;
+    private static BalancedClickhouseDataSource singleDs;
+    private static BalancedClickhouseDataSource dualDs;
 
     @BeforeEach
     public void reset() {
-        dataSource = new BalancedClickhouseDataSource("jdbc:clickhouse://127.0.0.1:9000");
-        doubleDataSource = new BalancedClickhouseDataSource("jdbc:clickhouse://127.0.0.1:9000,127.0.0.1:9000");
+        singleDs = new BalancedClickhouseDataSource(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s", CK_HOST, CK_PORT));
+        dualDs = new BalancedClickhouseDataSource(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s,%s:%s", CK_HOST, CK_PORT, CK_IP, CK_PORT));
     }
 
     @Test
     public void testSingleDatabaseConnection() throws Exception {
-        Connection connection = dataSource.getConnection();
+        Connection connection = singleDs.getConnection();
         connection.createStatement().execute("CREATE DATABASE IF NOT EXISTS test");
         connection.createStatement().execute("DROP TABLE IF EXISTS test.insert_test");
         connection.createStatement().execute(
@@ -58,14 +59,14 @@ public class BalancedClickhouseDataSourceITest {
 
     @Test
     public void testDoubleDatabaseConnection() throws Exception {
-        Connection connection = doubleDataSource.getConnection();
+        Connection connection = dualDs.getConnection();
         connection.createStatement().execute("CREATE DATABASE IF NOT EXISTS test");
-        connection = doubleDataSource.getConnection();
+        connection = dualDs.getConnection();
         connection.createStatement().execute("DROP TABLE IF EXISTS test.insert_test");
         connection.createStatement().execute(
                 "CREATE TABLE IF NOT EXISTS test.insert_test (i Int32, s String) ENGINE = TinyLog");
 
-        connection = doubleDataSource.getConnection();
+        connection = dualDs.getConnection();
 
         PreparedStatement statement = connection.prepareStatement("INSERT INTO test.insert_test (s, i) VALUES (?, ?)");
         statement.setString(1, "asd");
@@ -78,7 +79,7 @@ public class BalancedClickhouseDataSourceITest {
         assertEquals("asd", rs.getString("s"));
         assertEquals(42, rs.getInt("i"));
 
-        connection = doubleDataSource.getConnection();
+        connection = dualDs.getConnection();
 
         statement = connection.prepareStatement("INSERT INTO test.insert_test (s, i) VALUES (?, ?)");
         statement.setString(1, "asd");
@@ -96,8 +97,8 @@ public class BalancedClickhouseDataSourceITest {
 
     @Test
     public void testCorrectActualizationDatabaseConnection() throws Exception {
-        dataSource.actualize();
-        try (Connection connection = dataSource.getConnection()) {
+        singleDs.actualize();
+        try (Connection connection = singleDs.getConnection()) {
             assertTrue(connection.isValid(1000));
         }
     }
@@ -106,7 +107,7 @@ public class BalancedClickhouseDataSourceITest {
     @Test
     public void testDisableConnection() {
         BalancedClickhouseDataSource badDatasource = new BalancedClickhouseDataSource(
-                "jdbc:clickhouse://not.existed.url:9000", new Properties());
+                "jdbc:clickhouse://not.existed.url:" + CK_PORT, new Properties());
         badDatasource.actualize();
         try {
             Connection connection = badDatasource.getConnection();
@@ -120,7 +121,7 @@ public class BalancedClickhouseDataSourceITest {
     @Test
     public void testWorkWithEnabledUrl() throws Exception {
         BalancedClickhouseDataSource halfDatasource = new BalancedClickhouseDataSource(
-                "jdbc:clickhouse://not.existed.url:9000,127.0.0.1:9000", new Properties());
+                String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s,%s:%s", "not.existed.url", CK_PORT, CK_IP, CK_PORT), new Properties());
 
         halfDatasource.actualize();
         Connection connection = halfDatasource.getConnection();
@@ -167,27 +168,29 @@ public class BalancedClickhouseDataSourceITest {
 
         // without connection parameters
         BalancedClickhouseDataSource dataSource = new BalancedClickhouseDataSource(
-                "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click", properties);
+                String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s,%s:%s/click", CK_HOST, CK_PORT, CK_IP, CK_PORT), properties);
         ClickHouseConfig cfg = dataSource.getCfg();
         assertEquals(Duration.ofSeconds(6789), cfg.queryTimeout());
         assertEquals("888888", cfg.password());
         assertEquals("click", cfg.database());
         assertEquals(2, dataSource.getAllClickhouseUrls().size());
-        assertEquals(dataSource.getAllClickhouseUrls().get(0), "jdbc:clickhouse://localhost:9000/click");
-        assertEquals(dataSource.getAllClickhouseUrls().get(1), "jdbc:clickhouse://127.0.0.1:9000/click");
+        assertEquals(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s/click", CK_HOST, CK_PORT),
+                dataSource.getAllClickhouseUrls().get(0));
+        assertEquals(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s/click", CK_IP, CK_PORT),
+                dataSource.getAllClickhouseUrls().get(1));
 
         // with connection parameters
         dataSource = new BalancedClickhouseDataSource(
-                "jdbc:clickhouse://localhost:9000,127.0.0.1:9000/click?query_timeout=12345&user=readonly", properties);
+                String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s,%s:%s/click?query_timeout=12345&user=readonly", CK_HOST, CK_PORT, CK_IP, CK_PORT), properties);
         cfg = dataSource.getCfg();
         assertEquals(Duration.ofSeconds(6789), cfg.queryTimeout());
         assertEquals("readonly", cfg.user());
         assertEquals("888888", cfg.password());
         assertEquals("click", cfg.database());
         assertEquals(2, dataSource.getAllClickhouseUrls().size());
-        assertEquals("jdbc:clickhouse://localhost:9000/click?query_timeout=12345&user=readonly",
+        assertEquals(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s/click?query_timeout=12345&user=readonly", CK_HOST, CK_PORT),
                 dataSource.getAllClickhouseUrls().get(0));
-        assertEquals("jdbc:clickhouse://127.0.0.1:9000/click?query_timeout=12345&user=readonly",
+        assertEquals(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s/click?query_timeout=12345&user=readonly", CK_IP, CK_PORT),
                 dataSource.getAllClickhouseUrls().get(1));
     }
 }

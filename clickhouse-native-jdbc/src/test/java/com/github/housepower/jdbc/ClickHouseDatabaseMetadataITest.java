@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,7 +47,8 @@ class ClickHouseDatabaseMetadataITest extends AbstractITest {
     void getURL() throws Exception {
         withNewConnection(connection -> {
             DatabaseMetaData dm = connection.getMetaData();
-            assertEquals("jdbc:clickhouse://127.0.0.1:9000/default?query_timeout=0&connect_timeout=0&charset=UTF-8&tcp_keep_alive=false", dm.getURL());
+            assertEquals(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s/default?query_timeout=0&connect_timeout=0&charset=UTF-8&tcp_keep_alive=false", CK_HOST, CK_PORT),
+                    dm.getURL());
         });
     }
 

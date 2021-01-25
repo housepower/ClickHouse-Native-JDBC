@@ -284,7 +284,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             }
             return ((ClickHouseStruct) obj).mapAttributes(((DataTypeTuple) type).getNestedTypes(), unchecked(this::convertToCkDataType));
         }
-        LOG.debug("unhandled type: {}", obj.getClass());
+        LOG.debug("unhandled type: {}[{}]", type.name(), obj.getClass());
         return obj;
     }
 }
