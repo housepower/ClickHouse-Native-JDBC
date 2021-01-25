@@ -17,7 +17,7 @@ Note left of Client: I got server infos
 
 - There are many kinds of requests/response, the above `hello` is one of them.
 
-- You can find all the request/response type in `com.github.housepower.jdbc.protocol` package.
+- You can find all the request/response type in `com.github.housepower.protocol` package.
 
 ## Query
 

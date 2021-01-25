@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.settings.ClickHouseConfig;
+import com.github.housepower.settings.ClickHouseConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -14,14 +14,16 @@
 
 package com.github.housepower.jdbc.statement;
 
+import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.client.NativeContext;
+import com.github.housepower.misc.BytesCharSeq;
+import com.github.housepower.misc.DateTimeUtil;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
+
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Date;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Struct;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -30,12 +32,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.regex.Matcher;
-
-import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.misc.DateTimeUtil;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
 
 public abstract class AbstractPreparedStatement extends ClickHouseStatement implements SQLPreparedStatement {
 
@@ -124,7 +120,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void setBytes(int index, byte[] x) throws SQLException {
-        setObject(index, x);
+        setObject(index, new BytesCharSeq(x));
     }
 
     @Override
@@ -145,17 +141,6 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     @Override
     public void setObject(int index, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
         setObject(index, x);
-    }
-
-    protected Object convertObjectIfNecessary(Object obj) {
-        Object result = obj;
-        if (obj instanceof Date) {
-            result = ((Date) obj).toLocalDate();
-        }
-        if (obj instanceof Timestamp) {
-            result = DateTimeUtil.toZonedDateTime((Timestamp) obj, tz);
-        }
-        return result;
     }
 
     @Override
@@ -187,17 +172,16 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     private boolean assembleSimpleParameter(StringBuilder queryBuilder, Object parameter) {
-        if (parameter == null) {
-            return assembleWithoutQuotedParameter(queryBuilder, "Null");
-        } else if (parameter instanceof Number) {
-            return assembleWithoutQuotedParameter(queryBuilder, parameter);
-        } else if (parameter instanceof String) {
+        if (parameter instanceof String)
             return assembleQuotedParameter(queryBuilder, String.valueOf(parameter));
-        } else if (parameter instanceof LocalDate) {
+        if (parameter == null)
+            return assembleWithoutQuotedParameter(queryBuilder, "Null");
+        if (parameter instanceof Number)
+            return assembleWithoutQuotedParameter(queryBuilder, parameter);
+        if (parameter instanceof LocalDate)
             return assembleQuotedParameter(queryBuilder, dateFmt.format((LocalDate) parameter));
-        } else if (parameter instanceof ZonedDateTime) {
+        if (parameter instanceof ZonedDateTime)
             return assembleQuotedParameter(queryBuilder, timestampFmt.format((ZonedDateTime) parameter));
-        }
         return false;
     }
 

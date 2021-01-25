@@ -26,7 +26,7 @@ import java.sql.Statement;
 
 import joptsimple.internal.Strings;
 
-import static com.github.housepower.jdbc.misc.BytesUtil.longsToBytes;
+import static com.github.housepower.misc.BytesUtil.longsToBytes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DecimalTypeITest extends AbstractITest {

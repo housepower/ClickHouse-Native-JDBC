@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.annotation.Issue;
+import com.github.housepower.annotation.Issue;
 import com.google.common.base.Strings;
 import org.junit.jupiter.api.Test;
 

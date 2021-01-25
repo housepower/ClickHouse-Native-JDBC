@@ -14,17 +14,39 @@
 
 package com.github.housepower.jdbc.statement;
 
+import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.connect.NativeContext;
-import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.stream.ValuesWithParametersInputFormat;
+import com.github.housepower.jdbc.ClickHouseSQLException;
+import com.github.housepower.client.NativeContext;
+import com.github.housepower.data.Block;
+import com.github.housepower.data.IDataType;
+import com.github.housepower.data.type.*;
+import com.github.housepower.data.type.complex.*;
+import com.github.housepower.jdbc.ClickHouseStruct;
+import com.github.housepower.misc.BytesCharSeq;
+import com.github.housepower.misc.DateTimeUtil;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.stream.ValuesWithParametersInputFormat;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.UUID;
+
+import static com.github.housepower.misc.ExceptionUtil.unchecked;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClickHousePreparedInsertStatement.class);
 
     private static int computeQuestionMarkSize(String query, int start) throws SQLException {
         int param = 0;
@@ -65,9 +87,9 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     // parameterIndex start with 1
     @Override
-    public void setObject(int parameterIndex, Object x) throws SQLException {
+    public void setObject(int idx, Object x) throws SQLException {
         initBlockIfPossible();
-        block.setPlaceholderObject(parameterIndex - 1, convertObjectIfNecessary(x));
+        block.setPlaceholderObject(idx - 1, convertToCkDataType(block.getColumnByPosition(idx - 1).type(), x));
     }
 
     @Override
@@ -160,5 +182,109 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
 
     private void addParameters() throws SQLException {
         block.appendRow();
+    }
+
+    // TODO we actually need a type cast system rather than put all type cast stuffs here
+    private Object convertToCkDataType(IDataType<?, ?> type, Object obj) throws ClickHouseSQLException {
+        if (obj == null) {
+            if (type.nullable() || type instanceof DataTypeNothing)
+                return null;
+            throw new ClickHouseSQLException(-1, "type[" + type.name() + "] doesn't support null value");
+        }
+        // put the most common cast at first to avoid `instanceof` test overhead
+        if (type instanceof DataTypeString || type instanceof DataTypeFixedString) {
+            if (obj instanceof CharSequence)
+                return obj;
+            if (obj instanceof byte[])
+                return new BytesCharSeq((byte[]) obj);
+            String objStr = obj.toString();
+            LOG.debug("set value[{}]: {} on String Column", obj.getClass(), obj);
+            return objStr;
+        }
+        if (type instanceof DataTypeDate) {
+            if (obj instanceof java.util.Date)
+                return ((Date) obj).toLocalDate();
+            if (obj instanceof LocalDate)
+                return obj;
+        }
+        // TODO support
+        //   1. other Java8 time, i.e. OffsetDateTime, Instant
+        //   2. unix timestamp, but in second or millisecond?
+        if (type instanceof DataTypeDateTime || type instanceof DataTypeDateTime64) {
+            if (obj instanceof Timestamp)
+                return DateTimeUtil.toZonedDateTime((Timestamp) obj, tz);
+            if (obj instanceof LocalDateTime)
+                return ((LocalDateTime) obj).atZone(tz);
+            if (obj instanceof ZonedDateTime)
+                return obj;
+        }
+        if (type instanceof DataTypeInt8) {
+            if (obj instanceof Number)
+                return ((Number) obj).byteValue();
+        }
+        if (type instanceof DataTypeUInt8 || type instanceof DataTypeInt16) {
+            if (obj instanceof Number)
+                return ((Number) obj).shortValue();
+        }
+        if (type instanceof DataTypeUInt16 || type instanceof DataTypeInt32) {
+            if (obj instanceof Number)
+                return ((Number) obj).intValue();
+        }
+        if (type instanceof DataTypeUInt32 || type instanceof DataTypeInt64) {
+            if (obj instanceof Number)
+                return ((Number) obj).longValue();
+        }
+        if (type instanceof DataTypeUInt64) {
+            if (obj instanceof BigInteger)
+                return obj;
+            if (obj instanceof BigDecimal)
+                return ((BigDecimal) obj).toBigInteger();
+            if (obj instanceof Number)
+                return BigInteger.valueOf(((Number) obj).longValue());
+        }
+        if (type instanceof DataTypeFloat32) {
+            if (obj instanceof Number)
+                return ((Number) obj).floatValue();
+        }
+        if (type instanceof DataTypeFloat64) {
+            if (obj instanceof Number)
+                return ((Number) obj).doubleValue();
+        }
+        if (type instanceof DataTypeDecimal) {
+            if (obj instanceof BigDecimal)
+                return obj;
+            if (obj instanceof BigInteger)
+                return new BigDecimal((BigInteger) obj);
+            if (obj instanceof Number)
+                return ((Number) obj).doubleValue();
+        }
+        if (type instanceof DataTypeUUID) {
+            if (obj instanceof UUID)
+                return obj;
+            if (obj instanceof String) {
+                return UUID.fromString((String) obj);
+            }
+        }
+        if (type instanceof DataTypeNothing) {
+            return null;
+        }
+        if (type instanceof DataTypeNullable) {
+            // handled null at first, so obj also not null here
+            return convertToCkDataType(((DataTypeNullable) type).getNestedDataType(), obj);
+        }
+        if (type instanceof DataTypeArray) {
+            if (!(obj instanceof ClickHouseArray)) {
+                throw new ClickHouseSQLException(-1, "require ClickHouseArray for column: " + type.name() + ", but found " + obj.getClass());
+            }
+            return ((ClickHouseArray) obj).mapElements(unchecked(this::convertToCkDataType));
+        }
+        if (type instanceof DataTypeTuple) {
+            if (!(obj instanceof ClickHouseStruct)) {
+                throw new ClickHouseSQLException(-1, "require ClickHouseStruct for column: " + type.name() + ", but found " + obj.getClass());
+            }
+            return ((ClickHouseStruct) obj).mapAttributes(((DataTypeTuple) type).getNestedTypes(), unchecked(this::convertToCkDataType));
+        }
+        LOG.debug("unhandled type: {}", obj.getClass());
+        return obj;
     }
 }

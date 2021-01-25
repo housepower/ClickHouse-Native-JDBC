@@ -14,34 +14,36 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.log.Logger;
-import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.data.IDataType;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.jdbc.wrapper.SQLArray;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.StringJoiner;
+import java.util.function.BiFunction;
 
 public class ClickHouseArray implements SQLArray {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClickHouseArray.class);
 
-    private final IDataType itemDataType;
-    private final Object[] data;
+    private final IDataType<?, ?> elementDataType;
+    private final Object[] elements;
 
-    public ClickHouseArray(IDataType itemDataType, Object[] data) {
-        this.itemDataType = itemDataType;
-        this.data = data;
+    public ClickHouseArray(IDataType<?, ?> elementDataType, Object[] elements) {
+        this.elementDataType = elementDataType;
+        this.elements = elements;
     }
 
     @Override
     public String getBaseTypeName() throws SQLException {
-        return itemDataType.name();
+        return elementDataType.name();
     }
 
     @Override
-    public int getBaseType() throws SQLException {
-        return itemDataType.sqlTypeId();
+    public int getBaseType() {
+        return elementDataType.sqlTypeId();
     }
 
     @Override
@@ -49,8 +51,8 @@ public class ClickHouseArray implements SQLArray {
     }
 
     @Override
-    public Object getArray() throws SQLException {
-        return data;
+    public Object[] getArray() throws SQLException {
+        return elements;
     }
 
     @Override
@@ -61,7 +63,7 @@ public class ClickHouseArray implements SQLArray {
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(",", "[", "]");
-        for (Object item : data) {
+        for (Object item : elements) {
             // TODO format by itemDataType
             joiner.add(String.valueOf(item));
         }
@@ -70,7 +72,12 @@ public class ClickHouseArray implements SQLArray {
 
     public ClickHouseArray slice(int offset, int length) {
         Object[] result = new Object[length];
-        if (length >= 0) System.arraycopy(data, offset, result, 0, length);
-        return new ClickHouseArray(itemDataType, result);
+        if (length >= 0) System.arraycopy(elements, offset, result, 0, length);
+        return new ClickHouseArray(elementDataType, result);
+    }
+
+    public ClickHouseArray mapElements(BiFunction<IDataType<?, ?>, Object, Object> mapFunc) {
+        Object[] mapped = Arrays.stream(elements).map(elem -> mapFunc.apply(elementDataType, elem)).toArray();
+        return new ClickHouseArray(elementDataType, mapped);
     }
 }

@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.misc.StrUtil;
+import com.github.housepower.misc.StrUtil;
 
 import java.io.Serializable;
 import java.sql.Connection;

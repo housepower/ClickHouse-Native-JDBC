@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.exception.InvalidValueException;
+import com.github.housepower.exception.InvalidValueException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

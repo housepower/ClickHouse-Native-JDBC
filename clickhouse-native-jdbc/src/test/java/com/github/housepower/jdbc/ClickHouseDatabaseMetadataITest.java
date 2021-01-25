@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.settings.ClickHouseDefines;
+import com.github.housepower.settings.ClickHouseDefines;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;

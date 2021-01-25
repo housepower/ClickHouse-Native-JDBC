@@ -14,11 +14,10 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.data.IDataType;
-import com.github.housepower.jdbc.data.type.complex.DataTypeNullable;
-import com.github.housepower.jdbc.log.Logger;
-import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.data.Block;
+import com.github.housepower.data.type.complex.DataTypeNullable;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.jdbc.wrapper.SQLResultSetMetaData;
 
 import java.sql.ResultSetMetaData;
@@ -45,8 +44,7 @@ public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
 
     @Override
     public int getColumnType(int index) throws SQLException {
-        IDataType type = header.getColumnByPosition(index - 1).type();
-        return type.sqlTypeId();
+        return header.getColumnByPosition(index - 1).type().sqlTypeId();
     }
 
     @Override
@@ -129,22 +127,6 @@ public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
     public boolean isDefinitelyWritable(int column) throws SQLException {
         return false;
     }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (isWrapperFor(iface)) {
-            return (T) this;
-        }
-        throw new SQLException("Unable to unwrap to " + iface.toString());
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) {
-        return iface != null && iface.isAssignableFrom(getClass());
-    }
-
-    /*=========================================================*/
 
     @Override
     public boolean isReadOnly(int index) throws SQLException {

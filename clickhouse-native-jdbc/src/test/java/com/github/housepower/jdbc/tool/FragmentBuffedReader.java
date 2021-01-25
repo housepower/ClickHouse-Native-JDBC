@@ -16,7 +16,7 @@ package com.github.housepower.jdbc.tool;
 
 import java.io.IOException;
 
-import com.github.housepower.jdbc.buffer.BuffedReader;
+import com.github.housepower.buffer.BuffedReader;
 
 public class FragmentBuffedReader implements BuffedReader {
 

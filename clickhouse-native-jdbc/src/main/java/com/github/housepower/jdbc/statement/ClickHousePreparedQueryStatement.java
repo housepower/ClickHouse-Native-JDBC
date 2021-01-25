@@ -16,10 +16,13 @@ package com.github.housepower.jdbc.statement;
 
 
 import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.connect.NativeContext;
+import com.github.housepower.client.NativeContext;
+import com.github.housepower.misc.DateTimeUtil;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,8 +58,8 @@ public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement 
     }
 
     @Override
-    public void setObject(int index, Object x) throws SQLException {
-        parameters[index - 1] = convertObjectIfNecessary(x);
+    public void setObject(int idx, Object x) throws SQLException {
+        parameters[idx - 1] = convertObjectIfNecessary(x);
     }
 
     @Override
@@ -85,5 +88,16 @@ public class ClickHousePreparedQueryStatement extends AbstractPreparedStatement 
             e.printStackTrace();
         }
         return queryBuilder.toString();
+    }
+
+    private Object convertObjectIfNecessary(Object obj) {
+        Object result = obj;
+        if (obj instanceof Date) {
+            result = ((Date) obj).toLocalDate();
+        }
+        if (obj instanceof Timestamp) {
+            result = DateTimeUtil.toZonedDateTime((Timestamp) obj, tz);
+        }
+        return result;
     }
 }

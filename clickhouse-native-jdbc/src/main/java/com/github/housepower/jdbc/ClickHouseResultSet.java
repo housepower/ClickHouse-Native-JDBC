@@ -14,31 +14,25 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.data.Block;
+import com.github.housepower.data.IColumn;
+import com.github.housepower.jdbc.statement.ClickHouseStatement;
+import com.github.housepower.jdbc.wrapper.SQLResultSet;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.misc.CheckedIterator;
+import com.github.housepower.misc.DateTimeUtil;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.protocol.DataResponse;
+import com.github.housepower.settings.ClickHouseConfig;
+
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
-
-import com.github.housepower.jdbc.data.Block;
-import com.github.housepower.jdbc.data.IColumn;
-import com.github.housepower.jdbc.log.Logger;
-import com.github.housepower.jdbc.log.LoggerFactory;
-import com.github.housepower.jdbc.misc.CheckedIterator;
-import com.github.housepower.jdbc.misc.DateTimeUtil;
-import com.github.housepower.jdbc.misc.Validate;
-import com.github.housepower.jdbc.protocol.DataResponse;
-import com.github.housepower.jdbc.settings.ClickHouseConfig;
-import com.github.housepower.jdbc.statement.ClickHouseStatement;
-import com.github.housepower.jdbc.wrapper.SQLResultSet;
 
 public class ClickHouseResultSet implements SQLResultSet {
 
@@ -269,11 +263,14 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public byte[] getBytes(int index) throws SQLException {
-        String data = (String) getInternalObject(index);
+        Object data = getInternalObject(index);
         if (data == null) {
             return null;
         }
-        return data.getBytes(cfg.charset());
+        if (data instanceof String) {
+            return ((String) data).getBytes(cfg.charset());
+        }
+        throw new ClickHouseSQLException(-1, "Currently not support getBytes from class: " + data.getClass());
     }
 
     @Override
@@ -307,6 +304,10 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (obj instanceof LocalDate) {
             return Date.valueOf(((LocalDate) obj));
         }
+        // It's not necessary, because we always return a String, but keep it here for future refactor.
+        // if (obj instanceof BytesCharSeq) {
+        //    return ((BytesCharSeq) obj).bytes();
+        // }
         return obj;
     }
 

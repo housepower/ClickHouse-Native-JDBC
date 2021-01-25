@@ -16,8 +16,8 @@ package com.github.housepower.jdbc.tool;
 
 import com.github.housepower.jdbc.AbstractITest;
 import com.google.common.base.Joiner;
-import com.github.housepower.jdbc.log.Logger;
-import com.github.housepower.jdbc.log.LoggerFactory;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -154,7 +154,7 @@ public class TestHarness extends AbstractITest {
         }
         sb.append(" ) Engine=Memory");
         String sql = sb.toString();
-        LOG.debug("CREATE TABLE DDL: \n{}", sql);
+        LOG.trace("CREATE TABLE DDL: \n{}", sql);
 
         withNewConnection(connection -> {
             Statement stmt = connection.createStatement();
