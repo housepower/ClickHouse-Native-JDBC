@@ -46,7 +46,6 @@ public class BalancedClickhouseDataSourceTest {
                 BalancedClickhouseDataSource.splitUrl("jdbc:clickhouse://localhost:1234,_0another-host.com:4321"));
     }
 
-
     @Test
     public void testUrlSplitInvalidHostName() {
         assertThrows(InvalidValueException.class, () ->

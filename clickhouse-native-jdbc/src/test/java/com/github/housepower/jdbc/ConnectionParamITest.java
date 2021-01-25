@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.*;
 import java.time.Duration;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,7 +37,7 @@ public class ConnectionParamITest extends AbstractITest {
     public void successfullyMaxRowsToRead() {
         assertThrows(SQLException.class, () -> {
             Connection connection = DriverManager
-                    .getConnection("jdbc:clickhouse://127.0.0.1?max_rows_to_read=1&connect_timeout=10");
+                    .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s?max_rows_to_read=1&connect_timeout=10", CK_HOST, CK_PORT));
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
             int rowsRead = 0;
@@ -50,7 +51,7 @@ public class ConnectionParamITest extends AbstractITest {
     @Test
     public void successfullyMaxResultRows() throws Exception {
         Connection connection = DriverManager
-                .getConnection("jdbc:clickhouse://127.0.0.1?max_result_rows=1&connect_timeout=10");
+                .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s?max_result_rows=1&connect_timeout=10", CK_HOST, CK_PORT));
         Statement statement = connection.createStatement();
         statement.setMaxRows(400);
         ResultSet rs = statement.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
