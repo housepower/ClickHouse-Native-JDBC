@@ -101,15 +101,15 @@ public class DataTypeFactory {
         registerType(creators, new DataTypeFloat32());
         registerType(creators, new DataTypeFloat64());
 
-        registerType(creators, new DataTypeInt8("Int8"));
-        registerType(creators, new DataTypeInt16("Int16"));
-        registerType(creators, new DataTypeInt32("Int32"));
-        registerType(creators, new DataTypeInt64("Int64"));
+        registerType(creators, new DataTypeInt8());
+        registerType(creators, new DataTypeInt16());
+        registerType(creators, new DataTypeInt32());
+        registerType(creators, new DataTypeInt64());
 
-        registerType(creators, new DataTypeUInt8("UInt8"));
-        registerType(creators, new DataTypeUInt16("UInt16"));
-        registerType(creators, new DataTypeUInt32("UInt32"));
-        registerType(creators, new DataTypeUInt64("UInt64"));
+        registerType(creators, new DataTypeUInt8());
+        registerType(creators, new DataTypeUInt16());
+        registerType(creators, new DataTypeUInt32());
+        registerType(creators, new DataTypeUInt64());
 
         registerType(creators, new DataTypeDate());
         return creators;

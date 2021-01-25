@@ -23,15 +23,9 @@ import java.sql.SQLException;
 
 public class DataTypeUInt8 implements BaseDataTypeInt8<Short, Short> {
 
-    private final String name;
-
-    public DataTypeUInt8(String name) {
-        this.name = name;
-    }
-
     @Override
     public String name() {
-        return name;
+        return "UInt8";
     }
 
     @Override

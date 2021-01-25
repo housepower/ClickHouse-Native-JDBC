@@ -28,15 +28,9 @@ import java.sql.SQLException;
 // so we have an opportunity to change it later.
 public class DataTypeUInt64 implements BaseDataTypeInt64<BigInteger, BigInteger> {
 
-    private final String name;
-
-    public DataTypeUInt64(String name) {
-        this.name = name;
-    }
-
     @Override
     public String name() {
-        return name;
+        return "UInt64";
     }
 
     @Override

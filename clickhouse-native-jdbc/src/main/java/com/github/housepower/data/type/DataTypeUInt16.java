@@ -23,15 +23,9 @@ import java.sql.SQLException;
 
 public class DataTypeUInt16 implements BaseDataTypeInt16<Integer, Integer> {
 
-    private final String name;
-
-    public DataTypeUInt16(String name) {
-        this.name = name;
-    }
-
     @Override
     public String name() {
-        return name;
+        return "UInt16";
     }
 
     @Override

@@ -23,15 +23,9 @@ import java.sql.SQLException;
 
 public class DataTypeInt8 implements BaseDataTypeInt8<Byte, Byte> {
 
-    private final String name;
-
-    public DataTypeInt8(String name) {
-        this.name = name;
-    }
-
     @Override
     public String name() {
-        return name;
+        return "Int8";
     }
 
     @Override

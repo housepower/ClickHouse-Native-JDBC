@@ -23,15 +23,9 @@ import java.sql.SQLException;
 
 public class DataTypeInt32 implements BaseDataTypeInt32<Integer, Integer> {
 
-    private final String name;
-
-    public DataTypeInt32(String name) {
-        this.name = name;
-    }
-
     @Override
     public String name() {
-        return name;
+        return "Int32";
     }
 
     @Override

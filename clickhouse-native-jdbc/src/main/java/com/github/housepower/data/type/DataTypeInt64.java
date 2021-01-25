@@ -23,15 +23,9 @@ import java.sql.SQLException;
 
 public class DataTypeInt64 implements BaseDataTypeInt64<Long, Long> {
 
-    private final String name;
-
-    public DataTypeInt64(String name) {
-        this.name = name;
-    }
-
     @Override
     public String name() {
-        return name;
+        return "Int64";
     }
 
     @Override
