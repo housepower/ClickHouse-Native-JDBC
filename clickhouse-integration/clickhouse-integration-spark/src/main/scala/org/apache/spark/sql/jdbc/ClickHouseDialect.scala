@@ -24,7 +24,7 @@ import org.apache.spark.sql.types._
 import scala.util.matching.Regex
 
 /**
- * ClickHouseDialects
+ * ClickHouse SQL dialect
  */
 object ClickHouseDialect extends JdbcDialect with Logging {
 
@@ -42,7 +42,7 @@ object ClickHouseDialect extends JdbcDialect with Logging {
 
   /**
    * Inferred schema always nullable.
-   * see [[JDBCRDD.resolveTable(JDBCOptions)]]
+   * see [[JDBCRDD.resolveTable]]
    */
   override def getCatalystType(sqlType: Int,
                                typeName: String,
@@ -61,8 +61,10 @@ object ClickHouseDialect extends JdbcDialect with Logging {
     }
   }
 
-  // Spark use a widening conversion both ways.
-  // see https://github.com/apache/spark/pull/26301#discussion_r347725332
+  /**
+   * Spark use a widening conversion both ways, see detail at
+   * [[https://github.com/apache/spark/pull/26301#discussion_r347725332]]
+   */
   private[jdbc] def toCatalystType(typeName: String,
                                    precision: Int,
                                    scale: Int): Option[(Boolean, DataType)] = {
@@ -95,8 +97,10 @@ object ClickHouseDialect extends JdbcDialect with Logging {
     case _ => (false, maybeNullableTypeName)
   }
 
-  // NOT recommend auto create ClickHouse table by Spark JDBC, the reason is it's hard to handle nullable because
-  // ClickHouse use `T` to represent ANSI SQL `T NOT NULL` and  `Nullable(T)` to represent ANSI SQL `T NULL`,
+  /**
+   * NOT recommend auto create ClickHouse table by Spark JDBC, the reason is it's hard to handle nullable because
+   * ClickHouse use `T` to represent ANSI SQL `T NOT NULL` and `Nullable(T)` to represent ANSI SQL `T NULL`,
+   */
   override def getJDBCType(dt: DataType): Option[JdbcType] = dt match {
     case StringType => Some(JdbcType("String", Types.VARCHAR))
     // ClickHouse doesn't have the concept of encodings. Strings can contain an arbitrary set of bytes,
