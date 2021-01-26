@@ -15,20 +15,23 @@
 package com.github.housepower.buffer;
 
 import com.github.housepower.misc.ClickHouseCityHash;
-
-import net.jpountz.lz4.LZ4Compressor;
-import net.jpountz.lz4.LZ4Factory;
+import io.airlift.compress.Compressor;
+import io.airlift.compress.lz4.Lz4Compressor;
+import io.airlift.compress.zstd.ZstdCompressor;
 
 import java.io.IOException;
 
-public class CompressedBuffedWriter implements BuffedWriter {
+import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
+import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-    private static final int COMPRESSION_HEADER_LENGTH = 9;
+public class CompressedBuffedWriter implements BuffedWriter {
 
     private final int capacity;
     private final byte[] writtenBuf;
     private final BuffedWriter writer;
-    private final LZ4Compressor lz4Compressor = LZ4Factory.safeInstance().fastCompressor();
+
+    private final Compressor lz4Compressor = new Lz4Compressor();
+    private final Compressor zstdCompressor = new ZstdCompressor();
 
     private int position;
 
@@ -71,19 +74,19 @@ public class CompressedBuffedWriter implements BuffedWriter {
         if (position > 0 && (force || !hasRemaining())) {
             int maxLen = lz4Compressor.maxCompressedLength(position);
 
-            byte[] compressedBuffer = new byte[maxLen + 9 + 16];
-            int res = lz4Compressor.compress(writtenBuf, 0, position, compressedBuffer, 9 + 16);
+            byte[] compressedBuffer = new byte[maxLen + COMPRESSION_HEADER_LENGTH + CHECKSUM_LENGTH];
+            int res = lz4Compressor.compress(writtenBuf, 0, position, compressedBuffer, COMPRESSION_HEADER_LENGTH + CHECKSUM_LENGTH, compressedBuffer.length);
 
-            compressedBuffer[16] = (byte) (0x82 & 0xFF);
+            compressedBuffer[CHECKSUM_LENGTH] = (byte) (0x82 & 0xFF);
             int compressedSize = res + COMPRESSION_HEADER_LENGTH;
             System.arraycopy(littleEndian(compressedSize), 0, compressedBuffer, 17, 4);
             System.arraycopy(littleEndian(position), 0, compressedBuffer, 21, 4);
 
-            long[] checksum = ClickHouseCityHash.cityHash128(compressedBuffer, 16, compressedSize);
+            long[] checksum = ClickHouseCityHash.cityHash128(compressedBuffer, CHECKSUM_LENGTH, compressedSize);
             System.arraycopy(littleEndian(checksum[0]), 0, compressedBuffer, 0, 8);
             System.arraycopy(littleEndian(checksum[1]), 0, compressedBuffer, 8, 8);
 
-            writer.writeBinary(compressedBuffer, 0, compressedSize + 16);
+            writer.writeBinary(compressedBuffer, 0, compressedSize + CHECKSUM_LENGTH);
             position = 0;
         }
     }

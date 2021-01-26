@@ -16,8 +16,12 @@ package com.github.housepower.buffer;
 
 import java.io.IOException;
 
-import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FastDecompressor;
+import io.airlift.compress.Decompressor;
+import io.airlift.compress.lz4.Lz4Decompressor;
+import io.airlift.compress.zstd.ZstdDecompressor;
+
+import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
+import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
 public class CompressedBuffedReader implements BuffedReader {
 
@@ -26,7 +30,9 @@ public class CompressedBuffedReader implements BuffedReader {
     private byte[] decompressed;
 
     private final BuffedReader buf;
-    private final LZ4FastDecompressor lz4FastDecompressor = LZ4Factory.safeInstance().fastDecompressor();
+
+    private final Decompressor lz4Decompressor = new Lz4Decompressor();
+    private final Decompressor zstdDecompressor = new ZstdDecompressor();
 
     public CompressedBuffedReader(BuffedReader buf) {
         this.buf = buf;
@@ -66,19 +72,18 @@ public class CompressedBuffedReader implements BuffedReader {
     }
 
 
-    private static final int LZ4 = 0x82;
     private static final int NONE = 0x02;
+    private static final int LZ4 = 0x82;
     private static final int ZSTD = 0x90;
 
     private byte[] readCompressedData() throws IOException {
         //TODO: validate checksum
-        buf.readBinary(new byte[16]);
+        buf.readBinary(new byte[CHECKSUM_LENGTH]);
 
-        byte[] compressedHeader = new byte[9];
+        byte[] compressedHeader = new byte[COMPRESSION_HEADER_LENGTH];
 
-        if (buf.readBinary(compressedHeader) != 9) {
-            //TODO:more detail for exception
-            throw new IOException("");
+        if (buf.readBinary(compressedHeader) != COMPRESSION_HEADER_LENGTH) {
+            throw new IOException("Invalid compression header");
         }
 
         int method = unsignedByte(compressedHeader[0]);
@@ -87,7 +92,7 @@ public class CompressedBuffedReader implements BuffedReader {
 
         switch (method) {
             case LZ4:
-                return readLZ4CompressedData(compressedSize - 9, decompressedSize);
+                return readLZ4CompressedData(compressedSize - COMPRESSION_HEADER_LENGTH, decompressedSize);
             case NONE:
                 return readNoneCompressedData(decompressedSize);
             default:
@@ -110,7 +115,7 @@ public class CompressedBuffedReader implements BuffedReader {
         if (buf.readBinary(compressed) == compressedSize) {
             byte[] decompressed = new byte[decompressedSize];
 
-            if (lz4FastDecompressor.decompress(compressed, decompressed) == compressedSize) {
+            if (lz4Decompressor.decompress(compressed, 0, compressedSize, decompressed, 0, decompressedSize) == decompressedSize) {
                 return decompressed;
             }
         }
