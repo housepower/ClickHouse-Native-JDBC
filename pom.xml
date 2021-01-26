@@ -99,6 +99,7 @@
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
         <maven.checkstyle.plugin.version>3.1.1</maven.checkstyle.plugin.version>
 
+        <aircompressor.version>0.18</aircompressor.version>
         <lz4.java.version>1.7.1</lz4.java.version>
         <google.jsr305.version>3.0.2</google.jsr305.version>
         <jmh.version>1.27</jmh.version>
@@ -163,6 +164,11 @@
                 <groupId>com.github.housepower</groupId>
                 <artifactId>examples</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.airlift</groupId>
+                <artifactId>aircompressor</artifactId>
+                <version>${aircompressor.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.lz4</groupId>
