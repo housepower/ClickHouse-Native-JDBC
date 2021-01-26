@@ -98,7 +98,7 @@ public class DataTypeEnum16 implements IDataType<String, String> {
     }
 
     @Override
-    public String deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public String deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.stringLiteral();
     }
 

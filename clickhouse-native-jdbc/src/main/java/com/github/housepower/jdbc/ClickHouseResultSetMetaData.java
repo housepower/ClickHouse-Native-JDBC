@@ -19,6 +19,7 @@ import com.github.housepower.data.type.complex.DataTypeNullable;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.jdbc.wrapper.SQLResultSetMetaData;
+import com.github.housepower.settings.ClickHouseDefines;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -115,7 +116,7 @@ public class ClickHouseResultSetMetaData implements SQLResultSetMetaData {
 
     @Override
     public String getCatalogName(int column) throws SQLException {
-        return "default";
+        return ClickHouseDefines.DEFAULT_CATALOG;
     }
 
     @Override

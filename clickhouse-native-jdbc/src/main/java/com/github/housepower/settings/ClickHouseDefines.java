@@ -16,6 +16,7 @@ package com.github.housepower.settings;
 
 public class ClickHouseDefines {
     public static final String NAME = "ClickHouse";
+    public static final String DEFAULT_CATALOG = "default";
     public static final String DEFAULT_DATABASE = "default";
 
     public static final int MAJOR_VERSION = 1;
@@ -29,4 +30,6 @@ public class ClickHouseDefines {
     public static int SOCKET_RECV_BUFFER_BYTES = 1024 * 1024;
 
     public static int COLUMN_BUFFER_BYTES = 1024 * 1024;
+
+    public static final int DATA_TYPE_CACHE_SIZE = 1024;
 }

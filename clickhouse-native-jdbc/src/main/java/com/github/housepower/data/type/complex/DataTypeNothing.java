@@ -77,7 +77,7 @@ public class DataTypeNothing implements IDataType<Object, Object> {
     }
 
     @Override
-    public Object deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Object deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.stringView();
     }
 }

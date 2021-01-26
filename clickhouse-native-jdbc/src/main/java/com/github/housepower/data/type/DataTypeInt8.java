@@ -59,7 +59,7 @@ public class DataTypeInt8 implements BaseDataTypeInt8<Byte, Byte> {
     }
 
     @Override
-    public Byte deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Byte deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().byteValue();
     }
 

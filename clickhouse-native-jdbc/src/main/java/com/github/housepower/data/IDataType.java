@@ -22,11 +22,14 @@ import com.github.housepower.serde.BinarySerializer;
 import java.io.IOException;
 import java.sql.SQLException;
 
+// TODO remove Generic Param JDBC
 public interface IDataType<CK, JDBC> {
 
     String name();
 
-    int sqlTypeId();
+    default String[] getAliases() {
+        return new String[0];
+    }
 
     // TODO detect column default value from sample block
     default CK defaultValue() {
@@ -35,6 +38,10 @@ public interface IDataType<CK, JDBC> {
 
     Class<CK> javaType();
 
+    @Deprecated
+    int sqlTypeId();
+
+    @Deprecated
     @SuppressWarnings("unchecked")
     default Class<JDBC> jdbcJavaType() {
         return (Class<JDBC>) javaType();
@@ -44,13 +51,17 @@ public interface IDataType<CK, JDBC> {
         return false;
     }
 
+    default boolean isSigned() {
+        return false;
+    }
+
     int getPrecision();
 
     int getScale();
 
-    CK deserializeTextQuoted(SQLLexer lexer) throws SQLException;
-
-    CK deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;
+    default String serializeText(CK value) {
+        return value.toString();
+    }
 
     void serializeBinary(CK data, BinarySerializer serializer) throws SQLException, IOException;
 
@@ -60,6 +71,10 @@ public interface IDataType<CK, JDBC> {
         }
     }
 
+    CK deserializeText(SQLLexer lexer) throws SQLException;
+
+    CK deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;
+
     // fuck type erasure
     default Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         Object[] data = new Object[rows];
@@ -67,13 +82,5 @@ public interface IDataType<CK, JDBC> {
             data[row] = this.deserializeBinary(deserializer);
         }
         return data;
-    }
-
-    default String[] getAliases() {
-        return new String[0];
-    }
-
-    default boolean isSigned() {
-        return false;
     }
 }

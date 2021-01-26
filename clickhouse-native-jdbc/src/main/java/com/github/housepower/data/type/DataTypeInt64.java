@@ -59,7 +59,7 @@ public class DataTypeInt64 implements BaseDataTypeInt64<Long, Long> {
     }
 
     @Override
-    public Long deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Long deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().longValue();
     }
 

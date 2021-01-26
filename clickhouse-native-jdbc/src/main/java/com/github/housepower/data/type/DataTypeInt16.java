@@ -60,7 +60,7 @@ public class DataTypeInt16 implements BaseDataTypeInt16<Short, Short> {
     }
 
     @Override
-    public Short deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public Short deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.numberLiteral().shortValue();
     }
 

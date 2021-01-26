@@ -110,7 +110,7 @@ public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public ZonedDateTime deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public ZonedDateTime deserializeText(SQLLexer lexer) throws SQLException {
         StringView dataTypeName = lexer.bareWord();
         Validate.isTrue(dataTypeName.checkEquals("toDateTime64"));
         Validate.isTrue(lexer.character() == '(');

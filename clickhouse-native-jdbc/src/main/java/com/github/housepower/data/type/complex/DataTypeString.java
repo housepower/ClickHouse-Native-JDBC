@@ -91,7 +91,7 @@ public class DataTypeString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public CharSequence deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public CharSequence deserializeText(SQLLexer lexer) throws SQLException {
         return lexer.stringView();
     }
 

@@ -36,10 +36,10 @@ import com.github.housepower.data.type.complex.DataTypeTuple;
 import com.github.housepower.misc.LRUCache;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-
+import com.github.housepower.settings.ClickHouseDefines;
 
 public class DataTypeFactory {
-    private static final LRUCache<String, IDataType<?, ?>> DATA_TYPE_CACHE = new LRUCache<>(1024);
+    private static final LRUCache<String, IDataType<?, ?>> DATA_TYPE_CACHE = new LRUCache<>(ClickHouseDefines.DATA_TYPE_CACHE_SIZE);
 
     public static IDataType<?, ?> get(String type, NativeContext.ServerContext serverContext) throws SQLException {
         IDataType<?, ?> dataType = DATA_TYPE_CACHE.get(type);

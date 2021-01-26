@@ -98,7 +98,7 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal> {
     }
 
     @Override
-    public BigDecimal deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public BigDecimal deserializeText(SQLLexer lexer) throws SQLException {
         BigDecimal result;
         if (lexer.isCharacter('\'')) {
             String v = lexer.stringLiteral();

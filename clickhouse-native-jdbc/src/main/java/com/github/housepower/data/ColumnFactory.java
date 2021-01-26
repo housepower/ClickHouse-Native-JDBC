@@ -18,18 +18,18 @@ import com.github.housepower.data.type.complex.DataTypeArray;
 import com.github.housepower.data.type.complex.DataTypeNullable;
 import com.github.housepower.data.type.complex.DataTypeTuple;
 
-import java.sql.Types;
-
 public class ColumnFactory {
 
     public static IColumn createColumn(String name, IDataType<?, ?> type, Object[] values) {
-        if (type.sqlTypeId() == Types.ARRAY) {
+        if (type instanceof DataTypeArray)
             return new ColumnArray(name, (DataTypeArray) type, values);
-        } else if (type.nullable()) {
+
+        if (type instanceof DataTypeNullable)
             return new ColumnNullable(name, (DataTypeNullable) type, values);
-        } else if (type.sqlTypeId() == Types.STRUCT) {
+
+        if (type instanceof DataTypeTuple)
             return new ColumnTuple(name, (DataTypeTuple) type, values);
-        }
+
         return new Column(name, type, values);
     }
 }

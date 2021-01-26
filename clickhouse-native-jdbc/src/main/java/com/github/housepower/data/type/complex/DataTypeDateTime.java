@@ -87,7 +87,7 @@ public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public ZonedDateTime deserializeTextQuoted(SQLLexer lexer) throws SQLException {
+    public ZonedDateTime deserializeText(SQLLexer lexer) throws SQLException {
         Validate.isTrue(lexer.character() == '\'');
         int year = lexer.numberLiteral().intValue();
         Validate.isTrue(lexer.character() == '-');
