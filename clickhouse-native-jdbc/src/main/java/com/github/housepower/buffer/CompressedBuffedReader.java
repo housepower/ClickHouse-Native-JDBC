@@ -16,6 +16,7 @@ package com.github.housepower.buffer;
 
 import java.io.IOException;
 
+import com.github.housepower.misc.BytesHelper;
 import io.airlift.compress.Decompressor;
 import io.airlift.compress.lz4.Lz4Decompressor;
 import io.airlift.compress.zstd.ZstdDecompressor;
@@ -23,7 +24,7 @@ import io.airlift.compress.zstd.ZstdDecompressor;
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-public class CompressedBuffedReader implements BuffedReader {
+public class CompressedBuffedReader implements BuffedReader, BytesHelper {
 
     private int position;
     private int capacity;
@@ -58,8 +59,8 @@ public class CompressedBuffedReader implements BuffedReader {
                 this.capacity = decompressed.length;
             }
 
-            int pending = bytes.length - i;
-            int fillLength = Math.min(pending, capacity - position);
+            int padding = bytes.length - i;
+            int fillLength = Math.min(padding, capacity - position);
 
             if (fillLength > 0) {
                 System.arraycopy(decompressed, position, bytes, i, fillLength);
@@ -71,10 +72,11 @@ public class CompressedBuffedReader implements BuffedReader {
         return bytes.length;
     }
 
-
+    // @formatter:off
     private static final int NONE = 0x02;
-    private static final int LZ4 = 0x82;
+    private static final int LZ4  = 0x82;
     private static final int ZSTD = 0x90;
+    // @formatter:on
 
     private byte[] readCompressedData() throws IOException {
         //TODO: validate checksum
@@ -86,9 +88,9 @@ public class CompressedBuffedReader implements BuffedReader {
             throw new IOException("Invalid compression header");
         }
 
-        int method = unsignedByte(compressedHeader[0]);
-        int compressedSize = readInt(compressedHeader, 1);
-        int decompressedSize = readInt(compressedHeader, 5);
+        int method = compressedHeader[0] & 0x0FF;
+        int compressedSize = getIntLE(compressedHeader, 1);
+        int decompressedSize = getIntLE(compressedHeader, 5);
 
         switch (method) {
             case LZ4:
@@ -96,7 +98,7 @@ public class CompressedBuffedReader implements BuffedReader {
             case NONE:
                 return readNoneCompressedData(decompressedSize);
             default:
-                throw new UnsupportedOperationException("Unknown compression method: " + method);
+                throw new UnsupportedOperationException("Unknown compression magic code: " + method);
         }
     }
 
@@ -121,19 +123,5 @@ public class CompressedBuffedReader implements BuffedReader {
         }
 
         throw new IOException("Cannot decompress use LZ4 method.");
-    }
-
-    private int unsignedByte(byte byt) {
-        return 0x0FF & byt;
-    }
-
-    @SuppressWarnings({"PointlessBitwiseExpression", "PointlessArithmeticExpression"})
-    private int readInt(byte[] bytes, int begin) {
-        // @formatter:off
-        return (bytes[begin + 0] & 0xFF) << 0
-             | (bytes[begin + 1] & 0XFF) << 8
-             | (bytes[begin + 2] & 0xFF) << 16
-             | (bytes[begin + 3] & 0xFF) << 24;
-        // @formatter:on
     }
 }
