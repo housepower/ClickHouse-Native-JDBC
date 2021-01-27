@@ -14,66 +14,64 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.client.SessionState;
-import com.github.housepower.client.NativeClient;
+import com.github.housepower.client.NativeConnection;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
 import com.github.housepower.data.DataTypeFactory;
-import com.github.housepower.misc.Validate;
-import com.github.housepower.protocol.HelloResponse;
-import com.github.housepower.protocol.QueryRequest;
-import com.github.housepower.stream.QueryResult;
-import com.github.housepower.settings.ClickHouseConfig;
-import com.github.housepower.settings.ClickHouseDefines;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
 import com.github.housepower.jdbc.statement.ClickHousePreparedQueryStatement;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.settings.SettingKey;
+import com.github.housepower.stream.QueryResult;
 
 import javax.annotation.Nullable;
-import java.net.InetSocketAddress;
 import java.sql.*;
 import java.time.Duration;
-import java.time.ZoneId;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClickHouseConnection implements SQLConnection {
 
+    public static ClickHouseConnection create(ClickHouseConfig cfg) throws SQLException {
+        return ExceptionUtil.rethrowSQLException(() -> {
+            NativeConnection nativeConn = NativeConnection.create(cfg);
+            return new ClickHouseConnection(nativeConn);
+        });
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(ClickHouseConnection.class);
+
     private static final Pattern VALUES_REGEX = Pattern.compile("[Vv][Aa][Ll][Uu][Ee][Ss]\\s*\\(");
 
     private final AtomicBoolean isClosed;
-    private final AtomicReference<ClickHouseConfig> cfg;
-    // TODO move to NativeClient
-    private final AtomicReference<SessionState> state = new AtomicReference<>(SessionState.IDLE);
-    private volatile NativeContext nativeCtx;
+    private final NativeConnection nativeConn;
 
-    protected ClickHouseConnection(ClickHouseConfig cfg, NativeContext nativeCtx) {
+    protected ClickHouseConnection(NativeConnection nativeConn) {
         this.isClosed = new AtomicBoolean(false);
-        this.cfg = new AtomicReference<>(cfg);
-        this.nativeCtx = nativeCtx;
+        this.nativeConn = nativeConn;
     }
 
     public ClickHouseConfig cfg() {
-        return cfg.get();
+        return nativeConn.cfg();
     }
 
     public NativeContext.ServerContext serverContext() {
-        return nativeCtx.serverCtx();
+        return nativeConn.ctx().serverCtx();
     }
 
-    public QueryRequest.ClientContext clientContext() {
-        return nativeCtx.clientCtx();
+    public NativeContext.ClientContext clientContext() {
+        return nativeConn.ctx().clientCtx();
     }
 
     @Override
@@ -137,8 +135,7 @@ public class ClickHouseConnection implements SQLConnection {
     @Override
     public void close() throws SQLException {
         if (!isClosed() && isClosed.compareAndSet(false, true)) {
-            NativeClient nativeClient = nativeCtx.nativeClient();
-            nativeClient.disconnect();
+            ExceptionUtil.rethrowSQLException(nativeConn::close);
         }
     }
 
@@ -150,15 +147,15 @@ public class ClickHouseConnection implements SQLConnection {
     @Override
     public Statement createStatement() throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create Statement, because the connection is closed.");
-        return new ClickHouseStatement(this, nativeCtx);
+        return new ClickHouseStatement(this, nativeConn.ctx());
     }
 
     @Override
     public PreparedStatement prepareStatement(String query) throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create PreparedStatement, because the connection is closed.");
         Matcher matcher = VALUES_REGEX.matcher(query);
-        return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this, nativeCtx) :
-                new ClickHousePreparedQueryStatement(this, nativeCtx, query);
+        return matcher.find() ? new ClickHousePreparedInsertStatement(matcher.end() - 1, query, this, nativeConn.ctx()) :
+                new ClickHousePreparedQueryStatement(this, nativeConn.ctx(), query);
     }
 
     @Override
@@ -169,7 +166,7 @@ public class ClickHouseConnection implements SQLConnection {
     @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
         try {
-            cfg.set(ClickHouseConfig.Builder.builder(cfg.get()).withProperties(properties).build());
+            nativeConn.updateCfg(cfg().withProperties(properties));
         } catch (Exception ex) {
             Map<String, ClientInfoStatus> failed = new HashMap<>();
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -189,7 +186,7 @@ public class ClickHouseConnection implements SQLConnection {
     @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
         Validate.isTrue(!isClosed(), "Unable to create Array, because the connection is closed.");
-        return new ClickHouseArray(DataTypeFactory.get(typeName, nativeCtx.serverCtx()), elements);
+        return new ClickHouseArray(DataTypeFactory.get(typeName, nativeConn.ctx().serverCtx()), elements);
     }
 
     @Override
@@ -200,13 +197,13 @@ public class ClickHouseConnection implements SQLConnection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        return getNativeClient().ping(Duration.ofSeconds(timeout), nativeCtx.serverCtx());
+        return ExceptionUtil.rethrowSQLException(() -> nativeConn.syncPing(Duration.ofSeconds(timeout)));
     }
 
     // ClickHouse support only `database`, we treat it as JDBC `schema`
     @Override
     public void setSchema(String schema) throws SQLException {
-        this.cfg.set(this.cfg().withDatabase(schema));
+        nativeConn.updateCfg(cfg().withDatabase(schema));
     }
 
     @Override
@@ -254,84 +251,19 @@ public class ClickHouseConnection implements SQLConnection {
     }
 
     public boolean ping(Duration timeout) throws SQLException {
-        return nativeCtx.nativeClient().ping(timeout, nativeCtx.serverCtx());
+        return ExceptionUtil.rethrowSQLException(() -> nativeConn.syncPing(timeout));
     }
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
-        NativeClient nativeClient = getHealthyNativeClient();
-        nativeClient.sendQuery(insertQuery, nativeCtx.clientCtx(), cfg.get().settings());
-        Validate.isTrue(this.state.compareAndSet(SessionState.IDLE, SessionState.WAITING_INSERT),
-                "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
-        return nativeClient.receiveSampleBlock(cfg.get().queryTimeout(), nativeCtx.serverCtx());
+        return ExceptionUtil.rethrowSQLException(() -> nativeConn.syncSampleBlock(insertQuery));
     }
 
-    public QueryResult sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
-        Validate.isTrue(this.state.get() == SessionState.IDLE,
-                "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
-        NativeClient nativeClient = getHealthyNativeClient();
-        nativeClient.sendQuery(query, nativeCtx.clientCtx(), cfg.settings());
-        return nativeClient.receiveQuery(cfg.queryTimeout(), nativeCtx.serverCtx());
+    public QueryResult sendQueryRequest(final String query, Map<SettingKey, Object> settings) throws SQLException {
+        return ExceptionUtil.rethrowSQLException(() -> nativeConn.syncQuery(query, settings));
     }
-    // when sendInsertRequest we must ensure the connection is healthy
-    // the #getSampleBlock() must be called before this method
 
     public int sendInsertRequest(Block block) throws SQLException {
-        Validate.isTrue(this.state.get() == SessionState.WAITING_INSERT, "Call getSampleBlock before insert.");
-
-        NativeClient nativeClient = getNativeClient();
-        nativeClient.sendData(block);
-        nativeClient.sendData(new Block());
-        nativeClient.receiveEndOfStream(cfg.get().queryTimeout(), nativeCtx.serverCtx());
-        Validate.isTrue(this.state.compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE));
+        ExceptionUtil.rethrowSQLException(() -> nativeConn.syncStore(block));
         return block.rowCnt();
-    }
-
-    synchronized private NativeClient getHealthyNativeClient() throws SQLException {
-        NativeContext oldCtx = nativeCtx;
-        if (!oldCtx.nativeClient().ping(cfg.get().queryTimeout(), nativeCtx.serverCtx())) {
-            LOG.warn("connection loss with state[{}], create new connection and reset state", state);
-            nativeCtx = createNativeContext(cfg.get());
-            state.set(SessionState.IDLE);
-            oldCtx.nativeClient().silentDisconnect();
-        }
-
-        return nativeCtx.nativeClient();
-    }
-
-    private NativeClient getNativeClient() {
-        return nativeCtx.nativeClient();
-    }
-
-    public static ClickHouseConnection createClickHouseConnection(ClickHouseConfig configure) throws SQLException {
-        return new ClickHouseConnection(configure, createNativeContext(configure));
-    }
-
-    private static NativeContext createNativeContext(ClickHouseConfig configure) throws SQLException {
-        NativeClient nativeClient = NativeClient.connect(configure);
-        return new NativeContext(clientContext(nativeClient, configure), serverContext(nativeClient, configure), nativeClient);
-    }
-
-    private static QueryRequest.ClientContext clientContext(NativeClient nativeClient, ClickHouseConfig configure) throws SQLException {
-        Validate.isTrue(nativeClient.address() instanceof InetSocketAddress);
-        InetSocketAddress address = (InetSocketAddress) nativeClient.address();
-        String clientName = String.format(Locale.ROOT, "%s %s", ClickHouseDefines.NAME, "client");
-        String initialAddress = "[::ffff:127.0.0.1]:0";
-        return new QueryRequest.ClientContext(initialAddress, address.getHostName(), clientName);
-    }
-
-    private static NativeContext.ServerContext serverContext(NativeClient nativeClient, ClickHouseConfig configure) throws SQLException {
-        try {
-            long revision = ClickHouseDefines.CLIENT_REVISION;
-            nativeClient.sendHello("client", revision, configure.database(), configure.user(), configure.password());
-
-            HelloResponse response = nativeClient.receiveHello(configure.queryTimeout(), null);
-            ZoneId timeZone = ZoneId.of(response.serverTimeZone());
-            return new NativeContext.ServerContext(
-                    response.majorVersion(), response.minorVersion(), response.reversion(),
-                    configure, timeZone, response.serverDisplayName());
-        } catch (SQLException rethrows) {
-            nativeClient.silentDisconnect();
-            throw rethrows;
-        }
     }
 }

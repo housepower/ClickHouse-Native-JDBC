@@ -16,39 +16,41 @@ package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.exception.NotImplementedException;
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.ByteBufHelper;
+import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
-import java.sql.SQLException;
+import javax.annotation.Nullable;
 
-public interface Response {
+public interface Response extends ByteBufHelper {
+
+    ByteBufHelper helper = ByteBufHelper.DEFAULT;
 
     ProtoType type();
 
-    static Response readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
-        switch ((int) deserializer.readVarInt()) {
+    static Response readFrom(ByteBuf buf, @Nullable NativeContext.ServerContext info) {
+        switch ((int) helper.readVarInt(buf)) {
             case 0:
-                return HelloResponse.readFrom(deserializer);
+                return HelloResponse.readFrom(buf);
             case 1:
-                return DataResponse.readFrom(deserializer, info);
+                return DataResponse.readFrom(buf, info);
             case 2:
-                throw ExceptionResponse.readExceptionFrom(deserializer);
+                return ExceptionResponse.readFrom(buf);
             case 3:
-                return ProgressResponse.readFrom(deserializer);
+                return ProgressResponse.readFrom(buf);
             case 4:
-                return PongResponse.readFrom(deserializer);
+                return PongResponse.readFrom(buf);
             case 5:
-                return EOFStreamResponse.readFrom(deserializer);
+                return EOSResponse.readFrom(buf);
             case 6:
-                return ProfileInfoResponse.readFrom(deserializer);
+                return ProfileInfoResponse.readFrom(buf);
             case 7:
-                return TotalsResponse.readFrom(deserializer, info);
+                return TotalsResponse.readFrom(buf, info);
             case 8:
-                return ExtremesResponse.readFrom(deserializer, info);
+                return ExtremesResponse.readFrom(buf, info);
             case 9:
                 throw new NotImplementedException("RESPONSE_TABLES_STATUS_RESPONSE");
             default:
-                throw new IllegalStateException("Accept the id of response that is not recognized by Server.");
+                throw new IllegalStateException("Accept the id of response that is not recognized by Client.");
         }
     }
 

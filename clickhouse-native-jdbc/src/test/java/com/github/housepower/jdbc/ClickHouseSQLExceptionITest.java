@@ -13,6 +13,7 @@
  */
 package com.github.housepower.jdbc;
 
+import com.github.housepower.exception.ClickHouseSQLException;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
@@ -34,7 +35,7 @@ public class ClickHouseSQLExceptionITest extends AbstractITest {
             } catch (SQLException e) {
                 assertTrue(e instanceof ClickHouseSQLException);
                 assertNotEquals(0, e.getErrorCode());
-                assertEquals(e.getErrorCode(), ((ClickHouseSQLException) e).getCode());
+                assertEquals(e.getErrorCode(), e.getErrorCode());
             }
         });
     }

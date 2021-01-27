@@ -14,7 +14,6 @@
 
 package com.github.housepower.settings;
 
-import com.github.housepower.serde.SettingType;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;

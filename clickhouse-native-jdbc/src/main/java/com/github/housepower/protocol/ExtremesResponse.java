@@ -16,16 +16,12 @@ package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
-import com.github.housepower.serde.BinaryDeserializer;
-
-import java.io.IOException;
-import java.sql.SQLException;
+import io.netty.buffer.ByteBuf;
 
 public class ExtremesResponse implements Response {
 
-    public static ExtremesResponse readFrom(
-            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
-        return new ExtremesResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
+    public static ExtremesResponse readFrom(ByteBuf buf, NativeContext.ServerContext info) {
+        return new ExtremesResponse(helper.readUTF8Binary(buf), Block.readFrom(buf, info));
     }
 
     private final String name;

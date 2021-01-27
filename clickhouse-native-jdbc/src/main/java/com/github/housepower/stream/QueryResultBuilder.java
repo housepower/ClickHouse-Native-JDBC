@@ -16,12 +16,15 @@ package com.github.housepower.stream;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.*;
-import com.github.housepower.misc.CheckedIterator;
+import com.github.housepower.exception.CheckedIterator;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.DataResponse;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Support building QueryResult in client side, it's useful for ad-hoc building a ResultSet for JDBC interface,

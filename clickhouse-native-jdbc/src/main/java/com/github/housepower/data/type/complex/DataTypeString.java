@@ -16,17 +16,17 @@ package com.github.housepower.data.type.complex;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.BytesCharSeq;
+import com.github.housepower.io.ByteBufHelper;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
+import io.netty.util.AsciiString;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class DataTypeString implements IDataType<CharSequence, String> {
+public class DataTypeString implements IDataType<CharSequence, String>, ByteBufHelper {
 
     public static DataTypeCreator<CharSequence, String> CREATOR = (lexer, serverContext) -> new DataTypeString(serverContext);
 
@@ -72,22 +72,17 @@ public class DataTypeString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof BytesCharSeq) {
-            serializer.writeBytesBinary(((BytesCharSeq) data).bytes());
+    public void encode(ByteBuf buf, CharSequence data) {
+        if (data instanceof AsciiString) {
+            buf.writeCharSequence(data, StandardCharsets.ISO_8859_1);
         } else {
-            serializer.writeStringBinary(data.toString(), charset);
+            writeCharSeqBinary(buf, data, charset);
         }
     }
 
-    /**
-     * deserializeBinary will always returns String
-     * for getBytes(idx) method, we encode the String again
-     */
     @Override
-    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        byte[] bs = deserializer.readBytesBinary();
-        return new String(bs, charset);
+    public CharSequence decode(ByteBuf buf) {
+        return readCharSeqBinary(buf, charset);
     }
 
     @Override

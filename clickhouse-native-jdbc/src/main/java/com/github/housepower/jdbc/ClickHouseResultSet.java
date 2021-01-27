@@ -16,15 +16,18 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.data.Block;
 import com.github.housepower.data.IColumn;
+import com.github.housepower.exception.ClickHouseSQLException;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLResultSet;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.misc.CheckedIterator;
+import com.github.housepower.exception.CheckedIterator;
 import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.DataResponse;
 import com.github.housepower.settings.ClickHouseConfig;
+import io.netty.util.AsciiString;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -270,6 +273,9 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (data == null) {
             return null;
         }
+        if (data instanceof AsciiString) {
+            return ((AsciiString) data).toByteArray();
+        }
         if (data instanceof String) {
             return ((String) data).getBytes(cfg.charset());
         }
@@ -307,10 +313,9 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (obj instanceof LocalDate) {
             return Date.valueOf(((LocalDate) obj));
         }
-        // It's not necessary, because we always return a String, but keep it here for future refactor.
-        // if (obj instanceof BytesCharSeq) {
-        //    return ((BytesCharSeq) obj).bytes();
-        // }
+        if (obj instanceof AsciiString) {
+            return ((AsciiString) obj).toByteArray();
+        }
         return obj;
     }
 
@@ -402,16 +407,18 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        boolean isBeforeFirst = isBeforeFirst();
-        LOG.trace("check status[before]: is_before_first: {}, is_first: {}, is_after_last: {}", isBeforeFirst, isFirst, isAfterLast);
+        return ExceptionUtil.rethrowSQLException(() -> {
+            boolean isBeforeFirst = isBeforeFirst();
+            LOG.trace("check status[before]: is_before_first: {}, is_first: {}, is_after_last: {}", isBeforeFirst, isFirst, isAfterLast);
 
-        boolean hasNext = ++currentRowNum < currentBlock.rowCnt() || (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
+            boolean hasNext = ++currentRowNum < currentBlock.rowCnt() || (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
 
-        isFirst = isBeforeFirst && hasNext;
-        isAfterLast = !hasNext;
-        LOG.trace("check status[after]: has_next: {}, is_before_first: {}, is_first: {}, is_after_last: {}", hasNext, isBeforeFirst(), isFirst, isAfterLast);
+            isFirst = isBeforeFirst && hasNext;
+            isAfterLast = !hasNext;
+            LOG.trace("check status[after]: has_next: {}, is_before_first: {}, is_first: {}, is_after_last: {}", hasNext, isBeforeFirst(), isFirst, isAfterLast);
 
-        return hasNext;
+            return hasNext;
+        });
     }
 
     @Override

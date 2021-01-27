@@ -16,32 +16,35 @@ package com.github.housepower.data;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
+import com.github.housepower.io.ByteBufHelper;
+import com.github.housepower.netty.NettyUtil;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.protocol.Encodable;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Block {
+public class Block implements ByteBufHelper, Encodable {
 
-    public static Block readFrom(BinaryDeserializer deserializer,
-                                 NativeContext.ServerContext serverContext) throws IOException, SQLException {
-        BlockSettings info = BlockSettings.readFrom(deserializer);
+    private static final ByteBufHelper helper = ByteBufHelper.DEFAULT;
 
-        int columnCnt = (int) deserializer.readVarInt();
-        int rowCnt = (int) deserializer.readVarInt();
+    public static Block readFrom(ByteBuf buf, NativeContext.ServerContext serverContext) {
+        BlockSettings info = BlockSettings.readFrom(buf);
+
+        int columnCnt = (int) helper.readVarInt(buf);
+        int rowCnt = (int) helper.readVarInt(buf);
 
         IColumn[] columns = new IColumn[columnCnt];
 
         for (int i = 0; i < columnCnt; i++) {
-            String name = deserializer.readUTF8StringBinary();
-            String type = deserializer.readUTF8StringBinary();
+            String name = helper.readUTF8Binary(buf);
+            String type = helper.readUTF8Binary(buf);
 
             IDataType dataType = DataTypeFactory.get(type, serverContext);
-            Object[] arr = dataType.deserializeBinaryBulk(rowCnt, deserializer);
+            Object[] arr = dataType.decodeBulk(buf, rowCnt);
             columns[i] = ColumnFactory.createColumn(name, dataType, arr);
         }
 
@@ -112,14 +115,15 @@ public class Block {
         }
     }
 
-    public void writeTo(BinarySerializer serializer) throws IOException, SQLException {
-        settings.writeTo(serializer);
+    @Override
+    public void encode(ByteBuf buf) {
+        settings.encode(buf);
 
-        serializer.writeVarInt(columns.length);
-        serializer.writeVarInt(rowCnt);
+        writeVarInt(buf, columns.length);
+        writeVarInt(buf, rowCnt);
 
         for (IColumn column : columns) {
-            column.flushToSerializer(serializer, true);
+            column.flush(buf, true);
         }
     }
 
@@ -146,7 +150,7 @@ public class Block {
 
     public void initWriteBuffer() {
         for (IColumn column : columns) {
-            column.setColumnWriterBuffer(new ColumnWriterBuffer());
+            column.setBuf(NettyUtil.alloc().buffer());
         }
     }
 }

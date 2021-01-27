@@ -15,13 +15,11 @@
 package com.github.housepower.data.type.complex;
 
 import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.BytesHelper;
+import com.github.housepower.io.CodecHelper;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -29,7 +27,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Locale;
 
-public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, BytesHelper {
+public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, CodecHelper {
 
     public static DataTypeCreator<BigDecimal, BigDecimal> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
@@ -112,29 +110,29 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Bytes
     }
 
     @Override
-    public void serializeBinary(BigDecimal data, BinarySerializer serializer) throws IOException {
+    public void encode(ByteBuf buf, BigDecimal data) {
         BigDecimal targetValue = data.multiply(scaleFactor);
         switch (this.nobits) {
             case 32: {
-                serializer.writeInt(targetValue.intValue());
+                buf.writeIntLE(targetValue.intValue());
                 break;
             }
             case 64: {
-                serializer.writeLong(targetValue.longValue());
+                buf.writeLongLE(targetValue.longValue());
                 break;
             }
             case 128: {
                 BigInteger res = targetValue.toBigInteger();
-                serializer.writeLong(res.longValue());
-                serializer.writeLong(res.shiftRight(64).longValue());
+                buf.writeLongLE(res.longValue());
+                buf.writeLongLE(res.shiftRight(64).longValue());
                 break;
             }
             case 256: {
                 BigInteger res = targetValue.toBigInteger();
-                serializer.writeLong(targetValue.longValue());
-                serializer.writeLong(res.shiftRight(64).longValue());
-                serializer.writeLong(res.shiftRight(64 * 2).longValue());
-                serializer.writeLong(res.shiftRight(64 * 3).longValue());
+                buf.writeLongLE(targetValue.longValue());
+                buf.writeLongLE(res.shiftRight(64).longValue());
+                buf.writeLongLE(res.shiftRight(64 * 2).longValue());
+                buf.writeLongLE(res.shiftRight(64 * 3).longValue());
                 break;
             }
             default: {
@@ -145,26 +143,26 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Bytes
     }
 
     @Override
-    public BigDecimal deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public BigDecimal decode(ByteBuf buf) {
         BigDecimal value;
         switch (this.nobits) {
             case 32: {
-                int v = deserializer.readInt();
+                int v = buf.readIntLE();
                 value = BigDecimal.valueOf(v);
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
             case 64: {
-                long v = deserializer.readLong();
+                long v = buf.readLongLE();
                 value = BigDecimal.valueOf(v);
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
 
             case 128: {
-                long []array = new long[2];
-                array[1] = deserializer.readLong();
-                array[0] = deserializer.readLong();
+                long[] array = new long[2];
+                array[1] = buf.readLongLE();
+                array[0] = buf.readLongLE();
 
                 value = new BigDecimal(new BigInteger(getBytes(array)));
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
@@ -172,11 +170,11 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Bytes
             }
 
             case 256: {
-                long []array = new long[4];
-                array[3] = deserializer.readLong();
-                array[2] = deserializer.readLong();
-                array[1] = deserializer.readLong();
-                array[0] = deserializer.readLong();
+                long[] array = new long[4];
+                array[3] = buf.readLongLE();
+                array[2] = buf.readLongLE();
+                array[1] = buf.readLongLE();
+                array[0] = buf.readLongLE();
 
                 value = new BigDecimal(new BigInteger(getBytes(array)));
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);

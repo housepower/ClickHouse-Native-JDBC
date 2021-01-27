@@ -126,15 +126,4 @@ public class StringView implements CharSequence {
         }
         return true;
     }
-
-    public boolean checkEqualsIgnoreCase(String expectString) {
-        if (expectString == null || expectString.length() != end - start)
-            return false;
-
-        for (int i = 0; i < expectString.length(); i++) {
-            if (expectString.charAt(i) != str.charAt(start + i))
-                return false;
-        }
-        return true;
-    }
 }

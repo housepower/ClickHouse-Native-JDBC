@@ -14,9 +14,7 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinarySerializer;
-
-import java.io.IOException;
+import io.netty.buffer.ByteBuf;
 
 public class PingRequest implements Request {
 
@@ -28,7 +26,6 @@ public class PingRequest implements Request {
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
-        // Nothing
+    public void encode0(ByteBuf buf) {
     }
 }

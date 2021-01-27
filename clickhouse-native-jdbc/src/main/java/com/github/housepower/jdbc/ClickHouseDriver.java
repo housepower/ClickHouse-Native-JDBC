@@ -54,7 +54,7 @@ public class ClickHouseDriver implements Driver {
         if (!this.acceptsURL(url)) {
             return null;
         }
-        return ClickHouseConnection.createClickHouseConnection(cfg.withJdbcUrl(url));
+        return ClickHouseConnection.create(cfg.withJdbcUrl(url));
     }
 
     @Override

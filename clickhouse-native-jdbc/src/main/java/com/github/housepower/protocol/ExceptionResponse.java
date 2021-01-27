@@ -14,30 +14,41 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.jdbc.ClickHouseSQLException;
-import com.github.housepower.serde.BinaryDeserializer;
-
-import java.io.IOException;
-import java.sql.SQLException;
+import com.github.housepower.exception.ClickHouseException;
+import io.netty.buffer.ByteBuf;
 
 public class ExceptionResponse implements Response {
 
-    public static SQLException readExceptionFrom(BinaryDeserializer deserializer) throws IOException {
-        int code = deserializer.readInt();
-        String name = deserializer.readUTF8StringBinary();
-        String message = deserializer.readUTF8StringBinary();
-        String stackTrace = deserializer.readUTF8StringBinary();
+    public static ExceptionResponse readFrom(ByteBuf buf) {
+        ClickHouseException ex = readExceptionFrom(buf);
+        return new ExceptionResponse(ex);
+    }
 
-        if (deserializer.readBoolean()) {
-            return new ClickHouseSQLException(
-                    code, name + message + ". Stack trace:\n\n" + stackTrace, readExceptionFrom(deserializer));
-        }
+    private static ClickHouseException readExceptionFrom(ByteBuf buf) {
+        int errCode = buf.readIntLE();
+        String name = helper.readUTF8Binary(buf);
+        String message = helper.readUTF8Binary(buf);
+        String stackTrace = helper.readUTF8Binary(buf);
+        boolean hasInner = buf.readBoolean();
+        ClickHouseException innerEx = hasInner ? readExceptionFrom(buf) : null;
+        String errMsg = "ERROR[" + errCode + "] " + message + "\n" +
+                "=== stack trace ===" + "\n" +
+                stackTrace;
+        return new ClickHouseException(errCode, errMsg, innerEx);
+    }
 
-        return new ClickHouseSQLException(code, name + message + ". Stack trace:\n\n" + stackTrace);
+    private final ClickHouseException exception;
+
+    public ExceptionResponse(ClickHouseException exception) {
+        this.exception = exception;
     }
 
     @Override
     public ProtoType type() {
         return ProtoType.RESPONSE_EXCEPTION;
+    }
+
+    public ClickHouseException exception() {
+        return exception;
     }
 }

@@ -12,21 +12,20 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc;
+package com.github.housepower.protocol;
 
-import java.sql.SQLException;
+import io.netty.buffer.ByteBuf;
 
-public class ClickHouseSQLException extends SQLException {
+public class EOSResponse implements Response {
 
-    public ClickHouseSQLException(int code, String message) {
-        this(code, message, null);
+    public static final EOSResponse INSTANCE = new EOSResponse();
+
+    public static Response readFrom(ByteBuf buf) {
+        return INSTANCE;
     }
 
-    public ClickHouseSQLException(int code, String message, Throwable cause) {
-        super(message, null, code, cause);
-    }
-
-    public int getCode() {
-        return getErrorCode();
+    @Override
+    public ProtoType type() {
+        return ProtoType.RESPONSE_END_OF_STREAM;
     }
 }

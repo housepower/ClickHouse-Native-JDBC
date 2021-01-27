@@ -16,21 +16,17 @@ package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
-import com.github.housepower.serde.BinaryDeserializer;
-
-import java.io.IOException;
-import java.sql.SQLException;
+import io.netty.buffer.ByteBuf;
 
 public class DataResponse implements Response {
 
-    public static DataResponse readFrom(
-            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
+    public static DataResponse readFrom(ByteBuf buf, NativeContext.ServerContext info)  {
 
-        String name = deserializer.readUTF8StringBinary();
+        String name = helper.readUTF8Binary(buf);
 
-        deserializer.maybeEnableCompressed();
-        Block block = Block.readFrom(deserializer, info);
-        deserializer.maybeDisableCompressed();
+        // TODO deserializer.maybeEnableCompressed();
+        Block block = Block.readFrom(buf, info);
+        // TODO deserializer.maybeDisableCompressed();
 
         return new DataResponse(name, block);
     }

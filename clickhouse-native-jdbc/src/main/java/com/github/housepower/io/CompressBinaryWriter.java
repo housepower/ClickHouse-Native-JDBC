@@ -12,49 +12,43 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.io;
 
-import com.github.housepower.misc.BytesHelper;
 import com.github.housepower.misc.ClickHouseCityHash;
 import io.airlift.compress.Compressor;
-import io.airlift.compress.lz4.Lz4Compressor;
-import io.airlift.compress.zstd.ZstdCompressor;
-
-import java.io.IOException;
 
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-public class CompressedBuffedWriter implements BuffedWriter, BytesHelper {
+public class CompressBinaryWriter implements BinaryWriter, CodecHelper {
 
     private final int capacity;
     private final byte[] writtenBuf;
-    private final BuffedWriter writer;
-
-    private final Compressor lz4Compressor = new Lz4Compressor();
-    private final Compressor zstdCompressor = new ZstdCompressor();
+    private final BinaryWriter writer;
+    private final Compressor compressor;
 
     private int position;
 
-    public CompressedBuffedWriter(int capacity, BuffedWriter writer) {
+    public CompressBinaryWriter(int capacity, BinaryWriter writer, Compressor compressor) {
         this.capacity = capacity;
         this.writtenBuf = new byte[capacity];
         this.writer = writer;
+        this.compressor = compressor;
     }
 
     @Override
-    public void writeBinary(byte byt) throws IOException {
+    public void writeByte(byte byt) {
         writtenBuf[position++] = byt;
         flushToTarget(false);
     }
 
     @Override
-    public void writeBinary(byte[] bytes) throws IOException {
-        writeBinary(bytes, 0, bytes.length);
+    public void writeBytes(byte[] bytes) {
+        writeBytes(bytes, 0, bytes.length);
     }
 
     @Override
-    public void writeBinary(byte[] bytes, int offset, int length) throws IOException {
+    public void writeBytes(byte[] bytes, int offset, int length) {
         while (remaining() < length) {
             int num = remaining();
             System.arraycopy(bytes, offset, writtenBuf, position, remaining());
@@ -71,15 +65,15 @@ public class CompressedBuffedWriter implements BuffedWriter, BytesHelper {
     }
 
     @Override
-    public void flushToTarget(boolean force) throws IOException {
+    public void flushToTarget(boolean force) {
         if (position > 0 && (force || !hasRemaining())) {
-            int maxLen = lz4Compressor.maxCompressedLength(position);
+            int maxLen = compressor.maxCompressedLength(position);
 
             byte[] compressedBuffer = new byte[maxLen + COMPRESSION_HEADER_LENGTH + CHECKSUM_LENGTH];
-            int res = lz4Compressor.compress(writtenBuf, 0, position, compressedBuffer, COMPRESSION_HEADER_LENGTH + CHECKSUM_LENGTH, compressedBuffer.length);
+            int compressedDataLen = compressor.compress(writtenBuf, 0, position, compressedBuffer, COMPRESSION_HEADER_LENGTH + CHECKSUM_LENGTH, compressedBuffer.length);
 
-            compressedBuffer[CHECKSUM_LENGTH] = (byte) (0x82 & 0xFF);
-            int compressedSize = res + COMPRESSION_HEADER_LENGTH;
+            compressedBuffer[CHECKSUM_LENGTH] = (byte) (0x82 & 0xFF); // TODO not sure if it works for zstd
+            int compressedSize = compressedDataLen + COMPRESSION_HEADER_LENGTH;
             System.arraycopy(getBytesLE(compressedSize), 0, compressedBuffer, CHECKSUM_LENGTH + 1, Integer.BYTES);
             System.arraycopy(getBytesLE(position), 0, compressedBuffer, CHECKSUM_LENGTH + Integer.BYTES + 1, Integer.BYTES);
 
@@ -87,7 +81,7 @@ public class CompressedBuffedWriter implements BuffedWriter, BytesHelper {
             System.arraycopy(getBytesLE(checksum[0]), 0, compressedBuffer, 0, Long.BYTES);
             System.arraycopy(getBytesLE(checksum[1]), 0, compressedBuffer, Long.BYTES, Long.BYTES);
 
-            writer.writeBinary(compressedBuffer, 0, compressedSize + CHECKSUM_LENGTH);
+            writer.writeBytes(compressedBuffer, 0, compressedSize + CHECKSUM_LENGTH);
             position = 0;
         }
     }

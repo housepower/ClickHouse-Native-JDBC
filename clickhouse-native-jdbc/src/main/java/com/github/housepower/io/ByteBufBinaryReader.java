@@ -12,16 +12,27 @@
  * limitations under the License.
  */
 
-package com.github.housepower.misc;
+package com.github.housepower.io;
 
-/**
- * Copyright (C) 2018 SpectX
- * Created by Lauri Nõmme
- * 12.12.2018 16:11
- */
-public interface CheckedIterator<T, E extends Throwable> {
+import io.netty.buffer.ByteBuf;
 
-    boolean hasNext() throws E;
+public class ByteBufBinaryReader implements BinaryReader {
 
-    T next() throws E;
+    private final ByteBuf buf;
+
+    public ByteBufBinaryReader(ByteBuf buf) {
+        this.buf = buf;
+    }
+
+    @Override
+    public int readByte() {
+        return buf.readUnsignedByte();
+    }
+
+    @Override
+    public int readBytes(byte[] bytes) {
+        int len = Math.min(buf.readableBytes(), bytes.length);
+        buf.readBytes(bytes, 0, len);
+        return len;
+    }
 }

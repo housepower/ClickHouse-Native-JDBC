@@ -14,8 +14,11 @@
 
 package com.github.housepower.client;
 
-import com.github.housepower.protocol.QueryRequest.ClientContext;
+import com.github.housepower.io.ByteBufHelper;
+import com.github.housepower.protocol.Encodable;
 import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.settings.ClickHouseDefines;
+import io.netty.buffer.ByteBuf;
 
 import java.time.ZoneId;
 
@@ -23,12 +26,12 @@ public class NativeContext {
 
     private final ClientContext clientCtx;
     private final ServerContext serverCtx;
-    private final NativeClient nativeClient;
+    private final NativeConnection nativeConn;
 
-    public NativeContext(ClientContext clientCtx, ServerContext serverCtx, NativeClient nativeClient) {
+    public NativeContext(ClientContext clientCtx, ServerContext serverCtx, NativeConnection nativeConn) {
         this.clientCtx = clientCtx;
         this.serverCtx = serverCtx;
-        this.nativeClient = nativeClient;
+        this.nativeConn = nativeConn;
     }
 
     public ClientContext clientCtx() {
@@ -39,8 +42,43 @@ public class NativeContext {
         return serverCtx;
     }
 
-    public NativeClient nativeClient() {
-        return nativeClient;
+    public NativeConnection nativeConn() {
+        return nativeConn;
+    }
+
+    public static class ClientContext implements ByteBufHelper, Encodable {
+        public static final int TCP_KINE = 1;
+
+        public static final byte NO_QUERY = 0;
+        public static final byte INITIAL_QUERY = 1;
+        public static final byte SECONDARY_QUERY = 2;
+
+        private final String clientName;
+        private final String clientHostname;
+        private final String initialAddress;
+
+        public ClientContext(String initialAddress, String clientHostname, String clientName) {
+            this.clientName = clientName;
+            this.clientHostname = clientHostname;
+            this.initialAddress = initialAddress;
+        }
+
+        @Override
+        public void encode(ByteBuf buf) {
+            writeVarInt(buf, ClientContext.INITIAL_QUERY);
+            writeUTF8Binary(buf, "");
+            writeUTF8Binary(buf, "");
+            writeUTF8Binary(buf, initialAddress);
+            // for TCP kind
+            writeVarInt(buf, TCP_KINE);
+            writeUTF8Binary(buf, "");
+            writeUTF8Binary(buf, clientHostname);
+            writeUTF8Binary(buf, clientName);
+            writeVarInt(buf, ClickHouseDefines.MAJOR_VERSION);
+            writeVarInt(buf, ClickHouseDefines.MINOR_VERSION);
+            writeVarInt(buf, ClickHouseDefines.CLIENT_REVISION);
+            writeUTF8Binary(buf, "");
+        }
     }
 
     public static class ServerContext {

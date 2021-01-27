@@ -18,10 +18,8 @@ import com.github.housepower.data.DataTypeFactory;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 public class DataTypeNullable implements IDataType {
@@ -104,35 +102,35 @@ public class DataTypeNullable implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        this.nestedDataType.serializeBinary(data, serializer);
+    public void encode(ByteBuf buf, Object data) {
+        this.nestedDataType.encode(buf, data);
     }
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
+    public void encodeBulk(ByteBuf buf, Object[] data) {
         Short[] isNull = new Short[data.length];
         for (int i = 0; i < data.length; i++) {
             isNull[i] = (data[i] == null ? IS_NULL : NON_NULL);
             data[i] = data[i] == null ? nestedDataType.defaultValue() : data[i];
         }
-        nullMapDataType.serializeBinaryBulk(isNull, serializer);
-        nestedDataType.serializeBinaryBulk(data, serializer);
+        nullMapDataType.encodeBulk(buf, isNull);
+        nestedDataType.encodeBulk(buf, data);
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        boolean isNull = (deserializer.readByte() == (byte) 1);
+    public Object decode(ByteBuf buf) {
+        boolean isNull = (buf.readByte() == (byte) 1);
         if (isNull) {
             return null;
         }
-        return this.nestedDataType.deserializeBinary(deserializer);
+        return this.nestedDataType.decode(buf);
     }
 
     @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
-        Object[] nullMap = nullMapDataType.deserializeBinaryBulk(rows, deserializer);
+    public Object[] decodeBulk(ByteBuf buf, int rows) {
+        Object[] nullMap = nullMapDataType.decodeBulk(buf, rows);
 
-        Object[] data = nestedDataType.deserializeBinaryBulk(rows, deserializer);
+        Object[] data = nestedDataType.decodeBulk(buf, rows);
         for (int i = 0; i < nullMap.length; i++) {
             if (IS_NULL.equals(nullMap[i])) {
                 data[i] = null;

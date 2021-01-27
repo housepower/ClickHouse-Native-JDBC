@@ -12,13 +12,11 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.protocol;
 
-import java.io.IOException;
+import io.netty.buffer.ByteBuf;
 
-public interface BuffedReader {
+public interface Encodable {
 
-    int readBinary() throws IOException;
-
-    int readBinary(byte[] bytes) throws IOException;
+    void encode(ByteBuf buf);
 }

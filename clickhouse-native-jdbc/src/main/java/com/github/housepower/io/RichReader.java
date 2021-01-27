@@ -12,15 +12,34 @@
  * limitations under the License.
  */
 
-package com.github.housepower.misc;
+package com.github.housepower.io;
 
-/**
- * Copyright (C) 2018 SpectX
- * Created by Lauri Nõmme
- * 12.12.2018 16:04
- */
-@FunctionalInterface
-public interface CheckedSupplier<R, E extends Throwable> {
+// TODO refactor to match ByteBuf
+public interface RichReader {
 
-    R get() throws E;
+    long readVarInt();
+
+    short readShort();
+
+    int readInt();
+
+    long readLong();
+
+    boolean readBoolean();
+
+    byte[] readBytesBinary();
+
+    String readUTF8StringBinary();
+
+    byte readByte();
+
+    void maybeEnableCompressed();
+
+    void maybeDisableCompressed();
+
+    float readFloat();
+
+    double readDouble();
+
+    byte[] readBytes(int size);
 }

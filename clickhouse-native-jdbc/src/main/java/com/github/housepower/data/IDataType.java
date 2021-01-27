@@ -16,10 +16,8 @@ package com.github.housepower.data;
 
 import com.github.housepower.exception.NoDefaultValueException;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 // TODO remove Generic Param JDBC
@@ -63,23 +61,22 @@ public interface IDataType<CK, JDBC> {
         return value.toString();
     }
 
-    void serializeBinary(CK data, BinarySerializer serializer) throws SQLException, IOException;
+    void encode(ByteBuf buf, CK data);
 
-    default void serializeBinaryBulk(CK[] data, BinarySerializer serializer) throws SQLException, IOException {
-        for (CK d : data) {
-            serializeBinary(d, serializer);
+    default void encodeBulk(ByteBuf buf, CK[] data) {
+        for (CK value : data) {
+            encode(buf, value);
         }
     }
 
     CK deserializeText(SQLLexer lexer) throws SQLException;
 
-    CK deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;
+    CK decode(ByteBuf buf);
 
-    // fuck type erasure
-    default Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
+    default Object[] decodeBulk(ByteBuf buf, int rows) {
         Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = this.deserializeBinary(deserializer);
+            data[row] = this.decode(buf);
         }
         return data;
     }

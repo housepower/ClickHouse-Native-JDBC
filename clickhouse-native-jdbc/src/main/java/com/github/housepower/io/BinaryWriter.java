@@ -12,20 +12,16 @@
  * limitations under the License.
  */
 
-package com.github.housepower.protocol;
+package com.github.housepower.io;
 
-import com.github.housepower.serde.BinaryDeserializer;
+// TODO refactor to match ByteBuf
+public interface BinaryWriter {
 
-public class EOFStreamResponse implements Response {
+    void writeByte(byte byt);
 
-    public static final EOFStreamResponse INSTANCE = new EOFStreamResponse();
+    void writeBytes(byte[] bytes);
 
-    public static Response readFrom(BinaryDeserializer deserializer) {
-        return INSTANCE;
-    }
+    void writeBytes(byte[] bytes, int offset, int length);
 
-    @Override
-    public ProtoType type() {
-        return ProtoType.RESPONSE_END_OF_STREAM;
-    }
+    void flushToTarget(boolean force);
 }

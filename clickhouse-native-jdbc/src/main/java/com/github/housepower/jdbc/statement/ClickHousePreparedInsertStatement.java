@@ -14,22 +14,22 @@
 
 package com.github.housepower.jdbc.statement;
 
-import com.github.housepower.data.IColumn;
-import com.github.housepower.jdbc.ClickHouseArray;
-import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.ClickHouseSQLException;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
+import com.github.housepower.data.IColumn;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.data.type.*;
 import com.github.housepower.data.type.complex.*;
+import com.github.housepower.exception.ClickHouseSQLException;
+import com.github.housepower.jdbc.ClickHouseArray;
+import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseStruct;
-import com.github.housepower.misc.BytesCharSeq;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.stream.ValuesWithParametersInputFormat;
-import com.github.housepower.log.Logger;
-import com.github.housepower.log.LoggerFactory;
+import io.netty.util.AsciiString;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -43,7 +43,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static com.github.housepower.misc.ExceptionUtil.unchecked;
+import static com.github.housepower.exception.ExceptionUtil.unchecked;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
 
@@ -177,7 +177,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         if (this.blockInit) {
             return;
         }
-        this.block = getSampleBlock(insertQuery);
+        this.block = connection.getSampleBlock(insertQuery);
         this.block.initWriteBuffer();
         this.blockInit = true;
         new ValuesWithParametersInputFormat(posOfData, fullQuery).fillBlock(block);
@@ -199,7 +199,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             if (obj instanceof CharSequence)
                 return obj;
             if (obj instanceof byte[])
-                return new BytesCharSeq((byte[]) obj);
+                return new AsciiString((byte[]) obj, false);
             String objStr = obj.toString();
             LOG.debug("set value[{}]: {} on String Column", obj.getClass(), obj);
             return objStr;
@@ -287,7 +287,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             }
             return ((ClickHouseStruct) obj).mapAttributes(((DataTypeTuple) type).getNestedTypes(), unchecked(this::convertToCkDataType));
         }
-        LOG.debug("unhandled type: {}[{}]", type.name(), obj.getClass());
+        LOG.debug("unhandled type: {}|{}|{}", type.name(), obj.getClass().getSimpleName(), obj);
         return obj;
     }
 }

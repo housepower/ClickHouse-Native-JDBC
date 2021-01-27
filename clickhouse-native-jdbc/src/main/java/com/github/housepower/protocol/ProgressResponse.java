@@ -14,14 +14,12 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinaryDeserializer;
-
-import java.io.IOException;
+import io.netty.buffer.ByteBuf;
 
 public class ProgressResponse implements Response {
 
-    public static ProgressResponse readFrom(BinaryDeserializer deserializer) throws IOException {
-        return new ProgressResponse(deserializer.readVarInt(), deserializer.readVarInt(), deserializer.readVarInt());
+    public static ProgressResponse readFrom(ByteBuf buf) {
+        return new ProgressResponse(helper.readVarInt(buf), helper.readVarInt(buf), helper.readVarInt(buf));
     }
 
     private final long newRows;

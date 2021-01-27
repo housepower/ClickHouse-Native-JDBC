@@ -14,7 +14,7 @@
 
 package com.github.housepower.exception;
 
-public class NoDefaultValueException extends ClickHouseException {
+public class NoDefaultValueException extends ClickHouseClientException {
 
     public NoDefaultValueException(String message) {
         super(message);

@@ -12,9 +12,17 @@
  * limitations under the License.
  */
 
-package com.github.housepower.client;
+package com.github.housepower.netty;
 
-public enum SessionState {
+import org.junit.jupiter.api.Test;
 
-    IDLE, WAITING_INSERT
+import static org.junit.jupiter.api.Assertions.*;
+
+class NettyClientBootstrapTest {
+
+    @Test
+    void connect() {
+
+        assertTrue(true);
+    }
 }

@@ -12,17 +12,15 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.exception;
 
-import java.io.IOException;
+/**
+ * Copyright (C) 2018 SpectX
+ * Created by Lauri Nõmme
+ * 12.12.2018 16:04
+ */
+@FunctionalInterface
+public interface CheckedSupplier<R, E extends Throwable> {
 
-public interface BuffedWriter {
-
-    void writeBinary(byte byt) throws IOException;
-
-    void writeBinary(byte[] bytes) throws IOException;
-
-    void writeBinary(byte[] bytes, int offset, int length) throws IOException;
-
-    void flushToTarget(boolean force) throws IOException;
+    R get() throws E;
 }

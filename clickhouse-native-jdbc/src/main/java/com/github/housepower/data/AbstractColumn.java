@@ -14,14 +14,17 @@
 
 package com.github.housepower.data;
 
-public abstract class AbstractColumn implements IColumn {
+import com.github.housepower.io.ByteBufHelper;
+import io.netty.buffer.ByteBuf;
+
+public abstract class AbstractColumn implements IColumn, ByteBufHelper {
 
     protected final String name;
     protected final IDataType<?, ?> type;
 
     // Note: values is only for reading
     protected Object[] values;
-    protected ColumnWriterBuffer buffer;
+    protected ByteBuf buf;
 
     public AbstractColumn(String name, IDataType<?, ?> type, Object[] values) {
         this.name = name;
@@ -55,12 +58,7 @@ public abstract class AbstractColumn implements IColumn {
     }
 
     @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        this.buffer = buffer;
-    }
-
-    @Override
-    public ColumnWriterBuffer getColumnWriterBuffer() {
-        return buffer;
+    public void setBuf(ByteBuf buf) {
+        this.buf = buf;
     }
 }

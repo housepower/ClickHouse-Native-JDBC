@@ -15,7 +15,7 @@
 package com.github.housepower.data;
 
 import com.github.housepower.data.type.complex.DataTypeNullable;
-import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -47,23 +47,23 @@ public class ColumnNullable extends AbstractColumn {
     }
 
     @Override
-    public void flushToSerializer(BinarySerializer serializer, boolean immediate) throws IOException {
+    public void flush(ByteBuf out, boolean flush) {
         if (isExported()) {
-            serializer.writeUTF8StringBinary(name);
-            serializer.writeUTF8StringBinary(type.name());
+            writeUTF8Binary(out, name);
+            writeUTF8Binary(out, type.name());
         }
 
         for (byte sign : nullableSign) {
-            serializer.writeByte(sign);
+            out.writeByte(sign);
         }
 
-        if (immediate)
-            buffer.writeTo(serializer);
+        if (flush)
+            out.writeBytes(buf);
     }
 
     @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        super.setColumnWriterBuffer(buffer);
-        data.setColumnWriterBuffer(buffer);
+    public void setBuf(ByteBuf buf) {
+        super.setBuf(buf);
+        data.setBuf(buf);
     }
 }

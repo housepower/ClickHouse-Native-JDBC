@@ -15,10 +15,8 @@
 package com.github.housepower.data.type;
 
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 public class DataTypeInt32 implements BaseDataTypeInt32<Integer, Integer> {
@@ -44,13 +42,13 @@ public class DataTypeInt32 implements BaseDataTypeInt32<Integer, Integer> {
     }
 
     @Override
-    public void serializeBinary(Integer data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt(data);
+    public void encode(ByteBuf buf, Integer data) {
+        buf.writeIntLE(data);
     }
 
     @Override
-    public Integer deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readInt();
+    public Integer decode(ByteBuf buf) {
+        return buf.readIntLE();
     }
 
     @Override

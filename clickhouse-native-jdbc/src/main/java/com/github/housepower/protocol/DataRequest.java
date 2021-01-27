@@ -15,21 +15,14 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.data.Block;
-import com.github.housepower.serde.BinarySerializer;
-
-import java.io.IOException;
-import java.sql.SQLException;
+import io.netty.buffer.ByteBuf;
 
 public class DataRequest implements Request {
 
-    public static final DataRequest EMPTY = new DataRequest("");
+    public static final DataRequest EMPTY = new DataRequest("", new Block());
 
     private final String name;
     private final Block block;
-
-    public DataRequest(String name) {
-        this(name, new Block());
-    }
 
     public DataRequest(String name, Block block) {
         this.name = name;
@@ -42,11 +35,11 @@ public class DataRequest implements Request {
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
-        serializer.writeUTF8StringBinary(name);
-
-        serializer.maybeEnableCompressed();
-        block.writeTo(serializer);
-        serializer.maybeDisableCompressed();
+    public void encode0(ByteBuf buf) {
+        writeUTF8Binary(buf, name);
+        // TODO compress
+        // serializer.maybeEnableCompressed();
+        block.encode(buf);
+        // serializer.maybeDisableCompressed();
     }
 }

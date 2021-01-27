@@ -12,9 +12,15 @@
  * limitations under the License.
  */
 
-package com.github.housepower.misc;
+package com.github.housepower.io;
 
-public interface BytesHelper {
+public interface CodecHelper {
+
+    // @formatter:off
+    int NONE = 0x02;
+    int LZ4  = 0x82;
+    int ZSTD = 0x90;
+    // @formatter:on
 
     default byte[] getBytes(int i) {
         byte[] memory = new byte[Integer.BYTES];

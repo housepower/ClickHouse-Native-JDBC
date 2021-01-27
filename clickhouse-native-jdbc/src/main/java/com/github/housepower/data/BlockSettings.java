@@ -14,48 +14,51 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.ByteBufHelper;
+import com.github.housepower.protocol.Encodable;
+import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
+public class BlockSettings implements ByteBufHelper, Encodable {
 
-public class BlockSettings {
+    private static final ByteBufHelper helper = ByteBufHelper.DEFAULT;
+
     private final Setting[] settings;
 
     public BlockSettings(Setting[] settings) {
         this.settings = settings;
     }
 
-    public void writeTo(BinarySerializer serializer) throws IOException {
+    @Override
+    public void encode(ByteBuf buf) {
         for (Setting setting : settings) {
-            serializer.writeVarInt(setting.num);
+            writeVarInt(buf, setting.num);
 
             if (Boolean.class.isAssignableFrom(setting.clazz)) {
-                serializer.writeBoolean((Boolean) setting.defaultValue);
+                buf.writeBoolean((Boolean) setting.defaultValue);
             } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                serializer.writeInt((Integer) setting.defaultValue);
+                buf.writeIntLE((Integer) setting.defaultValue);
             }
         }
-        serializer.writeVarInt(0);
+        writeVarInt(buf, 0);
     }
 
-    public static BlockSettings readFrom(BinaryDeserializer deserializer) throws IOException {
-        return new BlockSettings(readSettingsFrom(1, deserializer));
+    public static BlockSettings readFrom(ByteBuf buf) {
+        return new BlockSettings(readSettingsFrom(1, buf));
     }
 
-    private static Setting[] readSettingsFrom(int currentSize, BinaryDeserializer deserializer) throws IOException {
-        long num = deserializer.readVarInt();
+    private static Setting[] readSettingsFrom(int currentSize, ByteBuf buf) {
+        long num = helper.readVarInt(buf);
 
         for (Setting setting : Setting.defaultValues()) {
             if (setting.num == num) {
                 if (Boolean.class.isAssignableFrom(setting.clazz)) {
-                    Setting receiveSetting = new Setting(setting.num, deserializer.readBoolean());
-                    Setting[] settings = readSettingsFrom(currentSize + 1, deserializer);
+                    Setting receiveSetting = new Setting(setting.num, buf.readBoolean());
+                    Setting[] settings = readSettingsFrom(currentSize + 1, buf);
                     settings[currentSize - 1] = receiveSetting;
                     return settings;
                 } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                    Setting receiveSetting = new Setting(setting.num, deserializer.readInt());
-                    Setting[] settings = readSettingsFrom(currentSize + 1, deserializer);
+                    Setting receiveSetting = new Setting(setting.num, buf.readIntLE());
+                    Setting[] settings = readSettingsFrom(currentSize + 1, buf);
                     settings[currentSize - 1] = receiveSetting;
                     return settings;
                 }
@@ -69,7 +72,7 @@ public class BlockSettings {
         public static final Setting BUCKET_NUM = new Setting(2, -1);
 
         public static Setting[] defaultValues() {
-            return new Setting[] {IS_OVERFLOWS, BUCKET_NUM};
+            return new Setting[]{IS_OVERFLOWS, BUCKET_NUM};
         }
 
         private final int num;
