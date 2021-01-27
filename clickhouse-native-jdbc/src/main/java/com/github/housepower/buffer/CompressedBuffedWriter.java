@@ -79,7 +79,7 @@ public class CompressedBuffedWriter implements BuffedWriter {
 
             compressedBuffer[CHECKSUM_LENGTH] = (byte) (0x82 & 0xFF);
             int compressedSize = res + COMPRESSION_HEADER_LENGTH;
-            System.arraycopy(littleEndian(compressedSize), 0, compressedBuffer, 17, 4);
+            System.arraycopy(littleEndian(compressedSize), 0, compressedBuffer, CHECKSUM_LENGTH + 1, 4);
             System.arraycopy(littleEndian(position), 0, compressedBuffer, 21, 4);
 
             long[] checksum = ClickHouseCityHash.cityHash128(compressedBuffer, CHECKSUM_LENGTH, compressedSize);
