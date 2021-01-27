@@ -57,7 +57,7 @@ public class DataTypeIPv4 implements IDataType<Long, Long> {
 
     @Override
     public void serializeBinary(Long data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt(((Number) data).intValue());
+        serializer.writeInt(data.intValue());
     }
 
     @Override

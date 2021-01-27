@@ -45,7 +45,7 @@ public class DataTypeInt32 implements BaseDataTypeInt32<Integer, Integer> {
 
     @Override
     public void serializeBinary(Integer data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt(((Number) data).intValue());
+        serializer.writeInt(data);
     }
 
     @Override
