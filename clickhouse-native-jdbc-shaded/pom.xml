@@ -67,6 +67,10 @@
                                     <pattern>io.airlift</pattern>
                                     <shadedPattern>com.github.housepower.repackaged.io.airlift</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>io.netty</pattern>
+                                    <shadedPattern>com.github.housepower.repackaged.io.netty</shadedPattern>
+                                </relocation>
                             </relocations>
                             <filters>
                                 <filter>
