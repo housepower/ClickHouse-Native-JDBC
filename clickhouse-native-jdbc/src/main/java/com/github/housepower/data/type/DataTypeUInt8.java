@@ -45,7 +45,7 @@ public class DataTypeUInt8 implements BaseDataTypeInt8<Short, Short> {
 
     @Override
     public void serializeBinary(Short data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeByte(((Number) data).byteValue());
+        serializer.writeByte(data.byteValue());
     }
 
     @Override

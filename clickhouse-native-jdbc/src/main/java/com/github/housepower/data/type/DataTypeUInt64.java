@@ -50,7 +50,7 @@ public class DataTypeUInt64 implements BaseDataTypeInt64<BigInteger, BigInteger>
 
     @Override
     public void serializeBinary(BigInteger data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeLong(((Number) data).longValue());
+        serializer.writeLong(data.longValue());
     }
 
     @Override
