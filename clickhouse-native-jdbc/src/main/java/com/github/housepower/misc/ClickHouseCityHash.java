@@ -30,28 +30,32 @@ public class ClickHouseCityHash {
     private static final long k1 = 0xb492b66fbe98f273L;
     private static final long k2 = 0x9ae16a3b2f90404fL;
     private static final long k3 = 0xc949d7c7509e6557L;
+    private static final long kMul = 0x9ddfea08eb382d69L;
 
-    private static long toLongLE(byte[] b, int i) {
-        return (((long) b[i + 7] << 56) +
-                ((long) (b[i + 6] & 255) << 48) +
-                ((long) (b[i + 5] & 255) << 40) +
-                ((long) (b[i + 4] & 255) << 32) +
-                ((long) (b[i + 3] & 255) << 24) +
-                ((b[i + 2] & 255) << 16) +
-                ((b[i + 1] & 255) << 8) +
-                ((b[i + 0] & 255) << 0));
+    private static long toLongLE(byte[] bytes, int offset) {
+        return (((long) (bytes[offset + 7] & 255) << 56) +
+                ((long) (bytes[offset + 6] & 255) << 48) +
+                ((long) (bytes[offset + 5] & 255) << 40) +
+                ((long) (bytes[offset + 4] & 255) << 32) +
+                ((long) (bytes[offset + 3] & 255) << 24) +
+                ((long) (bytes[offset + 2] & 255) << 16) +
+                ((long) (bytes[offset + 1] & 255) << 8) +
+                ((long) (bytes[offset + 0] & 255) << 0));
     }
 
-    private static long toIntLE(byte[] b, int i) {
-        return (((b[i + 3] & 255L) << 24) + ((b[i + 2] & 255L) << 16) + ((b[i + 1] & 255L) << 8) + ((b[i + 0] & 255L) << 0));
-    }
-
-    private static long fetch64(byte[] s, int pos) {
-        return toLongLE(s, pos);
+    private static long toIntLE(byte[] bytes, int offset) {
+        return (((bytes[offset + 0] & 255L) << 0) +
+                ((bytes[offset + 1] & 255L) << 8) +
+                ((bytes[offset + 2] & 255L) << 16) +
+                ((bytes[offset + 3] & 255L) << 24));
     }
 
     private static long fetch32(byte[] s, int pos) {
         return toIntLE(s, pos);
+    }
+
+    private static long fetch64(byte[] s, int pos) {
+        return toLongLE(s, pos);
     }
 
     private static long rotate(long val, int shift) {
@@ -65,8 +69,6 @@ public class ClickHouseCityHash {
     private static long shiftMix(long val) {
         return val ^ (val >>> 47);
     }
-
-    private static final long kMul = 0x9ddfea08eb382d69L;
 
     private static long hash128to64(long u, long v) {
         long a = (u ^ v) * kMul;
@@ -83,16 +85,16 @@ public class ClickHouseCityHash {
 
     private static long hashLen0to16(byte[] s, int pos, int len) {
         if (len > 8) {
-            long a = fetch64(s, pos + 0);
+            long a = fetch64(s, pos);
             long b = fetch64(s, pos + len - 8);
             return hashLen16(a, rotateByAtLeast1(b + len, len)) ^ b;
         }
         if (len >= 4) {
-            long a = fetch32(s, pos + 0);
+            long a = fetch32(s, pos);
             return hashLen16((a << 3) + len, fetch32(s, pos + len - 4));
         }
         if (len > 0) {
-            byte a = s[pos + 0];
+            byte a = s[pos];
             byte b = s[pos + (len >>> 1)];
             byte c = s[pos + len - 1];
             int y = (int) a + (((int) b) << 8);
@@ -244,17 +246,15 @@ public class ClickHouseCityHash {
                     s, pos + 16,
                     len - 16,
                     fetch64(s, pos) ^ k3,
-                    fetch64(s, pos + 8)
-            );
-        } else if (len >= 8) {
+                    fetch64(s, pos + 8));
+        }
+        if (len >= 8) {
             return cityHash128WithSeed(
                     new byte[0], 0, 0,
                     fetch64(s, pos) ^ (len * k0),
-                    fetch64(s, pos + len - 8) ^ k1
-            );
-        } else {
-            return cityHash128WithSeed(s, pos, len, k0, k1);
+                    fetch64(s, pos + len - 8) ^ k1);
         }
+        return cityHash128WithSeed(s, pos, len, k0, k1);
     }
 
 }

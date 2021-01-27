@@ -15,7 +15,7 @@
 package com.github.housepower.data.type.complex;
 
 import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.BytesUtil;
+import com.github.housepower.misc.BytesHelper;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
@@ -29,7 +29,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Locale;
 
-public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal> {
+public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, BytesHelper {
 
     public static DataTypeCreator<BigDecimal, BigDecimal> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
@@ -47,7 +47,7 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal> {
     private final BigDecimal scaleFactor;
     private final int nobits;
 
-    //@see: https://clickhouse.tech/docs/en/sql-reference/data-types/decimal/
+    // see https://clickhouse.tech/docs/en/sql-reference/data-types/decimal/
     public DataTypeDecimal(String name, int precision, int scale) {
         this.name = name;
         this.precision = precision;
@@ -125,7 +125,6 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal> {
             }
             case 128: {
                 BigInteger res = targetValue.toBigInteger();
-
                 serializer.writeLong(res.longValue());
                 serializer.writeLong(res.shiftRight(64).longValue());
                 break;
@@ -167,8 +166,7 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal> {
                 array[1] = deserializer.readLong();
                 array[0] = deserializer.readLong();
 
-                BigInteger v1 = new BigInteger(BytesUtil.longsToBytes(array));
-                value = new BigDecimal(v1);
+                value = new BigDecimal(new BigInteger(getBytes(array)));
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
@@ -180,8 +178,7 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal> {
                 array[1] = deserializer.readLong();
                 array[0] = deserializer.readLong();
 
-                BigInteger v1 = new BigInteger(BytesUtil.longsToBytes(array));
-                value = new BigDecimal(v1);
+                value = new BigDecimal(new BigInteger(getBytes(array)));
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }

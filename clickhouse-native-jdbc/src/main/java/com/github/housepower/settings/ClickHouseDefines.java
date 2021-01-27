@@ -32,4 +32,7 @@ public class ClickHouseDefines {
     public static int COLUMN_BUFFER_BYTES = 1024 * 1024;
 
     public static final int DATA_TYPE_CACHE_SIZE = 1024;
+
+    public static final int COMPRESSION_HEADER_LENGTH = 9;
+    public static final int CHECKSUM_LENGTH = 16;
 }

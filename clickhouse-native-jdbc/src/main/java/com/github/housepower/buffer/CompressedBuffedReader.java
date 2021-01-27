@@ -16,17 +16,24 @@ package com.github.housepower.buffer;
 
 import java.io.IOException;
 
-import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FastDecompressor;
+import com.github.housepower.misc.BytesHelper;
+import io.airlift.compress.Decompressor;
+import io.airlift.compress.lz4.Lz4Decompressor;
+import io.airlift.compress.zstd.ZstdDecompressor;
 
-public class CompressedBuffedReader implements BuffedReader {
+import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
+import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
+
+public class CompressedBuffedReader implements BuffedReader, BytesHelper {
 
     private int position;
     private int capacity;
     private byte[] decompressed;
 
     private final BuffedReader buf;
-    private final LZ4FastDecompressor lz4FastDecompressor = LZ4Factory.safeInstance().fastDecompressor();
+
+    private final Decompressor lz4Decompressor = new Lz4Decompressor();
+    private final Decompressor zstdDecompressor = new ZstdDecompressor();
 
     public CompressedBuffedReader(BuffedReader buf) {
         this.buf = buf;
@@ -52,8 +59,8 @@ public class CompressedBuffedReader implements BuffedReader {
                 this.capacity = decompressed.length;
             }
 
-            int pending = bytes.length - i;
-            int fillLength = Math.min(pending, capacity - position);
+            int padding = bytes.length - i;
+            int fillLength = Math.min(padding, capacity - position);
 
             if (fillLength > 0) {
                 System.arraycopy(decompressed, position, bytes, i, fillLength);
@@ -65,33 +72,33 @@ public class CompressedBuffedReader implements BuffedReader {
         return bytes.length;
     }
 
-
-    private static final int LZ4 = 0x82;
+    // @formatter:off
     private static final int NONE = 0x02;
+    private static final int LZ4  = 0x82;
     private static final int ZSTD = 0x90;
+    // @formatter:on
 
     private byte[] readCompressedData() throws IOException {
         //TODO: validate checksum
-        buf.readBinary(new byte[16]);
+        buf.readBinary(new byte[CHECKSUM_LENGTH]);
 
-        byte[] compressedHeader = new byte[9];
+        byte[] compressedHeader = new byte[COMPRESSION_HEADER_LENGTH];
 
-        if (buf.readBinary(compressedHeader) != 9) {
-            //TODO:more detail for exception
-            throw new IOException("");
+        if (buf.readBinary(compressedHeader) != COMPRESSION_HEADER_LENGTH) {
+            throw new IOException("Invalid compression header");
         }
 
-        int method = unsignedByte(compressedHeader[0]);
-        int compressedSize = readInt(compressedHeader, 1);
-        int decompressedSize = readInt(compressedHeader, 5);
+        int method = compressedHeader[0] & 0x0FF;
+        int compressedSize = getIntLE(compressedHeader, 1);
+        int decompressedSize = getIntLE(compressedHeader, 5);
 
         switch (method) {
             case LZ4:
-                return readLZ4CompressedData(compressedSize - 9, decompressedSize);
+                return readLZ4CompressedData(compressedSize - COMPRESSION_HEADER_LENGTH, decompressedSize);
             case NONE:
                 return readNoneCompressedData(decompressedSize);
             default:
-                throw new UnsupportedOperationException("Unknown compression method: " + method);
+                throw new UnsupportedOperationException("Unknown compression magic code: " + method);
         }
     }
 
@@ -110,25 +117,11 @@ public class CompressedBuffedReader implements BuffedReader {
         if (buf.readBinary(compressed) == compressedSize) {
             byte[] decompressed = new byte[decompressedSize];
 
-            if (lz4FastDecompressor.decompress(compressed, decompressed) == compressedSize) {
+            if (lz4Decompressor.decompress(compressed, 0, compressedSize, decompressed, 0, decompressedSize) == decompressedSize) {
                 return decompressed;
             }
         }
 
         throw new IOException("Cannot decompress use LZ4 method.");
-    }
-
-    private int unsignedByte(byte byt) {
-        return 0x0FF & byt;
-    }
-
-    @SuppressWarnings({"PointlessBitwiseExpression", "PointlessArithmeticExpression"})
-    private int readInt(byte[] bytes, int begin) {
-        // @formatter:off
-        return (bytes[begin + 0] & 0xFF) << 0
-             | (bytes[begin + 1] & 0XFF) << 8
-             | (bytes[begin + 2] & 0xFF) << 16
-             | (bytes[begin + 3] & 0xFF) << 24;
-        // @formatter:on
     }
 }

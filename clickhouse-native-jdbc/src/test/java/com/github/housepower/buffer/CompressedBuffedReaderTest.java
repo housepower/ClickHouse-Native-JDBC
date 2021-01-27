@@ -15,10 +15,14 @@
 package com.github.housepower.buffer;
 
 import com.github.housepower.jdbc.tool.FragmentBuffedReader;
+import io.airlift.compress.Compressor;
+import io.airlift.compress.lz4.Lz4Compressor;
 import org.junit.jupiter.api.Test;
 
-import net.jpountz.lz4.LZ4Compressor;
-import net.jpountz.lz4.LZ4Factory;
+import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
+import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,14 +51,17 @@ public class CompressedBuffedReaderTest {
 
 
     private byte[] compressedData(byte[] bytes) {
-        LZ4Compressor lz4Compressor = LZ4Factory.safeInstance().fastCompressor();
-        byte[] compressData = lz4Compressor.compress(bytes);
-        byte[] data = new byte[compressData.length + 9 + 16];
+        Compressor lz4Compressor = new Lz4Compressor();
+        final int maxCompressedLength = lz4Compressor.maxCompressedLength(bytes.length);
+        final byte[] compressed = new byte[maxCompressedLength];
+        final int compressedLength = lz4Compressor.compress(bytes, 0, bytes.length, compressed, 0, maxCompressedLength);
+        byte[] compressData = Arrays.copyOf(compressed, compressedLength);
+        byte[] data = new byte[compressData.length + COMPRESSION_HEADER_LENGTH + CHECKSUM_LENGTH];
 
         data[16] = (byte) (0x82 & 0xFF);
-        System.arraycopy(compressData, 0, data, 9 + 16, compressData.length);
-        System.arraycopy(littleEndian(compressData.length + 9), 0, data, 17, 4);
-        System.arraycopy(littleEndian(bytes.length), 0, data, 21, 4);
+        System.arraycopy(compressData, 0, data, COMPRESSION_HEADER_LENGTH + CHECKSUM_LENGTH, compressData.length);
+        System.arraycopy(littleEndian(compressData.length + COMPRESSION_HEADER_LENGTH), 0, data, CHECKSUM_LENGTH + 1, 4);
+        System.arraycopy(littleEndian(bytes.length), 0, data, CHECKSUM_LENGTH + 4 + 1, 4);
 
         return data;
     }

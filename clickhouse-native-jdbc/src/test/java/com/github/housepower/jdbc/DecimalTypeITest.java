@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.misc.BytesHelper;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -26,10 +27,9 @@ import java.sql.Statement;
 
 import joptsimple.internal.Strings;
 
-import static com.github.housepower.misc.BytesUtil.longsToBytes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DecimalTypeITest extends AbstractITest {
+public class DecimalTypeITest extends AbstractITest implements BytesHelper {
 
     @Test
     public void testDecimalType() throws Exception {
@@ -116,7 +116,7 @@ public class DecimalTypeITest extends AbstractITest {
 
         // v =  -1820000
         long []arr = new long[]{l2, l1};
-        BigInteger v = new BigInteger(longsToBytes(arr));
+        BigInteger v = new BigInteger(getBytes(arr));
         BigDecimal value = new BigDecimal(v);
         value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
 

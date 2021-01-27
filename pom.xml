@@ -99,7 +99,7 @@
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
         <maven.checkstyle.plugin.version>3.1.1</maven.checkstyle.plugin.version>
 
-        <lz4.java.version>1.7.1</lz4.java.version>
+        <aircompressor.version>0.18</aircompressor.version>
         <google.jsr305.version>3.0.2</google.jsr305.version>
         <jmh.version>1.27</jmh.version>
         <yandex-clickhouse-jdbc.version>0.2.4</yandex-clickhouse-jdbc.version>
@@ -165,9 +165,9 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.lz4</groupId>
-                <artifactId>lz4-java</artifactId>
-                <version>${lz4.java.version}</version>
+                <groupId>io.airlift</groupId>
+                <artifactId>aircompressor</artifactId>
+                <version>${aircompressor.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
@@ -191,7 +191,15 @@
                 <version>${yandex-clickhouse-jdbc.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>*</groupId>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
