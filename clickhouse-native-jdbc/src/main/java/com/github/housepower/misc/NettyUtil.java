@@ -12,13 +12,16 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.misc;
 
-import java.io.IOException;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 
-public interface BuffedReader {
+public class NettyUtil {
 
-    int readBinary() throws IOException;
+    private final static ByteBufAllocator alloc = new PooledByteBufAllocator(false);
 
-    int readBinary(byte[] bytes) throws IOException;
+    public static ByteBufAllocator alloc() {
+        return alloc;
+    }
 }

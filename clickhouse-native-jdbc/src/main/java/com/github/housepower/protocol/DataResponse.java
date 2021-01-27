@@ -26,7 +26,7 @@ public class DataResponse implements Response {
     public static DataResponse readFrom(
             BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
 
-        String name = deserializer.readUTF8StringBinary();
+        String name = deserializer.readUTF8Binary();
 
         deserializer.maybeEnableCompressed();
         Block block = Block.readFrom(deserializer, info);

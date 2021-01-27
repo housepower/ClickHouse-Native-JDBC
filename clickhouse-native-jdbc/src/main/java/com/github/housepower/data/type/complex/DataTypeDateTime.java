@@ -107,12 +107,12 @@ public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
 
     @Override
     public void serializeBinary(ZonedDateTime data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt((int) DateTimeUtil.toEpochSecond(data));
+        serializer.writeIntLE((int) DateTimeUtil.toEpochSecond(data));
     }
 
     @Override
     public ZonedDateTime deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        int epochSeconds = deserializer.readInt();
+        int epochSeconds = deserializer.readIntLE();
         return DateTimeUtil.toZonedDateTime(epochSeconds, 0, tz);
     }
 

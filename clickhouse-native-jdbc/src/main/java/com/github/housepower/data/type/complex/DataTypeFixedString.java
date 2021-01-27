@@ -20,7 +20,10 @@ import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.util.AsciiString;
+import io.netty.util.ReferenceCountUtil;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -97,7 +100,7 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
         }
     }
 
-    private void writeBytes(byte[] bs, BinarySerializer serializer) throws IOException, SQLException {
+    private void writeBytes(byte[] bs, BinarySerializer serializer) throws SQLException {
         byte[] res;
         if (bs.length > n) {
             throw new SQLException("The size of FixString column is too large, got " + bs.length);
@@ -108,12 +111,15 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
             res = new byte[n];
             System.arraycopy(bs, 0, res, 0, bs.length);
         }
-        serializer.writeBytes(res);
+        serializer.writeBytes(Unpooled.wrappedBuffer(res));
     }
 
     @Override
-    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new String(deserializer.readBytes(n), charset);
+    public CharSequence deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        ByteBuf buf = deserializer.readBytes(n);
+        CharSequence ret = buf.readCharSequence(n, charset);
+        ReferenceCountUtil.safeRelease(buf);
+        return ret;
     }
 
     @Override

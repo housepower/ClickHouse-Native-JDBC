@@ -45,12 +45,12 @@ public class DataTypeInt64 implements BaseDataTypeInt64<Long, Long> {
 
     @Override
     public void serializeBinary(Long data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeLong(data);
+        serializer.writeLongLE(data);
     }
 
     @Override
     public Long deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readLong();
+        return deserializer.readLongLE();
     }
 
     @Override

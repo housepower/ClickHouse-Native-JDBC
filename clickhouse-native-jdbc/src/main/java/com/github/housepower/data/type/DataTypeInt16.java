@@ -46,12 +46,12 @@ public class DataTypeInt16 implements BaseDataTypeInt16<Short, Short> {
 
     @Override
     public void serializeBinary(Short data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeShort(data);
+        serializer.writeShortLE(data);
     }
 
     @Override
     public Short deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readShort();
+        return deserializer.readShortLE();
     }
 
     @Override

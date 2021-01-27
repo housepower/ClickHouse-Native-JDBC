@@ -25,7 +25,7 @@ public class ExtremesResponse implements Response {
 
     public static ExtremesResponse readFrom(
             BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
-        return new ExtremesResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
+        return new ExtremesResponse(deserializer.readUTF8Binary(), Block.readFrom(deserializer, info));
     }
 
     private final String name;

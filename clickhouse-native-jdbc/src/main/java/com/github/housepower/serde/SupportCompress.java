@@ -12,17 +12,11 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.serde;
 
-import java.io.IOException;
+public interface SupportCompress {
 
-public interface BuffedWriter {
+    void maybeEnableCompressed();
 
-    void writeBinary(byte byt) throws IOException;
-
-    void writeBinary(byte[] bytes) throws IOException;
-
-    void writeBinary(byte[] bytes, int offset, int length) throws IOException;
-
-    void flushToTarget(boolean force) throws IOException;
+    void maybeDisableCompressed();
 }

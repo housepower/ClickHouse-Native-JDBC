@@ -106,7 +106,7 @@ public class DataTypeEnum16 implements IDataType<String, String> {
     public void serializeBinary(String data, BinarySerializer serializer) throws SQLException, IOException {
         for (int i = 0; i < names.length; i++) {
             if (data.equals(names[i])) {
-                serializer.writeShort(values[i]);
+                serializer.writeShortLE(values[i]);
                 return;
             }
         }
@@ -124,7 +124,7 @@ public class DataTypeEnum16 implements IDataType<String, String> {
 
     @Override
     public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        short value = deserializer.readShort();
+        short value = deserializer.readShortLE();
         for (int i = 0; i < values.length; i++) {
             if (values[i].equals(value)) {
                 return names[i];

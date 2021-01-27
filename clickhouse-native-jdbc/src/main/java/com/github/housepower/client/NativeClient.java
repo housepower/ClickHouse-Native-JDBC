@@ -14,13 +14,15 @@
 
 package com.github.housepower.client;
 
-import com.github.housepower.buffer.SocketBuffedReader;
-import com.github.housepower.buffer.SocketBuffedWriter;
+import com.github.housepower.io.SocketBinaryReader;
+import com.github.housepower.io.SocketBinaryWriter;
 import com.github.housepower.data.Block;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.*;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.serde.LegacyBinaryDeserializer;
+import com.github.housepower.serde.LegacyBinarySerializer;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
@@ -28,6 +30,7 @@ import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.stream.QueryResult;
 import com.github.housepower.stream.ClickHouseQueryResult;
+import io.airlift.compress.lz4.Lz4Compressor;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -56,8 +59,9 @@ public class NativeClient {
             socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
 
             return new NativeClient(socket,
-                    new BinarySerializer(new SocketBuffedWriter(socket), true),
-                    new BinaryDeserializer(new SocketBuffedReader(socket), true));
+                    // TODO support zstd
+                    new LegacyBinarySerializer(new SocketBinaryWriter(socket), true, new Lz4Compressor()),
+                    new LegacyBinaryDeserializer(new SocketBinaryReader(socket), true));
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -151,8 +155,10 @@ public class NativeClient {
                 return;
             }
             LOG.trace("flush and close socket");
-            serializer.flushToTarget(true);
+            serializer.flush(true);
             socket.close();
+            serializer.close();
+            deserializer.close();
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -167,7 +173,7 @@ public class NativeClient {
         try {
             LOG.trace("send request: {}", request.type());
             request.writeTo(serializer);
-            serializer.flushToTarget(true);
+            serializer.flush(true);
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }

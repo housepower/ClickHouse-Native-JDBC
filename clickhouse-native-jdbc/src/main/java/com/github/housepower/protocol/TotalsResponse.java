@@ -25,7 +25,7 @@ public class TotalsResponse implements Response {
 
     public static TotalsResponse readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info)
             throws IOException, SQLException {
-        return new TotalsResponse(deserializer.readUTF8StringBinary(), Block.readFrom(deserializer, info));
+        return new TotalsResponse(deserializer.readUTF8Binary(), Block.readFrom(deserializer, info));
     }
 
     private final String name;

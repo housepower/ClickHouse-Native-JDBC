@@ -12,13 +12,13 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.io;
 
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.Charset;
 
-public interface BinarySerializer extends SupportCompress, AutoCloseable {
+public interface BinaryWriter extends AutoCloseable {
 
     void writeBoolean(boolean b);
 

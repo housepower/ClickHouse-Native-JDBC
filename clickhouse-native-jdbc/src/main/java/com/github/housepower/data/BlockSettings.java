@@ -17,9 +17,11 @@ package com.github.housepower.data;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
 
+
 import java.io.IOException;
 
 public class BlockSettings {
+
     private final Setting[] settings;
 
     public BlockSettings(Setting[] settings) {
@@ -33,7 +35,7 @@ public class BlockSettings {
             if (Boolean.class.isAssignableFrom(setting.clazz)) {
                 serializer.writeBoolean((Boolean) setting.defaultValue);
             } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                serializer.writeInt((Integer) setting.defaultValue);
+                serializer.writeIntLE((Integer) setting.defaultValue);
             }
         }
         serializer.writeVarInt(0);
@@ -54,7 +56,7 @@ public class BlockSettings {
                     settings[currentSize - 1] = receiveSetting;
                     return settings;
                 } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                    Setting receiveSetting = new Setting(setting.num, deserializer.readInt());
+                    Setting receiveSetting = new Setting(setting.num, deserializer.readIntLE());
                     Setting[] settings = readSettingsFrom(currentSize + 1, deserializer);
                     settings[currentSize - 1] = receiveSetting;
                     return settings;

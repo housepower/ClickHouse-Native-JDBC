@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.misc.BytesHelper;
+import com.github.housepower.misc.CodecHelper;
 import com.google.common.base.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ import java.sql.ResultSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DecimalTypeITest extends AbstractITest implements BytesHelper {
+public class DecimalTypeITest extends AbstractITest implements CodecHelper {
 
     @Test
     public void testDecimalType() throws Exception {

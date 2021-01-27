@@ -64,19 +64,19 @@ public class NativeContext {
 
         public void writeTo(BinarySerializer serializer) throws IOException {
             serializer.writeVarInt(ClientContext.INITIAL_QUERY);
-            serializer.writeUTF8StringBinary("");
-            serializer.writeUTF8StringBinary("");
-            serializer.writeUTF8StringBinary(initialAddress);
+            serializer.writeUTF8Binary("");
+            serializer.writeUTF8Binary("");
+            serializer.writeUTF8Binary(initialAddress);
 
             // for TCP kind
             serializer.writeVarInt(TCP_KINE);
-            serializer.writeUTF8StringBinary("");
-            serializer.writeUTF8StringBinary(clientHostname);
-            serializer.writeUTF8StringBinary(clientName);
+            serializer.writeUTF8Binary("");
+            serializer.writeUTF8Binary(clientHostname);
+            serializer.writeUTF8Binary(clientName);
             serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
             serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
             serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
-            serializer.writeUTF8StringBinary("");
+            serializer.writeUTF8Binary("");
         }
     }
 

@@ -57,12 +57,12 @@ public class DataTypeFloat64 implements IDataType<Double, Double> {
 
     @Override
     public void serializeBinary(Double data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeDouble(data);
+        serializer.writeDoubleLE(data);
     }
 
     @Override
     public Double deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readDouble();
+        return deserializer.readDoubleLE();
     }
 
     @Override

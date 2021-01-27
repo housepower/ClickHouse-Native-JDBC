@@ -45,12 +45,12 @@ public class DataTypeUInt32 implements BaseDataTypeInt32<Long, Long> {
 
     @Override
     public void serializeBinary(Long data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt(data.intValue());
+        serializer.writeIntLE(data.intValue());
     }
 
     @Override
     public Long deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        int res = deserializer.readInt();
+        int res = deserializer.readIntLE();
         return 0xffffffffL & res;
     }
 
