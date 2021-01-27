@@ -12,9 +12,8 @@
  * limitations under the License.
  */
 
-package com.github.housepower.data;
+package com.github.housepower.buffer;
 
-import com.github.housepower.buffer.ByteArrayWriter;
 import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.settings.ClickHouseDefines;
 

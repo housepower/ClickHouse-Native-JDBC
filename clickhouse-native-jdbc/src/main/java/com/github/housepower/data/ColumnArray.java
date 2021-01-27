@@ -14,6 +14,7 @@
 
 package com.github.housepower.data;
 
+import com.github.housepower.buffer.ColumnWriterBuffer;
 import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.data.type.complex.DataTypeArray;
 import com.github.housepower.serde.BinarySerializer;
