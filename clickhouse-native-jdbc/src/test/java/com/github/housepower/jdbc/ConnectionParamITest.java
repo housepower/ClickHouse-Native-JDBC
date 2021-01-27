@@ -19,7 +19,10 @@ import com.github.housepower.settings.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Locale;
 
@@ -36,30 +39,35 @@ public class ConnectionParamITest extends AbstractITest {
     @Test
     public void successfullyMaxRowsToRead() {
         assertThrows(SQLException.class, () -> {
-            Connection connection = DriverManager
-                    .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s?max_rows_to_read=1&connect_timeout=10", CK_HOST, CK_PORT));
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
-            int rowsRead = 0;
-            while (rs.next()) {
-                ++rowsRead;
+            try (Connection connection = DriverManager
+                    .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s?max_rows_to_read=1&connect_timeout=10", CK_HOST, CK_PORT))) {
+                withStatement(connection, stmt -> {
+                    ResultSet rs = stmt.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
+                    int rowsRead = 0;
+                    while (rs.next()) {
+                        ++rowsRead;
+                    }
+                    assertEquals(1, rowsRead); // not reached
+                });
             }
-            assertEquals(1, rowsRead); // not reached
         });
     }
 
     @Test
     public void successfullyMaxResultRows() throws Exception {
-        Connection connection = DriverManager
-                .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s?max_result_rows=1&connect_timeout=10", CK_HOST, CK_PORT));
-        Statement statement = connection.createStatement();
-        statement.setMaxRows(400);
-        ResultSet rs = statement.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
-        int rowsRead = 0;
-        while (rs.next()) {
-            ++rowsRead;
+        try (Connection connection = DriverManager
+                .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s?max_result_rows=1&connect_timeout=10", CK_HOST, CK_PORT))
+        ) {
+            withStatement(connection, stmt -> {
+                stmt.setMaxRows(400);
+                ResultSet rs = stmt.executeQuery("SELECT arrayJoin([1,2,3,4]) from numbers(100)");
+                int rowsRead = 0;
+                while (rs.next()) {
+                    ++rowsRead;
+                }
+                assertEquals(400, rowsRead);
+            });
         }
-        assertEquals(400, rowsRead);
     }
 
     @Test

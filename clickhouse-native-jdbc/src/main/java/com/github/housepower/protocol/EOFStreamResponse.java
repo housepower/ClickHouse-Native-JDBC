@@ -14,13 +14,13 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.CompositeSource;
 
 public class EOFStreamResponse implements Response {
 
     public static final EOFStreamResponse INSTANCE = new EOFStreamResponse();
 
-    public static Response readFrom(BinaryDeserializer deserializer) {
+    public static Response readFrom(CompositeSource source) {
         return INSTANCE;
     }
 

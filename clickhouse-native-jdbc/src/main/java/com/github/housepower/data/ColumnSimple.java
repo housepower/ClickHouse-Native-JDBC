@@ -14,32 +14,32 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class Column extends AbstractColumn {
+public class ColumnSimple extends AbstractColumn {
 
-    public Column(String name, IDataType<?, ?> type, Object[] values) {
+    public ColumnSimple(String name, IDataType<?, ?> type, Object[] values) {
         super(name, type, values);
-        this.values = values;
+        this.sourceValues = values;
     }
 
     @Override
     public void write(Object object) throws IOException, SQLException {
-        type().serializeBinary(object, buffer.column);
+        type().serializeBinary(object, sinkBuf);
     }
 
     @Override
-    public void flushToSerializer(BinarySerializer serializer, boolean now) throws IOException, SQLException {
+    public void flush(CompositeSink sink, boolean now) throws IOException {
         if (isExported()) {
-            serializer.writeUTF8StringBinary(name);
-            serializer.writeUTF8StringBinary(type.name());
+            sink.writeUTF8Binary(name);
+            sink.writeUTF8Binary(type.name());
         }
 
         if (now) {
-            buffer.writeTo(serializer);
+            sink.writeBytes(sinkBuf.retain());
         }
     }
 }

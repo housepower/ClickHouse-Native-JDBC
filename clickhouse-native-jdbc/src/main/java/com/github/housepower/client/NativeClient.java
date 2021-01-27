@@ -14,20 +14,21 @@
 
 package com.github.housepower.client;
 
-import com.github.housepower.buffer.SocketBuffedReader;
-import com.github.housepower.buffer.SocketBuffedWriter;
 import com.github.housepower.data.Block;
+import com.github.housepower.io.CompositeSink;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.SocketSink;
+import com.github.housepower.io.SocketSource;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.*;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
-import com.github.housepower.log.Logger;
-import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.stream.QueryResult;
 import com.github.housepower.stream.ClickHouseQueryResult;
+import com.github.housepower.stream.QueryResult;
+import io.airlift.compress.lz4.Lz4Compressor;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -56,8 +57,9 @@ public class NativeClient {
             socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
 
             return new NativeClient(socket,
-                    new BinarySerializer(new SocketBuffedWriter(socket), true),
-                    new BinaryDeserializer(new SocketBuffedReader(socket), true));
+                    // TODO support zstd
+                    new CompositeSink(new SocketSink(socket), true, new Lz4Compressor()),
+                    new CompositeSource(new SocketSource(socket), true));
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -65,14 +67,14 @@ public class NativeClient {
 
     private final Socket socket;
     private final SocketAddress address;
-    private final BinarySerializer serializer;
-    private final BinaryDeserializer deserializer;
+    private final CompositeSink sink;
+    private final CompositeSource source;
 
-    public NativeClient(Socket socket, BinarySerializer serializer, BinaryDeserializer deserializer) {
+    public NativeClient(Socket socket, CompositeSink sink, CompositeSource source) {
         this.socket = socket;
         this.address = socket.getLocalSocketAddress();
-        this.serializer = serializer;
-        this.deserializer = deserializer;
+        this.sink = sink;
+        this.source = source;
     }
 
     public SocketAddress address() {
@@ -151,8 +153,10 @@ public class NativeClient {
                 return;
             }
             LOG.trace("flush and close socket");
-            serializer.flushToTarget(true);
+            sink.flush(true);
             socket.close();
+            sink.close();
+            source.close();
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -166,8 +170,8 @@ public class NativeClient {
     private void sendRequest(Request request) throws SQLException {
         try {
             LOG.trace("send request: {}", request.type());
-            request.writeTo(serializer);
-            serializer.flushToTarget(true);
+            request.writeTo(sink);
+            sink.flush(true);
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -176,7 +180,7 @@ public class NativeClient {
     private Response receiveResponse(Duration soTimeout, NativeContext.ServerContext info) throws SQLException {
         try {
             socket.setSoTimeout(((int) soTimeout.toMillis()));
-            Response response = Response.readFrom(deserializer, info);
+            Response response = Response.readFrom(source, info);
             LOG.trace("recv response: {}", response.type());
             return response;
         } catch (IOException ex) {

@@ -14,34 +14,35 @@
 
 package com.github.housepower.data;
 
+import com.github.housepower.io.ByteBufSink;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Block {
+public class Block implements AutoCloseable {
 
-    public static Block readFrom(BinaryDeserializer deserializer,
+    public static Block readFrom(CompositeSource source,
                                  NativeContext.ServerContext serverContext) throws IOException, SQLException {
-        BlockSettings info = BlockSettings.readFrom(deserializer);
+        BlockSettings info = BlockSettings.readFrom(source);
 
-        int columnCnt = (int) deserializer.readVarInt();
-        int rowCnt = (int) deserializer.readVarInt();
+        int columnCnt = (int) source.readVarInt();
+        int rowCnt = (int) source.readVarInt();
 
         IColumn[] columns = new IColumn[columnCnt];
 
         for (int i = 0; i < columnCnt; i++) {
-            String name = deserializer.readUTF8StringBinary();
-            String type = deserializer.readUTF8StringBinary();
+            String name = source.readUTF8Binary();
+            String type = source.readUTF8Binary();
 
             IDataType dataType = DataTypeFactory.get(type, serverContext);
-            Object[] arr = dataType.deserializeBinaryBulk(rowCnt, deserializer);
+            Object[] arr = dataType.deserializeBinaryBulk(rowCnt, source);
             columns[i] = ColumnFactory.createColumn(name, dataType, arr);
         }
 
@@ -112,14 +113,14 @@ public class Block {
         }
     }
 
-    public void writeTo(BinarySerializer serializer) throws IOException, SQLException {
-        settings.writeTo(serializer);
+    public void writeTo(CompositeSink sink) throws IOException, SQLException {
+        settings.writeTo(sink);
 
-        serializer.writeVarInt(columns.length);
-        serializer.writeVarInt(rowCnt);
+        sink.writeVarInt(columns.length);
+        sink.writeVarInt(rowCnt);
 
         for (IColumn column : columns) {
-            column.flushToSerializer(serializer, true);
+            column.flush(sink, true);
         }
     }
 
@@ -146,7 +147,15 @@ public class Block {
 
     public void initWriteBuffer() {
         for (IColumn column : columns) {
-            column.setColumnWriterBuffer(new ColumnWriterBuffer());
+            column.close();
+            column.setColumnWriterBuffer(new ByteBufSink());
+        }
+    }
+
+    @Override
+    public void close() {
+        for (IColumn column : columns) {
+            column.close();
         }
     }
 }

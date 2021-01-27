@@ -14,9 +14,9 @@
 
 package com.github.housepower.data.type;
 
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -44,13 +44,13 @@ public class DataTypeInt8 implements BaseDataTypeInt8<Byte, Byte> {
     }
 
     @Override
-    public void serializeBinary(Byte data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeByte(data);
+    public void serializeBinary(Byte data, ISink sink) throws SQLException, IOException {
+        sink.writeByte(data);
     }
 
     @Override
-    public Byte deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        return deserializer.readByte();
+    public Byte deserializeBinary(ISource source) throws IOException {
+        return source.readByte();
     }
 
     @Override

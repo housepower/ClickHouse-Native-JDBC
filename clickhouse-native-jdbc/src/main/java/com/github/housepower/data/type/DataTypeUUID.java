@@ -15,9 +15,9 @@
 package com.github.housepower.data.type;
 
 import com.github.housepower.data.IDataType;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -67,13 +67,13 @@ public class DataTypeUUID implements IDataType<UUID, String> {
     }
 
     @Override
-    public void serializeBinary(UUID data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeLong(data.getMostSignificantBits());
-        serializer.writeLong(data.getLeastSignificantBits());
+    public void serializeBinary(UUID data, ISink sink) throws SQLException, IOException {
+        sink.writeLongLE(data.getMostSignificantBits());
+        sink.writeLongLE(data.getLeastSignificantBits());
     }
 
     @Override
-    public UUID deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new UUID(deserializer.readLong(), deserializer.readLong());
+    public UUID deserializeBinary(ISource source) throws SQLException, IOException {
+        return new UUID(source.readLongLE(), source.readLongLE());
     }
 }

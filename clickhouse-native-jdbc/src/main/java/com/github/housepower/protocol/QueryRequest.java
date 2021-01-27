@@ -15,13 +15,12 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
-import com.github.housepower.serde.BinarySerializer;
-import com.github.housepower.serde.SettingType;
+import com.github.housepower.io.CompositeSink;
+import com.github.housepower.settings.SettingType;
 import com.github.housepower.settings.SettingKey;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -45,10 +44,6 @@ public class QueryRequest implements Request {
     private final NativeContext.ClientContext clientContext;
     private final Map<SettingKey, Serializable> settings;
 
-    public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString) {
-        this(queryId, clientContext, stage, compression, queryString, new HashMap<>());
-    }
-
     public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString,
                         Map<SettingKey, Serializable> settings) {
 
@@ -66,23 +61,23 @@ public class QueryRequest implements Request {
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
-        serializer.writeUTF8StringBinary(queryId);
-        clientContext.writeTo(serializer);
+    public void writeImpl(CompositeSink sink) throws IOException, SQLException {
+        sink.writeUTF8Binary(queryId);
+        clientContext.writeTo(sink);
 
         for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
-            serializer.writeUTF8StringBinary(entry.getKey().name());
+            sink.writeUTF8Binary(entry.getKey().name());
             @SuppressWarnings("rawtypes")
             SettingType type = entry.getKey().type();
             //noinspection unchecked
-            type.serializeSetting(serializer, entry.getValue());
+            type.serializeSetting(sink, entry.getValue());
         }
-        serializer.writeUTF8StringBinary("");
-        serializer.writeVarInt(stage);
-        serializer.writeBoolean(compression);
-        serializer.writeUTF8StringBinary(queryString);
+        sink.writeUTF8Binary("");
+        sink.writeVarInt(stage);
+        sink.writeBoolean(compression);
+        sink.writeUTF8Binary(queryString);
         // empty data to server
-        DataRequest.EMPTY.writeTo(serializer);
+        DataRequest.EMPTY.writeTo(sink);
 
     }
 }

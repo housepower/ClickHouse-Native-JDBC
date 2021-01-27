@@ -15,9 +15,9 @@
 package com.github.housepower.data;
 
 import com.github.housepower.exception.NoDefaultValueException;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -63,23 +63,23 @@ public interface IDataType<CK, JDBC> {
         return value.toString();
     }
 
-    void serializeBinary(CK data, BinarySerializer serializer) throws SQLException, IOException;
+    void serializeBinary(CK data, ISink sink) throws SQLException, IOException;
 
-    default void serializeBinaryBulk(CK[] data, BinarySerializer serializer) throws SQLException, IOException {
+    default void serializeBinaryBulk(CK[] data, ISink sink) throws SQLException, IOException {
         for (CK d : data) {
-            serializeBinary(d, serializer);
+            serializeBinary(d, sink);
         }
     }
 
     CK deserializeText(SQLLexer lexer) throws SQLException;
 
-    CK deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;
+    CK deserializeBinary(ISource source) throws SQLException, IOException;
 
     // fuck type erasure
-    default Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
+    default Object[] deserializeBinaryBulk(int rows, ISource source) throws SQLException, IOException {
         Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = this.deserializeBinary(deserializer);
+            data[row] = this.deserializeBinary(source);
         }
         return data;
     }

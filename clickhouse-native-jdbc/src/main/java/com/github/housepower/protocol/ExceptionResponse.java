@@ -15,22 +15,21 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.exception.ClickHouseSQLException;
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.CompositeSource;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 public class ExceptionResponse implements Response {
 
-    public static SQLException readExceptionFrom(BinaryDeserializer deserializer) throws IOException {
-        int code = deserializer.readInt();
-        String name = deserializer.readUTF8StringBinary();
-        String message = deserializer.readUTF8StringBinary();
-        String stackTrace = deserializer.readUTF8StringBinary();
+    public static SQLException readExceptionFrom(CompositeSource source) {
+        int code = source.readIntLE();
+        String name = source.readUTF8Binary();
+        String message = source.readUTF8Binary();
+        String stackTrace = source.readUTF8Binary();
 
-        if (deserializer.readBoolean()) {
+        if (source.readBoolean()) {
             return new ClickHouseSQLException(
-                    code, name + message + ". Stack trace:\n\n" + stackTrace, readExceptionFrom(deserializer));
+                    code, name + message + ". Stack trace:\n\n" + stackTrace, readExceptionFrom(source));
         }
 
         return new ClickHouseSQLException(code, name + message + ". Stack trace:\n\n" + stackTrace);

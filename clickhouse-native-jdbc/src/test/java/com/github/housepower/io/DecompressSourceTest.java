@@ -12,41 +12,40 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.io;
 
-import com.github.housepower.jdbc.tool.FragmentBuffedReader;
 import io.airlift.compress.Compressor;
 import io.airlift.compress.lz4.Lz4Compressor;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;
-
-import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
-import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
+import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CompressedBuffedReaderTest {
+public class DecompressSourceTest {
 
     @Test
-    public void successfullyReadCompressedData() throws Exception {
-
-        CompressedBuffedReader compressedBuffed = new CompressedBuffedReader(
-            new FragmentBuffedReader(compressedData(new byte[] {1, 2, 3}), compressedData(new byte[] {4, 5, 6, 7}))
+    public void successfullyReadCompressedData() {
+        ByteBuf buf = Unpooled.wrappedBuffer(
+                compressedData(new byte[]{1, 2, 3}),
+                compressedData(new byte[]{4, 5, 6, 7})
         );
+        DecompressSource compressedReader = new DecompressSource(new ByteBufSource(buf));
 
-        assertEquals(compressedBuffed.readBinary(), 1);
+        assertEquals(compressedReader.readByte(), 1);
 
-        byte[] bytes = new byte[5];
-        compressedBuffed.readBinary(bytes);
+        ByteBuf ret = compressedReader.readSlice(5);
+        assertEquals(ret.readByte(), 2);
+        assertEquals(ret.readByte(), 3);
+        assertEquals(ret.readByte(), 4);
+        assertEquals(ret.readByte(), 5);
+        assertEquals(ret.readByte(), 6);
 
-        assertEquals(bytes[0], 2);
-        assertEquals(bytes[1], 3);
-        assertEquals(bytes[2], 4);
-        assertEquals(bytes[3], 5);
-        assertEquals(bytes[4], 6);
-
-        assertEquals(compressedBuffed.readBinary(), 7);
+        assertEquals(compressedReader.readByte(), 7);
     }
 
 

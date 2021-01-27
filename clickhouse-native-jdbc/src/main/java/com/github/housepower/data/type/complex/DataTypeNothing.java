@@ -14,23 +14,19 @@
 
 package com.github.housepower.data.type.complex;
 
+import com.github.housepower.data.IDataType;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
+import com.github.housepower.misc.SQLLexer;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.github.housepower.client.NativeContext;
-import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
-
 public class DataTypeNothing implements IDataType<Object, Object> {
 
     public static DataTypeCreator<Object, Object> CREATOR =
-            (lexer, serverContext) -> new DataTypeNothing(serverContext);
-
-    public DataTypeNothing(NativeContext.ServerContext serverContext) {
-    }
+            (lexer, serverContext) -> new DataTypeNothing();
 
     @Override
     public String name() {
@@ -63,11 +59,11 @@ public class DataTypeNothing implements IDataType<Object, Object> {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(Object data, ISink sink) throws SQLException, IOException {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object deserializeBinary(ISource source) throws SQLException, IOException {
         return new Object();
     }
 

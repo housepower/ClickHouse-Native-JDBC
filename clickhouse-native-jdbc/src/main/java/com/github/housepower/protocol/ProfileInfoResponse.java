@@ -14,19 +14,19 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.CompositeSource;
 
 import java.io.IOException;
 
 public class ProfileInfoResponse implements Response {
 
-    public static ProfileInfoResponse readFrom(BinaryDeserializer deserializer) throws IOException {
-        long rows = deserializer.readVarInt();
-        long blocks = deserializer.readVarInt();
-        long bytes = deserializer.readVarInt();
-        long appliedLimit = deserializer.readVarInt();
-        long rowsBeforeLimit = deserializer.readVarInt();
-        boolean calculatedRowsBeforeLimit = deserializer.readBoolean();
+    public static ProfileInfoResponse readFrom(CompositeSource source) throws IOException {
+        long rows = source.readVarInt();
+        long blocks = source.readVarInt();
+        long bytes = source.readVarInt();
+        long appliedLimit = source.readVarInt();
+        long rowsBeforeLimit = source.readVarInt();
+        boolean calculatedRowsBeforeLimit = source.readBoolean();
         return new ProfileInfoResponse(rows, blocks, bytes, appliedLimit, rowsBeforeLimit, calculatedRowsBeforeLimit);
     }
 

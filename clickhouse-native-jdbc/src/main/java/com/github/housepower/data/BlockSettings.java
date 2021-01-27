@@ -14,48 +14,50 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
+
 
 import java.io.IOException;
 
 public class BlockSettings {
+
     private final Setting[] settings;
 
     public BlockSettings(Setting[] settings) {
         this.settings = settings;
     }
 
-    public void writeTo(BinarySerializer serializer) throws IOException {
+    public void writeTo(CompositeSink sink) throws IOException {
         for (Setting setting : settings) {
-            serializer.writeVarInt(setting.num);
+            sink.writeVarInt(setting.num);
 
             if (Boolean.class.isAssignableFrom(setting.clazz)) {
-                serializer.writeBoolean((Boolean) setting.defaultValue);
+                sink.writeBoolean((Boolean) setting.defaultValue);
             } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                serializer.writeInt((Integer) setting.defaultValue);
+                sink.writeIntLE((Integer) setting.defaultValue);
             }
         }
-        serializer.writeVarInt(0);
+        sink.writeVarInt(0);
     }
 
-    public static BlockSettings readFrom(BinaryDeserializer deserializer) throws IOException {
-        return new BlockSettings(readSettingsFrom(1, deserializer));
+    public static BlockSettings readFrom(CompositeSource source) throws IOException {
+        return new BlockSettings(readSettingsFrom(1, source));
     }
 
-    private static Setting[] readSettingsFrom(int currentSize, BinaryDeserializer deserializer) throws IOException {
-        long num = deserializer.readVarInt();
+    private static Setting[] readSettingsFrom(int currentSize, CompositeSource source) {
+        long num = source.readVarInt();
 
         for (Setting setting : Setting.defaultValues()) {
             if (setting.num == num) {
                 if (Boolean.class.isAssignableFrom(setting.clazz)) {
-                    Setting receiveSetting = new Setting(setting.num, deserializer.readBoolean());
-                    Setting[] settings = readSettingsFrom(currentSize + 1, deserializer);
+                    Setting receiveSetting = new Setting(setting.num, source.readBoolean());
+                    Setting[] settings = readSettingsFrom(currentSize + 1, source);
                     settings[currentSize - 1] = receiveSetting;
                     return settings;
                 } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                    Setting receiveSetting = new Setting(setting.num, deserializer.readInt());
-                    Setting[] settings = readSettingsFrom(currentSize + 1, deserializer);
+                    Setting receiveSetting = new Setting(setting.num, source.readIntLE());
+                    Setting[] settings = readSettingsFrom(currentSize + 1, source);
                     settings[currentSize - 1] = receiveSetting;
                     return settings;
                 }

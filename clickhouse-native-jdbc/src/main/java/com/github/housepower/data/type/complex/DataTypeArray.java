@@ -17,11 +17,11 @@ package com.github.housepower.data.type.complex;
 import com.github.housepower.data.DataTypeFactory;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.data.type.DataTypeInt64;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.Array;
@@ -50,7 +50,7 @@ public class DataTypeArray implements IDataType<ClickHouseArray, Array> {
     // Change from UInt64 to Int64 because we mapping UInt64 to BigInteger
     private final DataTypeInt64 offsetIDataType;
 
-    public DataTypeArray(String name, IDataType<?, ?> elemDataType, DataTypeInt64 offsetIDataType) throws SQLException {
+    public DataTypeArray(String name, IDataType<?, ?> elemDataType, DataTypeInt64 offsetIDataType) {
         this.name = name;
         this.elemDataType = elemDataType;
         this.offsetIDataType = offsetIDataType;
@@ -110,36 +110,36 @@ public class DataTypeArray implements IDataType<ClickHouseArray, Array> {
     }
 
     @Override
-    public void serializeBinary(ClickHouseArray data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(ClickHouseArray data, ISink sink) throws SQLException, IOException {
         for (Object f : data.getArray()) {
-            getElemDataType().serializeBinary(f, serializer);
+            getElemDataType().serializeBinary(f, sink);
         }
     }
 
 
     @Override
-    public void serializeBinaryBulk(ClickHouseArray[] data, BinarySerializer serializer) throws SQLException, IOException {
-        offsetIDataType.serializeBinary((long) data.length, serializer);
-        getElemDataType().serializeBinaryBulk(data, serializer);
+    public void serializeBinaryBulk(ClickHouseArray[] data, ISink sink) throws SQLException, IOException {
+        offsetIDataType.serializeBinary((long) data.length, sink);
+        getElemDataType().serializeBinaryBulk(data, sink);
     }
 
     @Override
-    public ClickHouseArray deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        Long offset = offsetIDataType.deserializeBinary(deserializer);
-        Object[] data = getElemDataType().deserializeBinaryBulk(offset.intValue(), deserializer);
+    public ClickHouseArray deserializeBinary(ISource source) throws SQLException, IOException {
+        Long offset = offsetIDataType.deserializeBinary(source);
+        Object[] data = getElemDataType().deserializeBinaryBulk(offset.intValue(), source);
         return new ClickHouseArray(elemDataType, data);
     }
 
     @Override
-    public ClickHouseArray[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
+    public ClickHouseArray[] deserializeBinaryBulk(int rows, ISource source) throws IOException, SQLException {
         ClickHouseArray[] arrays = new ClickHouseArray[rows];
         if (rows == 0) {
             return arrays;
         }
 
-        int[] offsets = Arrays.stream(offsetIDataType.deserializeBinaryBulk(rows, deserializer)).mapToInt(value -> ((Long) value).intValue()).toArray();
+        int[] offsets = Arrays.stream(offsetIDataType.deserializeBinaryBulk(rows, source)).mapToInt(value -> ((Long) value).intValue()).toArray();
         ClickHouseArray res = new ClickHouseArray(elemDataType,
-                elemDataType.deserializeBinaryBulk(offsets[rows - 1], deserializer));
+                elemDataType.deserializeBinaryBulk(offsets[rows - 1], source));
 
         for (int row = 0, lastOffset = 0; row < rows; row++) {
             int offset = offsets[row];

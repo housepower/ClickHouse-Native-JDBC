@@ -14,12 +14,13 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.ByteBufSink;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-public interface IColumn {
+public interface IColumn extends AutoCloseable {
 
     boolean isExported();
 
@@ -34,16 +35,16 @@ public interface IColumn {
     /**
      * Flush to socket output stream
      *
-     * @param serializer is serializer wrapper of tcp socket
-     * @param now        means we should flush all the buffer to serializer now
+     * @param sink is sink wrapper of tcp socket
+     * @param now        means we should flush all the buffer to sink now
      */
-    void flushToSerializer(BinarySerializer serializer, boolean now) throws IOException, SQLException;
+    void flush(CompositeSink sink, boolean now) throws IOException, SQLException;
 
-    void clear();
+    void setColumnWriterBuffer(ByteBufSink buffer);
 
-    void setColumnWriterBuffer(ColumnWriterBuffer buffer);
-
-    ColumnWriterBuffer getColumnWriterBuffer();
+    // explicitly overwrite to suppress Exception
+    @Override
+    void close();
 }
 
 

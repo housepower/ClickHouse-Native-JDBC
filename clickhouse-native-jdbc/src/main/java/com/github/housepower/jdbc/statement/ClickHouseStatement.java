@@ -71,7 +71,6 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public int executeUpdate(String query) throws SQLException {
-
         return ExceptionUtil.rethrowSQLException(() -> {
             cfg.settings().put(SettingKey.max_result_rows, maxRows);
             cfg.settings().put(SettingKey.result_overflow_mode, "break");
@@ -82,6 +81,9 @@ public class ClickHouseStatement implements SQLStatement {
             if (matcher.find() && query.trim().toUpperCase(Locale.ROOT).startsWith("INSERT")) {
                 lastResultSet = null;
                 String insertQuery = query.substring(0, matcher.end() - 1);
+                if (block != null) {
+                    block.close();
+                }
                 block = connection.getSampleBlock(insertQuery);
                 block.initWriteBuffer();
                 new ValuesNativeInputFormat(matcher.end() - 1, query).fill(block);
@@ -124,7 +126,12 @@ public class ClickHouseStatement implements SQLStatement {
     @Override
     public void close() throws SQLException {
         LOG.debug("close Statement");
-        this.isClosed = true;
+        if (!isClosed) {
+            this.isClosed = true;
+            if (block != null) {
+                block.close();
+            }
+        }
     }
 
     @Override

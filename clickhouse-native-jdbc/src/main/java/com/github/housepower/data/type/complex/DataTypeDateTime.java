@@ -14,19 +14,21 @@
 
 package com.github.housepower.data.type.complex;
 
+import com.github.housepower.client.NativeContext;
+import com.github.housepower.data.IDataType;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
+import com.github.housepower.misc.DateTimeUtil;
+import com.github.housepower.misc.SQLLexer;
+import com.github.housepower.misc.Validate;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.*;
-
-import com.github.housepower.client.NativeContext;
-import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.DateTimeUtil;
-import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
 
@@ -106,13 +108,13 @@ public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public void serializeBinary(ZonedDateTime data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt((int) DateTimeUtil.toEpochSecond(data));
+    public void serializeBinary(ZonedDateTime data, ISink sink) throws SQLException, IOException {
+        sink.writeIntLE((int) DateTimeUtil.toEpochSecond(data));
     }
 
     @Override
-    public ZonedDateTime deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        int epochSeconds = deserializer.readInt();
+    public ZonedDateTime deserializeBinary(ISource source) throws SQLException, IOException {
+        int epochSeconds = source.readIntLE();
         return DateTimeUtil.toZonedDateTime(epochSeconds, 0, tz);
     }
 

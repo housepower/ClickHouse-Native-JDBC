@@ -18,8 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Types;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ClickHouseResultSetMetaDataITest extends AbstractITest {
 
@@ -36,12 +35,12 @@ class ClickHouseResultSetMetaDataITest extends AbstractITest {
 
             assertEquals("a1", rs.getMetaData().getColumnName(1));
 
-            assertEquals(false, rs.getMetaData().isSigned(2));
-            assertEquals(true, rs.getMetaData().isSigned(3));
-            assertEquals(true, rs.getMetaData().isSigned(4));
-            assertEquals(true, rs.getMetaData().isSigned(5));
-            assertEquals(true, rs.getMetaData().isSigned(7));
-            assertEquals(false, rs.getMetaData().isSigned(8));
+            assertFalse(rs.getMetaData().isSigned(2));
+            assertTrue(rs.getMetaData().isSigned(3));
+            assertTrue(rs.getMetaData().isSigned(4));
+            assertTrue(rs.getMetaData().isSigned(5));
+            assertTrue(rs.getMetaData().isSigned(7));
+            assertFalse(rs.getMetaData().isSigned(8));
 
             assertEquals(8, rs.getMetaData().getPrecision(4));
             assertEquals(17, rs.getMetaData().getPrecision(5));

@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Array;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.Struct;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -33,8 +32,7 @@ public class QueryComplexTypeITest extends AbstractITest {
         LocalDate date = LocalDate.of(2020, 1, 1);
 
         // use client timezone, Asia/Shanghai
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery("select toDate('2020-01-01') as dateValue");
             assertTrue(rs.next());
             assertEquals(date, rs.getDate(1).toLocalDate());
@@ -42,8 +40,7 @@ public class QueryComplexTypeITest extends AbstractITest {
         }, "use_client_time_zone", true);
 
         // use server timezone, UTC
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery("select toDate('2020-01-01') as dateValue");
             assertTrue(rs.next());
             assertEquals(date, rs.getDate(1).toLocalDate());
@@ -53,8 +50,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyNullableWithDateTimeWithoutTimezone() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(statement -> {
             long ts = 946659723 * 1000L;
             ResultSet rs = statement.executeQuery("SELECT nullIf(toDateTime(946659723), toDateTime(0))");
             assertTrue(rs.next());
@@ -65,9 +61,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyFixedString() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery("SELECT toFixedString('abc',3),toFixedString('abc',4)");
 
             assertTrue(rs.next());
@@ -78,9 +72,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyNullableDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery("SELECT arrayJoin([NULL,1])");
 
             assertTrue(rs.next());
@@ -93,9 +85,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyNullableFixedStringType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery("SELECT arrayJoin([NULL,toFixedString('abc',3)])");
 
             assertTrue(rs.next());
@@ -109,9 +99,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyArray() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             // Array(UInt8)
             ResultSet rs = statement.executeQuery("SELECT [[1], [2], [3], [4,5,6]] from numbers(10)");
 
@@ -137,9 +125,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyArrayJoin() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             // Array(UInt8)
             ResultSet rs = statement.executeQuery("SELECT arrayJoin([[1,2,3],[4,5]])");
 
@@ -157,9 +143,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyArrayTuple() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery("SELECT arrayJoin([[(1,'3'), (2,'4')],[(3,'5')]])");
 
             assertTrue(rs.next());
@@ -187,9 +171,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyArrayArray() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery(
                     "SELECT [[1.1, 1.2], [2.1, 2.2], [3.1, 3.2]] AS v, toTypeName(v), [toNullable(10000), toNullable(10001)] from numbers(10)");
 
@@ -211,15 +193,12 @@ public class QueryComplexTypeITest extends AbstractITest {
                 assertEquals(10001, arr[1]);
             }
             assertFalse(rs.next());
-
         });
     }
 
     @Test
     public void successfullyTimestamp() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             long ts = 946659723 * 1000L;
             ResultSet rs = statement.executeQuery("SELECT toDateTime(946659723)");
 
@@ -230,9 +209,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyNothing() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery("SELECT array()");
             assertTrue(rs.next());
             Array array = rs.getArray(1);
@@ -242,9 +219,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyNullableNothing() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery("SELECT array(null)");
             assertTrue(rs.next());
             Array array = rs.getArray(1);
@@ -254,8 +229,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyTuple() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(statement -> {
             ResultSet rs = statement.executeQuery("SELECT (toUInt32(1),'2')");
 
             assertTrue(rs.next());
@@ -271,8 +245,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyEnum8() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.execute("CREATE TABLE test (test Enum8('a' = -1, 'b' = 1))ENGINE = Log");
             statement.execute("INSERT INTO test VALUES('a')");
@@ -287,8 +260,7 @@ public class QueryComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyEnum16() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.execute("CREATE TABLE test (test Enum16('a' = -1, 'b' = 1))ENGINE = Log");
             statement.execute("INSERT INTO test VALUES('a')");

@@ -16,14 +16,18 @@ package com.github.housepower.data.type.complex;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.IDataType;
+import com.github.housepower.exception.ClickHouseClientException;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.util.AsciiString;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -45,12 +49,7 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
         this.n = n;
         this.name = name;
         this.charset = serverContext.getConfigure().charset();
-
-        byte[] data = new byte[n];
-        for (int i = 0; i < n; i++) {
-            data[i] = '\u0000';
-        }
-        this.defaultValue = new String(data, charset);
+        this.defaultValue = new String(new byte[n], charset);
     }
 
     @Override
@@ -89,31 +88,35 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(CharSequence data, ISink sink) throws SQLException, IOException {
+        int writeLen;
+        int paddingLen;
         if (data instanceof AsciiString) {
-            writeBytes(((AsciiString) data).toByteArray(), serializer);
+            writeLen = data.length();
+            checkWriteLength(writeLen);
+            sink.writeCharSequence(data, StandardCharsets.US_ASCII);
+        } else if (charset.equals(StandardCharsets.UTF_8)) {
+            writeLen = ByteBufUtil.utf8Bytes(data);
+            checkWriteLength(writeLen);
+            sink.writeCharSequence(data, charset);
         } else {
-            writeBytes(data.toString().getBytes(charset), serializer);
+            byte[] bytes = data.toString().getBytes(charset);
+            writeLen = bytes.length;
+            checkWriteLength(writeLen);
+            sink.writeBytes(Unpooled.wrappedBuffer(bytes));
         }
+        paddingLen = n - writeLen;
+        sink.writeZero(paddingLen);
     }
 
-    private void writeBytes(byte[] bs, BinarySerializer serializer) throws IOException, SQLException {
-        byte[] res;
-        if (bs.length > n) {
-            throw new SQLException("The size of FixString column is too large, got " + bs.length);
-        }
-        if (bs.length == n) {
-            res = bs;
-        } else {
-            res = new byte[n];
-            System.arraycopy(bs, 0, res, 0, bs.length);
-        }
-        serializer.writeBytes(res);
+    private void checkWriteLength(int writeLen) {
+        if (writeLen > n)
+            throw new ClickHouseClientException("The size of FixString column is too large, got " + writeLen);
     }
 
     @Override
-    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new String(deserializer.readBytes(n), charset);
+    public CharSequence deserializeBinary(ISource source) throws SQLException, IOException {
+        return source.readCharSequence(n, charset);
     }
 
     @Override

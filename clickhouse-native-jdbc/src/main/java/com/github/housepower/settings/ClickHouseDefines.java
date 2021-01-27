@@ -26,13 +26,16 @@ public class ClickHouseDefines {
     public static final int DBMS_MIN_REVISION_WITH_SERVER_DISPLAY_NAME = 54372;
 
     public static final int MAX_BLOCK_BYTES = 1024 * 1024 * 10;
-    public static int SOCKET_SEND_BUFFER_BYTES = 1024 * 1024;
-    public static int SOCKET_RECV_BUFFER_BYTES = 1024 * 1024;
+    public static int SOCKET_SEND_BUFFER_BYTES = 1024 * 1024 * 4;
+    public static int SOCKET_RECV_BUFFER_BYTES = 1024 * 1024 * 4;
 
     public static int COLUMN_BUFFER_BYTES = 1024 * 1024;
 
     public static final int DATA_TYPE_CACHE_SIZE = 1024;
 
-    public static final int COMPRESSION_HEADER_LENGTH = 9;
     public static final int CHECKSUM_LENGTH = 16;
+    public static final int DECOMPRESSED_SIZE_LENGTH = 4;
+    public static final int COMPRESSED_SIZE_LENGTH = 4;
+    public static final int COMPRESSION_METHOD_LENGTH = 1;
+    public static final int COMPRESSION_HEADER_LENGTH = DECOMPRESSED_SIZE_LENGTH + COMPRESSED_SIZE_LENGTH + COMPRESSION_METHOD_LENGTH;
 }

@@ -14,19 +14,20 @@
 
 package com.github.housepower.data;
 
+import com.github.housepower.io.ByteBufSink;
+
 public abstract class AbstractColumn implements IColumn {
 
     protected final String name;
     protected final IDataType<?, ?> type;
 
-    // Note: values is only for reading
-    protected Object[] values;
-    protected ColumnWriterBuffer buffer;
+    protected Object[] sourceValues;
+    protected ByteBufSink sinkBuf;
 
-    public AbstractColumn(String name, IDataType<?, ?> type, Object[] values) {
+    public AbstractColumn(String name, IDataType<?, ?> type, Object[] sourceValues) {
         this.name = name;
         this.type = type;
-        this.values = values;
+        this.sourceValues = sourceValues;
     }
 
     @Override
@@ -46,21 +47,22 @@ public abstract class AbstractColumn implements IColumn {
 
     @Override
     public Object value(int idx) {
-        return values[idx];
+        return sourceValues[idx];
     }
 
     @Override
-    public void clear() {
-        values = new Object[0];
+    public void setColumnWriterBuffer(ByteBufSink buffer) {
+        this.sinkBuf = buffer;
     }
 
     @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        this.buffer = buffer;
-    }
-
-    @Override
-    public ColumnWriterBuffer getColumnWriterBuffer() {
-        return buffer;
+    public void close() {
+        if (sourceValues != null) {
+            sourceValues = new Object[0];
+        }
+        if (sinkBuf != null) {
+            sinkBuf.close();
+            sinkBuf = null;
+        }
     }
 }

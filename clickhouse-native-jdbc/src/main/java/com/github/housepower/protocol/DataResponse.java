@@ -16,7 +16,7 @@ package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.CompositeSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -24,13 +24,13 @@ import java.sql.SQLException;
 public class DataResponse implements Response {
 
     public static DataResponse readFrom(
-            BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
+            CompositeSource source, NativeContext.ServerContext info) throws IOException, SQLException {
 
-        String name = deserializer.readUTF8StringBinary();
+        String name = source.readUTF8Binary();
 
-        deserializer.maybeEnableCompressed();
-        Block block = Block.readFrom(deserializer, info);
-        deserializer.maybeDisableCompressed();
+        source.maybeEnableCompressed();
+        Block block = Block.readFrom(source, info);
+        source.maybeDisableCompressed();
 
         return new DataResponse(name, block);
     }

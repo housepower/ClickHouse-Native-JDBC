@@ -15,10 +15,10 @@
 package com.github.housepower.data.type;
 
 import com.github.housepower.data.IDataType;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -69,14 +69,14 @@ public class DataTypeDate implements IDataType<LocalDate, Date> {
     }
 
     @Override
-    public void serializeBinary(LocalDate data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(LocalDate data, ISink sink) throws SQLException, IOException {
         long epochDay = data.toEpochDay();
-        serializer.writeShort((short) epochDay);
+        sink.writeShortLE((short) epochDay);
     }
 
     @Override
-    public LocalDate deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        short epochDay = deserializer.readShort();
+    public LocalDate deserializeBinary(ISource source) throws IOException {
+        short epochDay = source.readShortLE();
         return LocalDate.ofEpochDay(epochDay);
     }
 

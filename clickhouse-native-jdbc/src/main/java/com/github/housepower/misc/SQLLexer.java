@@ -163,7 +163,7 @@ public class SQLLexer {
             return new StringView(data, start, pos);
         }
         // @formatter:on
-        throw new SQLException("Expect Bare Token.");
+        throw new SQLException("Expect bare token.");
     }
 
     public boolean isWhitespace() {

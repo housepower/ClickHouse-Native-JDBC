@@ -12,9 +12,10 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.settings;
 
-import java.io.IOException;
+import com.github.housepower.io.CompositeSink;
+
 import java.io.Serializable;
 import java.time.Duration;
 
@@ -24,7 +25,7 @@ public interface SettingType<T extends Serializable> {
 
     T deserializeURL(String queryParameter);
 
-    void serializeSetting(BinarySerializer serializer, T value) throws IOException;
+    void serializeSetting(CompositeSink sink, T value);
 
     SettingType<Long> Int64 = new SettingType<Long>() {
 
@@ -39,8 +40,8 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Long value) throws IOException {
-            serializer.writeVarInt(value);
+        public void serializeSetting(CompositeSink sink, Long value) {
+            sink.writeVarInt(value);
         }
     };
 
@@ -57,8 +58,8 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Integer value) throws IOException {
-            serializer.writeVarInt(value);
+        public void serializeSetting(CompositeSink sink, Integer value) {
+            sink.writeVarInt(value);
         }
     };
 
@@ -75,8 +76,8 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Float value) throws IOException {
-            serializer.writeUTF8StringBinary(String.valueOf(value));
+        public void serializeSetting(CompositeSink sink, Float value) {
+            sink.writeUTF8Binary(String.valueOf(value));
         }
     };
 
@@ -93,8 +94,8 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, String value) throws IOException {
-            serializer.writeUTF8StringBinary(String.valueOf(value));
+        public void serializeSetting(CompositeSink sink, String value) {
+            sink.writeUTF8Binary(String.valueOf(value));
         }
     };
 
@@ -111,8 +112,8 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Boolean value) throws IOException {
-            serializer.writeVarInt(Boolean.TRUE.equals(value) ? 1 : 0);
+        public void serializeSetting(CompositeSink sink, Boolean value) {
+            sink.writeVarInt(Boolean.TRUE.equals(value) ? 1 : 0);
         }
     };
 
@@ -129,8 +130,8 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Duration value) throws IOException {
-            serializer.writeVarInt(value.getSeconds());
+        public void serializeSetting(CompositeSink sink, Duration value) {
+            sink.writeVarInt(value.getSeconds());
         }
     };
 
@@ -147,8 +148,8 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Duration value) throws IOException {
-            serializer.writeVarInt(value.toMillis());
+        public void serializeSetting(CompositeSink sink, Duration value) {
+            sink.writeVarInt(value.toMillis());
         }
     };
 
@@ -165,8 +166,8 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Character value) throws IOException {
-            serializer.writeUTF8StringBinary(String.valueOf(value));
+        public void serializeSetting(CompositeSink sink, Character value) {
+            sink.writeUTF8Binary(String.valueOf(value));
         }
     };
 }
