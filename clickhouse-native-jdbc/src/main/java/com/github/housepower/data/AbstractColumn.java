@@ -14,6 +14,8 @@
 
 package com.github.housepower.data;
 
+import com.github.housepower.io.ColumnWriterBuffer;
+
 public abstract class AbstractColumn implements IColumn {
 
     protected final String name;

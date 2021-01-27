@@ -57,12 +57,12 @@ public class DataTypeIPv4 implements IDataType<Long, Long> {
 
     @Override
     public void serializeBinary(Long data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt(data.intValue());
+        serializer.writeIntLE(data.intValue());
     }
 
     @Override
     public Long deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readInt() & 0xffffffffL;
+        return deserializer.readIntLE() & 0xffffffffL;
     }
 
     @Override

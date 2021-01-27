@@ -57,12 +57,12 @@ public class DataTypeFloat32 implements IDataType<Float, Float> {
 
     @Override
     public void serializeBinary(Float data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeFloat(data);
+        serializer.writeFloatLE(data);
     }
 
     @Override
     public Float deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        return deserializer.readFloat();
+        return deserializer.readFloatLE();
     }
 
     @Override

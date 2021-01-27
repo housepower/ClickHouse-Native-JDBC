@@ -12,39 +12,35 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.io;
 
 import io.netty.buffer.ByteBuf;
 
-import java.nio.charset.Charset;
+public interface BinaryReader extends AutoCloseable {
 
-public interface BinarySerializer extends SupportCompress, AutoCloseable {
+    void skipBytes(int len);
 
-    void writeBoolean(boolean b);
+    boolean readBoolean();
 
-    void writeByte(byte b);
+    byte readByte();
 
-    void writeShortLE(short s);
+    short readShortLE();
 
-    void writeIntLE(int i);
+    int readIntLE();
 
-    void writeLongLE(long l);
+    long readLongLE();
 
-    void writeVarInt(long v);
+    long readVarInt();
 
-    void writeFloatLE(float f);
+    float readFloatLE();
 
-    void writeDoubleLE(double d);
+    double readDoubleLE();
 
-    void writeBytes(ByteBuf bytes);
+    ByteBuf readBytes(int maxLen);
 
-    void writeUTF8Binary(CharSequence utf8);
+    ByteBuf readBytesBinary();
 
-    void writeStringBinary(CharSequence seq, Charset charset);
-
-    void writeBytesBinary(ByteBuf bytes);
-
-    void flush(boolean force);
+    String readUTF8Binary();
 
     @Override
     void close();

@@ -18,7 +18,7 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
-import io.netty.util.AsciiString;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -72,11 +72,7 @@ public class DataTypeString implements IDataType<CharSequence, String> {
 
     @Override
     public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof AsciiString) {
-            serializer.writeBytesBinary(((AsciiString) data).toByteArray());
-        } else {
-            serializer.writeStringBinary(data.toString(), charset);
-        }
+        serializer.writeStringBinary(data, charset);
     }
 
     /**
@@ -84,9 +80,9 @@ public class DataTypeString implements IDataType<CharSequence, String> {
      * for getBytes(idx) method, we encode the String again
      */
     @Override
-    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        byte[] bs = deserializer.readBytesBinary();
-        return new String(bs, charset);
+    public CharSequence deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+        ByteBuf buf = deserializer.readBytesBinary();
+        return buf.readCharSequence(buf.readableBytes(), charset);
     }
 
     @Override

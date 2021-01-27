@@ -14,6 +14,7 @@
 
 package com.github.housepower.data;
 
+import com.github.housepower.io.ColumnWriterBuffer;
 import com.github.housepower.serde.BinarySerializer;
 
 import java.io.IOException;

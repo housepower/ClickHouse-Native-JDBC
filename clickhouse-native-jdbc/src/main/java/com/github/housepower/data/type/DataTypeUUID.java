@@ -68,12 +68,12 @@ public class DataTypeUUID implements IDataType<UUID, String> {
 
     @Override
     public void serializeBinary(UUID data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeLong(data.getMostSignificantBits());
-        serializer.writeLong(data.getLeastSignificantBits());
+        serializer.writeLongLE(data.getMostSignificantBits());
+        serializer.writeLongLE(data.getLeastSignificantBits());
     }
 
     @Override
     public UUID deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new UUID(deserializer.readLong(), deserializer.readLong());
+        return new UUID(deserializer.readLongLE(), deserializer.readLongLE());
     }
 }

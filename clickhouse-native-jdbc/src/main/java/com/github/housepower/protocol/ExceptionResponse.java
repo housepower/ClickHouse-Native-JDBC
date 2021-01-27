@@ -23,10 +23,10 @@ import java.sql.SQLException;
 public class ExceptionResponse implements Response {
 
     public static SQLException readExceptionFrom(BinaryDeserializer deserializer) throws IOException {
-        int code = deserializer.readInt();
-        String name = deserializer.readUTF8StringBinary();
-        String message = deserializer.readUTF8StringBinary();
-        String stackTrace = deserializer.readUTF8StringBinary();
+        int code = deserializer.readIntLE();
+        String name = deserializer.readUTF8Binary();
+        String message = deserializer.readUTF8Binary();
+        String stackTrace = deserializer.readUTF8Binary();
 
         if (deserializer.readBoolean()) {
             return new ClickHouseSQLException(

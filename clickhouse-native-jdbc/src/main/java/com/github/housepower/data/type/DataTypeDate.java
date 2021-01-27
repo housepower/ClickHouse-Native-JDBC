@@ -71,12 +71,12 @@ public class DataTypeDate implements IDataType<LocalDate, Date> {
     @Override
     public void serializeBinary(LocalDate data, BinarySerializer serializer) throws SQLException, IOException {
         long epochDay = data.toEpochDay();
-        serializer.writeShort((short) epochDay);
+        serializer.writeShortLE((short) epochDay);
     }
 
     @Override
     public LocalDate deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        short epochDay = deserializer.readShort();
+        short epochDay = deserializer.readShortLE();
         return LocalDate.ofEpochDay(epochDay);
     }
 

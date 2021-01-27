@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.misc.BytesHelper;
+import com.github.housepower.misc.CodecHelper;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -29,7 +29,7 @@ import joptsimple.internal.Strings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DecimalTypeITest extends AbstractITest implements BytesHelper {
+public class DecimalTypeITest extends AbstractITest implements CodecHelper {
 
     @Test
     public void testDecimalType() throws Exception {

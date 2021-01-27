@@ -67,20 +67,20 @@ public class QueryRequest implements Request {
 
     @Override
     public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
-        serializer.writeUTF8StringBinary(queryId);
+        serializer.writeUTF8Binary(queryId);
         clientContext.writeTo(serializer);
 
         for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
-            serializer.writeUTF8StringBinary(entry.getKey().name());
+            serializer.writeUTF8Binary(entry.getKey().name());
             @SuppressWarnings("rawtypes")
             SettingType type = entry.getKey().type();
             //noinspection unchecked
             type.serializeSetting(serializer, entry.getValue());
         }
-        serializer.writeUTF8StringBinary("");
+        serializer.writeUTF8Binary("");
         serializer.writeVarInt(stage);
         serializer.writeBoolean(compression);
-        serializer.writeUTF8StringBinary(queryString);
+        serializer.writeUTF8Binary(queryString);
         // empty data to server
         DataRequest.EMPTY.writeTo(serializer);
 

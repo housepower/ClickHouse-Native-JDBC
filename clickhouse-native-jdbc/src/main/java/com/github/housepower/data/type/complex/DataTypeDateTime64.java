@@ -140,12 +140,12 @@ public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
         long epochSeconds = DateTimeUtil.toEpochSecond(data);
         int nanos = data.getNano();
         long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
-        serializer.writeLong(value);
+        serializer.writeLongLE(value);
     }
 
     @Override
     public ZonedDateTime deserializeBinary(BinaryDeserializer deserializer) throws IOException {
-        long value = deserializer.readLong() * POW_10[MAX_SCALA - scale];
+        long value = deserializer.readLongLE() * POW_10[MAX_SCALA - scale];
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);
 

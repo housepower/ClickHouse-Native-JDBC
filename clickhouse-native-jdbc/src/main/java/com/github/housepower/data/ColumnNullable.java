@@ -14,6 +14,7 @@
 
 package com.github.housepower.data;
 
+import com.github.housepower.io.ColumnWriterBuffer;
 import com.github.housepower.data.type.complex.DataTypeNullable;
 import com.github.housepower.serde.BinarySerializer;
 
@@ -49,8 +50,8 @@ public class ColumnNullable extends AbstractColumn {
     @Override
     public void flushToSerializer(BinarySerializer serializer, boolean immediate) throws IOException {
         if (isExported()) {
-            serializer.writeUTF8StringBinary(name);
-            serializer.writeUTF8StringBinary(type.name());
+            serializer.writeUTF8Binary(name);
+            serializer.writeUTF8Binary(type.name());
         }
 
         for (byte sign : nullableSign) {
