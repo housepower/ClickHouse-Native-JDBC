@@ -15,16 +15,19 @@
 package com.github.housepower.buffer;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
-import com.github.housepower.misc.BytesHelper;
+import com.github.housepower.misc.CodecHelper;
 import io.airlift.compress.Decompressor;
 import io.airlift.compress.lz4.Lz4Decompressor;
 import io.airlift.compress.zstd.ZstdDecompressor;
 
+import javax.annotation.Nullable;
+
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-public class CompressedBuffedReader implements BuffedReader, BytesHelper {
+public class CompressedBuffedReader implements BuffedReader, CodecHelper {
 
     private int position;
     private int capacity;
@@ -72,12 +75,6 @@ public class CompressedBuffedReader implements BuffedReader, BytesHelper {
         return bytes.length;
     }
 
-    // @formatter:off
-    private static final int NONE = 0x02;
-    private static final int LZ4  = 0x82;
-    private static final int ZSTD = 0x90;
-    // @formatter:on
-
     private byte[] readCompressedData() throws IOException {
         //TODO: validate checksum
         buf.readBinary(new byte[CHECKSUM_LENGTH]);
@@ -94,34 +91,25 @@ public class CompressedBuffedReader implements BuffedReader, BytesHelper {
 
         switch (method) {
             case LZ4:
-                return readLZ4CompressedData(compressedSize - COMPRESSION_HEADER_LENGTH, decompressedSize);
+                return readCompressedData(compressedSize - COMPRESSION_HEADER_LENGTH, decompressedSize, lz4Decompressor);
+            case ZSTD:
+                return readCompressedData(compressedSize - COMPRESSION_HEADER_LENGTH, decompressedSize, zstdDecompressor);
             case NONE:
-                return readNoneCompressedData(decompressedSize);
+                return readCompressedData(compressedSize - COMPRESSION_HEADER_LENGTH, decompressedSize, null);
             default:
                 throw new UnsupportedOperationException("Unknown compression magic code: " + method);
         }
     }
 
-    private byte[] readNoneCompressedData(int size) throws IOException {
-        byte[] decompressed = new byte[size];
-
-        if (buf.readBinary(decompressed) != size) {
-            throw new IOException("Cannot decompress use None method.");
-        }
-
-        return decompressed;
-    }
-
-    private byte[] readLZ4CompressedData(int compressedSize, int decompressedSize) throws IOException {
+    private byte[] readCompressedData(int compressedSize, int decompressedSize, @Nullable Decompressor decompressor) throws IOException {
         byte[] compressed = new byte[compressedSize];
         if (buf.readBinary(compressed) == compressedSize) {
+            if (decompressor == null)
+                return compressed;
             byte[] decompressed = new byte[decompressedSize];
-
-            if (lz4Decompressor.decompress(compressed, 0, compressedSize, decompressed, 0, decompressedSize) == decompressedSize) {
+            if (decompressor.decompress(compressed, 0, compressedSize, decompressed, 0, decompressedSize) == decompressedSize)
                 return decompressed;
-            }
         }
-
-        throw new IOException("Cannot decompress use LZ4 method.");
+        throw new UncheckedIOException(new IOException("Cannot decompress data."));
     }
 }

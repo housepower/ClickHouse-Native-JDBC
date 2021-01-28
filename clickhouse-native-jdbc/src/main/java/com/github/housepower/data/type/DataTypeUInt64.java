@@ -14,7 +14,7 @@
 
 package com.github.housepower.data.type;
 
-import com.github.housepower.misc.BytesHelper;
+import com.github.housepower.misc.CodecHelper;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
@@ -26,7 +26,7 @@ import java.sql.SQLException;
 // I see some binary protocol frameworks such as Protobuf chose an alternative way to represent UInt64 by long,
 // and use special tools to calculate it. Since currently we don't guarantee any stable APIs except JDBC APIs,
 // so we have an opportunity to change it later.
-public class DataTypeUInt64 implements BaseDataTypeInt64<BigInteger, BigInteger>, BytesHelper {
+public class DataTypeUInt64 implements BaseDataTypeInt64<BigInteger, BigInteger>, CodecHelper {
 
     @Override
     public String name() {

@@ -28,6 +28,7 @@ import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.stream.QueryResult;
 import com.github.housepower.stream.ClickHouseQueryResult;
+import io.airlift.compress.lz4.Lz4Compressor;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -55,7 +56,8 @@ public class NativeClient {
             socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
 
             return new NativeClient(socket,
-                    new BinarySerializer(new SocketBuffedWriter(socket), true),
+                    // TODO support zstd
+                    new BinarySerializer(new SocketBuffedWriter(socket), true, new Lz4Compressor()),
                     new BinaryDeserializer(new SocketBuffedReader(socket), true));
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);

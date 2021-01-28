@@ -16,6 +16,7 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.misc.StrUtil;
 import com.github.housepower.misc.SystemUtil;
+import io.netty.util.ResourceLeakDetector;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.ClickHouseContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -33,6 +34,9 @@ import java.util.Enumeration;
 
 @Testcontainers
 public abstract class AbstractITest implements Serializable {
+    static {
+        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
+    }
 
     protected static final ZoneId CLIENT_TZ = ZoneId.systemDefault();
     protected static final ZoneId SERVER_TZ = ZoneId.of("UTC");

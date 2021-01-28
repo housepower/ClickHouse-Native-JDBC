@@ -18,7 +18,9 @@ import com.github.housepower.buffer.BuffedWriter;
 import com.github.housepower.buffer.CompressedBuffedWriter;
 import com.github.housepower.misc.Switcher;
 import com.github.housepower.settings.ClickHouseDefines;
+import io.airlift.compress.Compressor;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -28,11 +30,11 @@ public class BinarySerializer {
     private final Switcher<BuffedWriter> switcher;
     private final boolean enableCompress;
 
-    public BinarySerializer(BuffedWriter writer, boolean enableCompress) {
+    public BinarySerializer(BuffedWriter writer, boolean enableCompress, @Nullable Compressor compressor) {
         this.enableCompress = enableCompress;
         BuffedWriter compressWriter = null;
         if (enableCompress) {
-            compressWriter = new CompressedBuffedWriter(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES, writer);
+            compressWriter = new CompressedBuffedWriter(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES, writer, compressor);
         }
         switcher = new Switcher<>(compressWriter, writer);
     }

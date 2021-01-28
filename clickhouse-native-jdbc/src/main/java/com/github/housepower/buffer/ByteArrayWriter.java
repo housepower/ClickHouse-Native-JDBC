@@ -14,61 +14,58 @@
 
 package com.github.housepower.buffer;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.LinkedList;
+import com.github.housepower.misc.NettyUtil;
+import io.netty.buffer.ByteBuf;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class ByteArrayWriter implements BuffedWriter {
-    private final int blockSize;
-    private ByteBuffer buffer;
 
-    // TODO pooling
-    private final List<ByteBuffer> byteBufferList = new LinkedList<>();
+    private final int columnSize;
+    private final List<ByteBuf> bufList = new ArrayList<>();
 
-    public ByteArrayWriter(int blockSize) {
-        this.blockSize = blockSize;
-        this.buffer = ByteBuffer.allocate(blockSize);
-        this.byteBufferList.add(buffer);
+    private ByteBuf buf;
+
+    public ByteArrayWriter(int columnSize) {
+        this.columnSize = columnSize;
+        this.buf = NettyUtil.alloc().buffer(columnSize, columnSize);
+        this.bufList.add(buf);
     }
 
     @Override
-    public void writeBinary(byte byt) throws IOException {
-        buffer.put(byt);
+    public void writeBinary(byte byt) {
+        buf.writeByte(byt);
         flushToTarget(false);
     }
 
     @Override
-    public void writeBinary(byte[] bytes) throws IOException {
+    public void writeBinary(byte[] bytes) {
         writeBinary(bytes, 0, bytes.length);
     }
 
     @Override
-    public void writeBinary(byte[] bytes, int offset, int length) throws IOException {
-
-        while (buffer.remaining() < length) {
-            int num = buffer.remaining();
-            buffer.put(bytes, offset, num);
+    public void writeBinary(byte[] bytes, int offset, int length) {
+        if (buf.maxFastWritableBytes() < length) {
+            int partial = buf.maxFastWritableBytes();
+            buf.writeBytes(bytes, offset, partial);
             flushToTarget(true);
-
-            offset += num;
-            length -= num;
+            offset += partial;
+            length -= partial;
         }
-
-        buffer.put(bytes, offset, length);
+        buf.writeBytes(bytes, offset, length);
         flushToTarget(false);
     }
 
     @Override
-    public void flushToTarget(boolean force) throws IOException {
-        if (buffer.hasRemaining() && !force) {
+    public void flushToTarget(boolean force) {
+        if (buf.maxFastWritableBytes() > 0 && !force)
             return;
-        }
-        buffer = ByteBuffer.allocate(blockSize);
-        byteBufferList.add(buffer);
+        buf = NettyUtil.alloc().buffer(columnSize, columnSize);
+        bufList.add(buf);
     }
 
-    public List<ByteBuffer> getBufferList() {
-        return byteBufferList;
+    public ByteBuf getBuf() {
+        return NettyUtil.alloc().compositeBuffer(bufList.size()).addComponents(true, bufList);
     }
 }

@@ -15,7 +15,7 @@
 package com.github.housepower.data.type.complex;
 
 import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.BytesHelper;
+import com.github.housepower.misc.CodecHelper;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
@@ -29,7 +29,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Locale;
 
-public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, BytesHelper {
+public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, CodecHelper {
 
     public static DataTypeCreator<BigDecimal, BigDecimal> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
