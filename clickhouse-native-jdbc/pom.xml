@@ -124,7 +124,7 @@
                                     <arguments>
                                         <argument>-classpath</argument>
                                         <classpath/>
-                                        <argument>-Djava.library.path=/usr/lib</argument>
+                                        <argument>-Djava.library.path=/tmp</argument>
                                         <argument>com.github.housepower.jdbc.benchmark.Benchmark</argument>
                                     </arguments>
                                 </configuration>
