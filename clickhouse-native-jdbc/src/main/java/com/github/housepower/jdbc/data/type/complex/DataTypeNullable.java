@@ -141,4 +141,9 @@ public class DataTypeNullable implements IDataType {
         }
         return data;
     }
+
+    @Override
+    public boolean isSigned() {
+        return nestedDataType.isSigned();
+    }
 }
