@@ -28,7 +28,7 @@ jobs:
         run: |
           wget -O /tmp/async-profiler-1.8.3-linux-x64.tar.gz \
             https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.8.3/async-profiler-1.8.3-linux-x64.tar.gz
-          tar -C /usr/lib --strip-components=2 \
+          tar -C /tmp --strip-components=2 \
             -xzf /tmp/async-profiler-1.8.3-linux-x64.tar.gz async-profiler-1.8.3-linux-x64/build/libasyncProfiler.so
 
       - name: Run benchmarks
