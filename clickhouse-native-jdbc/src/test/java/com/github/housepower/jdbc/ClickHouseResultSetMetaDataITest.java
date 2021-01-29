@@ -27,10 +27,11 @@ class ClickHouseResultSetMetaDataITest extends AbstractITest {
     void getDriverMinorVersion() throws Exception {
         withNewConnection(connection -> {
             ClickHouseResultSet rs = ClickHouseResultSetBuilder
-                                         .builder(6, ((ClickHouseConnection) connection).serverContext())
+                                         .builder(8, ((ClickHouseConnection) connection).serverContext())
                                          .cfg(((ClickHouseConnection) connection).cfg())
-                                         .columnNames("a1", "a2", "a3", "a4", "a5", "a6")
-                                         .columnTypes("String", "UInt32", "Int64", "Float32", "Float64", "Decimal(76, 26)")
+                                         .columnNames("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8")
+                                         .columnTypes("String", "UInt32", "Int64", "Float32", "Float64", "Decimal(76, 26)",
+                                                 "Nullable(Int64)", "Nullable(UInt64)")
                                          .build();
 
             assertEquals("a1", rs.getMetaData().getColumnName(1));
@@ -39,6 +40,8 @@ class ClickHouseResultSetMetaDataITest extends AbstractITest {
             assertEquals(true, rs.getMetaData().isSigned(3));
             assertEquals(true, rs.getMetaData().isSigned(4));
             assertEquals(true, rs.getMetaData().isSigned(5));
+            assertEquals(true, rs.getMetaData().isSigned(7));
+            assertEquals(false, rs.getMetaData().isSigned(8));
 
             assertEquals(8, rs.getMetaData().getPrecision(4));
             assertEquals(17, rs.getMetaData().getPrecision(5));
