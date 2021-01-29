@@ -13,7 +13,7 @@ The following software is required to work with the codebase and build it locall
 * Git
 * JDK 8/11
 * Maven
-* Docker and docker-compose
+* Docker
 
 You can verify the tools are installed and running:
 
@@ -21,7 +21,6 @@ You can verify the tools are installed and running:
     $ javac -version
     $ mvn -version
     $ docker --version
-    $ docker-compose --version
 
 ### GitHub account
 
@@ -79,15 +78,8 @@ If you want to skip the integration tests (e.g., if you don't have Docker instal
 
 ### Running and debugging tests
 
-A number of the modules use Docker during their integration tests to run a database. During development it's often desirable to start the Docker container and leave it running so that you can compile/run/debug tests repeatedly from your IDE. To do this, simply go into project directory and run the following command:
-
-    $ docker-compose up -d
-
-This will first pull Docker image for the database container, and then will start it. You can then run any integration tests from your IDE.
-
-When your testing is complete, you can stop the Docker container by running:
-
-    $ docker-compose down
+A number of the modules use Docker during their integration tests to run a database. We use [TestContainers](https://www.testcontainers.org/) to manage that stuffs. 
+Please ensure that you have a docker daemon available when run integration tests on local.
 
 ### Making changes
 
