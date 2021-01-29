@@ -124,7 +124,7 @@
                                     <arguments>
                                         <argument>-classpath</argument>
                                         <classpath/>
-                                        <argument>com.github.housepower.jdbc.benchmark.Main</argument>
+                                        <argument>com.github.housepower.jdbc.benchmark.Benchmark</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

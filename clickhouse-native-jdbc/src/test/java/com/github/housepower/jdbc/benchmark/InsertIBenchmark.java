@@ -14,7 +14,6 @@
 
 package com.github.housepower.jdbc.benchmark;
 
-import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 
 import java.sql.Date;
@@ -25,8 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- */
 public class InsertIBenchmark extends AbstractInsertIBenchmark {
     AtomicInteger tableMaxId = new AtomicInteger();
 
@@ -57,13 +54,11 @@ public class InsertIBenchmark extends AbstractInsertIBenchmark {
     };
 
     @Benchmark
-    @Test
     public void benchInsertNative() throws Exception {
         withConnection(benchInsert, ConnectionType.NATIVE);
     }
 
     @Benchmark
-    @Test
     public void benchInsertHttp() throws Exception {
         withConnection(benchInsert, ConnectionType.HTTP);
     }

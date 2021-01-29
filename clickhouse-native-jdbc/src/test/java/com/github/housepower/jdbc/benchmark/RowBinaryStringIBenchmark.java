@@ -15,7 +15,6 @@
 package com.github.housepower.jdbc.benchmark;
 
 import com.google.common.base.Strings;
-import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import ru.yandex.clickhouse.ClickHouseStatement;
 import ru.yandex.clickhouse.domain.ClickHouseFormat;
@@ -28,7 +27,6 @@ public class RowBinaryStringIBenchmark extends AbstractInsertIBenchmark {
     private final String columnType = "String";
 
     @Benchmark
-    @Test
     public void benchInsertNative() throws Exception {
         withConnection(connection -> {
             wideColumnPrepare(connection, columnType);
@@ -48,7 +46,6 @@ public class RowBinaryStringIBenchmark extends AbstractInsertIBenchmark {
     }
 
     @Benchmark
-    @Test
     public void benchInsertHttpRowBinary() throws Exception {
         withConnection(connection -> {
             wideColumnPrepare(connection, columnType);

@@ -91,5 +91,4 @@ public class AbstractIBenchmark {
     public enum ConnectionType {
         NATIVE, HTTP
     }
-
 }

@@ -15,27 +15,20 @@
 package com.github.housepower.jdbc.benchmark;
 
 import com.google.common.base.Strings;
-import org.junit.jupiter.api.Test;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
 
 import java.sql.PreparedStatement;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
-@State(Scope.Thread)
 public class WideColumnStringInsertIBenchmark extends AbstractInsertIBenchmark {
 
     @Benchmark
-    @Test
     public void benchInsertNative() throws Exception {
         withConnection(benchInsert, ConnectionType.NATIVE);
     }
 
     @Benchmark
-    @Test
     public void benchInsertHttp() throws Exception {
         withConnection(benchInsert, ConnectionType.HTTP);
     }
