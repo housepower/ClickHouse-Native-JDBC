@@ -24,12 +24,25 @@ jobs:
       - run: sed -i 's/TRACE/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
       - run: sed -i 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
 
+      - name: Install libasyncProfiler (remove this once async-profiler available on maven-central)
+      - run: |
+          wget -O /tmp/async-profiler-1.8.3-linux-x64.tar.gz \
+            https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.8.3/async-profiler-1.8.3-linux-x64.tar.gz
+          tar -xzf /tmp/async-profiler-1.8.3-linux-x64.tar.gz async-profiler-1.8.3-linux-x64/build/libasyncProfiler.so \
+            -C /usr/lib --strip-components=2
+
       - name: Run benchmarks
         run: |
           mvn -B -Pbenchmark clean integration-test -DskipITs -pl :clickhouse-native-jdbc -am | tee output.log
           echo "BENCHMARK_REPORT<<EOF" >> $GITHUB_ENV
           echo "`cat output.log | grep -E '^Benchmark\s.*\sUnits$' -A 100 | grep -E '.*\s(Units|ms/op)$'`" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: benchmark-reports
+          path: clickhouse-native-jdbc/reports
 
       - name: PR Comment
         uses: github-actions-up-and-running/pr-comment@v1.0.1
