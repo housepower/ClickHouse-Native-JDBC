@@ -1,6 +1,11 @@
 Release Notes
 ===
 
+v2.5.3 (Jan 29, 2021)
+---
+### Changelog
+- (bugfix) Fix signed error when type is nullable (#305) Thanks @liuneng1994
+
 v2.5.2 (Jan 11, 2021)
 ---
 ### Changelog

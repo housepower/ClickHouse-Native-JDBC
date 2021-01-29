@@ -1,6 +1,11 @@
 发行注记
 ===
 
+v2.5.3 (2021年1月29日)
+---
+### 变更日志
+- (bugfix) Fix signed error when type is nullable (#305) Thanks @liuneng1994
+
 v2.5.2 (2021年1月11日)
 ---
 ### 变更日志
