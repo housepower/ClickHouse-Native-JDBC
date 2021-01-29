@@ -248,6 +248,9 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (data == null) {
             return null;
         }
+        if (data instanceof BigDecimal) {
+            return ((BigDecimal) data);
+        }
         return new BigDecimal(data.toString());
     }
 
