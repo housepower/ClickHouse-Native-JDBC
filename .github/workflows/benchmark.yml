@@ -28,8 +28,8 @@ jobs:
         run: |
           wget -O /tmp/async-profiler-1.8.3-linux-x64.tar.gz \
             https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.8.3/async-profiler-1.8.3-linux-x64.tar.gz
-          tar -xzf /tmp/async-profiler-1.8.3-linux-x64.tar.gz async-profiler-1.8.3-linux-x64/build/libasyncProfiler.so \
-            -C /usr/lib --strip-components=2
+          tar -C /usr/lib --strip-components=2 \
+            -xzf /tmp/async-profiler-1.8.3-linux-x64.tar.gz async-profiler-1.8.3-linux-x64/build/libasyncProfiler.so
 
       - name: Run benchmarks
         run: |
@@ -38,11 +38,12 @@ jobs:
           echo "`cat output.log | grep -E '^Benchmark\s.*\sUnits$' -A 100 | grep -E '.*\s(Units|ms/op)$'`" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
+      - run: tar -czf benchmark-reports.tgz -C clickhouse-native-jdbc reports
       - name: Upload reports
         uses: actions/upload-artifact@v2
         with:
           name: benchmark-reports
-          path: clickhouse-native-jdbc/reports
+          path: benchmark-reports.tgz
 
       - name: PR Comment
         uses: github-actions-up-and-running/pr-comment@v1.0.1
