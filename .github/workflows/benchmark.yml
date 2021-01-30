@@ -30,10 +30,6 @@ jobs:
             https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.8.3/async-profiler-1.8.3-linux-x64.tar.gz
           tar -C /tmp -xzf /tmp/async-profiler-1.8.3-linux-x64.tar.gz
 
-      - run: |
-          echo 0 > /proc/sys/kernel/kptr_restrict
-          echo 1 > /proc/sys/kernel/perf_event_paranoid
-
       - name: Run benchmarks
         run: |
           mvn -B -Pbenchmark clean integration-test -DskipITs -pl :clickhouse-native-jdbc -am | tee output.log
