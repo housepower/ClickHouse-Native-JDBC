@@ -22,19 +22,20 @@ import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Thread)
 public class AbstractInsertIBenchmark extends AbstractIBenchmark {
+
     @Param({"20", "50"})
     protected int columnNum = 20;
+
     @Param({"200000", "500000"})
     protected int batchSize = 200000;
 
     AtomicInteger tableMaxId = new AtomicInteger();
 
-    //drop table, create table
+    // drop table, create table
     protected void wideColumnPrepare(Connection connection, String columnType) throws SQLException {
         int tableId = tableMaxId.incrementAndGet();
         String testTable = "test_" + tableId;

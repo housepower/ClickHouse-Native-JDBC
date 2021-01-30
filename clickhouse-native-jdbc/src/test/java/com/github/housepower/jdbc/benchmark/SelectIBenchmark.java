@@ -14,7 +14,6 @@
 
 package com.github.housepower.jdbc.benchmark;
 
-import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 
@@ -24,11 +23,11 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- */
 public class SelectIBenchmark extends AbstractIBenchmark {
+
     @Param({"500000", "10000000"})
     protected long selectNumber = 100000;
+
     public WithConnection benchSelect = connection -> {
         long sum = 0;
         Statement statement = connection.createStatement();
@@ -40,17 +39,15 @@ public class SelectIBenchmark extends AbstractIBenchmark {
             rs.getTimestamp(3);
             rs.getDate(4);
         }
-        assertEquals((selectNumber-1) * selectNumber / 2, sum);
+        assertEquals((selectNumber - 1) * selectNumber / 2, sum);
     };
 
     @Benchmark
-    @Test
     public void benchSelectNative() throws Exception {
         withConnection(benchSelect, ConnectionType.NATIVE);
     }
 
     @Benchmark
-    @Test
     public void benchSelectHTTP() throws Exception {
         withConnection(benchSelect, ConnectionType.HTTP);
     }

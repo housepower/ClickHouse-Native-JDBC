@@ -16,7 +16,6 @@ package com.github.housepower.jdbc.benchmark;
 
 import com.google.common.base.Strings;
 
-import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 
 import java.sql.PreparedStatement;
@@ -32,7 +31,6 @@ public class RowBinaryIntIBenchmark extends AbstractInsertIBenchmark {
     private final String columnType = "Int32";
 
     @Benchmark
-    @Test
     public void benchInsertNative() throws Exception {
         withConnection(connection -> {
             wideColumnPrepare(connection, columnType);
@@ -53,7 +51,6 @@ public class RowBinaryIntIBenchmark extends AbstractInsertIBenchmark {
     }
 
     @Benchmark
-    @Test
     public void benchInsertHttpRowBinary() throws Exception {
         withConnection(connection -> {
             wideColumnPrepare(connection, columnType);
