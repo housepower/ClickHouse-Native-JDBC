@@ -116,6 +116,8 @@
         <jupiter.version>5.7.0</jupiter.version>
         <testcontainers.version>1.15.1</testcontainers.version>
 
+        <async-profiler.library-path>/tmp/async-profiler-1.8.3-linux-x64/build</async-profiler.library-path>
+
         <ClickHousePort>9000</ClickHousePort>
         <ClickHouseHTTPPort>8123</ClickHouseHTTPPort>
     </properties>

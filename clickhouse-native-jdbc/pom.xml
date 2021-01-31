@@ -124,7 +124,7 @@
                                     <arguments>
                                         <argument>-classpath</argument>
                                         <classpath/>
-                                        <argument>-Djava.library.path=/tmp/async-profiler-1.8.3-linux-x64/build</argument>
+                                        <argument>-Djava.library.path=${async-profiler.library-path}</argument>
                                         <argument>com.github.housepower.jdbc.benchmark.Benchmark</argument>
                                     </arguments>
                                 </configuration>
