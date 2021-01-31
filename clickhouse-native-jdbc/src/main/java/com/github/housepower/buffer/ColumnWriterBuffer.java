@@ -16,9 +16,6 @@ package com.github.housepower.buffer;
 
 import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.settings.ClickHouseDefines;
-import io.netty.buffer.ByteBuf;
-
-import java.io.IOException;
 
 public class ColumnWriterBuffer {
 
@@ -31,11 +28,7 @@ public class ColumnWriterBuffer {
         this.column = new BinarySerializer(columnWriter, false, null);
     }
 
-    public void writeTo(BinarySerializer serializer) throws IOException {
-        ByteBuf buf = columnWriter.getBuf();
-        byte[] bytes = new byte[buf.readableBytes()];
-        buf.readBytes(bytes);
-        serializer.writeBytes(bytes);
-        assert buf.release();
+    public void writeTo(BinarySerializer serializer) {
+        serializer.writeBytes(columnWriter.getBuf());
     }
 }

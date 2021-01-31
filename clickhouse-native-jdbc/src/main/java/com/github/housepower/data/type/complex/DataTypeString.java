@@ -20,6 +20,7 @@ import com.github.housepower.misc.BytesCharSeq;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.Unpooled;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -74,9 +75,9 @@ public class DataTypeString implements IDataType<CharSequence, String> {
     @Override
     public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
         if (data instanceof BytesCharSeq) {
-            serializer.writeBytesBinary(((BytesCharSeq) data).bytes());
+            serializer.writeBytesBinary(Unpooled.wrappedBuffer(((BytesCharSeq) data).bytes()));
         } else {
-            serializer.writeStringBinary(data.toString(), charset);
+            serializer.writeStringBinary(data, charset);
         }
     }
 

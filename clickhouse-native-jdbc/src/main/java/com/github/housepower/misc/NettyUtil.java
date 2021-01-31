@@ -15,10 +15,11 @@
 package com.github.housepower.misc;
 
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 
 public class NettyUtil {
 
-    private final static ByteBufAllocator alloc = ByteBufAllocator.DEFAULT;
+    private final static ByteBufAllocator alloc = new PooledByteBufAllocator();
 
     public static ByteBufAllocator alloc() {
         return alloc;

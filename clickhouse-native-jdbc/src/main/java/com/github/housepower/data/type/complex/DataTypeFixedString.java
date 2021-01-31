@@ -21,6 +21,7 @@ import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.Unpooled;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -108,7 +109,7 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
             res = new byte[n];
             System.arraycopy(bs, 0, res, 0, bs.length);
         }
-        serializer.writeBytes(res);
+        serializer.writeBytes(Unpooled.wrappedBuffer(res));
     }
 
     @Override
