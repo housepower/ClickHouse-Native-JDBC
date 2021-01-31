@@ -14,13 +14,15 @@
 
 package com.github.housepower.buffer;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
 
 public interface BuffedWriter {
 
-    void writeBinary(byte byt);
+    void writeBinary(byte byt) throws IOException;
 
-    void writeBinary(ByteBuf bytes);
+    void writeBinary(byte[] bytes) throws IOException;
 
-    void flushToTarget(boolean force);
+    void writeBinary(byte[] bytes, int offset, int length) throws IOException;
+
+    void flushToTarget(boolean force) throws IOException;
 }

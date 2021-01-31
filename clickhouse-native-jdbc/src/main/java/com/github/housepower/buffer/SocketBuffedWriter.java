@@ -14,54 +14,35 @@
 
 package com.github.housepower.buffer;
 
-import io.netty.buffer.ByteBuf;
-
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.net.Socket;
 
 public class SocketBuffedWriter implements BuffedWriter {
 
     private final OutputStream out;
 
-    public SocketBuffedWriter(Socket socket) {
-        try {
-            this.out = socket.getOutputStream();
-        } catch (IOException rethrow) {
-            throw new UncheckedIOException(rethrow);
-        }
+    public SocketBuffedWriter(Socket socket) throws IOException {
+        this.out = socket.getOutputStream();
     }
 
     @Override
-    public void writeBinary(byte byt) {
-        try {
-            out.write(byt);
-        } catch (IOException rethrow) {
-            throw new UncheckedIOException(rethrow);
-        }
+    public void writeBinary(byte byt) throws IOException {
+        out.write(byt);
     }
 
     @Override
-    public void writeBinary(ByteBuf bytes) {
-        try {
-            byte[] b = new byte[bytes.readableBytes()];
-            bytes.readBytes(b);
-            out.write(b);
-            flushToTarget(false);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } finally {
-            assert bytes.release();
-        }
+    public void writeBinary(byte[] bytes) throws IOException {
+        out.write(bytes);
     }
 
     @Override
-    public void flushToTarget(boolean force) {
-        try {
-            out.flush();
-        } catch (IOException rethrow) {
-            throw new UncheckedIOException(rethrow);
-        }
+    public void writeBinary(byte[] bytes, int offset, int length) throws IOException {
+        out.write(bytes, offset, length);
+    }
+
+    @Override
+    public void flushToTarget(boolean force) throws IOException {
+        out.flush();
     }
 }

@@ -25,23 +25,44 @@ public class ByteArrayWriter implements BuffedWriter {
     private final int columnSize;
     private final List<ByteBuf> bufList = new ArrayList<>();
 
+    private ByteBuf buf;
 
     public ByteArrayWriter(int columnSize) {
         this.columnSize = columnSize;
+        this.buf = NettyUtil.alloc().buffer(columnSize, columnSize);
+        this.bufList.add(buf);
     }
 
     @Override
     public void writeBinary(byte byt) {
-        bufList.add(NettyUtil.alloc().buffer(1, 1).writeByte(byt));
+        buf.writeByte(byt);
+        flushToTarget(false);
     }
 
     @Override
-    public void writeBinary(ByteBuf bytes) {
-        bufList.add(bytes);
+    public void writeBinary(byte[] bytes) {
+        writeBinary(bytes, 0, bytes.length);
+    }
+
+    @Override
+    public void writeBinary(byte[] bytes, int offset, int length) {
+        if (buf.maxFastWritableBytes() < length) {
+            int partial = buf.maxFastWritableBytes();
+            buf.writeBytes(bytes, offset, partial);
+            flushToTarget(true);
+            offset += partial;
+            length -= partial;
+        }
+        buf.writeBytes(bytes, offset, length);
+        flushToTarget(false);
     }
 
     @Override
     public void flushToTarget(boolean force) {
+        if (buf.maxFastWritableBytes() > 0 && !force)
+            return;
+        buf = NettyUtil.alloc().buffer(columnSize, columnSize);
+        bufList.add(buf);
     }
 
     public ByteBuf getBuf() {
