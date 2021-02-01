@@ -43,6 +43,7 @@ jobs:
         with:
           name: benchmark-reports
           path: benchmark-reports.tgz
+          retention-days: 30
 
       - name: PR Comment
         uses: github-actions-up-and-running/pr-comment@v1.0.1
