@@ -34,7 +34,7 @@ public class Benchmark {
                 .include("./*IBenchmark")
                 .result("reports/jmh.txt")
                 .resultFormat(ResultFormatType.TEXT)
-                .addProfiler(AsyncProfiler.class, "event:itimer;output=flamegraph;direction=forward;simple=true;dir=reports;width=1920")
+                .addProfiler(AsyncProfiler.class, "event=itimer;output=flamegraph;direction=forward;simple=true;dir=reports;width=1920")
                 .build();
         new Runner(options).run();
     }
