@@ -20,17 +20,26 @@ package com.github.housepower.exception;
  * <p>
  * Please avoid using CheckedException internal. See detail at <a>https://www.artima.com/intv/handcuffs.html</a>.
  */
-public abstract class ClickHouseException extends RuntimeException {
+public class ClickHouseException extends RuntimeException {
+
+    protected int code;
 
     public ClickHouseException(int errCode, String message) {
         super(message);
+        this.code = errCode;
     }
 
     public ClickHouseException(int errCode, String message, Throwable cause) {
         super(message, cause);
+        this.code = errCode;
     }
 
     public ClickHouseException(int errCode, Throwable cause) {
         super(cause);
+        this.code = errCode;
+    }
+
+    public int code() {
+        return code;
     }
 }

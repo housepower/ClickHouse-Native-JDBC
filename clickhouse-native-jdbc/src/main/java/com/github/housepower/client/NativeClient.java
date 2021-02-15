@@ -68,6 +68,7 @@ public class NativeClient {
 
 
             Channel channel = bootstrap.connect(endpoint);
+
             return new NativeClient(channel);
         } catch (Exception ex) {
             throw new SQLException(ex.getMessage(), ex);
@@ -129,7 +130,7 @@ public class NativeClient {
         sendRequest(new HelloRequest(client, reversion, db, user, password));
     }
 
-    public void sendQuery(String query, QueryRequest.ClientContext info, Map<SettingKey, Object> settings) throws SQLException {
+    public void sendQuery(String query, NativeContext.ClientContext info, Map<SettingKey, Object> settings) throws SQLException {
         sendQuery(UUID.randomUUID().toString(), QueryRequest.STAGE_COMPLETE, info, query, settings);
     }
 
@@ -172,7 +173,7 @@ public class NativeClient {
             channel.close().syncUninterruptibly();
     }
 
-    private void sendQuery(String id, int stage, QueryRequest.ClientContext info, String query,
+    private void sendQuery(String id, int stage, NativeContext.ClientContext info, String query,
                            Map<SettingKey, Object> settings) throws SQLException {
         sendRequest(new QueryRequest(id, info, stage, true, query, settings));
     }

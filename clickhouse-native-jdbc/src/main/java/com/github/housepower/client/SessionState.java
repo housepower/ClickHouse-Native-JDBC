@@ -15,6 +15,5 @@
 package com.github.housepower.client;
 
 public enum SessionState {
-
-    IDLE, WAITING_INSERT
+    INIT, CONNECTED, IDLE, WAITING_INSERT, CLOSED
 }

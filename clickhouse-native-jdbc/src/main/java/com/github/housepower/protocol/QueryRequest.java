@@ -14,10 +14,9 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.client.NativeContext;
 import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.serde.SettingType;
-import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
 import io.netty.buffer.ByteBuf;
 
@@ -43,14 +42,14 @@ public class QueryRequest implements Request {
     private final String queryId;
     private final String queryString;
     private final boolean compression;
-    private final ClientContext clientContext;
+    private final NativeContext.ClientContext clientContext;
     private final Map<SettingKey, Object> settings;
 
-    public QueryRequest(String queryId, ClientContext clientContext, int stage, boolean compression, String queryString) {
+    public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString) {
         this(queryId, clientContext, stage, compression, queryString, new HashMap<>());
     }
 
-    public QueryRequest(String queryId, ClientContext clientContext, int stage, boolean compression, String queryString,
+    public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString,
                         Map<SettingKey, Object> settings) {
 
         this.stage = stage;
@@ -105,56 +104,5 @@ public class QueryRequest implements Request {
         writeUTF8Binary(buf, queryString);
         // empty data to server
         DataRequest.EMPTY.encode(buf);
-    }
-
-    public static class ClientContext implements ByteBufHelper, Encodable {
-        public static final int TCP_KINE = 1;
-
-        public static final byte NO_QUERY = 0;
-        public static final byte INITIAL_QUERY = 1;
-        public static final byte SECONDARY_QUERY = 2;
-
-        private final String clientName;
-        private final String clientHostname;
-        private final String initialAddress;
-
-        public ClientContext(String initialAddress, String clientHostname, String clientName) {
-            this.clientName = clientName;
-            this.clientHostname = clientHostname;
-            this.initialAddress = initialAddress;
-        }
-
-        public void writeTo(BinarySerializer serializer) throws IOException {
-            serializer.writeVarInt(ClientContext.INITIAL_QUERY);
-            serializer.writeUTF8StringBinary("");
-            serializer.writeUTF8StringBinary("");
-            serializer.writeUTF8StringBinary(initialAddress);
-
-            // for TCP kind
-            serializer.writeVarInt(TCP_KINE);
-            serializer.writeUTF8StringBinary("");
-            serializer.writeUTF8StringBinary(clientHostname);
-            serializer.writeUTF8StringBinary(clientName);
-            serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
-            serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
-            serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
-            serializer.writeUTF8StringBinary("");
-        }
-
-        @Override
-        public void encode(ByteBuf buf) {
-            writeVarInt(buf, ClientContext.INITIAL_QUERY);
-            writeUTF8Binary(buf, "");
-            writeUTF8Binary(buf, "");
-            writeUTF8Binary(buf, initialAddress);
-            // for TCP kind
-            writeVarInt(buf, TCP_KINE);
-            writeUTF8Binary(buf, clientHostname);
-            writeUTF8Binary(buf, clientName);
-            writeVarInt(buf, ClickHouseDefines.MAJOR_VERSION);
-            writeVarInt(buf, ClickHouseDefines.MINOR_VERSION);
-            writeVarInt(buf, ClickHouseDefines.CLIENT_REVISION);
-            writeUTF8Binary(buf, "");
-        }
     }
 }

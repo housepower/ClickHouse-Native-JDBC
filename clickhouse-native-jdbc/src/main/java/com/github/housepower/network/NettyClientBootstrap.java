@@ -50,6 +50,7 @@ public class NettyClientBootstrap {
                         pipeline.addLast("logging_handler", new LoggingHandler(LogLevel.INFO))
                                 .addLast("request_encoder", new RequestEncoder())
                                 .addLast("response_decoder", new ResponseDecoder())
+                                .addLast("response_handler", new ResponseHandler())
                                 .addLast("idle_state_handler", new IdleStateHandler(600, 600, 600));
                     }
                 });

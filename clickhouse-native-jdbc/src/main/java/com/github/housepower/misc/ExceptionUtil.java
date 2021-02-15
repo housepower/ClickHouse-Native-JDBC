@@ -14,6 +14,7 @@
 
 package com.github.housepower.misc;
 
+import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -41,6 +42,19 @@ public class ExceptionUtil {
                 throw unchecked(rethrow);
             }
         };
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <T> T recursiveFind(Throwable th, Class<T> expectedClz) {
+        Throwable nest = th;
+        while (nest != null) {
+            if (expectedClz.isAssignableFrom(nest.getClass())) {
+                return (T) nest;
+            }
+            nest = nest.getCause();
+        }
+        return null;
     }
 
     @FunctionalInterface

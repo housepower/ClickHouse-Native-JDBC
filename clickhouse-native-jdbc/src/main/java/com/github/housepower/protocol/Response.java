@@ -20,6 +20,7 @@ import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.serde.BinaryDeserializer;
 import io.netty.buffer.ByteBuf;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -58,7 +59,7 @@ public interface Response extends ByteBufHelper {
         }
     }
 
-    static Response readFrom(ByteBuf buf, NativeContext.ServerContext info) throws SQLException {
+    static Response readFrom(ByteBuf buf, @Nullable NativeContext.ServerContext info) throws SQLException {
         switch ((int) helper.readVarInt(buf)) {
             case 0:
                 return HelloResponse.readFrom(buf);

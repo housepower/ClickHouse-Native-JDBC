@@ -14,38 +14,36 @@
 
 package com.github.housepower.network;
 
-import com.github.housepower.client.NativeContext;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.log.Logging;
+import com.github.housepower.misc.ChannelHelper;
 import com.github.housepower.protocol.Response;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.BlockingQueue;
 
-public class ResponseDecoder extends ByteToMessageDecoder {
+public class ResponseDecoder extends ByteToMessageDecoder implements ChannelHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseDecoder.class);
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        NativeContext.ServerContext serverCtx = ctx.channel().attr(serverCtxAttrKey(ctx)).get();
+        BlockingQueue<Response> queue = getResponseQueue(ctx.channel());
+        if (queue.remainingCapacity() == 0) {
+            log.debug("no capacity in channel[{}] response queue", ctx.channel().id());
+            return;
+        }
         in.markReaderIndex();
         try {
-            Response response = Response.readFrom(in, serverCtx);
-            out.add(response);
-        } catch (IndexOutOfBoundsException ex) {
+            Response response = Response.readFrom(in, getServerCtx(ctx.channel()));
+            // out.add(response);
+            queue.put(response);
+        } catch (IndexOutOfBoundsException | InterruptedException ex) {
             log.debug(ex.getMessage());
             in.resetReaderIndex();
         }
-    }
-
-    private AttributeKey<NativeContext.ServerContext> serverCtxAttrKey(ChannelHandlerContext ctx) {
-        return AttributeKey.valueOf(ctx.name() + ":server_ctx");
     }
 }
