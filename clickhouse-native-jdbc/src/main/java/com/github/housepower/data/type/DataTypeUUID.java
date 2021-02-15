@@ -18,6 +18,7 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -73,7 +74,18 @@ public class DataTypeUUID implements IDataType<UUID, String> {
     }
 
     @Override
+    public void encode(ByteBuf buf, UUID data) {
+        buf.writeLongLE(data.getMostSignificantBits());
+        buf.writeLongLE(data.getLeastSignificantBits());
+    }
+
+    @Override
     public UUID deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         return new UUID(deserializer.readLong(), deserializer.readLong());
+    }
+
+    @Override
+    public UUID decode(ByteBuf buf) {
+        return new UUID(buf.readLongLE(), buf.readLongLE());
     }
 }

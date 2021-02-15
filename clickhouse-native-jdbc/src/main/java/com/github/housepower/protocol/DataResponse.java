@@ -17,12 +17,14 @@ package com.github.housepower.protocol;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
 import com.github.housepower.serde.BinaryDeserializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class DataResponse implements Response {
 
+    @Deprecated
     public static DataResponse readFrom(
             BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
 
@@ -31,6 +33,17 @@ public class DataResponse implements Response {
         deserializer.maybeEnableCompressed();
         Block block = Block.readFrom(deserializer, info);
         deserializer.maybeDisableCompressed();
+
+        return new DataResponse(name, block);
+    }
+
+    public static DataResponse readFrom(ByteBuf buf, NativeContext.ServerContext info)  {
+
+        String name = helper.readUTF8Binary(buf);
+
+        // TODO deserializer.maybeEnableCompressed();
+        Block block = Block.readFrom(buf, info);
+        // TODO deserializer.maybeDisableCompressed();
 
         return new DataResponse(name, block);
     }

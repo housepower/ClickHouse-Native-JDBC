@@ -18,6 +18,7 @@ import com.github.housepower.misc.CodecHelper;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -54,8 +55,19 @@ public class DataTypeUInt64 implements BaseDataTypeInt64<BigInteger, BigInteger>
     }
 
     @Override
+    public void encode(ByteBuf buf, BigInteger data) {
+        buf.writeLongLE(data.longValue());
+    }
+
+    @Override
     public BigInteger deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         long l = deserializer.readLong();
+        return new BigInteger(1, getBytes(l));
+    }
+
+    @Override
+    public BigInteger decode(ByteBuf buf) {
+        long l = buf.readLongLE();
         return new BigInteger(1, getBytes(l));
     }
 

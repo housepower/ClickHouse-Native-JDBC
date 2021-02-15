@@ -19,6 +19,7 @@ import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -75,8 +76,20 @@ public class DataTypeDate implements IDataType<LocalDate, Date> {
     }
 
     @Override
+    public void encode(ByteBuf buf, LocalDate data) {
+        long epochDay = data.toEpochDay();
+        buf.writeShortLE((short) epochDay);
+    }
+
+    @Override
     public LocalDate deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         short epochDay = deserializer.readShort();
+        return LocalDate.ofEpochDay(epochDay);
+    }
+
+    @Override
+    public LocalDate decode(ByteBuf buf) {
+        short epochDay = buf.readShortLE();
         return LocalDate.ofEpochDay(epochDay);
     }
 

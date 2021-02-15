@@ -20,6 +20,7 @@ import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -145,6 +146,39 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
     }
 
     @Override
+    public void encode(ByteBuf buf, BigDecimal data) {
+        BigDecimal targetValue = data.multiply(scaleFactor);
+        switch (this.nobits) {
+            case 32: {
+                buf.writeIntLE(targetValue.intValue());
+                break;
+            }
+            case 64: {
+                buf.writeLongLE(targetValue.longValue());
+                break;
+            }
+            case 128: {
+                BigInteger res = targetValue.toBigInteger();
+                buf.writeLongLE(res.longValue());
+                buf.writeLongLE(res.shiftRight(64).longValue());
+                break;
+            }
+            case 256: {
+                BigInteger res = targetValue.toBigInteger();
+                buf.writeLongLE(targetValue.longValue());
+                buf.writeLongLE(res.shiftRight(64).longValue());
+                buf.writeLongLE(res.shiftRight(64 * 2).longValue());
+                buf.writeLongLE(res.shiftRight(64 * 3).longValue());
+                break;
+            }
+            default: {
+                throw new RuntimeException(String.format(Locale.ENGLISH,
+                        "Unknown precision[%d] & scale[%d]", precision, scale));
+            }
+        }
+    }
+
+    @Override
     public BigDecimal deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         BigDecimal value;
         switch (this.nobits) {
@@ -162,7 +196,7 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
             }
 
             case 128: {
-                long []array = new long[2];
+                long[] array = new long[2];
                 array[1] = deserializer.readLong();
                 array[0] = deserializer.readLong();
 
@@ -172,11 +206,58 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
             }
 
             case 256: {
-                long []array = new long[4];
+                long[] array = new long[4];
                 array[3] = deserializer.readLong();
                 array[2] = deserializer.readLong();
                 array[1] = deserializer.readLong();
                 array[0] = deserializer.readLong();
+
+                value = new BigDecimal(new BigInteger(getBytes(array)));
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
+                break;
+            }
+
+            default: {
+                throw new RuntimeException(String.format(Locale.ENGLISH,
+                        "Unknown precision[%d] & scale[%d]", precision, scale));
+            }
+        }
+        return value;
+    }
+
+    @Override
+    public BigDecimal decode(ByteBuf buf) {
+        BigDecimal value;
+        switch (this.nobits) {
+            case 32: {
+                int v = buf.readIntLE();
+                value = BigDecimal.valueOf(v);
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
+                break;
+            }
+            case 64: {
+                long v = buf.readLongLE();
+                value = BigDecimal.valueOf(v);
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
+                break;
+            }
+
+            case 128: {
+                long[] array = new long[2];
+                array[1] = buf.readLongLE();
+                array[0] = buf.readLongLE();
+
+                value = new BigDecimal(new BigInteger(getBytes(array)));
+                value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
+                break;
+            }
+
+            case 256: {
+                long[] array = new long[4];
+                array[3] = buf.readLongLE();
+                array[2] = buf.readLongLE();
+                array[1] = buf.readLongLE();
+                array[0] = buf.readLongLE();
 
                 value = new BigDecimal(new BigInteger(getBytes(array)));
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);

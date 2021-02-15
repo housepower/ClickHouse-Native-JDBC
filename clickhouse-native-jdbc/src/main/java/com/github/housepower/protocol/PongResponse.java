@@ -15,6 +15,7 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.serde.BinaryDeserializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -23,7 +24,12 @@ public class PongResponse implements Response {
 
     public static final PongResponse INSTANCE = new PongResponse();
 
+    @Deprecated
     public static PongResponse readFrom(BinaryDeserializer deserializer) throws IOException, SQLException {
+        return INSTANCE;
+    }
+
+    public static PongResponse readFrom(ByteBuf buf) {
         return INSTANCE;
     }
 

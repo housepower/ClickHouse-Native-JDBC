@@ -23,11 +23,14 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 public class DataTypeNothing implements IDataType<Object, Object> {
 
     public static DataTypeCreator<Object, Object> CREATOR =
             (lexer, serverContext) -> new DataTypeNothing(serverContext);
+
+    private static final Object value = new Object();
 
     public DataTypeNothing(NativeContext.ServerContext serverContext) {
     }
@@ -67,8 +70,17 @@ public class DataTypeNothing implements IDataType<Object, Object> {
     }
 
     @Override
+    public void encode(ByteBuf buf, Object data) {
+    }
+
+    @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new Object();
+        return value;
+    }
+
+    @Override
+    public Object decode(ByteBuf buf) {
+        return value;
     }
 
     @Override

@@ -33,6 +33,7 @@ import com.github.housepower.data.type.complex.DataTypeNothing;
 import com.github.housepower.data.type.complex.DataTypeNullable;
 import com.github.housepower.data.type.complex.DataTypeString;
 import com.github.housepower.data.type.complex.DataTypeTuple;
+import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.misc.LRUCache;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
@@ -41,19 +42,23 @@ import com.github.housepower.settings.ClickHouseDefines;
 public class DataTypeFactory {
     private static final LRUCache<String, IDataType<?, ?>> DATA_TYPE_CACHE = new LRUCache<>(ClickHouseDefines.DATA_TYPE_CACHE_SIZE);
 
-    public static IDataType<?, ?> get(String type, NativeContext.ServerContext serverContext) throws SQLException {
+    public static IDataType<?, ?> get(String type, NativeContext.ServerContext serverContext) {
         IDataType<?, ?> dataType = DATA_TYPE_CACHE.get(type);
         if (dataType != null) {
             DATA_TYPE_CACHE.put(type, dataType);
             return dataType;
         }
 
-        SQLLexer lexer = new SQLLexer(0, type);
-        dataType = get(lexer, serverContext);
-        Validate.isTrue(lexer.eof());
+        try {
+            SQLLexer lexer = new SQLLexer(0, type);
+            dataType = get(lexer, serverContext);
+            Validate.isTrue(lexer.eof());
 
-        DATA_TYPE_CACHE.put(type, dataType);
-        return dataType;
+            DATA_TYPE_CACHE.put(type, dataType);
+            return dataType;
+        } catch (Exception ex) {
+            throw new ClickHouseClientException(ex);
+        }
     }
 
     private static final Map<String, IDataType<?, ?>> dataTypes = initialDataTypes();

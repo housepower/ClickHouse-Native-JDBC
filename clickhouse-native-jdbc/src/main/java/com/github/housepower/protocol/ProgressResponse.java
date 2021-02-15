@@ -15,13 +15,19 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.serde.BinaryDeserializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
 public class ProgressResponse implements Response {
 
+    @Deprecated
     public static ProgressResponse readFrom(BinaryDeserializer deserializer) throws IOException {
         return new ProgressResponse(deserializer.readVarInt(), deserializer.readVarInt(), deserializer.readVarInt());
+    }
+
+    public static ProgressResponse readFrom(ByteBuf buf) {
+        return new ProgressResponse(helper.readVarInt(buf), helper.readVarInt(buf), helper.readVarInt(buf));
     }
 
     private final long newRows;

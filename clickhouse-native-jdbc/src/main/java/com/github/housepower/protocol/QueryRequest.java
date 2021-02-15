@@ -14,10 +14,12 @@
 
 package com.github.housepower.protocol;
 
+import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.serde.SettingType;
 import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -85,7 +87,27 @@ public class QueryRequest implements Request {
 
     }
 
-    public static class ClientContext {
+    @Override
+    public void encode0(ByteBuf buf) {
+        writeUTF8Binary(buf, queryId);
+        clientContext.encode(buf);
+
+        for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
+            writeUTF8Binary(buf, entry.getKey().name());
+            @SuppressWarnings("rawtypes")
+            SettingType type = entry.getKey().type();
+            //noinspection unchecked
+            type.encode(buf, entry.getValue());
+        }
+        writeUTF8Binary(buf, "");
+        writeVarInt(buf, stage);
+        buf.writeBoolean(compression);
+        writeUTF8Binary(buf, queryString);
+        // empty data to server
+        DataRequest.EMPTY.encode(buf);
+    }
+
+    public static class ClientContext implements ByteBufHelper, Encodable {
         public static final int TCP_KINE = 1;
 
         public static final byte NO_QUERY = 0;
@@ -117,6 +139,22 @@ public class QueryRequest implements Request {
             serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
             serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
             serializer.writeUTF8StringBinary("");
+        }
+
+        @Override
+        public void encode(ByteBuf buf) {
+            writeVarInt(buf, ClientContext.INITIAL_QUERY);
+            writeUTF8Binary(buf, "");
+            writeUTF8Binary(buf, "");
+            writeUTF8Binary(buf, initialAddress);
+            // for TCP kind
+            writeVarInt(buf, TCP_KINE);
+            writeUTF8Binary(buf, clientHostname);
+            writeUTF8Binary(buf, clientName);
+            writeVarInt(buf, ClickHouseDefines.MAJOR_VERSION);
+            writeVarInt(buf, ClickHouseDefines.MINOR_VERSION);
+            writeVarInt(buf, ClickHouseDefines.CLIENT_REVISION);
+            writeUTF8Binary(buf, "");
         }
     }
 }

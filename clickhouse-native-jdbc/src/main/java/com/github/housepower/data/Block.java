@@ -17,17 +17,25 @@ package com.github.housepower.data;
 import com.github.housepower.buffer.ColumnWriterBuffer;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
+import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.misc.NettyUtil;
 import com.github.housepower.misc.Validate;
+import com.github.housepower.protocol.Encodable;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Block {
+public class Block implements ByteBufHelper, Encodable {
 
+    private static final ByteBufHelper helper = new ByteBufHelper() {
+    };
+
+    @Deprecated
     public static Block readFrom(BinaryDeserializer deserializer,
                                  NativeContext.ServerContext serverContext) throws IOException, SQLException {
         BlockSettings info = BlockSettings.readFrom(deserializer);
@@ -43,6 +51,26 @@ public class Block {
 
             IDataType dataType = DataTypeFactory.get(type, serverContext);
             Object[] arr = dataType.deserializeBinaryBulk(rowCnt, deserializer);
+            columns[i] = ColumnFactory.createColumn(name, dataType, arr);
+        }
+
+        return new Block(rowCnt, columns, info);
+    }
+
+    public static Block readFrom(ByteBuf buf, NativeContext.ServerContext serverContext) {
+        BlockSettings info = BlockSettings.readFrom(buf);
+
+        int columnCnt = (int) helper.readVarInt(buf);
+        int rowCnt = (int) helper.readVarInt(buf);
+
+        IColumn[] columns = new IColumn[columnCnt];
+
+        for (int i = 0; i < columnCnt; i++) {
+            String name = helper.readUTF8Binary(buf);
+            String type = helper.readUTF8Binary(buf);
+
+            IDataType dataType = DataTypeFactory.get(type, serverContext);
+            Object[] arr = dataType.decodeBulk(buf, rowCnt);
             columns[i] = ColumnFactory.createColumn(name, dataType, arr);
         }
 
@@ -113,6 +141,7 @@ public class Block {
         }
     }
 
+    @Deprecated
     public void writeTo(BinarySerializer serializer) throws IOException, SQLException {
         settings.writeTo(serializer);
 
@@ -121,6 +150,18 @@ public class Block {
 
         for (IColumn column : columns) {
             column.flushToSerializer(serializer, true);
+        }
+    }
+
+    @Override
+    public void encode(ByteBuf buf) {
+        settings.encode(buf);
+
+        writeVarInt(buf, columns.length);
+        writeVarInt(buf, rowCnt);
+
+        for (IColumn column : columns) {
+            column.flush(buf, true);
         }
     }
 
@@ -148,6 +189,7 @@ public class Block {
     public void initWriteBuffer() {
         for (IColumn column : columns) {
             column.setColumnWriterBuffer(new ColumnWriterBuffer());
+            column.setBuf(NettyUtil.alloc().buffer());
         }
     }
 }

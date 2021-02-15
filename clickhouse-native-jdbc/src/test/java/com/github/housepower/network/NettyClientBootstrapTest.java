@@ -12,19 +12,17 @@
  * limitations under the License.
  */
 
-package com.github.housepower.exception;
+package com.github.housepower.network;
 
-public class NoDefaultValueException extends ClickHouseClientException {
+import org.junit.jupiter.api.Test;
 
-    public NoDefaultValueException(String message) {
-        super(message);
-    }
+import static org.junit.jupiter.api.Assertions.*;
 
-    public NoDefaultValueException(String message, Throwable cause) {
-        super(message, cause);
-    }
+class NettyClientBootstrapTest {
 
-    public NoDefaultValueException(Throwable cause) {
-        super(cause);
+    @Test
+    void connect() {
+
+        assertTrue(true);
     }
 }

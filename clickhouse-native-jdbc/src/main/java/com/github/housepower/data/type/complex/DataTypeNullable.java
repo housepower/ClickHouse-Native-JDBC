@@ -20,6 +20,7 @@ import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -109,6 +110,11 @@ public class DataTypeNullable implements IDataType {
     }
 
     @Override
+    public void encode(ByteBuf buf, Object data) {
+        this.nestedDataType.encode(buf, data);
+    }
+
+    @Override
     public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
         Short[] isNull = new Short[data.length];
         for (int i = 0; i < data.length; i++) {
@@ -117,6 +123,17 @@ public class DataTypeNullable implements IDataType {
         }
         nullMapDataType.serializeBinaryBulk(isNull, serializer);
         nestedDataType.serializeBinaryBulk(data, serializer);
+    }
+
+    @Override
+    public void encodeBulk(ByteBuf buf, Object[] data) {
+        Short[] isNull = new Short[data.length];
+        for (int i = 0; i < data.length; i++) {
+            isNull[i] = (data[i] == null ? IS_NULL : NON_NULL);
+            data[i] = data[i] == null ? nestedDataType.defaultValue() : data[i];
+        }
+        nullMapDataType.encodeBulk(buf, isNull);
+        nestedDataType.encodeBulk(buf, data);
     }
 
     @Override
@@ -133,6 +150,28 @@ public class DataTypeNullable implements IDataType {
         Object[] nullMap = nullMapDataType.deserializeBinaryBulk(rows, deserializer);
 
         Object[] data = nestedDataType.deserializeBinaryBulk(rows, deserializer);
+        for (int i = 0; i < nullMap.length; i++) {
+            if (IS_NULL.equals(nullMap[i])) {
+                data[i] = null;
+            }
+        }
+        return data;
+    }
+
+    @Override
+    public Object decode(ByteBuf buf) {
+        boolean isNull = (buf.readByte() == (byte) 1);
+        if (isNull) {
+            return null;
+        }
+        return this.nestedDataType.decode(buf);
+    }
+
+    @Override
+    public Object[] decodeBulk(ByteBuf buf, int rows) {
+        Object[] nullMap = nullMapDataType.decodeBulk(buf, rows);
+
+        Object[] data = nestedDataType.decodeBulk(buf, rows);
         for (int i = 0; i < nullMap.length; i++) {
             if (IS_NULL.equals(nullMap[i])) {
                 data[i] = null;

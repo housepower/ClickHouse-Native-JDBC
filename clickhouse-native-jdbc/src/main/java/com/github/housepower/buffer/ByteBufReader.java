@@ -12,19 +12,29 @@
  * limitations under the License.
  */
 
-package com.github.housepower.exception;
+package com.github.housepower.buffer;
 
-public class NoDefaultValueException extends ClickHouseClientException {
+import io.netty.buffer.ByteBuf;
 
-    public NoDefaultValueException(String message) {
-        super(message);
+import java.io.IOException;
+
+public class ByteBufReader implements BuffedReader {
+
+    private final ByteBuf buf;
+
+    public ByteBufReader(ByteBuf buf) {
+        this.buf = buf;
     }
 
-    public NoDefaultValueException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public int readBinary() throws IOException {
+        return buf.readUnsignedByte();
     }
 
-    public NoDefaultValueException(Throwable cause) {
-        super(cause);
+    @Override
+    public int readBinary(byte[] bytes) throws IOException {
+        int len = Math.min(buf.readableBytes(), bytes.length);
+        buf.readBytes(bytes, 0, len);
+        return len;
     }
 }

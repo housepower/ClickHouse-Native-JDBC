@@ -14,7 +14,7 @@
 
 package com.github.housepower.exception;
 
-public class InvalidValueException extends ClickHouseException {
+public class InvalidValueException extends ClickHouseClientException {
 
     public InvalidValueException(String message) {
         super(message);

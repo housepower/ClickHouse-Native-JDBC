@@ -17,6 +17,7 @@ package com.github.housepower.data.type;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -50,8 +51,18 @@ public class DataTypeInt16 implements BaseDataTypeInt16<Short, Short> {
     }
 
     @Override
+    public void encode(ByteBuf buf, Short data) {
+        buf.writeShortLE(data);
+    }
+
+    @Override
     public Short deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         return deserializer.readShort();
+    }
+
+    @Override
+    public Short decode(ByteBuf buf) {
+        return buf.readShortLE();
     }
 
     @Override

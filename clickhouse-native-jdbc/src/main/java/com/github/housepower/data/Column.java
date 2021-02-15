@@ -15,6 +15,7 @@
 package com.github.housepower.data;
 
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -29,6 +30,7 @@ public class Column extends AbstractColumn {
     @Override
     public void write(Object object) throws IOException, SQLException {
         type().serializeBinary(object, buffer.column);
+        type().encode(this.buf, object);
     }
 
     @Override
@@ -40,6 +42,18 @@ public class Column extends AbstractColumn {
 
         if (now) {
             buffer.writeTo(serializer);
+        }
+    }
+
+    @Override
+    public void flush(ByteBuf out, boolean flush) {
+        if (isExported()) {
+            writeUTF8Binary(out, name);
+            writeUTF8Binary(out, type.name());
+        }
+
+        if (flush) {
+            buffer.encode(out);
         }
     }
 }

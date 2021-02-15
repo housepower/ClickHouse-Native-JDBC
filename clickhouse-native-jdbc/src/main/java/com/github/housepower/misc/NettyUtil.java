@@ -15,12 +15,32 @@
 package com.github.housepower.misc;
 
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollSocketChannel;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class NettyUtil {
 
-    private final static ByteBufAllocator alloc = ByteBufAllocator.DEFAULT;
+    private final static ByteBufAllocator alloc = new PooledByteBufAllocator();
 
     public static ByteBufAllocator alloc() {
         return alloc;
+    }
+
+    public static EventLoopGroup createEventLoopGroup() {
+        return Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
+    }
+
+    public static EventLoopGroup createEventLoopGroup(int threadNum) {
+        return Epoll.isAvailable() ? new EpollEventLoopGroup(threadNum) : new NioEventLoopGroup(threadNum);
+    }
+
+    public static Class<? extends SocketChannel> socketChannelClass() {
+        return Epoll.isAvailable() ? EpollSocketChannel.class : NioSocketChannel.class;
     }
 }

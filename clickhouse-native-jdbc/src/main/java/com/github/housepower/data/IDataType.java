@@ -18,6 +18,7 @@ import com.github.housepower.exception.NoDefaultValueException;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -63,23 +64,45 @@ public interface IDataType<CK, JDBC> {
         return value.toString();
     }
 
+    @Deprecated
     void serializeBinary(CK data, BinarySerializer serializer) throws SQLException, IOException;
 
+    @Deprecated
     default void serializeBinaryBulk(CK[] data, BinarySerializer serializer) throws SQLException, IOException {
         for (CK d : data) {
             serializeBinary(d, serializer);
         }
     }
 
+    void encode(ByteBuf buf, CK data);
+
+    default void encodeBulk(ByteBuf buf, CK[] data) {
+        for (CK value : data) {
+            encode(buf, value);
+        }
+    }
+
     CK deserializeText(SQLLexer lexer) throws SQLException;
 
+    @Deprecated
     CK deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException;
 
     // fuck type erasure
+    @Deprecated
     default Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
         Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
             data[row] = this.deserializeBinary(deserializer);
+        }
+        return data;
+    }
+
+    CK decode(ByteBuf buf);
+
+    default Object[] decodeBulk(ByteBuf buf, int rows) {
+        Object[] data = new Object[rows];
+        for (int row = 0; row < rows; row++) {
+            data[row] = this.decode(buf);
         }
         return data;
     }

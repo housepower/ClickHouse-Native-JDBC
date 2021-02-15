@@ -27,6 +27,7 @@ import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
 
@@ -111,8 +112,19 @@ public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
+    public void encode(ByteBuf buf, ZonedDateTime data) {
+        buf.writeIntLE((int) DateTimeUtil.toEpochSecond(data));
+    }
+
+    @Override
     public ZonedDateTime deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
         int epochSeconds = deserializer.readInt();
+        return DateTimeUtil.toZonedDateTime(epochSeconds, 0, tz);
+    }
+
+    @Override
+    public ZonedDateTime decode(ByteBuf buf) {
+        int epochSeconds = buf.readIntLE();
         return DateTimeUtil.toZonedDateTime(epochSeconds, 0, tz);
     }
 

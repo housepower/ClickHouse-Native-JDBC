@@ -16,6 +16,7 @@ package com.github.housepower.protocol;
 
 import com.github.housepower.data.Block;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -48,5 +49,12 @@ public class DataRequest implements Request {
         serializer.maybeEnableCompressed();
         block.writeTo(serializer);
         serializer.maybeDisableCompressed();
+    }
+
+    @Override
+    public void encode0(ByteBuf buf) {
+        writeUTF8Binary(buf, name);
+        // TODO compress
+        block.encode(buf);
     }
 }

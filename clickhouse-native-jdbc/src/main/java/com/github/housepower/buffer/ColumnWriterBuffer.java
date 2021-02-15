@@ -14,28 +14,37 @@
 
 package com.github.housepower.buffer;
 
+import com.github.housepower.protocol.Encodable;
 import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.serde.LegacyBinarySerializer;
 import com.github.housepower.settings.ClickHouseDefines;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
-public class ColumnWriterBuffer {
+public class ColumnWriterBuffer implements Encodable {
 
-    private final ByteArrayWriter columnWriter;
+    private final ByteBufWriter columnWriter;
 
     public BinarySerializer column;
 
     public ColumnWriterBuffer() {
-        this.columnWriter = new ByteArrayWriter(ClickHouseDefines.COLUMN_BUFFER_BYTES);
-        this.column = new BinarySerializer(columnWriter, false, null);
+        this.columnWriter = new ByteBufWriter(ClickHouseDefines.COLUMN_BUFFER_BYTES);
+        this.column = new LegacyBinarySerializer(columnWriter, false, null);
     }
 
+    @Deprecated
     public void writeTo(BinarySerializer serializer) throws IOException {
         ByteBuf buf = columnWriter.getBuf();
         byte[] bytes = new byte[buf.readableBytes()];
         buf.readBytes(bytes);
         serializer.writeBytes(bytes);
         assert buf.release();
+    }
+
+    @Override
+    public void encode(ByteBuf buf) {
+        ByteBuf buff = columnWriter.getBuf();
+        buf.writeBytes(buff);
     }
 }

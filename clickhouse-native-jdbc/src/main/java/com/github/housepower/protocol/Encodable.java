@@ -12,19 +12,11 @@
  * limitations under the License.
  */
 
-package com.github.housepower.exception;
+package com.github.housepower.protocol;
 
-public class NoDefaultValueException extends ClickHouseClientException {
+import io.netty.buffer.ByteBuf;
 
-    public NoDefaultValueException(String message) {
-        super(message);
-    }
+public interface Encodable {
 
-    public NoDefaultValueException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NoDefaultValueException(Throwable cause) {
-        super(cause);
-    }
+    void encode(ByteBuf buf);
 }

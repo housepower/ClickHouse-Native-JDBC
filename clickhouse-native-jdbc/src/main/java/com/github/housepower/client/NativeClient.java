@@ -18,9 +18,12 @@ import com.github.housepower.buffer.SocketBuffedReader;
 import com.github.housepower.buffer.SocketBuffedWriter;
 import com.github.housepower.data.Block;
 import com.github.housepower.misc.Validate;
+import com.github.housepower.network.NettyClientBootstrap;
 import com.github.housepower.protocol.*;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.serde.LegacyBinaryDeserializer;
+import com.github.housepower.serde.LegacyBinarySerializer;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
@@ -29,6 +32,7 @@ import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.stream.QueryResult;
 import com.github.housepower.stream.ClickHouseQueryResult;
 import io.airlift.compress.lz4.Lz4Compressor;
+import io.netty.channel.Channel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -44,40 +48,52 @@ public class NativeClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(NativeClient.class);
 
+    private static final NettyClientBootstrap bootstrap = new NettyClientBootstrap();
+
     public static NativeClient connect(ClickHouseConfig configure) throws SQLException {
         try {
             SocketAddress endpoint = new InetSocketAddress(configure.host(), configure.port());
-            // TODO support proxy
-            Socket socket = new Socket();
-            socket.setTcpNoDelay(true);
-            socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
-            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
-            socket.setKeepAlive(configure.tcpKeepAlive());
-            socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
+//            // TODO support proxy
+//            Socket socket = new Socket();
+//            socket.setTcpNoDelay(true);
+//            socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
+//            socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
+//            socket.setKeepAlive(configure.tcpKeepAlive());
+//            socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
+//
+//            return new NativeClient(socket,
+//                    // TODO support zstd
+//                    new LegacyBinarySerializer(new SocketBuffedWriter(socket), true, new Lz4Compressor()),
+//                    new LegacyBinaryDeserializer(new SocketBuffedReader(socket), true));
 
-            return new NativeClient(socket,
-                    // TODO support zstd
-                    new BinarySerializer(new SocketBuffedWriter(socket), true, new Lz4Compressor()),
-                    new BinaryDeserializer(new SocketBuffedReader(socket), true));
-        } catch (IOException ex) {
+
+            Channel channel = bootstrap.connect(endpoint);
+            return new NativeClient(channel);
+        } catch (Exception ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
     }
 
-    private final Socket socket;
-    private final SocketAddress address;
-    private final BinarySerializer serializer;
-    private final BinaryDeserializer deserializer;
+//    private final Socket socket;
+//    private final SocketAddress address;
+//    private final BinarySerializer serializer;
+//    private final BinaryDeserializer deserializer;
+//
+//    public NativeClient(Socket socket, BinarySerializer serializer, BinaryDeserializer deserializer) {
+//        this.socket = socket;
+//        this.address = socket.getLocalSocketAddress();
+//        this.serializer = serializer;
+//        this.deserializer = deserializer;
+//    }
 
-    public NativeClient(Socket socket, BinarySerializer serializer, BinaryDeserializer deserializer) {
-        this.socket = socket;
-        this.address = socket.getLocalSocketAddress();
-        this.serializer = serializer;
-        this.deserializer = deserializer;
+    private Channel channel;
+
+    public NativeClient(Channel channel) {
+        this.channel = channel;
     }
 
     public SocketAddress address() {
-        return address;
+        return channel.localAddress();
     }
 
     public boolean ping(Duration soTimeout, NativeContext.ServerContext info) {
@@ -146,17 +162,14 @@ public class NativeClient {
     }
 
     public void disconnect() throws SQLException {
-        try {
-            if (socket.isClosed()) {
+
+            if (!channel.isOpen()) {
                 LOG.info("socket already closed, ignore");
                 return;
             }
             LOG.trace("flush and close socket");
-            serializer.flushToTarget(true);
-            socket.close();
-        } catch (IOException ex) {
-            throw new SQLException(ex.getMessage(), ex);
-        }
+            channel.flush();
+            channel.close().syncUninterruptibly();
     }
 
     private void sendQuery(String id, int stage, QueryRequest.ClientContext info, String query,
@@ -165,13 +178,8 @@ public class NativeClient {
     }
 
     private void sendRequest(Request request) throws SQLException {
-        try {
-            LOG.trace("send request: {}", request.type());
-            request.writeTo(serializer);
-            serializer.flushToTarget(true);
-        } catch (IOException ex) {
-            throw new SQLException(ex.getMessage(), ex);
-        }
+        LOG.trace("send request: {}", request.type());
+        channel.writeAndFlush(request);
     }
 
     private Response receiveResponse(Duration soTimeout, NativeContext.ServerContext info) throws SQLException {

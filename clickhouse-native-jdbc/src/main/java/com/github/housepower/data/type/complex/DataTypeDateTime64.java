@@ -31,6 +31,7 @@ import com.github.housepower.misc.StringView;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
 
@@ -144,8 +145,25 @@ public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
+    public void encode(ByteBuf buf, ZonedDateTime data) {
+        long epochSeconds = DateTimeUtil.toEpochSecond(data);
+        int nanos = data.getNano();
+        long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
+        buf.writeLongLE(value);
+    }
+
+    @Override
     public ZonedDateTime deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         long value = deserializer.readLong() * POW_10[MAX_SCALA - scale];
+        long epochSeconds = value / NANOS_IN_SECOND;
+        int nanos = (int) (value % NANOS_IN_SECOND);
+
+        return DateTimeUtil.toZonedDateTime(epochSeconds, nanos, tz);
+    }
+
+    @Override
+    public ZonedDateTime decode(ByteBuf buf) {
+        long value = buf.readLongLE() * POW_10[MAX_SCALA - scale];
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);
 

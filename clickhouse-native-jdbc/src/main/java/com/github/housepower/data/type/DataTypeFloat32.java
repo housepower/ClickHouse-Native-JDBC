@@ -18,6 +18,7 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -61,8 +62,18 @@ public class DataTypeFloat32 implements IDataType<Float, Float> {
     }
 
     @Override
+    public void encode(ByteBuf buf, Float data) {
+        buf.writeFloatLE(data);
+    }
+
+    @Override
     public Float deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         return deserializer.readFloat();
+    }
+
+    @Override
+    public Float decode(ByteBuf buf) {
+        return buf.readFloatLE();
     }
 
     @Override

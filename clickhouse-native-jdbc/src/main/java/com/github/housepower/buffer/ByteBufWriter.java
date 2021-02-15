@@ -20,14 +20,14 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ByteArrayWriter implements BuffedWriter {
+public class ByteBufWriter implements BuffedWriter {
 
     private final int columnSize;
     private final List<ByteBuf> bufList = new ArrayList<>();
 
     private ByteBuf buf;
 
-    public ByteArrayWriter(int columnSize) {
+    public ByteBufWriter(int columnSize) {
         this.columnSize = columnSize;
         this.buf = NettyUtil.alloc().buffer(columnSize, columnSize);
         this.bufList.add(buf);

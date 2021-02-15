@@ -17,6 +17,7 @@ package com.github.housepower.data.type;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -49,8 +50,18 @@ public class DataTypeInt8 implements BaseDataTypeInt8<Byte, Byte> {
     }
 
     @Override
+    public void encode(ByteBuf buf, Byte data) {
+        buf.writeByte(data);
+    }
+
+    @Override
     public Byte deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         return deserializer.readByte();
+    }
+
+    @Override
+    public Byte decode(ByteBuf buf) {
+        return buf.readByte();
     }
 
     @Override

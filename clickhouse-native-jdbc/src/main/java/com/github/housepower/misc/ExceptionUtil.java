@@ -52,4 +52,8 @@ public class ExceptionUtil {
     public interface CheckedBiFunction<T, U, R> {
         R apply(T t, U u) throws Exception;
     }
+
+    public interface CheckedBiConsumer<T, U> {
+        void accept(T t, U u) throws Exception;
+    }
 }
