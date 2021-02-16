@@ -14,31 +14,26 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.client.SessionState;
-import com.github.housepower.client.NativeClient;
+import com.github.housepower.client.NativeBootstrap;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
 import com.github.housepower.data.DataTypeFactory;
-import com.github.housepower.misc.Validate;
-import com.github.housepower.protocol.HelloResponse;
-import com.github.housepower.protocol.QueryRequest;
-import com.github.housepower.stream.QueryResult;
-import com.github.housepower.settings.ClickHouseConfig;
-import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
 import com.github.housepower.jdbc.statement.ClickHousePreparedQueryStatement;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.misc.ExceptionUtil;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.settings.SettingKey;
+import com.github.housepower.stream.QueryResult;
 
 import javax.annotation.Nullable;
-import java.net.InetSocketAddress;
 import java.sql.*;
 import java.time.Duration;
-import java.time.ZoneId;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -52,11 +47,16 @@ public class ClickHouseConnection implements SQLConnection {
     private static final Logger LOG = LoggerFactory.getLogger(ClickHouseConnection.class);
     private static final Pattern VALUES_REGEX = Pattern.compile("[Vv][Aa][Ll][Uu][Ee][Ss]\\s*\\(");
 
+    public static ClickHouseConnection createClickHouseConnection(ClickHouseConfig cfg) throws SQLException {
+        return ExceptionUtil.rethrowSQLException(() -> {
+            NativeContext nativeCtx = NativeBootstrap.INSTANCE.createConnection(cfg);
+            return new ClickHouseConnection(cfg, nativeCtx);
+        });
+    }
+
     private final AtomicBoolean isClosed;
     private final AtomicReference<ClickHouseConfig> cfg;
-    // TODO move to NativeClient
-    private final AtomicReference<SessionState> state = new AtomicReference<>(SessionState.IDLE);
-    private volatile NativeContext nativeCtx;
+    private final NativeContext nativeCtx;
 
     protected ClickHouseConnection(ClickHouseConfig cfg, NativeContext nativeCtx) {
         this.isClosed = new AtomicBoolean(false);
@@ -137,8 +137,7 @@ public class ClickHouseConnection implements SQLConnection {
     @Override
     public void close() throws SQLException {
         if (!isClosed() && isClosed.compareAndSet(false, true)) {
-            NativeClient nativeClient = nativeCtx.nativeClient();
-            nativeClient.disconnect();
+            ExceptionUtil.rethrowSQLException(() -> nativeCtx.nativeConn().close());
         }
     }
 
@@ -200,7 +199,7 @@ public class ClickHouseConnection implements SQLConnection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        return getNativeClient().ping(Duration.ofSeconds(timeout), nativeCtx.serverCtx());
+        return ExceptionUtil.rethrowSQLException(() -> nativeCtx.nativeConn().syncPing(Duration.ofSeconds(timeout)));
     }
 
     // ClickHouse support only `database`, we treat it as JDBC `schema`
@@ -254,84 +253,19 @@ public class ClickHouseConnection implements SQLConnection {
     }
 
     public boolean ping(Duration timeout) throws SQLException {
-        return nativeCtx.nativeClient().ping(timeout, nativeCtx.serverCtx());
+        return ExceptionUtil.rethrowSQLException(() -> nativeCtx.nativeConn().syncPing(timeout));
     }
 
     public Block getSampleBlock(final String insertQuery) throws SQLException {
-        NativeClient nativeClient = getHealthyNativeClient();
-        nativeClient.sendQuery(insertQuery, nativeCtx.clientCtx(), cfg.get().settings());
-        Validate.isTrue(this.state.compareAndSet(SessionState.IDLE, SessionState.WAITING_INSERT),
-                "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
-        return nativeClient.receiveSampleBlock(cfg.get().queryTimeout(), nativeCtx.serverCtx());
+        return ExceptionUtil.rethrowSQLException(() -> nativeCtx.nativeConn().syncSampleBlock(insertQuery));
     }
 
-    public QueryResult sendQueryRequest(final String query, ClickHouseConfig cfg) throws SQLException {
-        Validate.isTrue(this.state.get() == SessionState.IDLE,
-                "Connection is currently waiting for an insert operation, check your previous InsertStatement.");
-        NativeClient nativeClient = getHealthyNativeClient();
-        nativeClient.sendQuery(query, nativeCtx.clientCtx(), cfg.settings());
-        return nativeClient.receiveQuery(cfg.queryTimeout(), nativeCtx.serverCtx());
+    public QueryResult sendQueryRequest(final String query, Map<SettingKey, Object> settings) throws SQLException {
+        return ExceptionUtil.rethrowSQLException(() -> nativeCtx.nativeConn().syncQuery(query, settings));
     }
-    // when sendInsertRequest we must ensure the connection is healthy
-    // the #getSampleBlock() must be called before this method
 
     public int sendInsertRequest(Block block) throws SQLException {
-        Validate.isTrue(this.state.get() == SessionState.WAITING_INSERT, "Call getSampleBlock before insert.");
-
-        NativeClient nativeClient = getNativeClient();
-        nativeClient.sendData(block);
-        nativeClient.sendData(new Block());
-        nativeClient.receiveEndOfStream(cfg.get().queryTimeout(), nativeCtx.serverCtx());
-        Validate.isTrue(this.state.compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE));
+        ExceptionUtil.rethrowSQLException(() -> nativeCtx.nativeConn().syncStore(block));
         return block.rowCnt();
-    }
-
-    synchronized private NativeClient getHealthyNativeClient() throws SQLException {
-        NativeContext oldCtx = nativeCtx;
-        if (!oldCtx.nativeClient().ping(cfg.get().queryTimeout(), nativeCtx.serverCtx())) {
-            LOG.warn("connection loss with state[{}], create new connection and reset state", state);
-            nativeCtx = createNativeContext(cfg.get());
-            state.set(SessionState.IDLE);
-            oldCtx.nativeClient().silentDisconnect();
-        }
-
-        return nativeCtx.nativeClient();
-    }
-
-    private NativeClient getNativeClient() {
-        return nativeCtx.nativeClient();
-    }
-
-    public static ClickHouseConnection createClickHouseConnection(ClickHouseConfig configure) throws SQLException {
-        return new ClickHouseConnection(configure, createNativeContext(configure));
-    }
-
-    private static NativeContext createNativeContext(ClickHouseConfig configure) throws SQLException {
-        NativeClient nativeClient = NativeClient.connect(configure);
-        return new NativeContext(clientContext(nativeClient, configure), serverContext(nativeClient, configure), nativeClient);
-    }
-
-    private static NativeContext.ClientContext clientContext(NativeClient nativeClient, ClickHouseConfig configure) throws SQLException {
-        Validate.isTrue(nativeClient.address() instanceof InetSocketAddress);
-        InetSocketAddress address = (InetSocketAddress) nativeClient.address();
-        String clientName = String.format(Locale.ROOT, "%s %s", ClickHouseDefines.NAME, "client");
-        String initialAddress = "[::ffff:127.0.0.1]:0";
-        return new NativeContext.ClientContext(initialAddress, address.getHostName(), clientName);
-    }
-
-    private static NativeContext.ServerContext serverContext(NativeClient nativeClient, ClickHouseConfig configure) throws SQLException {
-        try {
-            long revision = ClickHouseDefines.CLIENT_REVISION;
-            nativeClient.sendHello("client", revision, configure.database(), configure.user(), configure.password());
-
-            HelloResponse response = nativeClient.receiveHello(configure.queryTimeout(), null);
-            ZoneId timeZone = ZoneId.of(response.serverTimeZone());
-            return new NativeContext.ServerContext(
-                    response.majorVersion(), response.minorVersion(), response.reversion(),
-                    configure, timeZone, response.serverDisplayName());
-        } catch (SQLException rethrows) {
-            nativeClient.silentDisconnect();
-            throw rethrows;
-        }
     }
 }

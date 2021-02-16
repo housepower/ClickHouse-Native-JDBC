@@ -15,6 +15,7 @@
 package com.github.housepower.client;
 
 import com.github.housepower.data.Block;
+import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.exception.ClickHouseException;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
@@ -23,8 +24,10 @@ import com.github.housepower.misc.ExceptionUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.*;
 import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.ClickHouseErrCode;
 import com.github.housepower.settings.SettingKey;
+import com.github.housepower.stream.ClickHouseQueryResult;
 import com.github.housepower.stream.QueryResult;
 import io.netty.channel.Channel;
 
@@ -34,46 +37,65 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class NativeConnection implements ChannelHelper {
+public class NativeConnection implements ChannelHelper, AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(NativeConnection.class);
 
-    private Channel channel;
-    private BlockingQueue<Response> responseQueue;
+    private volatile Channel channel;
+    private volatile BlockingQueue<Response> responseQueue;
     private ClickHouseConfig cfg;
 
     public NativeConnection(Channel channel, ClickHouseConfig cfg) {
         this.channel = channel;
         this.responseQueue = newResponseQueue();
         this.cfg = cfg;
-        initChannel();
     }
 
-    private void initChannel() {
+    public NativeContext initChannel() {
+        stateAttr(channel).set(SessionState.INIT);
         Validate.ensure(channel.isActive());
-        // Validate.ensure(stateAttr(channel).compareAndSet(SessionState.INIT, SessionState.CONNECTED));
-        stateAttr(channel).set(SessionState.CONNECTED);
+        Validate.ensure(stateAttr(channel).compareAndSet(SessionState.INIT, SessionState.CONNECTED));
+        NativeContext.ClientContext clientCtx = clientContext(channel);
+        setClientCtx(channel, clientCtx);
         setResponseQueue(channel, responseQueue);
+        stateAttr(channel).set(SessionState.CONNECTED);
+        syncHello("ClickHouse-Native-JDBC", ClickHouseDefines.CLIENT_REVISION, cfg.database(), cfg.user(), cfg.password());
+        NativeContext.ServerContext serverCtx = getServerCtx(channel);
+        return new NativeContext(clientCtx, serverCtx, this);
+    }
+
+    void checkOrRepairChannel() {
+        Validate.ensure(channel.isActive());
+        // TODO reconnect if current channel broken
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+    public void silentClose() {
+        try {
+            close();
+        } catch (Throwable th) {
+            log.debug("close throw exception", th);
+        }
     }
 
     public Future<Boolean> ping() {
-        Validate.ensure(channel.isActive());
+        checkOrRepairChannel();
         PingRequest request = PingRequest.INSTANCE;
-        ResultFuture resultFuture = new ResultFuture(request);
-        setResultFuture(channel, resultFuture);
         sendRequest(request);
-        return resultFuture
-                .toCompletableFuture()
+        return CompletableFuture
+                .supplyAsync(() -> recvResponse(PongResponse.class, true))
                 .handle((response, throwable) -> {
                     boolean active = throwable == null;
-                    if (active) Validate.ensure(state.compareAndSet(SessionState.IDLE, SessionState.IDLE)
-                            || state.compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE));
-                    assert response instanceof PongResponse;
+                    if (active) Validate.ensure(stateAttr(channel).compareAndSet(SessionState.IDLE, SessionState.IDLE)
+                            || stateAttr(channel).compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE));
                     return active;
                 });
     }
@@ -87,57 +109,106 @@ public class NativeConnection implements ChannelHelper {
         }
     }
 
-    public Future<Block> sampleBlock(String query) {
-        // check state
-        // set future
-        // update channel conf (optional)
-        // send request
-    }
-
-    public Future<QueryResult> query(String id, int stage, String sql, Map<SettingKey, Object> settings) {
-        Validate.ensure(channel.isActive());
-        Validate.ensure(state.get() == SessionState.IDLE);
-        NativeContext.ClientContext clientCtx = getClientCtx(channel);
-        QueryRequest request = new QueryRequest(id, clientCtx, stage, false, sql, settings);
-        ResultFuture resultFuture = new ResultFuture(request);
-        setResultFuture(channel, resultFuture);
+    public Future<Block> sampleBlock(String sampleSql) {
+        checkOrRepairChannel();
+        QueryRequest request = new QueryRequest(
+                nextId(),
+                getClientCtx(channel),
+                QueryRequest.STAGE_COMPLETE,
+                false, // TODO support compress
+                sampleSql,
+                cfg.settings());
+        Validate.ensure(stateAttr(channel).get() == SessionState.IDLE);
         sendRequest(request);
-        return resultFuture
-                .toCompletableFuture()
-                .whenComplete((response, throwable) -> {
-                    boolean authenticated = throwable == null;
-                    if (authenticated) {
-                        assert response instanceof HelloResponse;
-                        setServerCtx(channel, serverContext((HelloResponse) response, cfg));
-                        Validate.ensure(state.compareAndSet(SessionState.CONNECTED, SessionState.IDLE));
-                    }
-                })
-                .thenApply(response -> ((DataResponse) response).block());
+
+        return CompletableFuture
+                .supplyAsync(() -> recvResponse(DataResponse.class, false))
+                .handle((response, throwable) -> {
+                    boolean success = throwable == null;
+                    if (success)
+                        Validate.ensure(stateAttr(channel).compareAndSet(SessionState.IDLE, SessionState.WAITING_INSERT));
+                    return response.block();
+                });
     }
 
-    public Future<Boolean> data(Block block) {
+    public Block syncSampleBlock(String sampleSql) {
+        try {
+            return sampleBlock(sampleSql).get();
+        } catch (Exception rethrow) {
+            log.error("sample block failed\n=== failed sql ===\n{}\n===", sampleSql, rethrow);
+            int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
+            ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
+            if (ex != null)
+                errCode = ex.code();
+            throw new ClickHouseException(errCode, rethrow);
+        }
+    }
 
+    public Future<QueryResult> query(String querySql, Map<SettingKey, Object> settings) {
+        checkOrRepairChannel();
+        QueryRequest request = new QueryRequest(
+                nextId(),
+                getClientCtx(channel),
+                QueryRequest.STAGE_COMPLETE,
+                false, // TODO support compress
+                querySql,
+                settings);
+        sendRequest(request);
+        return CompletableFuture
+                .supplyAsync(() -> new ClickHouseQueryResult(() ->
+                        recvResponse(DataResponse.class, EOFStreamResponse.class, false)));
+    }
+
+    public QueryResult syncQuery(String querySql, Map<SettingKey, Object> settings) {
+        try {
+            return query(querySql, settings).get();
+        } catch (Exception rethrow) {
+            log.error("query failed\n=== failed sql ===\n{}\n===", querySql, rethrow);
+            int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
+            ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
+            if (ex != null)
+                errCode = ex.code();
+            throw new ClickHouseException(errCode, rethrow);
+        }
+    }
+
+    public Future<Void> store(Block block) {
+        checkOrRepairChannel();
+        DataRequest request = new DataRequest(nextId(), block);
+        sendRequest(request);
+        sendRequest(DataRequest.EMPTY);
+        return CompletableFuture
+                .supplyAsync(() -> recvResponse(EOFStreamResponse.class, false))
+                .thenAccept(eof -> Validate.ensure(
+                        stateAttr(channel).compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE)));
+    }
+
+    public void syncStore(Block block) {
+        try {
+            store(block).get();
+        } catch (Exception rethrow) {
+            log.error("store failed", rethrow);
+            int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
+            ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
+            if (ex != null)
+                errCode = ex.code();
+            throw new ClickHouseException(errCode, rethrow);
+        }
     }
 
     Future<HelloResponse> hello(String name, long reversion, String db, String user, String password) {
-        Validate.ensure(channel.isActive());
-        Validate.ensure(state.get() == SessionState.CONNECTED);
-        setClientCtx(channel, clientContext(channel));
+        checkOrRepairChannel();
         HelloRequest request = new HelloRequest(name, reversion, db, user, password);
-        ResultFuture resultFuture = new ResultFuture(request);
-        setResultFuture(channel, resultFuture);
         sendRequest(request);
-        return resultFuture
-                .toCompletableFuture()
+        return CompletableFuture
+                .supplyAsync(() -> recvResponse(HelloResponse.class, false))
                 .whenComplete((response, throwable) -> {
                     boolean authenticated = throwable == null;
                     if (authenticated) {
-                        assert response instanceof HelloResponse;
-                        setServerCtx(channel, serverContext((HelloResponse) response, cfg));
-                        Validate.ensure(state.compareAndSet(SessionState.CONNECTED, SessionState.IDLE));
+                        setServerCtx(channel, serverContext(response, cfg));
+                        Validate.ensure(stateAttr(channel).compareAndSet(SessionState.CONNECTED, SessionState.IDLE));
                     }
-                })
-                .thenApply(response -> (HelloResponse) response);
+                });
     }
 
     void syncHello(String name, long reversion, String db, String user, String password) {
@@ -154,6 +225,49 @@ public class NativeConnection implements ChannelHelper {
 
     void sendRequest(Request request) {
         channel.writeAndFlush(request);
+    }
+
+    @SuppressWarnings("unchecked")
+    <T extends Response> T recvResponse(Class<T> clz, boolean skipIfNotMatch) {
+        while (true) {
+            try {
+                Response response = responseQueue.take();
+                if (clz.isAssignableFrom(response.getClass())) {
+                    return (T) response;
+                }
+                if (skipIfNotMatch) {
+                    log.debug("expect {}, skip response: {}", clz.getSimpleName(), response.type());
+                } else {
+                    throw new ClickHouseException(
+                            ClickHouseErrCode.UNEXPECTED_PACKET_FROM_SERVER.code(), response.type().toString());
+                }
+            } catch (InterruptedException rethrow) {
+                throw new ClickHouseClientException(rethrow);
+            }
+        }
+    }
+
+    <T extends Response, U extends Response> Response recvResponse(Class<T> clz, Class<U> clz2, boolean skipIfNotMatch) {
+        while (true) {
+            try {
+                Response response = responseQueue.take();
+                if (clz.isAssignableFrom(response.getClass()) || clz2.isAssignableFrom(response.getClass())) {
+                    return response;
+                }
+                if (skipIfNotMatch) {
+                    log.debug("expect {} or {}, skip response: {}", clz.getSimpleName(), clz2.getSimpleName(), response.type());
+                } else {
+                    throw new ClickHouseException(
+                            ClickHouseErrCode.UNEXPECTED_PACKET_FROM_SERVER.code(), response.type().toString());
+                }
+            } catch (InterruptedException rethrow) {
+                throw new ClickHouseClientException(rethrow);
+            }
+        }
+    }
+
+    static String nextId() {
+        return "ClickHouse-Native-JDBC-" + System.nanoTime();
     }
 
     static NativeContext.ClientContext clientContext(Channel ch) {

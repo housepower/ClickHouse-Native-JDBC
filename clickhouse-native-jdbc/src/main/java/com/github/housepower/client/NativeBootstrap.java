@@ -12,10 +12,13 @@
  * limitations under the License.
  */
 
-package com.github.housepower.network;
+package com.github.housepower.client;
 
 import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.misc.NettyUtil;
+import com.github.housepower.network.RequestEncoder;
+import com.github.housepower.network.ResponseDecoder;
+import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -24,15 +27,18 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-public class NettyClientBootstrap {
+public class NativeBootstrap {
+
+    public static final NativeBootstrap INSTANCE = new NativeBootstrap();
 
     private final Bootstrap bootstrap;
     private final EventLoopGroup workerGroup;
 
-    public NettyClientBootstrap() {
+    public NativeBootstrap() {
         this.workerGroup = NettyUtil.createEventLoopGroup();
         this.bootstrap = new Bootstrap()
                 .group(workerGroup)
@@ -50,13 +56,18 @@ public class NettyClientBootstrap {
                         pipeline.addLast("logging_handler", new LoggingHandler(LogLevel.INFO))
                                 .addLast("request_encoder", new RequestEncoder())
                                 .addLast("response_decoder", new ResponseDecoder())
-                                .addLast("response_handler", new ResponseHandler())
                                 .addLast("idle_state_handler", new IdleStateHandler(600, 600, 600));
                     }
                 });
     }
 
-    public Channel connect(SocketAddress address) {
+    public NativeContext createConnection(ClickHouseConfig cfg) {
+        Channel ch = connect(new InetSocketAddress(cfg.host(), cfg.port()));
+        NativeConnection conn = new NativeConnection(ch, cfg);
+        return conn.initChannel();
+    }
+
+    private Channel connect(SocketAddress address) {
         Channel channel;
         ChannelFuture f = this.bootstrap.connect(address);
         try {

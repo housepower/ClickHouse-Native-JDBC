@@ -87,7 +87,7 @@ public class ClickHouseStatement implements SQLStatement {
         }
 
         updateCount = -1;
-        QueryResult result = connection.sendQueryRequest(query, cfg);
+        QueryResult result = connection.sendQueryRequest(query, cfg.settings());
         lastResultSet = new ClickHouseResultSet(this, cfg, db, table, result.header(), result.data());
         return 0;
     }

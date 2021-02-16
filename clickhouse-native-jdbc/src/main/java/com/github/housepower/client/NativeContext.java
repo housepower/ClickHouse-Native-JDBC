@@ -28,12 +28,12 @@ public class NativeContext {
 
     private final ClientContext clientCtx;
     private final ServerContext serverCtx;
-    private final NativeClient nativeClient;
+    private final NativeConnection nativeConn;
 
-    public NativeContext(ClientContext clientCtx, ServerContext serverCtx, NativeClient nativeClient) {
+    public NativeContext(ClientContext clientCtx, ServerContext serverCtx, NativeConnection nativeConn) {
         this.clientCtx = clientCtx;
         this.serverCtx = serverCtx;
-        this.nativeClient = nativeClient;
+        this.nativeConn = nativeConn;
     }
 
     public ClientContext clientCtx() {
@@ -44,8 +44,8 @@ public class NativeContext {
         return serverCtx;
     }
 
-    public NativeClient nativeClient() {
-        return nativeClient;
+    public NativeConnection nativeConn() {
+        return nativeConn;
     }
 
     public static class ClientContext implements ByteBufHelper, Encodable {

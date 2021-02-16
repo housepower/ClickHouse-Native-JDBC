@@ -16,6 +16,7 @@ package com.github.housepower.jdbc;
 
 import com.github.housepower.data.Block;
 import com.github.housepower.data.IColumn;
+import com.github.housepower.exception.ClickHouseSQLException;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLResultSet;
 import com.github.housepower.log.Logger;

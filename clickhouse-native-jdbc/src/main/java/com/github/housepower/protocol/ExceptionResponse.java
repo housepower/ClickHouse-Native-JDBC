@@ -14,7 +14,7 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.jdbc.ClickHouseSQLException;
+import com.github.housepower.exception.ClickHouseSQLException;
 import com.github.housepower.serde.BinaryDeserializer;
 import io.netty.buffer.ByteBuf;
 

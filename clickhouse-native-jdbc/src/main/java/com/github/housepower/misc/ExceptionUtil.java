@@ -14,9 +14,14 @@
 
 package com.github.housepower.misc;
 
+import com.github.housepower.exception.ClickHouseException;
+import com.github.housepower.exception.ClickHouseSQLException;
+import com.github.housepower.settings.ClickHouseErrCode;
+
 import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ExceptionUtil {
 
@@ -44,6 +49,40 @@ public class ExceptionUtil {
         };
     }
 
+    public static <T> Supplier<T> unchecked(CheckedSupplier<T> checked) {
+        return () -> {
+            try {
+                return checked.get();
+            } catch (Exception rethrow) {
+                throw unchecked(rethrow);
+            }
+        };
+    }
+
+    public static void rethrowSQLException(CheckedRunnable checked) throws ClickHouseSQLException {
+        try {
+            checked.run();
+        } catch (Exception rethrow) {
+            int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
+            ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
+            if (ex != null)
+                errCode = ex.code();
+            throw new ClickHouseSQLException(errCode, rethrow.getMessage(), rethrow);
+        }
+    }
+
+    public static <T> T rethrowSQLException(CheckedSupplier<T> checked) throws ClickHouseSQLException {
+        try {
+            return checked.get();
+        } catch (Exception rethrow) {
+            int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
+            ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
+            if (ex != null)
+                errCode = ex.code();
+            throw new ClickHouseSQLException(errCode, rethrow.getMessage(), rethrow);
+        }
+    }
+
     @Nullable
     @SuppressWarnings("unchecked")
     public static <T> T recursiveFind(Throwable th, Class<T> expectedClz) {
@@ -67,7 +106,18 @@ public class ExceptionUtil {
         R apply(T t, U u) throws Exception;
     }
 
+    @FunctionalInterface
     public interface CheckedBiConsumer<T, U> {
         void accept(T t, U u) throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface CheckedRunnable {
+        void run() throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface CheckedSupplier<T> {
+        T get() throws Exception;
     }
 }
