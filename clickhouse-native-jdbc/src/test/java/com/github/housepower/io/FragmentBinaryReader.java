@@ -12,13 +12,9 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc.tool;
+package com.github.housepower.io;
 
-import java.io.IOException;
-
-import com.github.housepower.buffer.BuffedReader;
-
-public class FragmentBuffedReader implements BuffedReader {
+public class FragmentBinaryReader implements BinaryReader {
 
     private int fragmentPos;
 
@@ -26,17 +22,17 @@ public class FragmentBuffedReader implements BuffedReader {
 
     private final byte[][] fragments;
 
-    public FragmentBuffedReader(byte[]... fragments) {
+    public FragmentBinaryReader(byte[]... fragments) {
         this.fragments = fragments;
     }
 
     @Override
-    public int readBinary() throws IOException {
+    public int readByte() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int readBinary(byte[] bytes) throws IOException {
+    public int readBytes(byte[] bytes) {
 
         for (int i = 0; i < bytes.length; ) {
             if (bytesPosition == fragments[fragmentPos].length) {

@@ -14,7 +14,7 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.io.ByteBufHelper;
 import io.netty.buffer.ByteBuf;
 
 public interface Request extends ByteBufHelper, Encodable {

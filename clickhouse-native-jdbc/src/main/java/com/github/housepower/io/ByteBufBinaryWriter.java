@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.io;
 
 import com.github.housepower.misc.NettyUtil;
 import io.netty.buffer.ByteBuf;
@@ -20,32 +20,32 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ByteBufWriter implements BuffedWriter {
+public class ByteBufBinaryWriter implements BinaryWriter {
 
     private final int columnSize;
     private final List<ByteBuf> bufList = new ArrayList<>();
 
     private ByteBuf buf;
 
-    public ByteBufWriter(int columnSize) {
+    public ByteBufBinaryWriter(int columnSize) {
         this.columnSize = columnSize;
         this.buf = NettyUtil.alloc().buffer(columnSize, columnSize);
         this.bufList.add(buf);
     }
 
     @Override
-    public void writeBinary(byte byt) {
+    public void writeByte(byte byt) {
         buf.writeByte(byt);
         flushToTarget(false);
     }
 
     @Override
-    public void writeBinary(byte[] bytes) {
-        writeBinary(bytes, 0, bytes.length);
+    public void writeBytes(byte[] bytes) {
+        writeBytes(bytes, 0, bytes.length);
     }
 
     @Override
-    public void writeBinary(byte[] bytes, int offset, int length) {
+    public void writeBytes(byte[] bytes, int offset, int length) {
         if (buf.maxFastWritableBytes() < length) {
             int partial = buf.maxFastWritableBytes();
             buf.writeBytes(bytes, offset, partial);

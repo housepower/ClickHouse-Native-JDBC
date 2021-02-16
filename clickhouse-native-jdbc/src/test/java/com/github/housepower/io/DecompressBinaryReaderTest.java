@@ -12,9 +12,8 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.io;
 
-import com.github.housepower.jdbc.tool.FragmentBuffedReader;
 import io.airlift.compress.Compressor;
 import io.airlift.compress.lz4.Lz4Compressor;
 import org.junit.jupiter.api.Test;
@@ -26,19 +25,19 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CompressedBuffedReaderTest {
+public class DecompressBinaryReaderTest {
 
     @Test
-    public void successfullyReadCompressedData() throws Exception {
+    public void successfullyReadCompressedData() {
 
-        CompressedBuffedReader compressedBuffed = new CompressedBuffedReader(
-            new FragmentBuffedReader(compressedData(new byte[] {1, 2, 3}), compressedData(new byte[] {4, 5, 6, 7}))
+        DecompressBinaryReader compressedBuffed = new DecompressBinaryReader(
+                new FragmentBinaryReader(compressedData(new byte[]{1, 2, 3}), compressedData(new byte[]{4, 5, 6, 7}))
         );
 
-        assertEquals(compressedBuffed.readBinary(), 1);
+        assertEquals(compressedBuffed.readByte(), 1);
 
         byte[] bytes = new byte[5];
-        compressedBuffed.readBinary(bytes);
+        compressedBuffed.readBytes(bytes);
 
         assertEquals(bytes[0], 2);
         assertEquals(bytes[1], 3);
@@ -46,7 +45,7 @@ public class CompressedBuffedReaderTest {
         assertEquals(bytes[3], 5);
         assertEquals(bytes[4], 6);
 
-        assertEquals(compressedBuffed.readBinary(), 7);
+        assertEquals(compressedBuffed.readByte(), 7);
     }
 
 

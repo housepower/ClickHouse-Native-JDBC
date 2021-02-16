@@ -12,16 +12,10 @@
  * limitations under the License.
  */
 
-package com.github.housepower.misc;
+package com.github.housepower.io;
 
-import com.github.housepower.buffer.ByteBufReader;
-import com.github.housepower.buffer.ByteBufWriter;
 import com.github.housepower.misc.ExceptionUtil.CheckedBiConsumer;
 import com.github.housepower.misc.ExceptionUtil.CheckedFunction;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
-import com.github.housepower.serde.LegacyBinaryDeserializer;
-import com.github.housepower.serde.LegacyBinarySerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,7 +29,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(booleans = {true, false})
     void testBoolean(boolean value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeBoolean, BinaryDeserializer::readBoolean,
+                RichWriter::writeBoolean, RichReader::readBoolean,
                 ByteBuf::writeBoolean, ByteBuf::readBoolean);
     }
 
@@ -43,7 +37,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(bytes = {0, 1, Byte.MIN_VALUE, Byte.MAX_VALUE})
     void testByte(byte value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeByte, BinaryDeserializer::readByte,
+                RichWriter::writeByte, RichReader::readByte,
                 ((CheckedBiConsumer<ByteBuf, Byte>) ByteBuf::writeByte),
                 byteBuf -> Short.valueOf(byteBuf.readUnsignedByte()).byteValue());
     }
@@ -52,7 +46,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(shorts = {0, 1, Short.MIN_VALUE, Short.MAX_VALUE})
     void testShort(short value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeShort, BinaryDeserializer::readShort,
+                RichWriter::writeShort, RichReader::readShort,
                 ((CheckedBiConsumer<ByteBuf, Short>) ByteBuf::writeShortLE),
                 byteBuf -> Integer.valueOf(byteBuf.readUnsignedShortLE()).shortValue());
     }
@@ -62,7 +56,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(ints = {0, 1, Integer.MIN_VALUE, Integer.MAX_VALUE})
     void testInt(int value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeInt, BinaryDeserializer::readInt,
+                RichWriter::writeInt, RichReader::readInt,
                 ByteBuf::writeIntLE,
                 byteBuf -> Long.valueOf(byteBuf.readUnsignedIntLE()).intValue());
     }
@@ -71,7 +65,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(longs = {0L, 1L, Long.MIN_VALUE, Long.MAX_VALUE})
     void testLong(long value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeLong, BinaryDeserializer::readLong,
+                RichWriter::writeLong, RichReader::readLong,
                 ByteBuf::writeLongLE, ByteBuf::readLongLE);
     }
 
@@ -79,7 +73,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(floats = {0.0F, 1.1F, Float.MIN_VALUE, Float.MAX_VALUE, Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY})
     void testFloat(float value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeFloat, BinaryDeserializer::readFloat,
+                RichWriter::writeFloat, RichReader::readFloat,
                 ByteBuf::writeFloatLE, ByteBuf::readFloatLE);
     }
 
@@ -87,7 +81,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(doubles = {0.0, 1.1, Double.MIN_VALUE, Double.MAX_VALUE, Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY})
     void testDouble(double value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeDouble, BinaryDeserializer::readDouble,
+                RichWriter::writeDouble, RichReader::readDouble,
                 ByteBuf::writeDoubleLE, ByteBuf::readDoubleLE);
     }
 
@@ -95,7 +89,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(longs = {0L, 1L, Integer.MAX_VALUE, Long.MAX_VALUE})
     void testVarInt(long value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeVarInt, BinaryDeserializer::readVarInt,
+                RichWriter::writeVarInt, RichReader::readVarInt,
                 this::writeVarInt, this::readVarInt);
     }
 
@@ -103,24 +97,24 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(strings = {"", "abc", "哈哈", "😝"})
     void testUTF8Binary(String value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeUTF8StringBinary, BinaryDeserializer::readUTF8StringBinary,
+                RichWriter::writeUTF8StringBinary, RichReader::readUTF8StringBinary,
                 this::writeUTF8Binary, this::readUTF8Binary);
     }
 
     private <T> void testSerde(T value,
-                               CheckedBiConsumer<BinarySerializer, T> legacySerialize,
-                               CheckedFunction<BinaryDeserializer, T> legacyDeserialize,
+                               CheckedBiConsumer<RichWriter, T> legacySerialize,
+                               CheckedFunction<RichReader, T> legacyDeserialize,
                                CheckedBiConsumer<ByteBuf, T> nettySerialize,
                                CheckedFunction<ByteBuf, T> nettyDeserialize) throws Exception {
-        ByteBufWriter memoryWriter = new ByteBufWriter(1024);
-        LegacyBinarySerializer serializer = new LegacyBinarySerializer(memoryWriter, false, null);
+        ByteBufBinaryWriter memoryWriter = new ByteBufBinaryWriter(1024);
+        LegacyRichWriter serializer = new LegacyRichWriter(memoryWriter, false, null);
         legacySerialize.accept(serializer, value);
         ByteBuf legacyBuf = memoryWriter.getBuf();
         ByteBuf nettyBuf = heapBuf();
         nettySerialize.accept(nettyBuf, value);
         assertEquals(legacyBuf, nettyBuf);
 
-        LegacyBinaryDeserializer deserializer = new LegacyBinaryDeserializer(new ByteBufReader(legacyBuf), false);
+        LegacyRichReader deserializer = new LegacyRichReader(new ByteBufBinaryReader(legacyBuf), false);
         assertEquals(value, legacyDeserialize.apply(deserializer));
         assertEquals(value, nettyDeserialize.apply(nettyBuf));
     }

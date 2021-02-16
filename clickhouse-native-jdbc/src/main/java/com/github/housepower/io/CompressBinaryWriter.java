@@ -12,27 +12,24 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.io;
 
 import com.github.housepower.misc.ClickHouseCityHash;
-import com.github.housepower.misc.CodecHelper;
 import io.airlift.compress.Compressor;
-
-import java.io.IOException;
 
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-public class CompressedBuffedWriter implements BuffedWriter, CodecHelper {
+public class CompressBinaryWriter implements BinaryWriter, CodecHelper {
 
     private final int capacity;
     private final byte[] writtenBuf;
-    private final BuffedWriter writer;
+    private final BinaryWriter writer;
     private final Compressor compressor;
 
     private int position;
 
-    public CompressedBuffedWriter(int capacity, BuffedWriter writer, Compressor compressor) {
+    public CompressBinaryWriter(int capacity, BinaryWriter writer, Compressor compressor) {
         this.capacity = capacity;
         this.writtenBuf = new byte[capacity];
         this.writer = writer;
@@ -40,18 +37,18 @@ public class CompressedBuffedWriter implements BuffedWriter, CodecHelper {
     }
 
     @Override
-    public void writeBinary(byte byt) throws IOException {
+    public void writeByte(byte byt) {
         writtenBuf[position++] = byt;
         flushToTarget(false);
     }
 
     @Override
-    public void writeBinary(byte[] bytes) throws IOException {
-        writeBinary(bytes, 0, bytes.length);
+    public void writeBytes(byte[] bytes) {
+        writeBytes(bytes, 0, bytes.length);
     }
 
     @Override
-    public void writeBinary(byte[] bytes, int offset, int length) throws IOException {
+    public void writeBytes(byte[] bytes, int offset, int length) {
         while (remaining() < length) {
             int num = remaining();
             System.arraycopy(bytes, offset, writtenBuf, position, remaining());
@@ -68,7 +65,7 @@ public class CompressedBuffedWriter implements BuffedWriter, CodecHelper {
     }
 
     @Override
-    public void flushToTarget(boolean force) throws IOException {
+    public void flushToTarget(boolean force) {
         if (position > 0 && (force || !hasRemaining())) {
             int maxLen = compressor.maxCompressedLength(position);
 
@@ -84,7 +81,7 @@ public class CompressedBuffedWriter implements BuffedWriter, CodecHelper {
             System.arraycopy(getBytesLE(checksum[0]), 0, compressedBuffer, 0, Long.BYTES);
             System.arraycopy(getBytesLE(checksum[1]), 0, compressedBuffer, Long.BYTES, Long.BYTES);
 
-            writer.writeBinary(compressedBuffer, 0, compressedSize + CHECKSUM_LENGTH);
+            writer.writeBytes(compressedBuffer, 0, compressedSize + CHECKSUM_LENGTH);
             position = 0;
         }
     }

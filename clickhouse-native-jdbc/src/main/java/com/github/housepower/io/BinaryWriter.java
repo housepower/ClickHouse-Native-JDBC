@@ -12,13 +12,16 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.io;
 
-import java.io.IOException;
+// TODO refactor to match ByteBuf
+public interface BinaryWriter {
 
-public interface BuffedReader {
+    void writeByte(byte byt);
 
-    int readBinary() throws IOException;
+    void writeBytes(byte[] bytes);
 
-    int readBinary(byte[] bytes) throws IOException;
+    void writeBytes(byte[] bytes, int offset, int length);
+
+    void flushToTarget(boolean force);
 }

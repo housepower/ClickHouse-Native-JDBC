@@ -16,7 +16,7 @@ package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.exception.NotImplementedException;
-import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.io.ByteBufHelper;
 import io.netty.buffer.ByteBuf;
 
 import javax.annotation.Nullable;
@@ -24,8 +24,7 @@ import java.sql.SQLException;
 
 public interface Response extends ByteBufHelper {
 
-    ByteBufHelper helper = new ByteBufHelper() {
-    };
+    ByteBufHelper helper = ByteBufHelper.DEFAULT;
 
     ProtoType type();
 

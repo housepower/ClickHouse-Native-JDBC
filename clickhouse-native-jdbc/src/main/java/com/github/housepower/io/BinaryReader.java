@@ -12,29 +12,12 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.io;
 
-import io.netty.buffer.ByteBuf;
+// TODO refactor to match ByteBuf
+public interface BinaryReader {
 
-import java.io.IOException;
+    int readByte();
 
-public class ByteBufReader implements BuffedReader {
-
-    private final ByteBuf buf;
-
-    public ByteBufReader(ByteBuf buf) {
-        this.buf = buf;
-    }
-
-    @Override
-    public int readBinary() throws IOException {
-        return buf.readUnsignedByte();
-    }
-
-    @Override
-    public int readBinary(byte[] bytes) throws IOException {
-        int len = Math.min(buf.readableBytes(), bytes.length);
-        buf.readBytes(bytes, 0, len);
-        return len;
-    }
+    int readBytes(byte[] bytes);
 }

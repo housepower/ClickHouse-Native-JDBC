@@ -14,7 +14,7 @@
 
 package com.github.housepower.serde;
 
-import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.io.ByteBufHelper;
 import io.netty.buffer.ByteBuf;
 
 import java.time.Duration;

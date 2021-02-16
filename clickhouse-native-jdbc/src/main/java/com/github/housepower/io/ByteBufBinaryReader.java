@@ -12,17 +12,27 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.io;
 
-import java.io.IOException;
+import io.netty.buffer.ByteBuf;
 
-public interface BuffedWriter {
+public class ByteBufBinaryReader implements BinaryReader {
 
-    void writeBinary(byte byt) throws IOException;
+    private final ByteBuf buf;
 
-    void writeBinary(byte[] bytes) throws IOException;
+    public ByteBufBinaryReader(ByteBuf buf) {
+        this.buf = buf;
+    }
 
-    void writeBinary(byte[] bytes, int offset, int length) throws IOException;
+    @Override
+    public int readByte() {
+        return buf.readUnsignedByte();
+    }
 
-    void flushToTarget(boolean force) throws IOException;
+    @Override
+    public int readBytes(byte[] bytes) {
+        int len = Math.min(buf.readableBytes(), bytes.length);
+        buf.readBytes(bytes, 0, len);
+        return len;
+    }
 }

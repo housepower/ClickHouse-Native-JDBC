@@ -12,36 +12,34 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.io;
 
-import java.io.IOException;
+// TODO refactor to match ByteBuf
+public interface RichReader {
 
-@Deprecated
-public interface BinaryDeserializer {
+    long readVarInt();
 
-    long readVarInt() throws IOException;
+    short readShort();
 
-    short readShort() throws IOException;
+    int readInt();
 
-    int readInt() throws IOException;
+    long readLong();
 
-    long readLong() throws IOException;
+    boolean readBoolean();
 
-    boolean readBoolean() throws IOException;
+    byte[] readBytesBinary();
 
-    byte[] readBytesBinary() throws IOException;
+    String readUTF8StringBinary();
 
-    String readUTF8StringBinary() throws IOException;
-
-    byte readByte() throws IOException;
+    byte readByte();
 
     void maybeEnableCompressed();
 
     void maybeDisableCompressed();
 
-    float readFloat() throws IOException;
+    float readFloat();
 
-    double readDouble() throws IOException;
+    double readDouble();
 
-    byte[] readBytes(int size) throws IOException;
+    byte[] readBytes(int size);
 }

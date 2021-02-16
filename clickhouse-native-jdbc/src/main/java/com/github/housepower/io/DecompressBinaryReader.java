@@ -12,9 +12,8 @@
  * limitations under the License.
  */
 
-package com.github.housepower.buffer;
+package com.github.housepower.io;
 
-import com.github.housepower.misc.CodecHelper;
 import io.airlift.compress.Decompressor;
 import io.airlift.compress.lz4.Lz4Decompressor;
 import io.airlift.compress.zstd.ZstdDecompressor;
@@ -26,23 +25,23 @@ import java.io.UncheckedIOException;
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-public class CompressedBuffedReader implements BuffedReader, CodecHelper {
+public class DecompressBinaryReader implements BinaryReader, CodecHelper {
 
     private int position;
     private int capacity;
     private byte[] decompressed;
 
-    private final BuffedReader buf;
+    private final BinaryReader buf;
 
     private final Decompressor lz4Decompressor = new Lz4Decompressor();
     private final Decompressor zstdDecompressor = new ZstdDecompressor();
 
-    public CompressedBuffedReader(BuffedReader buf) {
+    public DecompressBinaryReader(BinaryReader buf) {
         this.buf = buf;
     }
 
     @Override
-    public int readBinary() throws IOException {
+    public int readByte() {
         if (position == capacity) {
             decompressed = readCompressedData();
             this.position = 0;
@@ -53,7 +52,7 @@ public class CompressedBuffedReader implements BuffedReader, CodecHelper {
     }
 
     @Override
-    public int readBinary(byte[] bytes) throws IOException {
+    public int readBytes(byte[] bytes) {
         for (int i = 0; i < bytes.length; ) {
             if (position == capacity) {
                 decompressed = readCompressedData();
@@ -74,14 +73,14 @@ public class CompressedBuffedReader implements BuffedReader, CodecHelper {
         return bytes.length;
     }
 
-    private byte[] readCompressedData() throws IOException {
-        //TODO: validate checksum
-        buf.readBinary(new byte[CHECKSUM_LENGTH]);
+    private byte[] readCompressedData() {
+        // TODO validate checksum
+        buf.readBytes(new byte[CHECKSUM_LENGTH]);
 
         byte[] compressedHeader = new byte[COMPRESSION_HEADER_LENGTH];
 
-        if (buf.readBinary(compressedHeader) != COMPRESSION_HEADER_LENGTH) {
-            throw new IOException("Invalid compression header");
+        if (buf.readBytes(compressedHeader) != COMPRESSION_HEADER_LENGTH) {
+            throw new UncheckedIOException(new IOException("Invalid compression header"));
         }
 
         int method = compressedHeader[0] & 0x0FF;
@@ -100,9 +99,9 @@ public class CompressedBuffedReader implements BuffedReader, CodecHelper {
         }
     }
 
-    private byte[] readCompressedData(int compressedSize, int decompressedSize, @Nullable Decompressor decompressor) throws IOException {
+    private byte[] readCompressedData(int compressedSize, int decompressedSize, @Nullable Decompressor decompressor) {
         byte[] compressed = new byte[compressedSize];
-        if (buf.readBinary(compressed) == compressedSize) {
+        if (buf.readBytes(compressed) == compressedSize) {
             if (decompressor == null)
                 return compressed;
             byte[] decompressed = new byte[decompressedSize];

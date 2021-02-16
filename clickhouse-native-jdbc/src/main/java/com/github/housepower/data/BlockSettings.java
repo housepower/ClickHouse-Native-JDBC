@@ -14,13 +14,13 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.io.ByteBufHelper;
 import com.github.housepower.protocol.Encodable;
 import io.netty.buffer.ByteBuf;
 
 public class BlockSettings implements ByteBufHelper, Encodable {
-    private static final ByteBufHelper helper = new ByteBufHelper() {
-    };
+
+    private static final ByteBufHelper helper = ByteBufHelper.DEFAULT;
 
     private final Setting[] settings;
 

@@ -16,7 +16,7 @@ package com.github.housepower.data.type.complex;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.io.ByteBufHelper;
 import com.github.housepower.misc.SQLLexer;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.AsciiString;

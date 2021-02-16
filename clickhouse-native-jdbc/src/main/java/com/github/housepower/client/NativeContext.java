@@ -14,7 +14,7 @@
 
 package com.github.housepower.client;
 
-import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.io.ByteBufHelper;
 import com.github.housepower.protocol.Encodable;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;

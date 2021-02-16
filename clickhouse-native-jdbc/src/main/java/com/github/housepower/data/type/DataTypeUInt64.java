@@ -14,7 +14,7 @@
 
 package com.github.housepower.data.type;
 
-import com.github.housepower.misc.CodecHelper;
+import com.github.housepower.io.CodecHelper;
 import com.github.housepower.misc.SQLLexer;
 import io.netty.buffer.ByteBuf;
 

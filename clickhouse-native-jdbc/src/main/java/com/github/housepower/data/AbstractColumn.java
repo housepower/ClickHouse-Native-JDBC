@@ -14,7 +14,7 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.io.ByteBufHelper;
 import io.netty.buffer.ByteBuf;
 
 public abstract class AbstractColumn implements IColumn, ByteBufHelper {

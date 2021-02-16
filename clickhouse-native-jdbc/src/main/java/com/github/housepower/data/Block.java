@@ -16,7 +16,7 @@ package com.github.housepower.data;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
-import com.github.housepower.misc.ByteBufHelper;
+import com.github.housepower.io.ByteBufHelper;
 import com.github.housepower.misc.NettyUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.Encodable;
@@ -29,8 +29,7 @@ import java.util.Map;
 
 public class Block implements ByteBufHelper, Encodable {
 
-    private static final ByteBufHelper helper = new ByteBufHelper() {
-    };
+    private static final ByteBufHelper helper = ByteBufHelper.DEFAULT;
 
     public static Block readFrom(ByteBuf buf, NativeContext.ServerContext serverContext) {
         BlockSettings info = BlockSettings.readFrom(buf);
