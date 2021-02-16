@@ -44,6 +44,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.housepower.protocol.Response.ProtoType.*;
+
 public class NativeConnection implements ChannelHelper, AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(NativeConnection.class);
@@ -94,7 +96,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         PingRequest request = PingRequest.INSTANCE;
         sendRequest(request);
         return CompletableFuture
-                .supplyAsync(() -> recvResponse(PongResponse.class, true))
+                .supplyAsync(() -> recvResponse(RESPONSE_PONG, true))
                 .handle((response, throwable) -> {
                     boolean active = throwable == null;
                     if (active)
@@ -126,7 +128,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         sendRequest(request);
 
         return CompletableFuture
-                .supplyAsync(() -> recvResponse(DataResponse.class, true))
+                .supplyAsync(() -> (DataResponse) recvResponse(RESPONSE_DATA, true))
                 .thenApply(dataResponse -> {
                     changeState(SessionState.IDLE, SessionState.WAITING_INSERT);
                     return dataResponse.block();
@@ -158,7 +160,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         sendRequest(request);
         return CompletableFuture
                 .supplyAsync(() -> new ClickHouseQueryResult(() ->
-                        recvResponse(DataResponse.class, EOSResponse.class, Duration.ofMillis(300), false, true)));
+                        recvResponse(RESPONSE_DATA, RESPONSE_END_OF_STREAM, Duration.ofMillis(300), false, true)));
     }
 
     public QueryResult syncQuery(String querySql, Map<SettingKey, Object> settings) {
@@ -180,7 +182,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         sendRequest(request);
         sendRequest(DataRequest.EMPTY);
         return CompletableFuture
-                .supplyAsync(() -> recvResponse(EOSResponse.class, false))
+                .supplyAsync(() -> recvResponse(RESPONSE_END_OF_STREAM, false))
                 .thenAccept(eos -> changeState(SessionState.WAITING_INSERT, SessionState.IDLE));
     }
 
@@ -202,7 +204,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         HelloRequest request = new HelloRequest(name, reversion, db, user, password);
         sendRequest(request);
         return CompletableFuture
-                .supplyAsync(() -> recvResponse(HelloResponse.class, false))
+                .supplyAsync(() -> (HelloResponse) recvResponse(RESPONSE_HELLO, false))
                 .whenComplete((response, throwable) -> {
                     boolean authenticated = throwable == null;
                     if (authenticated) {
@@ -229,15 +231,18 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     @SuppressWarnings("unchecked")
-    <T extends Response> T recvResponse(Class<T> clz, boolean skipIfNotMatch) {
+    <T extends Response> T recvResponse(Response.ProtoType type, boolean skipIfNotMatch) {
         while (true) {
             try {
                 Response response = responseQueue.take();
-                if (clz.isAssignableFrom(response.getClass())) {
+                if (response.type() == type) {
                     return (T) response;
                 }
+                if (response.type() == RESPONSE_EXCEPTION) {
+                    throw ((ExceptionResponse) response).exception();
+                }
                 if (skipIfNotMatch) {
-                    log.debug("expect {}, skip response: {}", clz.getSimpleName(), response.type());
+                    log.debug("expect {}, skip response: {}", type, response.type());
                 } else {
                     throw new ClickHouseException(
                             ClickHouseErrCode.UNEXPECTED_PACKET_FROM_SERVER.code(), response.type().toString());
@@ -249,11 +254,11 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     @Nullable
-    <T extends Response, U extends Response> Response recvResponse(Class<T> clz,
-                                                                   Class<U> clz2,
-                                                                   Duration timeout,
-                                                                   boolean nullIfTimeout,
-                                                                   boolean skipIfNotMatch) {
+    Response recvResponse(Response.ProtoType type1,
+                          Response.ProtoType type2,
+                          Duration timeout,
+                          boolean nullIfTimeout,
+                          boolean skipIfNotMatch) {
         while (true) {
             try {
                 Response response = responseQueue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -261,10 +266,13 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                     return null;
                 if (response == null)
                     continue;
-                if (clz.isAssignableFrom(response.getClass()) || clz2.isAssignableFrom(response.getClass()))
+                if (response.type() == type1 || response.type() == type2)
                     return response;
+                if (response.type() == RESPONSE_EXCEPTION) {
+                    throw ((ExceptionResponse) response).exception();
+                }
                 if (skipIfNotMatch) {
-                    log.debug("expect {} or {}, skip response: {}", clz.getSimpleName(), clz2.getSimpleName(), response.type());
+                    log.debug("expect {} or {}, skip response: {}", type1, type2, response.type());
                 } else {
                     throw new ClickHouseException(
                             ClickHouseErrCode.UNEXPECTED_PACKET_FROM_SERVER.code(), response.type().toString());

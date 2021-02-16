@@ -14,31 +14,41 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.exception.ClickHouseSQLException;
+import com.github.housepower.exception.ClickHouseException;
 import io.netty.buffer.ByteBuf;
-
-import java.sql.SQLException;
 
 public class ExceptionResponse implements Response {
 
-    public static SQLException readExceptionFrom(ByteBuf buf) {
-        int code = buf.readIntLE();
+    public static ExceptionResponse readFrom(ByteBuf buf) {
+        ClickHouseException ex = readExceptionFrom(buf);
+        return new ExceptionResponse(ex);
+    }
+
+    private static ClickHouseException readExceptionFrom(ByteBuf buf) {
+        int errCode = buf.readIntLE();
         String name = helper.readUTF8Binary(buf);
         String message = helper.readUTF8Binary(buf);
         String stackTrace = helper.readUTF8Binary(buf);
+        boolean hasInner = buf.readBoolean();
+        ClickHouseException innerEx = hasInner ? readExceptionFrom(buf) : null;
+        String errMsg = "ERROR[" + errCode + "] " + message + "\n" +
+                "=== stack trace ===" + "\n" +
+                stackTrace;
+        return new ClickHouseException(errCode, errMsg, innerEx);
+    }
 
-        if (buf.readBoolean()) {
-            return new ClickHouseSQLException(
-                    code,
-                    name + message + ". Stack trace:\n\n" + stackTrace,
-                    readExceptionFrom(buf));
-        }
+    private final ClickHouseException exception;
 
-        return new ClickHouseSQLException(code, name + message + ". Stack trace:\n\n" + stackTrace);
+    public ExceptionResponse(ClickHouseException exception) {
+        this.exception = exception;
     }
 
     @Override
     public ProtoType type() {
         return ProtoType.RESPONSE_EXCEPTION;
+    }
+
+    public ClickHouseException exception() {
+        return exception;
     }
 }

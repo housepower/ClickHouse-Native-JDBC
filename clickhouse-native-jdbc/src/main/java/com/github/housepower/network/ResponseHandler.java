@@ -14,64 +14,36 @@
 
 package com.github.housepower.network;
 
-import com.github.housepower.client.ResultFuture;
 import com.github.housepower.exception.ClickHouseException;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.ChannelHelper;
-import com.github.housepower.protocol.*;
+import com.github.housepower.misc.ExceptionUtil;
+import com.github.housepower.protocol.ExceptionResponse;
+import com.github.housepower.protocol.Response;
 import com.github.housepower.settings.ClickHouseErrCode;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-@Deprecated
+import java.util.concurrent.BlockingQueue;
+
 public class ResponseHandler extends SimpleChannelInboundHandler<Response> implements ChannelHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Response response) throws Exception {
-        ResultFuture resultFuture = getResultFuture(ctx.channel());
-        Request request = resultFuture.getRequest();
-        switch (request.type()) {
-            case REQUEST_HELLO:
-                if (response instanceof HelloResponse) {
-                    resultFuture.toCompletableFuture().complete(response);
-                } else {
-                    resultFuture.toCompletableFuture().completeExceptionally(
-                            new ClickHouseException(
-                                    ClickHouseErrCode.UNEXPECTED_PACKET_FROM_SERVER.code(),
-                                    response.type().toString()));
-                }
-                break;
-            case REQUEST_QUERY:
-                if (response instanceof DataResponse) {
-                    resultFuture.toCompletableFuture().complete(response);
-                } else {
-                    log.debug("expect data, skip response: {}", response.type());
-                }
-                break;
-            case REQUEST_DATA:
-                if (response instanceof EOSResponse) {
-                    resultFuture.toCompletableFuture().complete(response);
-                } else {
-                    resultFuture.toCompletableFuture().completeExceptionally(
-                            new ClickHouseException(
-                                    ClickHouseErrCode.UNEXPECTED_PACKET_FROM_SERVER.code(),
-                                    response.type().toString()));
-                }
-                break;
-            case REQUEST_PING:
-                if (response instanceof PongResponse) {
-                    resultFuture.toCompletableFuture().complete(response);
-                } else {
-                    log.debug("expect pong, skip response: {}", response.type());
-                }
-        }
+        BlockingQueue<Response> responseQueue = getResponseQueue(ctx.channel());
+        responseQueue.put(response);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        getResultFuture(ctx.channel()).toCompletableFuture().completeExceptionally(cause);
+        BlockingQueue<Response> responseQueue = getResponseQueue(ctx.channel());
+        int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
+        ClickHouseException ex = ExceptionUtil.recursiveFind(cause, ClickHouseException.class);
+        if (ex != null)
+            errCode = ex.code();
+        responseQueue.put(new ExceptionResponse(new ClickHouseException(errCode, cause)));
     }
 }

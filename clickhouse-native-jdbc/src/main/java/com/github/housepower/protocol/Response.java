@@ -20,7 +20,6 @@ import com.github.housepower.io.ByteBufHelper;
 import io.netty.buffer.ByteBuf;
 
 import javax.annotation.Nullable;
-import java.sql.SQLException;
 
 public interface Response extends ByteBufHelper {
 
@@ -28,14 +27,14 @@ public interface Response extends ByteBufHelper {
 
     ProtoType type();
 
-    static Response readFrom(ByteBuf buf, @Nullable NativeContext.ServerContext info) throws SQLException {
+    static Response readFrom(ByteBuf buf, @Nullable NativeContext.ServerContext info) {
         switch ((int) helper.readVarInt(buf)) {
             case 0:
                 return HelloResponse.readFrom(buf);
             case 1:
                 return DataResponse.readFrom(buf, info);
             case 2:
-                throw ExceptionResponse.readExceptionFrom(buf);
+                return ExceptionResponse.readFrom(buf);
             case 3:
                 return ProgressResponse.readFrom(buf);
             case 4:

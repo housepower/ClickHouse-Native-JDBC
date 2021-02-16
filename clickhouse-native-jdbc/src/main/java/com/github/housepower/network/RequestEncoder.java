@@ -29,6 +29,6 @@ public class RequestEncoder extends MessageToByteEncoder<Request> implements Cha
     @Override
     protected void encode(ChannelHandlerContext ctx, Request msg, ByteBuf out) throws Exception {
         msg.encode(out);
-        log.trace("[{}] send {}", stateAttr(ctx.channel()).get(), msg.type());
+        log.trace("{}[{}] send {}", ctx.channel().id(), stateAttr(ctx.channel()).get(), msg.type());
     }
 }

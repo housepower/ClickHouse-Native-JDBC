@@ -23,7 +23,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 
 public class ResponseDecoder extends ByteToMessageDecoder implements ChannelHelper {
 
@@ -31,16 +30,15 @@ public class ResponseDecoder extends ByteToMessageDecoder implements ChannelHelp
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        BlockingQueue<Response> responseQueue = getResponseQueue(ctx.channel());
         while (in.isReadable()) {
             in.markReaderIndex();
             try {
                 Response response = Response.readFrom(in, getServerCtx(ctx.channel()));
-                log.trace("[{}] recv {}", stateAttr(ctx.channel()).get(), response.type());
-                // out.add(response);
-                responseQueue.put(response);
+                log.trace("{}[{}] recv {}", ctx.channel().id(), stateAttr(ctx.channel()).get(), response.type());
+                out.add(response);
             } catch (IndexOutOfBoundsException ex) {
-                log.debug("decode response failed: {}" , ex.getMessage());
+                // TODO detect max length
+                log.debug("decode incomplete response: {}", ex.getMessage());
                 in.resetReaderIndex();
                 break;
             }
