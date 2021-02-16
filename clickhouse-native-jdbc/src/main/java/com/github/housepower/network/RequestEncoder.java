@@ -14,6 +14,8 @@
 
 package com.github.housepower.network;
 
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.protocol.Request;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,8 +23,11 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 public class RequestEncoder extends MessageToByteEncoder<Request> {
 
+    private static final Logger log = LoggerFactory.getLogger(RequestEncoder.class);
+
     @Override
     protected void encode(ChannelHandlerContext ctx, Request msg, ByteBuf out) throws Exception {
         msg.encode(out);
+        log.trace("send {}", msg.type());
     }
 }

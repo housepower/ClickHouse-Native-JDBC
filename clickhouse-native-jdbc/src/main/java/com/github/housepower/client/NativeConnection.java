@@ -31,6 +31,7 @@ import com.github.housepower.stream.ClickHouseQueryResult;
 import com.github.housepower.stream.QueryResult;
 import io.netty.channel.Channel;
 
+import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.time.Duration;
@@ -110,6 +111,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     public Future<Block> sampleBlock(String sampleSql) {
+        log.debug("sample sql: {}", sampleSql);
         checkOrRepairChannel();
         QueryRequest request = new QueryRequest(
                 nextId(),
@@ -122,7 +124,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         sendRequest(request);
 
         return CompletableFuture
-                .supplyAsync(() -> recvResponse(DataResponse.class, false))
+                .supplyAsync(() -> recvResponse(DataResponse.class, true))
                 .handle((response, throwable) -> {
                     boolean success = throwable == null;
                     if (success)
@@ -156,7 +158,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         sendRequest(request);
         return CompletableFuture
                 .supplyAsync(() -> new ClickHouseQueryResult(() ->
-                        recvResponse(DataResponse.class, EOFStreamResponse.class, false)));
+                        recvResponse(DataResponse.class, EOFStreamResponse.class, Duration.ofMillis(300), true, true)));
     }
 
     public QueryResult syncQuery(String querySql, Map<SettingKey, Object> settings) {
@@ -247,13 +249,21 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         }
     }
 
-    <T extends Response, U extends Response> Response recvResponse(Class<T> clz, Class<U> clz2, boolean skipIfNotMatch) {
+    @Nullable
+    <T extends Response, U extends Response> Response recvResponse(Class<T> clz,
+                                                                   Class<U> clz2,
+                                                                   Duration timeout,
+                                                                   boolean nullIfTimeout,
+                                                                   boolean skipIfNotMatch) {
         while (true) {
             try {
-                Response response = responseQueue.take();
-                if (clz.isAssignableFrom(response.getClass()) || clz2.isAssignableFrom(response.getClass())) {
+                Response response = responseQueue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
+                if (response == null && nullIfTimeout)
+                    return null;
+                if (response == null)
+                    continue;
+                if (clz.isAssignableFrom(response.getClass()) || clz2.isAssignableFrom(response.getClass()))
                     return response;
-                }
                 if (skipIfNotMatch) {
                     log.debug("expect {} or {}, skip response: {}", clz.getSimpleName(), clz2.getSimpleName(), response.type());
                 } else {
