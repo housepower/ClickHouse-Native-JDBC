@@ -71,7 +71,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     void checkOrRepairChannel() {
-        Validate.ensure(channel.isActive());
+        syncPing(Duration.ofMillis(1000));
         // TODO reconnect if current channel broken
     }
 
@@ -89,7 +89,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     public Future<Boolean> ping() {
-        checkOrRepairChannel();
+        Validate.ensure(channel.isActive());
         PingRequest request = PingRequest.INSTANCE;
         sendRequest(request);
         return CompletableFuture
@@ -200,7 +200,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     Future<HelloResponse> hello(String name, long reversion, String db, String user, String password) {
-        checkOrRepairChannel();
+        Validate.ensure(channel.isActive());
         HelloRequest request = new HelloRequest(name, reversion, db, user, password);
         sendRequest(request);
         return CompletableFuture
