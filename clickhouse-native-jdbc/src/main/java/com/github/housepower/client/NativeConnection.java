@@ -37,6 +37,7 @@ import java.net.SocketAddress;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -176,7 +177,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
 
     public Future<Void> store(Block block) {
         checkOrRepairChannel();
-        DataRequest request = new DataRequest(nextId(), block);
+        DataRequest request = new DataRequest("", block);
         sendRequest(request);
         sendRequest(DataRequest.EMPTY);
         return CompletableFuture
@@ -277,7 +278,8 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     static String nextId() {
-        return "ClickHouse-Native-JDBC-" + System.nanoTime();
+        // return "ClickHouse-Native-JDBC-" + System.nanoTime();
+        return UUID.randomUUID().toString();
     }
 
     static NativeContext.ClientContext clientContext(Channel ch) {
@@ -289,7 +291,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         } else {
             localHostName = localAddr.toString();
         }
-        String clientName = "ClickHouse Native JDBC Client";
+        String clientName = "ClickHouse client";
         return new NativeContext.ClientContext(initialAddress, localHostName, clientName);
     }
 

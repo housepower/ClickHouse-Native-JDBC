@@ -23,7 +23,7 @@ import java.sql.SQLException;
 
 public class DataRequest implements Request {
 
-    public static final DataRequest EMPTY = new DataRequest("NOOP");
+    public static final DataRequest EMPTY = new DataRequest("");
 
     private final String name;
     private final Block block;

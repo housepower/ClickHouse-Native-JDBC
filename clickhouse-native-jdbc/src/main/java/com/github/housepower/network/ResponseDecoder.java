@@ -32,20 +32,19 @@ public class ResponseDecoder extends ByteToMessageDecoder implements ChannelHelp
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         BlockingQueue<Response> responseQueue = getResponseQueue(ctx.channel());
-        if (responseQueue.remainingCapacity() == 0) {
-            log.debug("no capacity in channel[{}] response queue", ctx.channel().id());
-            return;
-        }
-        in.markReaderIndex();
-        try {
-            log.trace("try to decode response");
-            Response response = Response.readFrom(in, getServerCtx(ctx.channel()));
-            log.trace("recv {}", response.type());
-            // out.add(response);
-            responseQueue.put(response);
-        } catch (IndexOutOfBoundsException | InterruptedException ex) {
-            log.debug(ex.getMessage());
-            in.resetReaderIndex();
+        while (in.isReadable()) {
+            in.markReaderIndex();
+            try {
+                log.trace("try to decode response");
+                Response response = Response.readFrom(in, getServerCtx(ctx.channel()));
+                log.trace("recv {}", response.type());
+                // out.add(response);
+                responseQueue.put(response);
+            } catch (IndexOutOfBoundsException | InterruptedException ex) {
+                log.debug("decode response failed: {}" , ex.getMessage());
+                in.resetReaderIndex();
+                break;
+            }
         }
     }
 }
