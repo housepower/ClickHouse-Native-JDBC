@@ -19,13 +19,10 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.util.AsciiString;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -93,29 +90,6 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof AsciiString) {
-            writeBytes((((AsciiString) data).toByteArray()), serializer);
-        } else {
-            writeBytes(data.toString().getBytes(charset), serializer);
-        }
-    }
-
-    private void writeBytes(byte[] bs, BinarySerializer serializer) throws IOException, SQLException {
-        byte[] res;
-        if (bs.length > n) {
-            throw new SQLException("The size of FixString column is too large, got " + bs.length);
-        }
-        if (bs.length == n) {
-            res = bs;
-        } else {
-            res = new byte[n];
-            System.arraycopy(bs, 0, res, 0, bs.length);
-        }
-        serializer.writeBytes(res);
-    }
-
-    @Override
     public void encode(ByteBuf buf, CharSequence data) {
         int writeLen;
         int paddingLen;
@@ -140,11 +114,6 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
     private void checkWriteLength(int writeLen) {
         if (writeLen > n)
             throw new ClickHouseClientException("The size of FixString column is too large, got " + writeLen);
-    }
-
-    @Override
-    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return new String(deserializer.readBytes(n), charset);
     }
 
     @Override

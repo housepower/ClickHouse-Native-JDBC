@@ -14,16 +14,13 @@
 
 package com.github.housepower.data.type.complex;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Types;
-
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
+
+import java.sql.SQLException;
+import java.sql.Types;
 
 public class DataTypeNothing implements IDataType<Object, Object> {
 
@@ -66,16 +63,7 @@ public class DataTypeNothing implements IDataType<Object, Object> {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-    }
-
-    @Override
     public void encode(ByteBuf buf, Object data) {
-    }
-
-    @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return value;
     }
 
     @Override

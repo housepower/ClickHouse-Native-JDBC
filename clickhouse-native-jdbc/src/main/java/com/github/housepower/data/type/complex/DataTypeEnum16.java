@@ -18,11 +18,8 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -105,26 +102,6 @@ public class DataTypeEnum16 implements IDataType<String, String> {
     }
 
     @Override
-    public void serializeBinary(String data, BinarySerializer serializer) throws SQLException, IOException {
-        for (int i = 0; i < names.length; i++) {
-            if (data.equals(names[i])) {
-                serializer.writeShort(values[i]);
-                return;
-            }
-        }
-
-        StringBuilder message = new StringBuilder("Expected ");
-        for (int i = 0; i < names.length; i++) {
-            if (i > 0)
-                message.append(" OR ");
-            message.append(names[i]);
-        }
-        message.append(", but was ").append(data);
-
-        throw new SQLException(message.toString());
-    }
-
-    @Override
     public void encode(ByteBuf buf, String data) {
         for (int i = 0; i < names.length; i++) {
             if (data.equals(names[i])) {
@@ -142,17 +119,6 @@ public class DataTypeEnum16 implements IDataType<String, String> {
         message.append(", but was ").append(data);
 
         throw new ClickHouseClientException(message.toString());
-    }
-
-    @Override
-    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        short value = deserializer.readShort();
-        for (int i = 0; i < values.length; i++) {
-            if (values[i].equals(value)) {
-                return names[i];
-            }
-        }
-        throw new SQLException("");
     }
 
     @Override

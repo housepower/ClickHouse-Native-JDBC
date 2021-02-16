@@ -17,11 +17,9 @@ package com.github.housepower.protocol;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.exception.NotImplementedException;
 import com.github.housepower.misc.ByteBufHelper;
-import com.github.housepower.serde.BinaryDeserializer;
 import io.netty.buffer.ByteBuf;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.sql.SQLException;
 
 public interface Response extends ByteBufHelper {
@@ -30,34 +28,6 @@ public interface Response extends ByteBufHelper {
     };
 
     ProtoType type();
-
-    @Deprecated
-    static Response readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
-        switch ((int) deserializer.readVarInt()) {
-            case 0:
-                return HelloResponse.readFrom(deserializer);
-            case 1:
-                return DataResponse.readFrom(deserializer, info);
-            case 2:
-                throw ExceptionResponse.readExceptionFrom(deserializer);
-            case 3:
-                return ProgressResponse.readFrom(deserializer);
-            case 4:
-                return PongResponse.readFrom(deserializer);
-            case 5:
-                return EOFStreamResponse.readFrom(deserializer);
-            case 6:
-                return ProfileInfoResponse.readFrom(deserializer);
-            case 7:
-                return TotalsResponse.readFrom(deserializer, info);
-            case 8:
-                return ExtremesResponse.readFrom(deserializer, info);
-            case 9:
-                throw new NotImplementedException("RESPONSE_TABLES_STATUS_RESPONSE");
-            default:
-                throw new IllegalStateException("Accept the id of response that is not recognized by Server.");
-        }
-    }
 
     static Response readFrom(ByteBuf buf, @Nullable NativeContext.ServerContext info) throws SQLException {
         switch ((int) helper.readVarInt(buf)) {
@@ -72,7 +42,7 @@ public interface Response extends ByteBufHelper {
             case 4:
                 return PongResponse.readFrom(buf);
             case 5:
-                return EOFStreamResponse.readFrom(buf);
+                return EOSResponse.readFrom(buf);
             case 6:
                 return ProfileInfoResponse.readFrom(buf);
             case 7:
@@ -82,7 +52,7 @@ public interface Response extends ByteBufHelper {
             case 9:
                 throw new NotImplementedException("RESPONSE_TABLES_STATUS_RESPONSE");
             default:
-                throw new IllegalStateException("Accept the id of response that is not recognized by Server.");
+                throw new IllegalStateException("Accept the id of response that is not recognized by Client.");
         }
     }
 

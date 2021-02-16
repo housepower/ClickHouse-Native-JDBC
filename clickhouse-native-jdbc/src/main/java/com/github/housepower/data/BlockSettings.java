@@ -16,34 +16,16 @@ package com.github.housepower.data;
 
 import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.protocol.Encodable;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
-
 public class BlockSettings implements ByteBufHelper, Encodable {
-    private static ByteBufHelper helper = new ByteBufHelper() {
+    private static final ByteBufHelper helper = new ByteBufHelper() {
     };
 
     private final Setting[] settings;
 
     public BlockSettings(Setting[] settings) {
         this.settings = settings;
-    }
-
-    @Deprecated
-    public void writeTo(BinarySerializer serializer) throws IOException {
-        for (Setting setting : settings) {
-            serializer.writeVarInt(setting.num);
-
-            if (Boolean.class.isAssignableFrom(setting.clazz)) {
-                serializer.writeBoolean((Boolean) setting.defaultValue);
-            } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                serializer.writeInt((Integer) setting.defaultValue);
-            }
-        }
-        serializer.writeVarInt(0);
     }
 
     @Override
@@ -60,35 +42,8 @@ public class BlockSettings implements ByteBufHelper, Encodable {
         writeVarInt(buf, 0);
     }
 
-    @Deprecated
-    public static BlockSettings readFrom(BinaryDeserializer deserializer) throws IOException {
-        return new BlockSettings(readSettingsFrom(1, deserializer));
-    }
-
     public static BlockSettings readFrom(ByteBuf buf) {
         return new BlockSettings(readSettingsFrom(1, buf));
-    }
-
-    @Deprecated
-    private static Setting[] readSettingsFrom(int currentSize, BinaryDeserializer deserializer) throws IOException {
-        long num = deserializer.readVarInt();
-
-        for (Setting setting : Setting.defaultValues()) {
-            if (setting.num == num) {
-                if (Boolean.class.isAssignableFrom(setting.clazz)) {
-                    Setting receiveSetting = new Setting(setting.num, deserializer.readBoolean());
-                    Setting[] settings = readSettingsFrom(currentSize + 1, deserializer);
-                    settings[currentSize - 1] = receiveSetting;
-                    return settings;
-                } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                    Setting receiveSetting = new Setting(setting.num, deserializer.readInt());
-                    Setting[] settings = readSettingsFrom(currentSize + 1, deserializer);
-                    settings[currentSize - 1] = receiveSetting;
-                    return settings;
-                }
-            }
-        }
-        return new Setting[currentSize - 1];
     }
 
     private static Setting[] readSettingsFrom(int currentSize, ByteBuf buf) {

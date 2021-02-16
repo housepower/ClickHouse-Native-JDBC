@@ -18,11 +18,8 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -106,22 +103,6 @@ public class DataTypeEnum8 implements IDataType<String, String> {
     }
 
     @Override
-    public void serializeBinary(String data, BinarySerializer serializer) throws SQLException, IOException {
-        for (int i = 0; i < names.length; i++) {
-            if (data.equals(names[i])) {
-                serializer.writeByte(values[i]);
-                return;
-            }
-        }
-
-        StringJoiner joiner = new StringJoiner(" OR ", "Expected ", ", but was " + data);
-        for (String s : names)
-            joiner.add(s);
-
-        throw new SQLException(joiner.toString());
-    }
-
-    @Override
     public void encode(ByteBuf buf, String data) {
         for (int i = 0; i < names.length; i++) {
             if (data.equals(names[i])) {
@@ -135,17 +116,6 @@ public class DataTypeEnum8 implements IDataType<String, String> {
             joiner.add(s);
 
         throw new ClickHouseClientException(joiner.toString());
-    }
-
-    @Override
-    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        byte value = deserializer.readByte();
-        for (int i = 0; i < values.length; i++) {
-            if (values[i].equals(value)) {
-                return names[i];
-            }
-        }
-        throw new SQLException("");
     }
 
     @Override

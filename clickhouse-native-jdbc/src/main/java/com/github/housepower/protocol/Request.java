@@ -15,24 +15,11 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.misc.ByteBufHelper;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
-
-import java.io.IOException;
-import java.sql.SQLException;
 
 public interface Request extends ByteBufHelper, Encodable {
 
     ProtoType type();
-
-    @Deprecated
-    void writeImpl(BinarySerializer serializer) throws IOException, SQLException;
-
-    @Deprecated
-    default void writeTo(BinarySerializer serializer) throws IOException, SQLException {
-        serializer.writeVarInt(type().id());
-        this.writeImpl(serializer);
-    }
 
     @Override
     default void encode(ByteBuf buf) {

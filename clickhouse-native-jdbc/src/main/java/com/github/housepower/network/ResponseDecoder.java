@@ -35,12 +35,11 @@ public class ResponseDecoder extends ByteToMessageDecoder implements ChannelHelp
         while (in.isReadable()) {
             in.markReaderIndex();
             try {
-                log.trace("try to decode response");
                 Response response = Response.readFrom(in, getServerCtx(ctx.channel()));
-                log.trace("recv {}", response.type());
+                log.trace("[{}] recv {}", stateAttr(ctx.channel()).get(), response.type());
                 // out.add(response);
                 responseQueue.put(response);
-            } catch (IndexOutOfBoundsException | InterruptedException ex) {
+            } catch (IndexOutOfBoundsException ex) {
                 log.debug("decode response failed: {}" , ex.getMessage());
                 in.resetReaderIndex();
                 break;

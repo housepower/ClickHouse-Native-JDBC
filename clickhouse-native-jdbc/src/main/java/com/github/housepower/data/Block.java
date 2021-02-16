@@ -21,8 +21,6 @@ import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.NettyUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.Encodable;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -34,28 +32,6 @@ public class Block implements ByteBufHelper, Encodable {
 
     private static final ByteBufHelper helper = new ByteBufHelper() {
     };
-
-    @Deprecated
-    public static Block readFrom(BinaryDeserializer deserializer,
-                                 NativeContext.ServerContext serverContext) throws IOException, SQLException {
-        BlockSettings info = BlockSettings.readFrom(deserializer);
-
-        int columnCnt = (int) deserializer.readVarInt();
-        int rowCnt = (int) deserializer.readVarInt();
-
-        IColumn[] columns = new IColumn[columnCnt];
-
-        for (int i = 0; i < columnCnt; i++) {
-            String name = deserializer.readUTF8StringBinary();
-            String type = deserializer.readUTF8StringBinary();
-
-            IDataType dataType = DataTypeFactory.get(type, serverContext);
-            Object[] arr = dataType.deserializeBinaryBulk(rowCnt, deserializer);
-            columns[i] = ColumnFactory.createColumn(name, dataType, arr);
-        }
-
-        return new Block(rowCnt, columns, info);
-    }
 
     public static Block readFrom(ByteBuf buf, NativeContext.ServerContext serverContext) {
         BlockSettings info = BlockSettings.readFrom(buf);
@@ -138,18 +114,6 @@ public class Block implements ByteBufHelper, Encodable {
     public void incPlaceholderIndexes(int columnIdx) {
         for (int i = columnIdx; i < placeholderIndexes.length; i++) {
             placeholderIndexes[i] += 1;
-        }
-    }
-
-    @Deprecated
-    public void writeTo(BinarySerializer serializer) throws IOException, SQLException {
-        settings.writeTo(serializer);
-
-        serializer.writeVarInt(columns.length);
-        serializer.writeVarInt(rowCnt);
-
-        for (IColumn column : columns) {
-            column.flushToSerializer(serializer, true);
         }
     }
 

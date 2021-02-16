@@ -15,30 +15,23 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.exception.InvalidValueException;
+import com.github.housepower.jdbc.wrapper.SQLWrapper;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.StrUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.SettingKey;
-import com.github.housepower.jdbc.wrapper.SQLWrapper;
 
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import javax.sql.DataSource;
 
 /**
  * <p> Database for clickhouse jdbc connections.

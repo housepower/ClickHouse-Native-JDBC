@@ -14,21 +14,21 @@
 
 package com.github.housepower.jdbc.statement;
 
-import com.github.housepower.data.IColumn;
-import com.github.housepower.jdbc.ClickHouseArray;
-import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.exception.ClickHouseSQLException;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
+import com.github.housepower.data.IColumn;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.data.type.*;
 import com.github.housepower.data.type.complex.*;
+import com.github.housepower.exception.ClickHouseSQLException;
+import com.github.housepower.jdbc.ClickHouseArray;
+import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseStruct;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.stream.ValuesWithParametersInputFormat;
-import com.github.housepower.log.Logger;
-import com.github.housepower.log.LoggerFactory;
 import io.netty.util.AsciiString;
 
 import java.math.BigDecimal;
@@ -287,7 +287,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             }
             return ((ClickHouseStruct) obj).mapAttributes(((DataTypeTuple) type).getNestedTypes(), unchecked(this::convertToCkDataType));
         }
-        LOG.debug("unhandled type: {}[{}]", type.name(), obj.getClass());
+        LOG.debug("unhandled type: {}|{}|{}", type.name(), obj.getClass().getSimpleName(), obj);
         return obj;
     }
 }

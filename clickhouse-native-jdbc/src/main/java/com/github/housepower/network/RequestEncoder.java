@@ -16,18 +16,19 @@ package com.github.housepower.network;
 
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.misc.ChannelHelper;
 import com.github.housepower.protocol.Request;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
-public class RequestEncoder extends MessageToByteEncoder<Request> {
+public class RequestEncoder extends MessageToByteEncoder<Request> implements ChannelHelper {
 
     private static final Logger log = LoggerFactory.getLogger(RequestEncoder.class);
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Request msg, ByteBuf out) throws Exception {
         msg.encode(out);
-        log.trace("send {}", msg.type());
+        log.trace("[{}] send {}", stateAttr(ctx.channel()).get(), msg.type());
     }
 }

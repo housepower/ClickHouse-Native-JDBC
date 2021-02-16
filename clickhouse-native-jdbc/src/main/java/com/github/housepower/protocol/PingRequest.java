@@ -14,10 +14,7 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
-
-import java.io.IOException;
 
 public class PingRequest implements Request {
 
@@ -26,11 +23,6 @@ public class PingRequest implements Request {
     @Override
     public ProtoType type() {
         return ProtoType.REQUEST_PING;
-    }
-
-    @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
-        // Nothing
     }
 
     @Override

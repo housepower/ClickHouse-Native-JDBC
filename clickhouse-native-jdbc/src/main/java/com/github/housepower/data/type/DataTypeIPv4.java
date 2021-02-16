@@ -16,11 +16,8 @@ package com.github.housepower.data.type;
 
 import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -57,18 +54,8 @@ public class DataTypeIPv4 implements IDataType<Long, Long> {
     }
 
     @Override
-    public void serializeBinary(Long data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeInt(data.intValue());
-    }
-
-    @Override
     public void encode(ByteBuf buf, Long data) {
         buf.writeIntLE(data.intValue());
-    }
-
-    @Override
-    public Long deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readInt() & 0xffffffffL;
     }
 
     @Override

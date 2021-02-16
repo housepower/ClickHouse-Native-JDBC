@@ -36,6 +36,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.time.Duration;
 import java.time.ZoneId;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -96,15 +97,15 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                 .supplyAsync(() -> recvResponse(PongResponse.class, true))
                 .handle((response, throwable) -> {
                     boolean active = throwable == null;
-                    if (active) Validate.ensure(stateAttr(channel).compareAndSet(SessionState.IDLE, SessionState.IDLE)
-                            || stateAttr(channel).compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE));
+                    if (active)
+                        changeState(SessionState.IDLE, SessionState.WAITING_INSERT, SessionState.IDLE);
                     return active;
                 });
     }
 
-    public boolean syncPing(Duration soTimeout) {
+    public boolean syncPing(Duration timeout) {
         try {
-            return ping().get(soTimeout.toMillis(), TimeUnit.MILLISECONDS);
+            return ping().get(timeout.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.debug("ping failed", e);
             return false;
@@ -114,6 +115,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     public Future<Block> sampleBlock(String sampleSql) {
         log.debug("sample sql: {}", sampleSql);
         checkOrRepairChannel();
+        checkState(SessionState.IDLE);
         QueryRequest request = new QueryRequest(
                 nextId(),
                 getClientCtx(channel),
@@ -121,17 +123,11 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                 false, // TODO support compress
                 sampleSql,
                 cfg.settings());
-        Validate.ensure(stateAttr(channel).get() == SessionState.IDLE);
         sendRequest(request);
 
         return CompletableFuture
                 .supplyAsync(() -> recvResponse(DataResponse.class, true))
-                .handle((response, throwable) -> {
-                    boolean success = throwable == null;
-                    if (success)
-                        Validate.ensure(stateAttr(channel).compareAndSet(SessionState.IDLE, SessionState.WAITING_INSERT));
-                    return response.block();
-                });
+                .thenApply(DataResponse::block);
     }
 
     public Block syncSampleBlock(String sampleSql) {
@@ -159,7 +155,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         sendRequest(request);
         return CompletableFuture
                 .supplyAsync(() -> new ClickHouseQueryResult(() ->
-                        recvResponse(DataResponse.class, EOFStreamResponse.class, Duration.ofMillis(300), true, true)));
+                        recvResponse(DataResponse.class, EOSResponse.class, Duration.ofMillis(300), false, true)));
     }
 
     public QueryResult syncQuery(String querySql, Map<SettingKey, Object> settings) {
@@ -177,13 +173,13 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
 
     public Future<Void> store(Block block) {
         checkOrRepairChannel();
+        changeState(SessionState.IDLE, SessionState.WAITING_INSERT);
         DataRequest request = new DataRequest("", block);
         sendRequest(request);
         sendRequest(DataRequest.EMPTY);
         return CompletableFuture
-                .supplyAsync(() -> recvResponse(EOFStreamResponse.class, false))
-                .thenAccept(eof -> Validate.ensure(
-                        stateAttr(channel).compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE)));
+                .supplyAsync(() -> recvResponse(EOSResponse.class, false))
+                .thenAccept(eos -> changeState(SessionState.WAITING_INSERT, SessionState.IDLE));
     }
 
     public void syncStore(Block block) {
@@ -209,7 +205,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                     boolean authenticated = throwable == null;
                     if (authenticated) {
                         setServerCtx(channel, serverContext(response, cfg));
-                        Validate.ensure(stateAttr(channel).compareAndSet(SessionState.CONNECTED, SessionState.IDLE));
+                        changeState(SessionState.CONNECTED, SessionState.IDLE);
                     }
                 });
     }
@@ -275,6 +271,32 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                 throw new ClickHouseClientException(rethrow);
             }
         }
+    }
+
+    void checkState(SessionState expected) {
+        Validate.ensure(stateAttr(channel).get() == expected,
+                String.format(Locale.ROOT, "expected state [%s], but got [%s]",
+                        expected, stateAttr(channel).get()));
+    }
+
+    void changeState(SessionState from, SessionState target) {
+        Validate.ensure(stateAttr(channel).compareAndSet(from, target),
+                String.format(Locale.ROOT,
+                        "failed change state from [%s] to [%s], unexpected current state [%s]",
+                        from, target, stateAttr(channel).get()));
+        if (from != target)
+            log.debug("channel[{}] change state from [{}] to [{}]", channel.id(), from, target);
+    }
+
+    void changeState(SessionState from1, SessionState from2, SessionState target) {
+        SessionState currentState = stateAttr(channel).get();
+        Validate.ensure(stateAttr(channel).compareAndSet(from1, target)
+                        || stateAttr(channel).compareAndSet(from2, target),
+                String.format(Locale.ROOT,
+                        "failed change state from [%s] or [%s] to [%s], unexpected current state [%s]",
+                        from1, from2, target, currentState));
+        if (currentState != target)
+            log.debug("channel[{}] change state from [{}] to [{}]", channel.id(), currentState, target);
     }
 
     static String nextId() {

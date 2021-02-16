@@ -52,7 +52,7 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Response> imple
                 }
                 break;
             case REQUEST_DATA:
-                if (response instanceof EOFStreamResponse) {
+                if (response instanceof EOSResponse) {
                     resultFuture.toCompletableFuture().complete(response);
                 } else {
                     resultFuture.toCompletableFuture().completeExceptionally(

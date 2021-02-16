@@ -15,11 +15,8 @@
 package com.github.housepower.data.type;
 
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 public class DataTypeInt64 implements BaseDataTypeInt64<Long, Long> {
@@ -45,18 +42,8 @@ public class DataTypeInt64 implements BaseDataTypeInt64<Long, Long> {
     }
 
     @Override
-    public void serializeBinary(Long data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeLong(data);
-    }
-
-    @Override
     public void encode(ByteBuf buf, Long data) {
         buf.writeLongLE(data);
-    }
-
-    @Override
-    public Long deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        return deserializer.readLong();
     }
 
     @Override
