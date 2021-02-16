@@ -151,8 +151,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public boolean getBoolean(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public boolean getBoolean(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return false;
         }
@@ -161,8 +161,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public byte getByte(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public byte getByte(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return 0;
         }
@@ -170,8 +170,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public short getShort(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public short getShort(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return 0;
         }
@@ -179,8 +179,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public int getInt(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public int getInt(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return 0;
         }
@@ -188,8 +188,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public long getLong(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public long getLong(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return 0;
         }
@@ -197,8 +197,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public float getFloat(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public float getFloat(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return 0;
         }
@@ -206,8 +206,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public double getDouble(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public double getDouble(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return 0;
         }
@@ -215,8 +215,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public Timestamp getTimestamp(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public Timestamp getTimestamp(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return null;
         }
@@ -225,8 +225,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public Timestamp getTimestamp(int index, Calendar cal) throws SQLException {
-        Object data = getInternalObject(index);
+    public Timestamp getTimestamp(int position, Calendar cal) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return null;
         }
@@ -235,16 +235,16 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public Date getDate(int index) throws SQLException {
-        LocalDate date = (LocalDate) getInternalObject(index);
+    public Date getDate(int position) throws SQLException {
+        LocalDate date = (LocalDate) getInternalObject(position);
         if (date == null)
             return null;
         return Date.valueOf(date);
     }
 
     @Override
-    public BigDecimal getBigDecimal(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public BigDecimal getBigDecimal(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return null;
         }
@@ -255,8 +255,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public String getString(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public String getString(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return null;
         }
@@ -265,8 +265,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public byte[] getBytes(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public byte[] getBytes(int position) throws SQLException {
+        Object data = getInternalObject(position);
         if (data == null) {
             return null;
         }
@@ -277,8 +277,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public URL getURL(int index) throws SQLException {
-        String data = this.getString(index);
+    public URL getURL(int position) throws SQLException {
+        String data = this.getString(position);
         if (data == null) {
             return null;
         }
@@ -290,14 +290,14 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     @Override
-    public Array getArray(int index) throws SQLException {
-        Object data = getInternalObject(index);
+    public Array getArray(int position) throws SQLException {
+        Object data = getInternalObject(position);
         return (Array) data;
     }
 
     @Override
-    public Object getObject(int index) throws SQLException {
-        Object obj = getInternalObject(index);
+    public Object getObject(int position) throws SQLException {
+        Object obj = getInternalObject(position);
         if (obj == null) {
             return null;
         }
@@ -314,12 +314,12 @@ public class ClickHouseResultSet implements SQLResultSet {
         return obj;
     }
 
-    private Object getInternalObject(int index) throws SQLException {
-        LOG.trace("get object at row: {}, column: {} from block with column count: {}, row count: {}",
-                currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
+    private Object getInternalObject(int position) throws SQLException {
+        LOG.trace("get object at row: {}, column position: {} from block with column count: {}, row count: {}",
+                currentRowNum, position, currentBlock.columnCnt(), currentBlock.rowCnt());
         Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
                 "No row information was obtained. You must call ResultSet.next() before that.");
-        IColumn column = (lastFetchBlock = currentBlock).getColumn((lastFetchColumnIdx = index - 1));
+        IColumn column = (lastFetchBlock = currentBlock).getColumn((lastFetchColumnIdx = position - 1));
         return column.value((lastFetchRowIdx = currentRowNum));
     }
 
