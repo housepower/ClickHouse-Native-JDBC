@@ -43,7 +43,7 @@ public class ValuesWithParametersInputFormat implements InputFormat {
                 lexer.character();
             } else {
                 constIdxFlags.set(columnIdx);
-                block.setConstObject(columnIdx, block.getColumnByPosition(columnIdx).type().deserializeText(lexer));
+                block.setObject(columnIdx, block.getColumn(columnIdx).type().deserializeText(lexer));
             }
         }
 

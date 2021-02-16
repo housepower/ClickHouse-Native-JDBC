@@ -98,12 +98,12 @@ public class Block {
         }
     }
 
-    public void setConstObject(int columnIdx, Object object) {
+    public void setObject(int columnIdx, Object object) {
         rowData[columnIdx] = object;
     }
 
-    public void setPlaceholderObject(int placeholderIdx, Object object) {
-        rowData[placeholderIndexes[placeholderIdx]] = object;
+    public int paramIdx2ColumnIdx(int paramIdx) {
+        return placeholderIndexes[paramIdx];
     }
 
     public void incPlaceholderIndexes(int columnIdx) {
@@ -123,23 +123,25 @@ public class Block {
         }
     }
 
-    public IColumn getColumnByPosition(int position) throws SQLException {
-        Validate.isTrue(position < columns.length,
-                "Position " + position +
+    // idx start with 0
+    public IColumn getColumn(int columnIdx) throws SQLException {
+        Validate.isTrue(columnIdx < columns.length,
+                "Position " + columnIdx +
                         " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
-        return columns[position];
+        return columns[columnIdx];
     }
 
+    // position start with 1
     public int getPositionByName(String columnName) throws SQLException {
         Validate.isTrue(nameAndPositions.containsKey(columnName), "Column '" + columnName + "' does not exist");
         return nameAndPositions.get(columnName);
     }
 
-    public Object getObject(int columnIndex) throws SQLException {
-        Validate.isTrue(columnIndex < columns.length,
-                "Position " + columnIndex +
+    public Object getObject(int columnIdx) throws SQLException {
+        Validate.isTrue(columnIdx < columns.length,
+                "Position " + columnIdx +
                         " is out of bound in Block.getByPosition, max position = " + (columns.length - 1));
-        return rowData[columnIndex];
+        return rowData[columnIdx];
     }
 
     public void initWriteBuffer() {

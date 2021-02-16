@@ -319,7 +319,7 @@ public class ClickHouseResultSet implements SQLResultSet {
                 currentRowNum, index, currentBlock.columnCnt(), currentBlock.rowCnt());
         Validate.isTrue(currentRowNum >= 0 && currentRowNum < currentBlock.rowCnt(),
                 "No row information was obtained. You must call ResultSet.next() before that.");
-        IColumn column = (lastFetchBlock = currentBlock).getColumnByPosition((lastFetchColumnIdx = index - 1));
+        IColumn column = (lastFetchBlock = currentBlock).getColumn((lastFetchColumnIdx = index - 1));
         return column.value((lastFetchRowIdx = currentRowNum));
     }
 
@@ -381,7 +381,7 @@ public class ClickHouseResultSet implements SQLResultSet {
         Validate.isTrue(lastFetchBlock != null, "Please call Result.next()");
         Validate.isTrue(lastFetchColumnIdx >= 0, "Please call Result.getXXX()");
         Validate.isTrue(lastFetchRowIdx >= 0 && lastFetchRowIdx < lastFetchBlock.rowCnt(), "Please call Result.next()");
-        return lastFetchBlock.getColumnByPosition(lastFetchColumnIdx).value(lastFetchRowIdx) == null;
+        return lastFetchBlock.getColumn(lastFetchColumnIdx).value(lastFetchRowIdx) == null;
     }
 
     @Override
