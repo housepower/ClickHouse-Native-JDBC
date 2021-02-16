@@ -14,7 +14,6 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.buffer.ColumnWriterBuffer;
 import com.github.housepower.data.type.complex.DataTypeNullable;
 import io.netty.buffer.ByteBuf;
 
@@ -59,13 +58,7 @@ public class ColumnNullable extends AbstractColumn {
         }
 
         if (flush)
-            buffer.encode(out);
-    }
-
-    @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        super.setColumnWriterBuffer(buffer);
-        data.setColumnWriterBuffer(buffer);
+            out.writeBytes(buf);
     }
 
     @Override

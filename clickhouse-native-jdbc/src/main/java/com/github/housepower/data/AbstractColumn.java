@@ -14,7 +14,6 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.buffer.ColumnWriterBuffer;
 import com.github.housepower.misc.ByteBufHelper;
 import io.netty.buffer.ByteBuf;
 
@@ -25,7 +24,6 @@ public abstract class AbstractColumn implements IColumn, ByteBufHelper {
 
     // Note: values is only for reading
     protected Object[] values;
-    protected ColumnWriterBuffer buffer;
     protected ByteBuf buf;
 
     public AbstractColumn(String name, IDataType<?, ?> type, Object[] values) {
@@ -57,11 +55,6 @@ public abstract class AbstractColumn implements IColumn, ByteBufHelper {
     @Override
     public void clear() {
         values = new Object[0];
-    }
-
-    @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        this.buffer = buffer;
     }
 
     @Override

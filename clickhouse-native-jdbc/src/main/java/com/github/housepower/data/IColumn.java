@@ -14,7 +14,6 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.buffer.ColumnWriterBuffer;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -37,9 +36,6 @@ public interface IColumn {
     void flush(ByteBuf out, boolean flush);
 
     void clear();
-
-    @Deprecated
-    void setColumnWriterBuffer(ColumnWriterBuffer buffer);
 }
 
 

@@ -19,14 +19,10 @@ import io.netty.buffer.ByteBuf;
 
 public class DataRequest implements Request {
 
-    public static final DataRequest EMPTY = new DataRequest("");
+    public static final DataRequest EMPTY = new DataRequest("", new Block());
 
     private final String name;
     private final Block block;
-
-    public DataRequest(String name) {
-        this(name, new Block());
-    }
 
     public DataRequest(String name, Block block) {
         this.name = name;

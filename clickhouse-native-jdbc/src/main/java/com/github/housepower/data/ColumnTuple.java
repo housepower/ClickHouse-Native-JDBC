@@ -14,7 +14,6 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.buffer.ColumnWriterBuffer;
 import com.github.housepower.data.type.complex.DataTypeTuple;
 import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.misc.NettyUtil;
@@ -60,16 +59,7 @@ public class ColumnTuple extends AbstractColumn {
         }
 
         if (flush) {
-            buffer.encode(out);
-        }
-    }
-
-    @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        super.setColumnWriterBuffer(buffer);
-
-        for (IColumn data : columnDataArray) {
-            data.setColumnWriterBuffer(new ColumnWriterBuffer());
+            out.writeBytes(buf);
         }
     }
 

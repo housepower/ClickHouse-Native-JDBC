@@ -39,7 +39,7 @@ public class Column extends AbstractColumn {
         }
 
         if (flush) {
-            buffer.encode(out);
+            out.writeBytes(buf);
         }
     }
 }

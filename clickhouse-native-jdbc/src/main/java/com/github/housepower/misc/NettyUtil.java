@@ -26,7 +26,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class NettyUtil {
 
-    private final static ByteBufAllocator alloc = new PooledByteBufAllocator();
+    private final static ByteBufAllocator alloc = new PooledByteBufAllocator(false);
 
     public static ByteBufAllocator alloc() {
         return alloc;

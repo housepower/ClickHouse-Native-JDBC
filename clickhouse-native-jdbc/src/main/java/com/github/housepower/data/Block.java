@@ -14,7 +14,6 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.buffer.ColumnWriterBuffer;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
 import com.github.housepower.misc.ByteBufHelper;
@@ -152,7 +151,6 @@ public class Block implements ByteBufHelper, Encodable {
 
     public void initWriteBuffer() {
         for (IColumn column : columns) {
-            column.setColumnWriterBuffer(new ColumnWriterBuffer());
             column.setBuf(NettyUtil.alloc().buffer());
         }
     }

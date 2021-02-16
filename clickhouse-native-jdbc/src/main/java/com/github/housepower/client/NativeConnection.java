@@ -127,7 +127,10 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
 
         return CompletableFuture
                 .supplyAsync(() -> recvResponse(DataResponse.class, true))
-                .thenApply(DataResponse::block);
+                .thenApply(dataResponse -> {
+                    changeState(SessionState.IDLE, SessionState.WAITING_INSERT);
+                    return dataResponse.block();
+                });
     }
 
     public Block syncSampleBlock(String sampleSql) {
@@ -172,8 +175,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     public Future<Void> store(Block block) {
-        checkOrRepairChannel();
-        changeState(SessionState.IDLE, SessionState.WAITING_INSERT);
+        checkState(SessionState.WAITING_INSERT);
         DataRequest request = new DataRequest("", block);
         sendRequest(request);
         sendRequest(DataRequest.EMPTY);

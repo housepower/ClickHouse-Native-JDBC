@@ -14,7 +14,6 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.buffer.ColumnWriterBuffer;
 import com.github.housepower.data.type.complex.DataTypeArray;
 import com.github.housepower.jdbc.ClickHouseArray;
 import io.netty.buffer.ByteBuf;
@@ -59,14 +58,8 @@ public class ColumnArray extends AbstractColumn {
         data.flush(out, false);
 
         if (flush) {
-            buffer.encode(out);
+            out.writeBytes(buf);
         }
-    }
-
-    @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
-        super.setColumnWriterBuffer(buffer);
-        data.setColumnWriterBuffer(buffer);
     }
 
     @Override
