@@ -31,10 +31,12 @@ jobs:
           tar -C /tmp -xzf /tmp/async-profiler-1.8.3-linux-x64.tar.gz
 
       - name: Run benchmarks
+        env:
+          NETTY_RESOURCE_LEAK_DETECT_LEVEL: DISABLED
         run: |
           mvn -B -Pbenchmark clean integration-test -DskipITs -pl :clickhouse-native-jdbc -am | tee output.log
           echo "BENCHMARK_REPORT<<EOF" >> $GITHUB_ENV
-          echo "`cat output.log | grep -E '^Benchmark\s.*\sUnits$' -A 100 | grep -E '.*\s(Units|ms/op)$'`" >> $GITHUB_ENV
+          echo "`cat output.log | grep -E '^Benchmark\s.*\sUnits$' -A 300 | grep -E '.*\s(Units|ms/op)$'`" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - run: tar -czf benchmark-reports.tgz -C clickhouse-native-jdbc reports
