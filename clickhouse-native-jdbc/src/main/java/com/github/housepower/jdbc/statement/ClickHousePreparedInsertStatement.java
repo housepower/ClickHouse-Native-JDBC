@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc.statement;
 
+import com.github.housepower.data.IColumn;
 import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseSQLException;
@@ -85,11 +86,13 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         initBlockIfPossible();
     }
 
-    // parameterIndex start with 1
+    // paramPosition start with 1
     @Override
-    public void setObject(int idx, Object x) throws SQLException {
+    public void setObject(int paramPosition, Object x) throws SQLException {
         initBlockIfPossible();
-        block.setPlaceholderObject(idx - 1, convertToCkDataType(block.getColumnByPosition(idx - 1).type(), x));
+        int columnIdx = block.paramIdx2ColumnIdx(paramPosition - 1);
+        IColumn column = block.getColumn(columnIdx);
+        block.setObject(columnIdx, convertToCkDataType(column.type(), x));
     }
 
     @Override
