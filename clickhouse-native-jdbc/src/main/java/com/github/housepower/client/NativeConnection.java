@@ -17,12 +17,12 @@ package com.github.housepower.client;
 import com.github.housepower.data.Block;
 import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.exception.ClickHouseException;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.exception.NotImplementedException;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.netty.ChannelHelper;
-import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.misc.Validate;
+import com.github.housepower.netty.ChannelHelper;
 import com.github.housepower.netty.ChannelState;
 import com.github.housepower.protocol.*;
 import com.github.housepower.settings.ClickHouseConfig;
@@ -58,15 +58,15 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(NativeConnection.class);
 
+    private final NativeBootstrap bootstrap;
     private volatile ClickHouseConfig cfg;
     private volatile Channel channel;
     private volatile NativeContext ctx;
     private volatile BlockingQueue<Response> responseQueue;
 
     public NativeConnection(NativeBootstrap bootstrap, ClickHouseConfig cfg) {
+        this.bootstrap = bootstrap;
         this.cfg = cfg;
-        this.channel = bootstrap.connect(cfg.host(), cfg.port());
-        this.responseQueue = newResponseQueue();
     }
 
     public ClickHouseConfig cfg() {
@@ -82,25 +82,27 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     public void initChannel() {
+        this.channel = bootstrap.connect(cfg.host(), cfg.port());
         Validate.ensure(channel.isActive() && channel.isRegistered());
         stateAttr(channel).set(ChannelState.INIT);
+
+        this.responseQueue = newResponseQueue();
+        setResponseQueue(channel, responseQueue);
         Validate.ensure(stateAttr(channel).compareAndSet(ChannelState.INIT, ChannelState.CONNECTED));
+
         NativeContext.ClientContext clientCtx = clientContext(channel);
         setClientCtx(channel, clientCtx);
-        setResponseQueue(channel, responseQueue);
-        stateAttr(channel).set(ChannelState.CONNECTED);
         syncHello("ClickHouse-Native-JDBC", ClickHouseDefines.CLIENT_REVISION, cfg.database(), cfg.user(), cfg.password());
         NativeContext.ServerContext serverCtx = getServerCtx(channel);
         this.ctx = new NativeContext(clientCtx, serverCtx, this);
     }
 
     synchronized void checkOrRepairChannel() {
-        Channel old = channel;
         if (!syncPing(Duration.ofMillis(1000))) {
             LOG.warn("current channel maybe broken, create new channel");
-            //channel = new//
+            silentClose();
+            initChannel();
         }
-
     }
 
     @Override
@@ -132,6 +134,10 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
 
     public boolean syncPing(Duration timeout) {
         try {
+            if (timeout.isZero()) {
+                // match so_timeout behavior
+                return ping().get();
+            }
             return ping().get(timeout.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             LOG.debug("ping failed", e);

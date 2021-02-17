@@ -58,6 +58,7 @@ public class NativeBootstrap {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast("logging_handler", new LoggingHandler("packet", LogLevel.TRACE))
                                 .addLast("request_encoder", new RequestEncoder())
+                                // TODO move decode to thread pool since we can not detect full response
                                 .addLast("response_decoder", new ResponseDecoder())
                                 .addLast("response_handler", new ResponseHandler());
                     }

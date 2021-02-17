@@ -16,6 +16,7 @@ package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseResultSet;
 import com.github.housepower.jdbc.wrapper.SQLStatement;
@@ -70,26 +71,28 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public int executeUpdate(String query) throws SQLException {
-        cfg.settings().put(SettingKey.max_result_rows, maxRows);
-        cfg.settings().put(SettingKey.result_overflow_mode, "break");
+        return ExceptionUtil.rethrowSQLException(() -> {
+            cfg.settings().put(SettingKey.max_result_rows, maxRows);
+            cfg.settings().put(SettingKey.result_overflow_mode, "break");
 
-        extractDBAndTableName(query);
-        Matcher matcher = VALUES_REGEX.matcher(query);
+            extractDBAndTableName(query);
+            Matcher matcher = VALUES_REGEX.matcher(query);
 
-        if (matcher.find() && query.trim().toUpperCase(Locale.ROOT).startsWith("INSERT")) {
-            lastResultSet = null;
-            String insertQuery = query.substring(0, matcher.end() - 1);
-            block = getSampleBlock(insertQuery);
-            block.initWriteBuffer();
-            new ValuesInputFormat(matcher.end() - 1, query).fillBlock(block);
-            updateCount = connection.sendInsertRequest(block);
-            return updateCount;
-        }
+            if (matcher.find() && query.trim().toUpperCase(Locale.ROOT).startsWith("INSERT")) {
+                lastResultSet = null;
+                String insertQuery = query.substring(0, matcher.end() - 1);
+                block = connection.getSampleBlock(insertQuery);
+                block.initWriteBuffer();
+                new ValuesInputFormat(matcher.end() - 1, query).fillBlock(block);
+                updateCount = connection.sendInsertRequest(block);
+                return updateCount;
+            }
 
-        updateCount = -1;
-        QueryResult result = connection.sendQueryRequest(query, cfg.settings());
-        lastResultSet = new ClickHouseResultSet(this, cfg, db, table, result.header(), result.data());
-        return 0;
+            updateCount = -1;
+            QueryResult result = connection.sendQueryRequest(query, cfg.settings());
+            lastResultSet = new ClickHouseResultSet(this, cfg, db, table, result.header(), result.data());
+            return 0;
+        });
     }
 
     @Override
@@ -230,10 +233,6 @@ public class ClickHouseStatement implements SQLStatement {
     @Override
     public Logger logger() {
         return ClickHouseStatement.LOG;
-    }
-
-    protected Block getSampleBlock(final String insertQuery) throws SQLException {
-        return connection.getSampleBlock(insertQuery);
     }
 
     private void extractDBAndTableName(String sql) {

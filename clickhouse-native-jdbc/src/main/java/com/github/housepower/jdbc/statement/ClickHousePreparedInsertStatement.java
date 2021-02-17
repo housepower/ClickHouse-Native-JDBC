@@ -177,7 +177,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         if (this.blockInit) {
             return;
         }
-        this.block = getSampleBlock(insertQuery);
+        this.block = connection.getSampleBlock(insertQuery);
         this.block.initWriteBuffer();
         this.blockInit = true;
         new ValuesWithParametersInputFormat(posOfData, fullQuery).fillBlock(block);

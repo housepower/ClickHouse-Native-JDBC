@@ -17,6 +17,7 @@ package com.github.housepower.jdbc;
 import com.github.housepower.data.Block;
 import com.github.housepower.data.IColumn;
 import com.github.housepower.exception.ClickHouseSQLException;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLResultSet;
 import com.github.housepower.log.Logger;
@@ -406,16 +407,18 @@ public class ClickHouseResultSet implements SQLResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        boolean isBeforeFirst = isBeforeFirst();
-        LOG.trace("check status[before]: is_before_first: {}, is_first: {}, is_after_last: {}", isBeforeFirst, isFirst, isAfterLast);
+        return ExceptionUtil.rethrowSQLException(() -> {
+            boolean isBeforeFirst = isBeforeFirst();
+            LOG.trace("check status[before]: is_before_first: {}, is_first: {}, is_after_last: {}", isBeforeFirst, isFirst, isAfterLast);
 
-        boolean hasNext = ++currentRowNum < currentBlock.rowCnt() || (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
+            boolean hasNext = ++currentRowNum < currentBlock.rowCnt() || (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
 
-        isFirst = isBeforeFirst && hasNext;
-        isAfterLast = !hasNext;
-        LOG.trace("check status[after]: has_next: {}, is_before_first: {}, is_first: {}, is_after_last: {}", hasNext, isBeforeFirst(), isFirst, isAfterLast);
+            isFirst = isBeforeFirst && hasNext;
+            isAfterLast = !hasNext;
+            LOG.trace("check status[after]: has_next: {}, is_before_first: {}, is_first: {}, is_after_last: {}", hasNext, isBeforeFirst(), isFirst, isAfterLast);
 
-        return hasNext;
+            return hasNext;
+        });
     }
 
     @Override
