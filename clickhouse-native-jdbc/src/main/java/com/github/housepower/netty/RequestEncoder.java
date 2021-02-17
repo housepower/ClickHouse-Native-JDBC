@@ -23,11 +23,11 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 public class RequestEncoder extends MessageToByteEncoder<Request> implements ChannelHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestEncoder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RequestEncoder.class);
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Request msg, ByteBuf out) throws Exception {
         msg.encode(out);
-        log.trace("{}[{}] send {}", ctx.channel().id(), stateAttr(ctx.channel()).get(), msg.type());
+        LOG.trace("{}[{}] send {}", ctx.channel().id(), stateAttr(ctx.channel()).get(), msg.type());
     }
 }

@@ -25,7 +25,7 @@ import java.util.List;
 
 public class ResponseDecoder extends ByteToMessageDecoder implements ChannelHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseDecoder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResponseDecoder.class);
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
@@ -33,11 +33,11 @@ public class ResponseDecoder extends ByteToMessageDecoder implements ChannelHelp
             in.markReaderIndex();
             try {
                 Response response = Response.readFrom(in, getServerCtx(ctx.channel()));
-                log.trace("{}[{}] recv {}", ctx.channel().id(), stateAttr(ctx.channel()).get(), response.type());
+                LOG.trace("{}[{}] recv {}", ctx.channel().id(), stateAttr(ctx.channel()).get(), response.type());
                 out.add(response);
             } catch (IndexOutOfBoundsException ex) {
                 // TODO detect max length
-                log.debug("decode incomplete response: {}", ex.getMessage());
+                LOG.debug("decode incomplete response: {}", ex.getMessage());
                 in.resetReaderIndex();
                 break;
             }

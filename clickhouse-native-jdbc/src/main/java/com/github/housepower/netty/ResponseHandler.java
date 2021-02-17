@@ -28,7 +28,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class ResponseHandler extends SimpleChannelInboundHandler<Response> implements ChannelHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResponseHandler.class);
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Response response) throws Exception {

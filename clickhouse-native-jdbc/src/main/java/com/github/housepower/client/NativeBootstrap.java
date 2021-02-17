@@ -19,7 +19,6 @@ import com.github.housepower.netty.NettyUtil;
 import com.github.housepower.netty.RequestEncoder;
 import com.github.housepower.netty.ResponseDecoder;
 import com.github.housepower.netty.ResponseHandler;
-import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -33,7 +32,11 @@ import java.util.concurrent.TimeUnit;
 
 public class NativeBootstrap {
 
-    public static final NativeBootstrap INSTANCE = new NativeBootstrap();
+    public static final NativeBootstrap DEFAULT = new NativeBootstrap();
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(DEFAULT::stop));
+    }
 
     private final Bootstrap bootstrap;
     private final EventLoopGroup workerGroup;
@@ -61,14 +64,9 @@ public class NativeBootstrap {
                 });
     }
 
-    public NativeContext createConnection(ClickHouseConfig cfg) {
-        Channel ch = connect(new InetSocketAddress(cfg.host(), cfg.port()));
-        NativeConnection conn = new NativeConnection(ch, cfg);
-        return conn.initChannel();
-    }
-
-    public Channel connect(SocketAddress address) {
+    public Channel connect(String host, int port) {
         Channel channel;
+        SocketAddress address = new InetSocketAddress(host, port);
         ChannelFuture f = this.bootstrap.connect(address);
         try {
             f.await(3000, TimeUnit.MILLISECONDS);

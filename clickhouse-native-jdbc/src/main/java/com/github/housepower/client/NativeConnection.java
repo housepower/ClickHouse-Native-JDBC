@@ -50,21 +50,40 @@ import static com.github.housepower.protocol.Response.ProtoType.*;
 
 public class NativeConnection implements ChannelHelper, AutoCloseable {
 
-    private static final Logger log = LoggerFactory.getLogger(NativeConnection.class);
+    public static NativeConnection create(ClickHouseConfig cfg) {
+        NativeConnection conn = new NativeConnection(NativeBootstrap.DEFAULT, cfg);
+        conn.initChannel();
+        return conn;
+    }
 
+    private static final Logger LOG = LoggerFactory.getLogger(NativeConnection.class);
+
+    private volatile ClickHouseConfig cfg;
     private volatile Channel channel;
+    private volatile NativeContext ctx;
     private volatile BlockingQueue<Response> responseQueue;
-    private ClickHouseConfig cfg;
 
-    public NativeConnection(Channel channel, ClickHouseConfig cfg) {
-        this.channel = channel;
+    public NativeConnection(NativeBootstrap bootstrap, ClickHouseConfig cfg) {
+        this.cfg = cfg;
+        this.channel = bootstrap.connect(cfg.host(), cfg.port());
         this.responseQueue = newResponseQueue();
+    }
+
+    public ClickHouseConfig cfg() {
+        return cfg;
+    }
+
+    public void updateCfg(ClickHouseConfig cfg) {
         this.cfg = cfg;
     }
 
-    public NativeContext initChannel() {
+    public NativeContext ctx() {
+        return ctx;
+    }
+
+    public void initChannel() {
+        Validate.ensure(channel.isActive() && channel.isRegistered());
         stateAttr(channel).set(ChannelState.INIT);
-        Validate.ensure(channel.isActive());
         Validate.ensure(stateAttr(channel).compareAndSet(ChannelState.INIT, ChannelState.CONNECTED));
         NativeContext.ClientContext clientCtx = clientContext(channel);
         setClientCtx(channel, clientCtx);
@@ -72,13 +91,13 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         stateAttr(channel).set(ChannelState.CONNECTED);
         syncHello("ClickHouse-Native-JDBC", ClickHouseDefines.CLIENT_REVISION, cfg.database(), cfg.user(), cfg.password());
         NativeContext.ServerContext serverCtx = getServerCtx(channel);
-        return new NativeContext(clientCtx, serverCtx, this);
+        this.ctx = new NativeContext(clientCtx, serverCtx, this);
     }
 
     synchronized void checkOrRepairChannel() {
         Channel old = channel;
         if (!syncPing(Duration.ofMillis(1000))) {
-            log.warn("current channel maybe broken, create new channel");
+            LOG.warn("current channel maybe broken, create new channel");
             //channel = new//
         }
 
@@ -93,7 +112,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         try {
             close();
         } catch (Throwable th) {
-            log.debug("Close NativeConnection throw exception, ignored", th);
+            LOG.debug("Close NativeConnection throw exception, ignored", th);
         }
     }
 
@@ -115,13 +134,13 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         try {
             return ping().get(timeout.toMillis(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            log.debug("ping failed", e);
+            LOG.debug("ping failed", e);
             return false;
         }
     }
 
     public Future<Block> sampleBlock(String sampleSql) {
-        log.debug("sample sql: {}", sampleSql);
+        LOG.debug("sample sql: {}", sampleSql);
         checkOrRepairChannel();
         checkState(ChannelState.IDLE);
         QueryRequest request = new QueryRequest(
@@ -145,7 +164,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         try {
             return sampleBlock(sampleSql).get();
         } catch (Exception rethrow) {
-            log.error("sample block failed\n=== failed sql ===\n{}\n===", sampleSql, rethrow);
+            LOG.error("sample block failed\n=== failed sql ===\n{}\n===", sampleSql, rethrow);
             int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
             ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
             if (ex != null)
@@ -173,7 +192,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         try {
             return query(querySql, settings).get();
         } catch (Exception rethrow) {
-            log.error("query failed\n=== failed sql ===\n{}\n===", querySql, rethrow);
+            LOG.error("query failed\n=== failed sql ===\n{}\n===", querySql, rethrow);
             int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
             ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
             if (ex != null)
@@ -182,7 +201,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         }
     }
 
-    public Future<Void> cancel()  {
+    public Future<Void> cancel() {
         throw new NotImplementedException("cancel not implemented");
     }
 
@@ -200,7 +219,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         try {
             store(block).get();
         } catch (Exception rethrow) {
-            log.error("store failed", rethrow);
+            LOG.error("store failed", rethrow);
             int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
             ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
             if (ex != null)
@@ -252,7 +271,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                     throw ((ExceptionResponse) response).exception();
                 }
                 if (skipIfNotMatch) {
-                    log.debug("expect {}, skip response: {}", type, response.type());
+                    LOG.debug("expect {}, skip response: {}", type, response.type());
                 } else {
                     throw new ClickHouseException(
                             ClickHouseErrCode.UNEXPECTED_PACKET_FROM_SERVER.code(), response.type().toString());
@@ -282,7 +301,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                     throw ((ExceptionResponse) response).exception();
                 }
                 if (skipIfNotMatch) {
-                    log.debug("expect {} or {}, skip response: {}", type1, type2, response.type());
+                    LOG.debug("expect {} or {}, skip response: {}", type1, type2, response.type());
                 } else {
                     throw new ClickHouseException(
                             ClickHouseErrCode.UNEXPECTED_PACKET_FROM_SERVER.code(), response.type().toString());
@@ -309,7 +328,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                         "failed change state from [%s] to [%s], unexpected current state [%s]",
                         from, target, state()));
         if (from != target)
-            log.debug("channel[{}] change state from [{}] to [{}]", channel.id(), from, target);
+            LOG.debug("channel[{}] change state from [{}] to [{}]", channel.id(), from, target);
     }
 
     static String nextId() {
