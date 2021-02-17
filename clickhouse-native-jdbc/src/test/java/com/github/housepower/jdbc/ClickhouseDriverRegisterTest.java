@@ -15,16 +15,17 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.jdbc.tool.EmbeddedDriver;
+import com.github.housepower.misc.SystemUtil;
 import org.junit.jupiter.api.Test;
 
 import java.sql.DriverManager;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ClickhouseDriverRegisterTest {
 
-    private static final int SERVER_PORT = Integer.parseInt(System.getProperty("CLICK_HOUSE_SERVER_PORT", "9000"));
+    private static final int SERVER_PORT = Integer.parseInt(SystemUtil.loadProp("CLICK_HOUSE_SERVER_PORT", "9000"));
 
     @Test
     public void successfullyCreateConnection() throws Exception {

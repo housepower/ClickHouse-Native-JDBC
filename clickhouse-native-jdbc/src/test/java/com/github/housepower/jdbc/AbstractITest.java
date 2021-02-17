@@ -15,11 +15,13 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.misc.StrUtil;
+import com.github.housepower.misc.SystemUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.ClickHouseContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.sql.DataSource;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -28,8 +30,6 @@ import java.sql.SQLException;
 import java.time.ZoneId;
 import java.util.Enumeration;
 
-import javax.sql.DataSource;
-
 @Testcontainers
 public abstract class AbstractITest implements Serializable {
 
@@ -37,11 +37,11 @@ public abstract class AbstractITest implements Serializable {
     protected static final ZoneId SERVER_TZ = ZoneId.of("UTC");
     protected static final String DRIVER_CLASS_NAME = "com.github.housepower.jdbc.ClickHouseDriver";
 
-    public static final String CLICKHOUSE_IMAGE = System.getProperty("CLICKHOUSE_IMAGE", "yandex/clickhouse-server:20.8");
+    public static final String CLICKHOUSE_IMAGE = SystemUtil.loadProp("CLICKHOUSE_IMAGE", "yandex/clickhouse-server:20.8");
 
-    protected static final String CLICKHOUSE_USER = System.getProperty("CLICKHOUSE_USER", "default");
-    protected static final String CLICKHOUSE_PASSWORD = System.getProperty("CLICKHOUSE_PASSWORD", "");
-    protected static final String CLICKHOUSE_DB = System.getProperty("CLICKHOUSE_DB", "");
+    protected static final String CLICKHOUSE_USER = SystemUtil.loadProp("CLICKHOUSE_USER", "default");
+    protected static final String CLICKHOUSE_PASSWORD = SystemUtil.loadProp("CLICKHOUSE_PASSWORD", "");
+    protected static final String CLICKHOUSE_DB = SystemUtil.loadProp("CLICKHOUSE_DB", "");
 
     @Container
     public static ClickHouseContainer container = (ClickHouseContainer) new ClickHouseContainer(CLICKHOUSE_IMAGE)
