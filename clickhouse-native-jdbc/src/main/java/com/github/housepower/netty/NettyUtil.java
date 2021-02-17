@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.misc;
+package com.github.housepower.netty;
 
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;

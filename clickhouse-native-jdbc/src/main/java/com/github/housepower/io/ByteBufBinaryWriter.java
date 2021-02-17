@@ -14,7 +14,7 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.NettyUtil;
+import com.github.housepower.netty.NettyUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.util.ArrayList;
@@ -27,9 +27,9 @@ public class ByteBufBinaryWriter implements BinaryWriter {
 
     private ByteBuf buf;
 
-    public ByteBufBinaryWriter(int columnSize) {
-        this.columnSize = columnSize;
-        this.buf = NettyUtil.alloc().buffer(columnSize, columnSize);
+    public ByteBufBinaryWriter(int singleBufCapacity) {
+        this.columnSize = singleBufCapacity;
+        this.buf = NettyUtil.alloc().buffer(singleBufCapacity, singleBufCapacity);
         this.bufList.add(buf);
     }
 

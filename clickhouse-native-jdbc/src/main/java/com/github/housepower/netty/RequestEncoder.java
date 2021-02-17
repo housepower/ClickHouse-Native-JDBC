@@ -12,11 +12,10 @@
  * limitations under the License.
  */
 
-package com.github.housepower.network;
+package com.github.housepower.netty;
 
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.misc.ChannelHelper;
 import com.github.housepower.protocol.Request;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

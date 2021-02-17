@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.network;
+package com.github.housepower.netty;
 
 import org.junit.jupiter.api.Test;
 

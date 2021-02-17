@@ -12,13 +12,12 @@
  * limitations under the License.
  */
 
-package com.github.housepower.network;
+package com.github.housepower.netty;
 
 import com.github.housepower.exception.ClickHouseException;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.misc.ChannelHelper;
-import com.github.housepower.misc.ExceptionUtil;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.protocol.ExceptionResponse;
 import com.github.housepower.protocol.Response;
 import com.github.housepower.settings.ClickHouseErrCode;
@@ -43,7 +42,7 @@ public class ResponseHandler extends SimpleChannelInboundHandler<Response> imple
         int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
         ClickHouseException ex = ExceptionUtil.recursiveFind(cause, ClickHouseException.class);
         if (ex != null)
-            errCode = ex.code();
+            errCode = ex.errCode();
         responseQueue.put(new ExceptionResponse(new ClickHouseException(errCode, cause)));
     }
 }

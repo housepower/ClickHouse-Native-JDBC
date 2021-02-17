@@ -43,7 +43,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static com.github.housepower.misc.ExceptionUtil.unchecked;
+import static com.github.housepower.exception.ExceptionUtil.unchecked;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
 

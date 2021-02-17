@@ -15,8 +15,8 @@
 package com.github.housepower.stream;
 
 import com.github.housepower.data.Block;
-import com.github.housepower.misc.CheckedIterator;
-import com.github.housepower.misc.CheckedSupplier;
+import com.github.housepower.exception.CheckedIterator;
+import com.github.housepower.exception.CheckedSupplier;
 import com.github.housepower.protocol.DataResponse;
 import com.github.housepower.protocol.EOSResponse;
 import com.github.housepower.protocol.Response;

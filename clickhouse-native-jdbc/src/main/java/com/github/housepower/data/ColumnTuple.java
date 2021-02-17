@@ -16,7 +16,7 @@ package com.github.housepower.data;
 
 import com.github.housepower.data.type.complex.DataTypeTuple;
 import com.github.housepower.jdbc.ClickHouseStruct;
-import com.github.housepower.misc.NettyUtil;
+import com.github.housepower.netty.NettyUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;

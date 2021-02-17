@@ -16,7 +16,6 @@ package com.github.housepower.settings;
 
 import com.github.housepower.misc.StrUtil;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.SettingType;
 
 import java.util.HashMap;
 import java.util.Locale;

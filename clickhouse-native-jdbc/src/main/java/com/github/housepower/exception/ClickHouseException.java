@@ -22,24 +22,24 @@ package com.github.housepower.exception;
  */
 public class ClickHouseException extends RuntimeException {
 
-    protected int code;
+    protected int errCode;
 
     public ClickHouseException(int errCode, String message) {
         super(message);
-        this.code = errCode;
+        this.errCode = errCode;
     }
 
     public ClickHouseException(int errCode, String message, Throwable cause) {
         super(message, cause);
-        this.code = errCode;
+        this.errCode = errCode;
     }
 
     public ClickHouseException(int errCode, Throwable cause) {
         super(cause);
-        this.code = errCode;
+        this.errCode = errCode;
     }
 
-    public int code() {
-        return code;
+    public int errCode() {
+        return errCode;
     }
 }

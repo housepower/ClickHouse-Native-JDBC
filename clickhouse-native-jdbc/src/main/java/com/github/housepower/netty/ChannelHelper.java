@@ -12,11 +12,9 @@
  * limitations under the License.
  */
 
-package com.github.housepower.misc;
+package com.github.housepower.netty;
 
 import com.github.housepower.client.NativeContext;
-import com.github.housepower.client.ResultFuture;
-import com.github.housepower.client.SessionState;
 import com.github.housepower.protocol.Response;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
@@ -31,8 +29,7 @@ public interface ChannelHelper {
     AttributeKey<NativeContext.ClientContext> clientCtxAttrKey = AttributeKey.valueOf("client_ctx");
     AttributeKey<NativeContext.ServerContext> serverCtxAttrKey = AttributeKey.valueOf("server_ctx");
     AttributeKey<BlockingQueue<Response>> responseQueueAttrKey = AttributeKey.valueOf("response_queue");
-    AttributeKey<ResultFuture> resultFutureAttrKey = AttributeKey.valueOf("result_future");
-    AttributeKey<SessionState> stateAttrKey = AttributeKey.valueOf("state");
+    AttributeKey<ChannelState> stateAttrKey = AttributeKey.valueOf("state");
 
     default void setClientCtx(Channel ch, NativeContext.ClientContext clientCtx) {
         ch.attr(clientCtxAttrKey).set(clientCtx);
@@ -59,15 +56,7 @@ public interface ChannelHelper {
         return ch.attr(responseQueueAttrKey).get();
     }
 
-    default void setResultFuture(Channel ch, ResultFuture resultFuture) {
-        ch.attr(resultFutureAttrKey).set(resultFuture);
-    }
-
-    default ResultFuture getResultFuture(Channel ch) {
-        return ch.attr(resultFutureAttrKey).get();
-    }
-
-    default Attribute<SessionState> stateAttr(Channel ch) {
+    default Attribute<ChannelState> stateAttr(Channel ch) {
         return ch.attr(stateAttrKey);
     }
 

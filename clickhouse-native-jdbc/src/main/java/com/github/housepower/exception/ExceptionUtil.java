@@ -12,10 +12,8 @@
  * limitations under the License.
  */
 
-package com.github.housepower.misc;
+package com.github.housepower.exception;
 
-import com.github.housepower.exception.ClickHouseException;
-import com.github.housepower.exception.ClickHouseSQLException;
 import com.github.housepower.settings.ClickHouseErrCode;
 
 import javax.annotation.Nullable;
@@ -66,7 +64,7 @@ public class ExceptionUtil {
             int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
             ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
             if (ex != null)
-                errCode = ex.code();
+                errCode = ex.errCode();
             throw new ClickHouseSQLException(errCode, rethrow.getMessage(), rethrow);
         }
     }
@@ -78,7 +76,7 @@ public class ExceptionUtil {
             int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
             ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
             if (ex != null)
-                errCode = ex.code();
+                errCode = ex.errCode();
             throw new ClickHouseSQLException(errCode, rethrow.getMessage(), rethrow);
         }
     }

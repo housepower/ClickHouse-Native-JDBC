@@ -17,11 +17,13 @@ package com.github.housepower.client;
 import com.github.housepower.data.Block;
 import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.exception.ClickHouseException;
+import com.github.housepower.exception.NotImplementedException;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.misc.ChannelHelper;
-import com.github.housepower.misc.ExceptionUtil;
+import com.github.housepower.netty.ChannelHelper;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.misc.Validate;
+import com.github.housepower.netty.ChannelState;
 import com.github.housepower.protocol.*;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
@@ -61,33 +63,37 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     }
 
     public NativeContext initChannel() {
-        stateAttr(channel).set(SessionState.INIT);
+        stateAttr(channel).set(ChannelState.INIT);
         Validate.ensure(channel.isActive());
-        Validate.ensure(stateAttr(channel).compareAndSet(SessionState.INIT, SessionState.CONNECTED));
+        Validate.ensure(stateAttr(channel).compareAndSet(ChannelState.INIT, ChannelState.CONNECTED));
         NativeContext.ClientContext clientCtx = clientContext(channel);
         setClientCtx(channel, clientCtx);
         setResponseQueue(channel, responseQueue);
-        stateAttr(channel).set(SessionState.CONNECTED);
+        stateAttr(channel).set(ChannelState.CONNECTED);
         syncHello("ClickHouse-Native-JDBC", ClickHouseDefines.CLIENT_REVISION, cfg.database(), cfg.user(), cfg.password());
         NativeContext.ServerContext serverCtx = getServerCtx(channel);
         return new NativeContext(clientCtx, serverCtx, this);
     }
 
-    void checkOrRepairChannel() {
-        syncPing(Duration.ofMillis(1000));
-        // TODO reconnect if current channel broken
+    synchronized void checkOrRepairChannel() {
+        Channel old = channel;
+        if (!syncPing(Duration.ofMillis(1000))) {
+            log.warn("current channel maybe broken, create new channel");
+            //channel = new//
+        }
+
     }
 
     @Override
-    public void close() {
-
+    public void close() throws Exception {
+        channel.close().sync();
     }
 
     public void silentClose() {
         try {
             close();
         } catch (Throwable th) {
-            log.debug("close throw exception", th);
+            log.debug("Close NativeConnection throw exception, ignored", th);
         }
     }
 
@@ -99,8 +105,8 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                 .supplyAsync(() -> recvResponse(RESPONSE_PONG, true))
                 .handle((response, throwable) -> {
                     boolean active = throwable == null;
-                    if (active)
-                        changeState(SessionState.IDLE, SessionState.WAITING_INSERT, SessionState.IDLE);
+                    if (active && state() != ChannelState.IDLE)
+                        changeState(ChannelState.WAITING_INSERT, ChannelState.IDLE);
                     return active;
                 });
     }
@@ -117,7 +123,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
     public Future<Block> sampleBlock(String sampleSql) {
         log.debug("sample sql: {}", sampleSql);
         checkOrRepairChannel();
-        checkState(SessionState.IDLE);
+        checkState(ChannelState.IDLE);
         QueryRequest request = new QueryRequest(
                 nextId(),
                 getClientCtx(channel),
@@ -130,7 +136,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         return CompletableFuture
                 .supplyAsync(() -> (DataResponse) recvResponse(RESPONSE_DATA, true))
                 .thenApply(dataResponse -> {
-                    changeState(SessionState.IDLE, SessionState.WAITING_INSERT);
+                    changeState(ChannelState.IDLE, ChannelState.WAITING_INSERT);
                     return dataResponse.block();
                 });
     }
@@ -143,7 +149,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
             int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
             ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
             if (ex != null)
-                errCode = ex.code();
+                errCode = ex.errCode();
             throw new ClickHouseException(errCode, rethrow);
         }
     }
@@ -171,19 +177,23 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
             int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
             ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
             if (ex != null)
-                errCode = ex.code();
+                errCode = ex.errCode();
             throw new ClickHouseException(errCode, rethrow);
         }
     }
 
+    public Future<Void> cancel()  {
+        throw new NotImplementedException("cancel not implemented");
+    }
+
     public Future<Void> store(Block block) {
-        checkState(SessionState.WAITING_INSERT);
+        checkState(ChannelState.WAITING_INSERT);
         DataRequest request = new DataRequest("", block);
         sendRequest(request);
         sendRequest(DataRequest.EMPTY);
         return CompletableFuture
                 .supplyAsync(() -> recvResponse(RESPONSE_END_OF_STREAM, false))
-                .thenAccept(eos -> changeState(SessionState.WAITING_INSERT, SessionState.IDLE));
+                .thenAccept(eos -> changeState(ChannelState.WAITING_INSERT, ChannelState.IDLE));
     }
 
     public void syncStore(Block block) {
@@ -194,7 +204,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
             int errCode = ClickHouseErrCode.UNKNOWN_ERROR.code();
             ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
             if (ex != null)
-                errCode = ex.code();
+                errCode = ex.errCode();
             throw new ClickHouseException(errCode, rethrow);
         }
     }
@@ -209,7 +219,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
                     boolean authenticated = throwable == null;
                     if (authenticated) {
                         setServerCtx(channel, serverContext(response, cfg));
-                        changeState(SessionState.CONNECTED, SessionState.IDLE);
+                        changeState(ChannelState.CONNECTED, ChannelState.IDLE);
                     }
                 });
     }
@@ -221,7 +231,7 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
             int errCode = ClickHouseErrCode.AUTHENTICATION_FAILED.code();
             ClickHouseException ex = ExceptionUtil.recursiveFind(rethrow, ClickHouseException.class);
             if (ex != null)
-                errCode = ex.code();
+                errCode = ex.errCode();
             throw new ClickHouseException(errCode, rethrow);
         }
     }
@@ -283,30 +293,23 @@ public class NativeConnection implements ChannelHelper, AutoCloseable {
         }
     }
 
-    void checkState(SessionState expected) {
-        Validate.ensure(stateAttr(channel).get() == expected,
+    ChannelState state() {
+        return stateAttr(channel).get();
+    }
+
+    void checkState(ChannelState expected) {
+        Validate.ensure(state() == expected,
                 String.format(Locale.ROOT, "expected state [%s], but got [%s]",
                         expected, stateAttr(channel).get()));
     }
 
-    void changeState(SessionState from, SessionState target) {
+    void changeState(ChannelState from, ChannelState target) {
         Validate.ensure(stateAttr(channel).compareAndSet(from, target),
                 String.format(Locale.ROOT,
                         "failed change state from [%s] to [%s], unexpected current state [%s]",
-                        from, target, stateAttr(channel).get()));
+                        from, target, state()));
         if (from != target)
             log.debug("channel[{}] change state from [{}] to [{}]", channel.id(), from, target);
-    }
-
-    void changeState(SessionState from1, SessionState from2, SessionState target) {
-        SessionState currentState = stateAttr(channel).get();
-        Validate.ensure(stateAttr(channel).compareAndSet(from1, target)
-                        || stateAttr(channel).compareAndSet(from2, target),
-                String.format(Locale.ROOT,
-                        "failed change state from [%s] or [%s] to [%s], unexpected current state [%s]",
-                        from1, from2, target, currentState));
-        if (currentState != target)
-            log.debug("channel[{}] change state from [{}] to [{}]", channel.id(), currentState, target);
     }
 
     static String nextId() {

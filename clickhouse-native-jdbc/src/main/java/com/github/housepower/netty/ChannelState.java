@@ -12,8 +12,8 @@
  * limitations under the License.
  */
 
-package com.github.housepower.client;
+package com.github.housepower.netty;
 
-public enum SessionState {
+public enum ChannelState {
     INIT, CONNECTED, IDLE, WAITING_INSERT, CLOSED
 }

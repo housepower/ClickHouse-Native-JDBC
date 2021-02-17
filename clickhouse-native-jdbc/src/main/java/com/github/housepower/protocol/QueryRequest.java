@@ -15,7 +15,7 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
-import com.github.housepower.serde.SettingType;
+import com.github.housepower.settings.SettingType;
 import com.github.housepower.settings.SettingKey;
 import io.netty.buffer.ByteBuf;
 

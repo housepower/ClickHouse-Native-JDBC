@@ -18,7 +18,7 @@ import com.github.housepower.data.DataTypeFactory;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.data.type.DataTypeInt64;
 import com.github.housepower.jdbc.ClickHouseArray;
-import com.github.housepower.misc.ExceptionUtil;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import io.netty.buffer.ByteBuf;
@@ -49,7 +49,7 @@ public class DataTypeArray implements IDataType<ClickHouseArray, Array> {
     // Change from UInt64 to Int64 because we mapping UInt64 to BigInteger
     private final DataTypeInt64 offsetIDataType;
 
-    public DataTypeArray(String name, IDataType<?, ?> elemDataType, DataTypeInt64 offsetIDataType) throws SQLException {
+    public DataTypeArray(String name, IDataType<?, ?> elemDataType, DataTypeInt64 offsetIDataType) {
         this.name = name;
         this.elemDataType = elemDataType;
         this.offsetIDataType = offsetIDataType;

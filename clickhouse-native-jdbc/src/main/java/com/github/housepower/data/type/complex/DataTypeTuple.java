@@ -17,7 +17,7 @@ package com.github.housepower.data.type.complex;
 import com.github.housepower.data.DataTypeFactory;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.jdbc.ClickHouseStruct;
-import com.github.housepower.misc.ExceptionUtil;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import io.netty.buffer.ByteBuf;

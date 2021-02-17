@@ -16,7 +16,7 @@ package com.github.housepower.stream;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.*;
-import com.github.housepower.misc.CheckedIterator;
+import com.github.housepower.exception.CheckedIterator;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.DataResponse;
 

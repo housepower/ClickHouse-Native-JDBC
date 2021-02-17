@@ -24,7 +24,7 @@ import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.misc.ExceptionUtil;
+import com.github.housepower.exception.ExceptionUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.SettingKey;

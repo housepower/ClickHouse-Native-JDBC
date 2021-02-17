@@ -15,10 +15,10 @@
 package com.github.housepower.client;
 
 import com.github.housepower.exception.ClickHouseClientException;
-import com.github.housepower.misc.NettyUtil;
-import com.github.housepower.network.RequestEncoder;
-import com.github.housepower.network.ResponseDecoder;
-import com.github.housepower.network.ResponseHandler;
+import com.github.housepower.netty.NettyUtil;
+import com.github.housepower.netty.RequestEncoder;
+import com.github.housepower.netty.ResponseDecoder;
+import com.github.housepower.netty.ResponseHandler;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import io.netty.bootstrap.Bootstrap;
@@ -26,7 +26,6 @@ import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.timeout.IdleStateHandler;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -57,8 +56,7 @@ public class NativeBootstrap {
                         pipeline.addLast("logging_handler", new LoggingHandler("packet", LogLevel.TRACE))
                                 .addLast("request_encoder", new RequestEncoder())
                                 .addLast("response_decoder", new ResponseDecoder())
-                                .addLast("response_handler", new ResponseHandler())
-                                .addLast("idle_state_handler", new IdleStateHandler(600, 600, 600));
+                                .addLast("response_handler", new ResponseHandler());
                     }
                 });
     }
@@ -69,7 +67,7 @@ public class NativeBootstrap {
         return conn.initChannel();
     }
 
-    private Channel connect(SocketAddress address) {
+    public Channel connect(SocketAddress address) {
         Channel channel;
         ChannelFuture f = this.bootstrap.connect(address);
         try {

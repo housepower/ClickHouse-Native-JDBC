@@ -14,16 +14,17 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.ExceptionUtil.CheckedBiConsumer;
-import com.github.housepower.misc.ExceptionUtil.CheckedFunction;
+import com.github.housepower.exception.ExceptionUtil.CheckedBiConsumer;
+import com.github.housepower.exception.ExceptionUtil.CheckedFunction;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.util.ReferenceCountUtil;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ByteBufHelperTest implements ByteBufHelper {
+class RichReaderWriterTest implements ByteBufHelper {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
@@ -117,6 +118,8 @@ class ByteBufHelperTest implements ByteBufHelper {
         LegacyRichReader deserializer = new LegacyRichReader(new ByteBufBinaryReader(legacyBuf), false);
         assertEquals(value, legacyDeserialize.apply(deserializer));
         assertEquals(value, nettyDeserialize.apply(nettyBuf));
+        ReferenceCountUtil.safeRelease(legacyBuf);
+        ReferenceCountUtil.safeRelease(nettyBuf);
     }
 
     private ByteBuf heapBuf() {
