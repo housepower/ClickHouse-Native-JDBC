@@ -65,8 +65,8 @@ git commit -am '(release) prepare release v2.6.0-rc0'
 ## Package and Deploy to Sonatype
 
 ```shell script
-mvn clean deploy -DskipTests -Prelease -Pscala-2.11
-mvn clean deploy -DskipTests -Prelease -Pscala-2.12
+mvn clean deploy -DskipTests -Prelease -Pscala-2.11 -Pspark-2.4
+mvn clean deploy -DskipTests -Prelease -Pscala-2.12 -Pspark-3.0
 ```
 
 ## Publish Release
