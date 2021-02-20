@@ -17,14 +17,14 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        java: [ 8, 11 ]
-        scala: [ 2.11, 2.12 ]
-        spark: [ 2.4, 3.0 ]
+        java: [ '8', '11' ]
+        scala: [ '2.11', '2.12' ]
+        spark: [ '2.4', '3.0' ]
         exclude:
-          - java: 11
-            spark: 2.4
-          - scala: 2.11
-            spark: 3.0
+          - java: '11'
+            spark: '2.4'
+          - scala: '2.11'
+            spark: '3.0'
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
