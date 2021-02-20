@@ -108,9 +108,9 @@
         <guava.version>16.0.1</guava.version>
         <jackson.version>2.10.3</jackson.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <scala.version>2.11.12</scala.version>
-        <scala.binary.version>2.11</scala.binary.version>
-        <spark.version>2.4.7</spark.version>
+        <scala.version>2.12.10</scala.version>
+        <scala.binary.version>2.12</scala.binary.version>
+        <spark.version>3.0.2</spark.version>
         <hikari.version>3.4.5</hikari.version>
         <alibaba.druid.version>1.2.4</alibaba.druid.version>
         <dbcp2.version>2.8.0</dbcp2.version>
@@ -567,12 +567,28 @@
         </profile>
         <profile>
             <id>scala-2.11</id>
+            <properties>
+                <scala.version>2.11.12</scala.version>
+                <scala.binary.version>2.11</scala.binary.version>
+            </properties>
         </profile>
         <profile>
             <id>scala-2.12</id>
             <properties>
                 <scala.version>2.12.10</scala.version>
                 <scala.binary.version>2.12</scala.binary.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>spark-2.4</id>
+            <properties>
+                <spark.version>2.4.7</spark.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>spark-3.0</id>
+            <properties>
+                <spark.version>3.0.2</spark.version>
             </properties>
         </profile>
         <profile>
