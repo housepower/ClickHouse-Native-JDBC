@@ -546,6 +546,18 @@
             <id>benchmark</id>
         </profile>
         <profile>
+            <id>java-8</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+        </profile>
+        <profile>
+            <id>java-11</id>
+            <activation>
+                <jdk>11</jdk>
+            </activation>
+        </profile>
+        <profile>
             <id>scala-2.11</id>
         </profile>
         <profile>
