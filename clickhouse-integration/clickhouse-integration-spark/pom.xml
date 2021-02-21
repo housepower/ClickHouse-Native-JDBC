@@ -111,7 +111,8 @@
                             <shadeTestJar>true</shadeTestJar>
                             <shadeSourcesContent>true</shadeSourcesContent>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
-                            <dependencyReducedPomLocation>${project.build.directory}/pom.xml
+                            <dependencyReducedPomLocation>
+                                ${project.build.directory}/pom.xml
                             </dependencyReducedPomLocation>
                         </configuration>
                     </execution>
