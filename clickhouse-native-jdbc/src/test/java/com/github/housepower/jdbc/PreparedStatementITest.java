@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.annotation.Issue;
 import com.github.housepower.jdbc.misc.DateTimeUtil;
 import org.junit.jupiter.api.Test;
 
@@ -230,6 +231,24 @@ public class PreparedStatementITest extends AbstractITest {
             preparedStatement.setDate(2, new Date(time * 1000));
             preparedStatement.setTimestamp(3, new Timestamp(time * 1000));
             preparedStatement.setBoolean(4, true);
+            assertEquals(1, preparedStatement.executeUpdate());
+        });
+    }
+
+    @Test
+    @Issue(channel = "GitHub", value = "314", link = "https://github.com/housepower/ClickHouse-Native-JDBC/issues/314")
+    public void ghIssue314() throws Exception {
+        withNewConnection(connection -> {
+            Statement statement = connection.createStatement();
+
+            statement.execute("DROP TABLE IF EXISTS test");
+            statement.execute("CREATE TABLE test(id UInt8)ENGINE = Log");
+
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?)");
+            preparedStatement.clearParameters();
+            preparedStatement.setByte(1, (byte) 1);
+            preparedStatement.clearParameters();
+            preparedStatement.setByte(1, (byte) 1);
             assertEquals(1, preparedStatement.executeUpdate());
         });
     }

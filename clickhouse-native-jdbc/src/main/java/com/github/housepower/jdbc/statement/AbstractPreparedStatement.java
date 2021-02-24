@@ -165,7 +165,9 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void clearParameters() throws SQLException {
-        Arrays.fill(parameters, null);
+        if (parameters != null) {
+            Arrays.fill(parameters, null);
+        }
     }
 
     protected String assembleQueryPartsAndParameters() throws SQLException {
