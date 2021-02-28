@@ -216,11 +216,13 @@ public class PreparedStatementITest extends AbstractITest {
             statement.execute("CREATE TABLE test(" +
                     "id UInt8, " +
                     "day Date, " +
+                    "day2 Date, " +
                     "time DateTime, " +
+                    "time2 DateTime, " +
                     "flag Boolean" +
                     ")ENGINE = Log");
 
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?, ?, ?, ?)");
 
             // 2018-07-01 19:00:00  GMT
             // 2018-07-02 03:00:00  Asia/Shanghai
@@ -228,8 +230,10 @@ public class PreparedStatementITest extends AbstractITest {
 
             preparedStatement.setByte(1, (byte) 1);
             preparedStatement.setDate(2, new Date(time * 1000));
-            preparedStatement.setTimestamp(3, new Timestamp(time * 1000));
-            preparedStatement.setBoolean(4, true);
+            preparedStatement.setObject(3, LocalDate.of(2018, 7, 2));
+            preparedStatement.setTimestamp(4, new Timestamp(time * 1000));
+            preparedStatement.setObject(5, LocalDateTime.of(2018, 7, 2, 3, 0, 0, 0));
+            preparedStatement.setBoolean(6, true);
             assertEquals(1, preparedStatement.executeUpdate());
         });
     }
