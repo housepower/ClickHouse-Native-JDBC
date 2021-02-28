@@ -4,13 +4,9 @@ on:
   push:
     branches:
       - "master"
-      - "2.4"
-      - "2.5"
   pull_request_target:
     branches:
       - "master"
-      - "2.4"
-      - "2.5"
 
 jobs:
   build:

@@ -1,0 +1,32 @@
+name: integration-test
+
+on:
+  push:
+    branches:
+      - "2.4"
+      - "2.5"
+  pull_request_target:
+    branches:
+      - "2.4"
+      - "2.5"
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        java: [ 8, 11 ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Start clickhouse-server
+        run: docker-compose up -d
+      - name: Run integration tests with Scala 2.11 & Spark 2.4.7
+        run: mvn -B clean verify
+      - name: upload code coverage report
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: bash <(curl -s https://codecov.io/bash)
