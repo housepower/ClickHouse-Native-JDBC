@@ -1,6 +1,13 @@
 发行注记
 ===
 
+v2.5.4 (2021年3月1日)
+---
+### 变更日志
+- (improvement) Avoid redundant BigDecimal cast (#306)
+- (bugfix) Fix NPE on clearParameters (#315)
+- (bugfix) Support LocalDateTime (#316)
+
 v2.5.3 (2021年1月29日)
 ---
 ### 变更日志

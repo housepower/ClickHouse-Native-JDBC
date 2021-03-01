@@ -1,6 +1,13 @@
 Release Notes
 ===
 
+v2.5.4 (Mar 1, 2021)
+---
+### Changelog
+- (improvement) Avoid redundant BigDecimal cast (#306)
+- (bugfix) Fix NPE on clearParameters (#315)
+- (bugfix) Support LocalDateTime (#316)
+
 v2.5.3 (Jan 29, 2021)
 ---
 ### Changelog
