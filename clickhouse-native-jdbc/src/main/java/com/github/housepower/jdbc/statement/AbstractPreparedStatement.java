@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Struct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -155,6 +156,9 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
         if (obj instanceof Timestamp) {
             result = DateTimeUtil.toZonedDateTime((Timestamp) obj, tz);
         }
+        if (obj instanceof LocalDateTime) {
+            result = ((LocalDateTime) obj).atZone(tz);
+        }
         return result;
     }
 
@@ -197,6 +201,8 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
             return assembleQuotedParameter(queryBuilder, String.valueOf(parameter));
         } else if (parameter instanceof LocalDate) {
             return assembleQuotedParameter(queryBuilder, dateFmt.format((LocalDate) parameter));
+        } else if (parameter instanceof LocalDateTime) {
+            return assembleQuotedParameter(queryBuilder, timestampFmt.format((LocalDateTime) parameter));
         } else if (parameter instanceof ZonedDateTime) {
             return assembleQuotedParameter(queryBuilder, timestampFmt.format((ZonedDateTime) parameter));
         }
