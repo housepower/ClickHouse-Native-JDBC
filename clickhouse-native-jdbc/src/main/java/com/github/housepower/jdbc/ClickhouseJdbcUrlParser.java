@@ -20,6 +20,7 @@ import com.github.housepower.settings.SettingKey;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -36,13 +37,13 @@ public class ClickhouseJdbcUrlParser {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClickhouseJdbcUrlParser.class);
 
-    public static Map<SettingKey, Object> parseJdbcUrl(String jdbcUrl) {
+    public static Map<SettingKey, Serializable> parseJdbcUrl(String jdbcUrl) {
         try {
             URI uri = new URI(jdbcUrl.substring(JDBC_PREFIX.length()));
             String host = parseHost(jdbcUrl);
             Integer port = parsePort(jdbcUrl);
             String database = parseDatabase(jdbcUrl);
-            Map<SettingKey, Object> settings = new HashMap<>();
+            Map<SettingKey, Serializable> settings = new HashMap<>();
             settings.put(SettingKey.host, host);
             settings.put(SettingKey.port, port);
             settings.put(SettingKey.database, database);
@@ -54,8 +55,8 @@ public class ClickhouseJdbcUrlParser {
         }
     }
 
-    public static Map<SettingKey, Object> parseProperties(Properties properties) {
-        Map<SettingKey, Object> settings = new HashMap<>();
+    public static Map<SettingKey, Serializable> parseProperties(Properties properties) {
+        Map<SettingKey, Serializable> settings = new HashMap<>();
 
         for (String name : properties.stringPropertyNames()) {
             String value = properties.getProperty(name);
@@ -119,8 +120,8 @@ public class ClickhouseJdbcUrlParser {
         return port;
     }
 
-    public static Map<SettingKey, Object> extractQueryParameters(String queryParameters) {
-        Map<SettingKey, Object> parameters = new HashMap<>();
+    public static Map<SettingKey, Serializable> extractQueryParameters(String queryParameters) {
+        Map<SettingKey, Serializable> parameters = new HashMap<>();
         StringTokenizer tokenizer = new StringTokenizer(queryParameters == null ? "" : queryParameters, "&");
 
         while (tokenizer.hasMoreTokens()) {
@@ -136,7 +137,7 @@ public class ClickhouseJdbcUrlParser {
         return parameters;
     }
 
-    private static void parseSetting(Map<SettingKey, Object> settings, String name, String value) {
+    private static void parseSetting(Map<SettingKey, Serializable> settings, String name, String value) {
         SettingKey settingKey = SettingKey.definedSettingKeys().get(name.toLowerCase(Locale.ROOT));
         if (settingKey != null) {
             settings.put(settingKey, settingKey.type().deserializeURL(value));

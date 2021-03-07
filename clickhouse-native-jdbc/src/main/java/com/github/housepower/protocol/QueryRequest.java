@@ -14,14 +14,15 @@
 
 package com.github.housepower.protocol;
 
+import com.github.housepower.client.NativeContext;
 import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.serde.SettingType;
-import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.io.Serializable;
 import java.util.Map;
 
 public class QueryRequest implements Request {
@@ -41,15 +42,15 @@ public class QueryRequest implements Request {
     private final String queryId;
     private final String queryString;
     private final boolean compression;
-    private final ClientContext clientContext;
-    private final Map<SettingKey, Object> settings;
+    private final NativeContext.ClientContext clientContext;
+    private final Map<SettingKey, Serializable> settings;
 
-    public QueryRequest(String queryId, ClientContext clientContext, int stage, boolean compression, String queryString) {
+    public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString) {
         this(queryId, clientContext, stage, compression, queryString, new HashMap<>());
     }
 
-    public QueryRequest(String queryId, ClientContext clientContext, int stage, boolean compression, String queryString,
-                        Map<SettingKey, Object> settings) {
+    public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString,
+                        Map<SettingKey, Serializable> settings) {
 
         this.stage = stage;
         this.queryId = queryId;
@@ -69,7 +70,7 @@ public class QueryRequest implements Request {
         serializer.writeUTF8StringBinary(queryId);
         clientContext.writeTo(serializer);
 
-        for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
+        for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
             serializer.writeUTF8StringBinary(entry.getKey().name());
             @SuppressWarnings("rawtypes")
             SettingType type = entry.getKey().type();
@@ -83,40 +84,5 @@ public class QueryRequest implements Request {
         // empty data to server
         DataRequest.EMPTY.writeTo(serializer);
 
-    }
-
-    public static class ClientContext {
-        public static final int TCP_KINE = 1;
-
-        public static final byte NO_QUERY = 0;
-        public static final byte INITIAL_QUERY = 1;
-        public static final byte SECONDARY_QUERY = 2;
-
-        private final String clientName;
-        private final String clientHostname;
-        private final String initialAddress;
-
-        public ClientContext(String initialAddress, String clientHostname, String clientName) {
-            this.clientName = clientName;
-            this.clientHostname = clientHostname;
-            this.initialAddress = initialAddress;
-        }
-
-        public void writeTo(BinarySerializer serializer) throws IOException {
-            serializer.writeVarInt(ClientContext.INITIAL_QUERY);
-            serializer.writeUTF8StringBinary("");
-            serializer.writeUTF8StringBinary("");
-            serializer.writeUTF8StringBinary(initialAddress);
-
-            // for TCP kind
-            serializer.writeVarInt(TCP_KINE);
-            serializer.writeUTF8StringBinary("");
-            serializer.writeUTF8StringBinary(clientHostname);
-            serializer.writeUTF8StringBinary(clientName);
-            serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
-            serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
-            serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
-            serializer.writeUTF8StringBinary("");
-        }
     }
 }

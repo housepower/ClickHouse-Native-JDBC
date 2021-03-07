@@ -15,9 +15,10 @@
 package com.github.housepower.serde;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.Duration;
 
-public interface SettingType<T> {
+public interface SettingType<T extends Serializable> {
 
     Class<T> javaClass();
 

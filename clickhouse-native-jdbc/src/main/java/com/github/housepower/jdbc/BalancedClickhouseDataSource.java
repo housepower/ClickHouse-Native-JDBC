@@ -24,6 +24,7 @@ import com.github.housepower.settings.SettingKey;
 import com.github.housepower.jdbc.wrapper.SQLWrapper;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.time.Duration;
@@ -97,7 +98,7 @@ public final class BalancedClickhouseDataSource implements DataSource, SQLWrappe
      * @param settings clickhouse settings
      * @see #BalancedClickhouseDataSource(String)
      */
-    public BalancedClickhouseDataSource(final String url, Map<SettingKey, Object> settings) {
+    public BalancedClickhouseDataSource(final String url, Map<SettingKey, Serializable> settings) {
         this(splitUrl(url), settings);
     }
 
@@ -105,7 +106,7 @@ public final class BalancedClickhouseDataSource implements DataSource, SQLWrappe
         this(urls, ClickhouseJdbcUrlParser.parseProperties(properties));
     }
 
-    private BalancedClickhouseDataSource(final List<String> urls, Map<SettingKey, Object> settings) {
+    private BalancedClickhouseDataSource(final List<String> urls, Map<SettingKey, Serializable> settings) {
         Validate.ensure(!urls.isEmpty(), "Incorrect ClickHouse jdbc url list. It must be not empty");
 
         this.cfg = ClickHouseConfig.Builder.builder()
