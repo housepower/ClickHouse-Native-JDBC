@@ -14,10 +14,16 @@
 
 package com.github.housepower.stream;
 
-// TODO remove E
-public interface InputFormat<T, E extends Throwable> {
+import com.github.housepower.data.Block;
 
-    String name();
+import java.sql.SQLException;
 
-    void fill(T payload) throws E;
+public interface NativeInputFormat extends InputFormat<Block, SQLException> {
+
+    @Override
+    default String name() {
+        return "Native";
+    }
+
+    void fill(Block block) throws SQLException;
 }

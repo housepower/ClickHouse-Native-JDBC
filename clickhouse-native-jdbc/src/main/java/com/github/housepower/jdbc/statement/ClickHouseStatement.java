@@ -20,12 +20,13 @@ import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.misc.ExceptionUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.stream.QueryResult;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.SettingKey;
-import com.github.housepower.stream.ValuesInputFormat;
 import com.github.housepower.jdbc.wrapper.SQLStatement;
+import com.github.housepower.stream.ValuesNativeInputFormat;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -70,26 +71,28 @@ public class ClickHouseStatement implements SQLStatement {
 
     @Override
     public int executeUpdate(String query) throws SQLException {
-        cfg.settings().put(SettingKey.max_result_rows, maxRows);
-        cfg.settings().put(SettingKey.result_overflow_mode, "break");
 
-        extractDBAndTableName(query);
-        Matcher matcher = VALUES_REGEX.matcher(query);
+        return ExceptionUtil.rethrowSQLException(() -> {
+            cfg.settings().put(SettingKey.max_result_rows, maxRows);
+            cfg.settings().put(SettingKey.result_overflow_mode, "break");
 
-        if (matcher.find() && query.trim().toUpperCase(Locale.ROOT).startsWith("INSERT")) {
-            lastResultSet = null;
-            String insertQuery = query.substring(0, matcher.end() - 1);
-            block = getSampleBlock(insertQuery);
-            block.initWriteBuffer();
-            new ValuesInputFormat(matcher.end() - 1, query).fillBlock(block);
-            updateCount = connection.sendInsertRequest(block);
-            return updateCount;
-        }
+            extractDBAndTableName(query);
+            Matcher matcher = VALUES_REGEX.matcher(query);
 
-        updateCount = -1;
-        QueryResult result = connection.sendQueryRequest(query, cfg);
-        lastResultSet = new ClickHouseResultSet(this, cfg, db, table, result.header(), result.data());
-        return 0;
+            if (matcher.find() && query.trim().toUpperCase(Locale.ROOT).startsWith("INSERT")) {
+                lastResultSet = null;
+                String insertQuery = query.substring(0, matcher.end() - 1);
+                block = connection.getSampleBlock(insertQuery);
+                block.initWriteBuffer();
+                new ValuesNativeInputFormat(matcher.end() - 1, query).fill(block);
+                updateCount = connection.sendInsertRequest(block);
+                return updateCount;
+            }
+            updateCount = -1;
+            QueryResult result = connection.sendQueryRequest(query, cfg);
+            lastResultSet = new ClickHouseResultSet(this, cfg, db, table, result.header(), result.data());
+            return 0;
+        });
     }
 
     @Override

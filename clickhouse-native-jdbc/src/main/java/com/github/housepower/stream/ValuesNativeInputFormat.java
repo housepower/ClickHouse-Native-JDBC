@@ -21,30 +21,36 @@ import com.github.housepower.misc.Validate;
 import java.sql.SQLException;
 import java.util.BitSet;
 
-public class ValuesWithParametersInputFormat implements InputFormat {
+public class ValuesNativeInputFormat implements NativeInputFormat {
 
     private final SQLLexer lexer;
 
-    public ValuesWithParametersInputFormat(int pos, String sql) {
+    public ValuesNativeInputFormat(int pos, String sql) {
         this.lexer = new SQLLexer(pos, sql);
     }
 
     @Override
-    public void fillBlock(Block block) throws SQLException {
+    public void fill(Block block) throws SQLException {
         BitSet constIdxFlags = new BitSet(block.columnCnt());
-        char nextChar = lexer.character();
-        Validate.isTrue(nextChar == '(');
-        for (int columnIdx = 0; columnIdx < block.columnCnt(); columnIdx++) {
-            if (columnIdx > 0) {
-                Validate.isTrue(lexer.character() == ',');
+        for (; ; ) {
+            char nextChar = lexer.character();
+            if (lexer.eof() || nextChar == ';') {
+                break;
             }
 
-            if (lexer.isCharacter('?')) {
-                lexer.character();
-            } else {
+            if (nextChar == ',') {
+                nextChar = lexer.character();
+            }
+            Validate.isTrue(nextChar == '(');
+            for (int columnIdx = 0; columnIdx < block.columnCnt(); columnIdx++) {
+                if (columnIdx > 0) {
+                    Validate.isTrue(lexer.character() == ',');
+                }
                 constIdxFlags.set(columnIdx);
                 block.setObject(columnIdx, block.getColumn(columnIdx).type().deserializeText(lexer));
             }
+            Validate.isTrue(lexer.character() == ')');
+            block.appendRow();
         }
 
         for (int columnIdx = 0; columnIdx < block.columnCnt(); columnIdx++) {
@@ -52,6 +58,5 @@ public class ValuesWithParametersInputFormat implements InputFormat {
                 block.incPlaceholderIndexes(columnIdx);
             }
         }
-        Validate.isTrue(lexer.character() == ')');
     }
 }
