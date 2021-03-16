@@ -14,8 +14,11 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.StrUtil;
 import com.github.housepower.misc.SystemUtil;
+import io.netty.util.ResourceLeakDetector;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.ClickHouseContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -28,8 +31,24 @@ import java.sql.*;
 import java.time.ZoneId;
 import java.util.Enumeration;
 
+import static io.netty.util.ResourceLeakDetector.Level.*;
+
 @Testcontainers
 public abstract class AbstractITest implements Serializable {
+
+    public static final Logger LOG = LoggerFactory.getLogger(AbstractITest.class);
+
+    static {
+        String levelProp = SystemUtil.loadProp("NETTY_RESOURCE_LEAK_DETECT_LEVEL", "SIMPLE");
+        ResourceLeakDetector.Level level = SIMPLE;
+        try {
+            level = ResourceLeakDetector.Level.valueOf(levelProp);
+        } catch (IllegalArgumentException ex) {
+            LOG.warn("Invalid value of NETTY_RESOURCE_LEAK_DETECT_LEVEL: {}", levelProp);
+        }
+        ResourceLeakDetector.setLevel(level);
+        LOG.info("Set NETTY_RESOURCE_LEAK_DETECT_LEVEL: {}", level);
+    }
 
     protected static final ZoneId CLIENT_TZ = ZoneId.systemDefault();
     protected static final ZoneId SERVER_TZ = ZoneId.of("UTC");
