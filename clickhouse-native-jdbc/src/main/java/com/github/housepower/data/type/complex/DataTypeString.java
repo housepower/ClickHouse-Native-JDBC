@@ -14,7 +14,6 @@
 
 package com.github.housepower.data.type.complex;
 
-import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.BytesCharSeq;
 import com.github.housepower.misc.SQLLexer;
@@ -28,12 +27,12 @@ import java.sql.Types;
 
 public class DataTypeString implements IDataType<CharSequence, String> {
 
-    public static DataTypeCreator<CharSequence, String> CREATOR = (lexer, serverContext) -> new DataTypeString(serverContext);
+    public static DataTypeCreator<CharSequence, String> CREATOR = (lexer, serverContext) -> new DataTypeString(serverContext.getConfigure().charset());
 
     private final Charset charset;
 
-    public DataTypeString(NativeContext.ServerContext serverContext) {
-        this.charset = serverContext.getConfigure().charset();
+    public DataTypeString(Charset charset) {
+        this.charset = charset;
     }
 
     @Override
