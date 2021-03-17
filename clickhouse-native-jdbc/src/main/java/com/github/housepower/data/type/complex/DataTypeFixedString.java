@@ -16,11 +16,11 @@ package com.github.housepower.data.type.complex;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.BytesCharSeq;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+import io.netty.util.AsciiString;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -90,8 +90,8 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
 
     @Override
     public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
-        if (data instanceof BytesCharSeq) {
-            writeBytes((((BytesCharSeq) data).bytes()), serializer);
+        if (data instanceof AsciiString) {
+            writeBytes(((AsciiString) data).toByteArray(), serializer);
         } else {
             writeBytes(data.toString().getBytes(charset), serializer);
         }

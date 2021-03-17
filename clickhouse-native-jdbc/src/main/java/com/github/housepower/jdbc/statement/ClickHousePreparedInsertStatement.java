@@ -26,11 +26,11 @@ import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.misc.BytesCharSeq;
 import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.ExceptionUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.stream.ValuesWithParametersNativeInputFormat;
+import io.netty.util.AsciiString;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -202,7 +202,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             if (obj instanceof CharSequence)
                 return obj;
             if (obj instanceof byte[])
-                return new BytesCharSeq((byte[]) obj);
+                return new AsciiString((byte[]) obj, false);
             String objStr = obj.toString();
             LOG.debug("set value[{}]: {} on String Column", obj.getClass(), obj);
             return objStr;
