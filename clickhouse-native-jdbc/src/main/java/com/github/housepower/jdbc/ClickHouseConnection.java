@@ -21,7 +21,6 @@ import com.github.housepower.data.Block;
 import com.github.housepower.data.DataTypeFactory;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.HelloResponse;
-import com.github.housepower.protocol.QueryRequest;
 import com.github.housepower.stream.QueryResult;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
@@ -72,7 +71,7 @@ public class ClickHouseConnection implements SQLConnection {
         return nativeCtx.serverCtx();
     }
 
-    public QueryRequest.ClientContext clientContext() {
+    public NativeContext.ClientContext clientContext() {
         return nativeCtx.clientCtx();
     }
 
@@ -311,12 +310,12 @@ public class ClickHouseConnection implements SQLConnection {
         return new NativeContext(clientContext(nativeClient, configure), serverContext(nativeClient, configure), nativeClient);
     }
 
-    private static QueryRequest.ClientContext clientContext(NativeClient nativeClient, ClickHouseConfig configure) throws SQLException {
+    private static NativeContext.ClientContext clientContext(NativeClient nativeClient, ClickHouseConfig configure) throws SQLException {
         Validate.isTrue(nativeClient.address() instanceof InetSocketAddress);
         InetSocketAddress address = (InetSocketAddress) nativeClient.address();
         String clientName = String.format(Locale.ROOT, "%s %s", ClickHouseDefines.NAME, "client");
         String initialAddress = "[::ffff:127.0.0.1]:0";
-        return new QueryRequest.ClientContext(initialAddress, address.getHostName(), clientName);
+        return new NativeContext.ClientContext(initialAddress, address.getHostName(), clientName);
     }
 
     private static NativeContext.ServerContext serverContext(NativeClient nativeClient, ClickHouseConfig configure) throws SQLException {

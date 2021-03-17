@@ -18,6 +18,7 @@ import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
 
+import java.io.Serializable;
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
@@ -66,7 +67,7 @@ public class ClickHouseDriver implements Driver {
         int index = 0;
         DriverPropertyInfo[] driverPropertiesInfo = new DriverPropertyInfo[cfg.settings().size()];
 
-        for (Map.Entry<SettingKey, Object> entry : cfg.settings().entrySet()) {
+        for (Map.Entry<SettingKey, Serializable> entry : cfg.settings().entrySet()) {
             String value = String.valueOf(entry.getValue());
 
             DriverPropertyInfo property = new DriverPropertyInfo(entry.getKey().name(), value);

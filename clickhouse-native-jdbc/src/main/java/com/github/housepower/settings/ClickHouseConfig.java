@@ -19,6 +19,7 @@ import com.github.housepower.misc.CollectionUtil;
 import com.github.housepower.misc.StrUtil;
 
 import javax.annotation.concurrent.Immutable;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 
 @Immutable
-public class ClickHouseConfig {
+public class ClickHouseConfig implements Serializable {
 
     private final String host;
     private final int port;
@@ -35,13 +36,13 @@ public class ClickHouseConfig {
     private final String password;
     private final Duration queryTimeout;
     private final Duration connectTimeout;
-    private final Charset charset;
-    private final Map<SettingKey, Object> settings;
+    private final String charset; // use String because Charset is not serializable
+    private final Map<SettingKey, Serializable> settings;
     private final boolean tcpKeepAlive;
 
     private ClickHouseConfig(String host, int port, String database, String user, String password,
                              Duration queryTimeout, Duration connectTimeout, boolean tcpKeepAlive,
-                             Charset charset, Map<SettingKey, Object> settings) {
+                             String charset, Map<SettingKey, Serializable> settings) {
         this.host = host;
         this.port = port;
         this.database = database;
@@ -83,7 +84,7 @@ public class ClickHouseConfig {
     }
 
     public Charset charset() {
-        return this.charset;
+        return Charset.forName(charset);
     }
 
     public String jdbcUrl() {
@@ -94,13 +95,13 @@ public class ClickHouseConfig {
                 .append("&").append(SettingKey.charset.name()).append("=").append(charset)
                 .append("&").append(SettingKey.tcp_keep_alive.name()).append("=").append(tcpKeepAlive);
 
-        for (Map.Entry<SettingKey, Object> entry : settings.entrySet()) {
+        for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
             builder.append("&").append(entry.getKey().name()).append("=").append(entry.getValue());
         }
         return builder.toString();
     }
 
-    public Map<SettingKey, Object> settings() {
+    public Map<SettingKey, Serializable> settings() {
         return settings;
     }
 
@@ -142,7 +143,7 @@ public class ClickHouseConfig {
                 .build();
     }
 
-    public ClickHouseConfig withSettings(Map<SettingKey, Object> settings) {
+    public ClickHouseConfig withSettings(Map<SettingKey, Serializable> settings) {
         return Builder.builder(this)
                 .withSettings(settings)
                 .build();
@@ -181,7 +182,7 @@ public class ClickHouseConfig {
         private Duration queryTimeout;
         private boolean tcpKeepAlive;
         private Charset charset;
-        private Map<SettingKey, Object> settings = new HashMap<>();
+        private Map<SettingKey, Serializable> settings = new HashMap<>();
 
         private Builder() {
         }
@@ -204,12 +205,12 @@ public class ClickHouseConfig {
                     .withSettings(cfg.settings());
         }
 
-        public Builder withSetting(SettingKey key, Object value) {
+        public Builder withSetting(SettingKey key, Serializable value) {
             this.settings.put(key, value);
             return this;
         }
 
-        public Builder withSettings(Map<SettingKey, Object> settings) {
+        public Builder withSettings(Map<SettingKey, Serializable> settings) {
             CollectionUtil.mergeMapInPlaceKeepLast(this.settings, settings);
             return this;
         }
@@ -264,7 +265,7 @@ public class ClickHouseConfig {
             return this;
         }
 
-        public Builder settings(Map<SettingKey, Object> settings) {
+        public Builder settings(Map<SettingKey, Serializable> settings) {
             this.settings = settings;
             return this;
         }
@@ -297,7 +298,7 @@ public class ClickHouseConfig {
             purgeSettings();
 
             return new ClickHouseConfig(
-                    host, port, database, user, password, queryTimeout, connectTimeout, tcpKeepAlive, charset, settings);
+                    host, port, database, user, password, queryTimeout, connectTimeout, tcpKeepAlive, charset.name(), settings);
         }
 
         private void revisit() {

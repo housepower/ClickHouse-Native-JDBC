@@ -30,6 +30,7 @@ import com.github.housepower.stream.QueryResult;
 import com.github.housepower.stream.ClickHouseQueryResult;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -111,7 +112,7 @@ public class NativeClient {
         sendRequest(new HelloRequest(client, reversion, db, user, password));
     }
 
-    public void sendQuery(String query, QueryRequest.ClientContext info, Map<SettingKey, Object> settings) throws SQLException {
+    public void sendQuery(String query, NativeContext.ClientContext info, Map<SettingKey, Serializable> settings) throws SQLException {
         sendQuery(UUID.randomUUID().toString(), QueryRequest.STAGE_COMPLETE, info, query, settings);
     }
 
@@ -157,8 +158,8 @@ public class NativeClient {
         }
     }
 
-    private void sendQuery(String id, int stage, QueryRequest.ClientContext info, String query,
-                           Map<SettingKey, Object> settings) throws SQLException {
+    private void sendQuery(String id, int stage, NativeContext.ClientContext info, String query,
+                           Map<SettingKey, Serializable> settings) throws SQLException {
         sendRequest(new QueryRequest(id, info, stage, true, query, settings));
     }
 

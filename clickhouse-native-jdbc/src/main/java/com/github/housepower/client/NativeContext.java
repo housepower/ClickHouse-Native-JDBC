@@ -14,9 +14,11 @@
 
 package com.github.housepower.client;
 
-import com.github.housepower.protocol.QueryRequest.ClientContext;
+import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.settings.ClickHouseDefines;
 
+import java.io.IOException;
 import java.time.ZoneId;
 
 public class NativeContext {
@@ -41,6 +43,41 @@ public class NativeContext {
 
     public NativeClient nativeClient() {
         return nativeClient;
+    }
+
+    public static class ClientContext {
+        public static final int TCP_KINE = 1;
+
+        public static final byte NO_QUERY = 0;
+        public static final byte INITIAL_QUERY = 1;
+        public static final byte SECONDARY_QUERY = 2;
+
+        private final String clientName;
+        private final String clientHostname;
+        private final String initialAddress;
+
+        public ClientContext(String initialAddress, String clientHostname, String clientName) {
+            this.clientName = clientName;
+            this.clientHostname = clientHostname;
+            this.initialAddress = initialAddress;
+        }
+
+        public void writeTo(BinarySerializer serializer) throws IOException {
+            serializer.writeVarInt(ClientContext.INITIAL_QUERY);
+            serializer.writeUTF8StringBinary("");
+            serializer.writeUTF8StringBinary("");
+            serializer.writeUTF8StringBinary(initialAddress);
+
+            // for TCP kind
+            serializer.writeVarInt(TCP_KINE);
+            serializer.writeUTF8StringBinary("");
+            serializer.writeUTF8StringBinary(clientHostname);
+            serializer.writeUTF8StringBinary(clientName);
+            serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
+            serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
+            serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
+            serializer.writeUTF8StringBinary("");
+        }
     }
 
     public static class ServerContext {
