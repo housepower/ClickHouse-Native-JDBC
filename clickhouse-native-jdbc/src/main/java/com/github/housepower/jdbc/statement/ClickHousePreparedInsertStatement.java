@@ -17,7 +17,7 @@ package com.github.housepower.jdbc.statement;
 import com.github.housepower.data.IColumn;
 import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.ClickHouseSQLException;
+import com.github.housepower.exception.ClickHouseSQLException;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
 import com.github.housepower.data.IDataType;

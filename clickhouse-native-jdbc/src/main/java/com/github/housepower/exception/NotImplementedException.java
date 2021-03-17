@@ -14,7 +14,7 @@
 
 package com.github.housepower.exception;
 
-public class NotImplementedException extends ClickHouseException {
+public class NotImplementedException extends ClickHouseClientException {
 
     public NotImplementedException(String message) {
         super(message);

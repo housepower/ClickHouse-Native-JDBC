@@ -19,29 +19,27 @@ package com.github.housepower.exception;
  * throw unchecked exception rather than checked exception.
  * <p>
  * Please avoid using CheckedException internal. See detail at <a>https://www.artima.com/intv/handcuffs.html</a>.
- * <p>
- * TODO: support error_code
  */
-public abstract class ClickHouseException extends RuntimeException {
+public class ClickHouseException extends RuntimeException {
 
-    /**
-     * {@inheritDoc}
-     */
-    public ClickHouseException(String message) {
+    protected int errCode;
+
+    public ClickHouseException(int errCode, String message) {
         super(message);
+        this.errCode = errCode;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public ClickHouseException(String message, Throwable cause) {
+    public ClickHouseException(int errCode, String message, Throwable cause) {
         super(message, cause);
+        this.errCode = errCode;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public ClickHouseException(Throwable cause) {
+    public ClickHouseException(int errCode, Throwable cause) {
         super(cause);
+        this.errCode = errCode;
+    }
+
+    public int errCode() {
+        return errCode;
     }
 }

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc;
+package com.github.housepower.exception;
 
 import java.sql.SQLException;
 
@@ -24,9 +24,5 @@ public class ClickHouseSQLException extends SQLException {
 
     public ClickHouseSQLException(int code, String message, Throwable cause) {
         super(message, null, code, cause);
-    }
-
-    public int getCode() {
-        return getErrorCode();
     }
 }

@@ -14,7 +14,7 @@
 
 package com.github.housepower.exception;
 
-public class InvalidOperationException extends ClickHouseException {
+public class InvalidOperationException extends ClickHouseClientException {
 
     public InvalidOperationException(String message) {
         super(message);
