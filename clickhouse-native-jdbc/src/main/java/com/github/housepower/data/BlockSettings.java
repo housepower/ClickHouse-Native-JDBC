@@ -14,8 +14,8 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class BlockSettings {
         this.settings = settings;
     }
 
-    public void writeTo(BinarySerializer serializer) throws IOException {
+    public void writeTo(CompositeSink serializer) throws IOException {
         for (Setting setting : settings) {
             serializer.writeVarInt(setting.num);
 
@@ -41,11 +41,11 @@ public class BlockSettings {
         serializer.writeVarInt(0);
     }
 
-    public static BlockSettings readFrom(BinaryDeserializer deserializer) throws IOException {
+    public static BlockSettings readFrom(CompositeSource deserializer) throws IOException {
         return new BlockSettings(readSettingsFrom(1, deserializer));
     }
 
-    private static Setting[] readSettingsFrom(int currentSize, BinaryDeserializer deserializer) throws IOException {
+    private static Setting[] readSettingsFrom(int currentSize, CompositeSource deserializer) throws IOException {
         long num = deserializer.readVarInt();
 
         for (Setting setting : Setting.defaultValues()) {

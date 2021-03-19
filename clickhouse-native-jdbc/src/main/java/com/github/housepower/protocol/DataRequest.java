@@ -15,7 +15,7 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.data.Block;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -42,7 +42,7 @@ public class DataRequest implements Request {
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
+    public void writeImpl(CompositeSink serializer) throws IOException, SQLException {
         serializer.writeUTF8Binary(name);
 
         serializer.maybeEnableCompressed();

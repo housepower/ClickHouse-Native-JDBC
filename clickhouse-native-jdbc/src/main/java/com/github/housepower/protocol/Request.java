@@ -14,7 +14,7 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -23,9 +23,9 @@ public interface Request {
 
     ProtoType type();
 
-    void writeImpl(BinarySerializer serializer) throws IOException, SQLException;
+    void writeImpl(CompositeSink serializer) throws IOException, SQLException;
 
-    default void writeTo(BinarySerializer serializer) throws IOException, SQLException {
+    default void writeTo(CompositeSink serializer) throws IOException, SQLException {
         serializer.writeVarInt(type().id());
         this.writeImpl(serializer);
     }

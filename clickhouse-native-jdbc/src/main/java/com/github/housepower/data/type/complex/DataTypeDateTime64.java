@@ -29,8 +29,8 @@ import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.StringView;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
 
@@ -136,7 +136,7 @@ public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public void serializeBinary(ZonedDateTime data, BinarySerializer serializer) throws IOException {
+    public void serializeBinary(ZonedDateTime data, CompositeSink serializer) throws IOException {
         long epochSeconds = DateTimeUtil.toEpochSecond(data);
         int nanos = data.getNano();
         long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
@@ -144,7 +144,7 @@ public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public ZonedDateTime deserializeBinary(BinaryDeserializer deserializer) throws IOException {
+    public ZonedDateTime deserializeBinary(CompositeSource deserializer) throws IOException {
         long value = deserializer.readLongLE() * POW_10[MAX_SCALA - scale];
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);

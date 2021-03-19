@@ -14,13 +14,13 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.CompositeSource;
 
 import java.io.IOException;
 
 public class ProgressResponse implements Response {
 
-    public static ProgressResponse readFrom(BinaryDeserializer deserializer) throws IOException {
+    public static ProgressResponse readFrom(CompositeSource deserializer) throws IOException {
         return new ProgressResponse(deserializer.readVarInt(), deserializer.readVarInt(), deserializer.readVarInt());
     }
 

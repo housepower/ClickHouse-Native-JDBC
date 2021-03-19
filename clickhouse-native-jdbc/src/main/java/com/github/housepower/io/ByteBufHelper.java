@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.misc;
+package com.github.housepower.io;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -22,9 +22,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public interface ByteBufHelper {
-
-    ByteBufHelper DEFAULT = new ByteBufHelper() {
-    };
 
     default long readVarInt(ByteBuf buf) {
         long number = 0;

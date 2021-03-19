@@ -14,18 +14,17 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.NettyUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
 
 import java.nio.charset.Charset;
 
-public class ByteBufBinaryWriter implements BinaryWriter, ByteBufHelper {
+public class ByteBufSink implements ISink, ByteBufHelper {
 
     private final ByteBuf buf;
 
-    public ByteBufBinaryWriter() {
+    public ByteBufSink() {
         this.buf = NettyUtil.alloc().buffer();
     }
 

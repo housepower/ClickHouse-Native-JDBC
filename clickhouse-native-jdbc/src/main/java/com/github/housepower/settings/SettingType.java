@@ -12,7 +12,9 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.settings;
+
+import com.github.housepower.io.CompositeSink;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -23,7 +25,7 @@ public interface SettingType<T extends Serializable> {
 
     T deserializeURL(String queryParameter);
 
-    void serializeSetting(BinarySerializer serializer, T value);
+    void serializeSetting(CompositeSink serializer, T value);
 
     SettingType<Long> Int64 = new SettingType<Long>() {
 
@@ -38,7 +40,7 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Long value) {
+        public void serializeSetting(CompositeSink serializer, Long value) {
             serializer.writeVarInt(value);
         }
     };
@@ -56,7 +58,7 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Integer value) {
+        public void serializeSetting(CompositeSink serializer, Integer value) {
             serializer.writeVarInt(value);
         }
     };
@@ -74,7 +76,7 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Float value) {
+        public void serializeSetting(CompositeSink serializer, Float value) {
             serializer.writeUTF8Binary(String.valueOf(value));
         }
     };
@@ -92,7 +94,7 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, String value) {
+        public void serializeSetting(CompositeSink serializer, String value) {
             serializer.writeUTF8Binary(String.valueOf(value));
         }
     };
@@ -110,7 +112,7 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Boolean value) {
+        public void serializeSetting(CompositeSink serializer, Boolean value) {
             serializer.writeVarInt(Boolean.TRUE.equals(value) ? 1 : 0);
         }
     };
@@ -128,7 +130,7 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Duration value) {
+        public void serializeSetting(CompositeSink serializer, Duration value) {
             serializer.writeVarInt(value.getSeconds());
         }
     };
@@ -146,7 +148,7 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Duration value) {
+        public void serializeSetting(CompositeSink serializer, Duration value) {
             serializer.writeVarInt(value.toMillis());
         }
     };
@@ -164,7 +166,7 @@ public interface SettingType<T extends Serializable> {
         }
 
         @Override
-        public void serializeSetting(BinarySerializer serializer, Character value) {
+        public void serializeSetting(CompositeSink serializer, Character value) {
             serializer.writeUTF8Binary(String.valueOf(value));
         }
     };

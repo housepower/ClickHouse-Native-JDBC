@@ -12,11 +12,8 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.io;
 
-import com.github.housepower.io.BinaryWriter;
-import com.github.housepower.io.CompressBinaryWriter;
-import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.Switcher;
 import com.github.housepower.settings.ClickHouseDefines;
 import io.airlift.compress.Compressor;
@@ -25,16 +22,16 @@ import io.netty.buffer.ByteBuf;
 import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 
-public class BinarySerializer implements BinaryWriter, SupportCompress, ByteBufHelper {
+public class CompositeSink implements ISink, SupportCompress, ByteBufHelper {
 
-    private final Switcher<BinaryWriter> switcher;
+    private final Switcher<ISink> switcher;
     private final boolean enableCompress;
 
-    public BinarySerializer(BinaryWriter writer, boolean enableCompress, @Nullable Compressor compressor) {
+    public CompositeSink(ISink writer, boolean enableCompress, @Nullable Compressor compressor) {
         this.enableCompress = enableCompress;
-        BinaryWriter compressWriter = null;
+        ISink compressWriter = null;
         if (enableCompress) {
-            compressWriter = new CompressBinaryWriter(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES, writer, compressor);
+            compressWriter = new CompressSink(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES, writer, compressor);
         }
         switcher = new Switcher<>(compressWriter, writer);
     }

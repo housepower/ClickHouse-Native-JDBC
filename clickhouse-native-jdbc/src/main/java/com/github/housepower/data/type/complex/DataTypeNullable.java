@@ -18,8 +18,8 @@ import com.github.housepower.data.DataTypeFactory;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -104,12 +104,12 @@ public class DataTypeNullable implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(Object data, CompositeSink serializer) throws SQLException, IOException {
         this.nestedDataType.serializeBinary(data, serializer);
     }
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinaryBulk(Object[] data, CompositeSink serializer) throws SQLException, IOException {
         Short[] isNull = new Short[data.length];
         for (int i = 0; i < data.length; i++) {
             isNull[i] = (data[i] == null ? IS_NULL : NON_NULL);
@@ -120,7 +120,7 @@ public class DataTypeNullable implements IDataType {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
         boolean isNull = (deserializer.readByte() == (byte) 1);
         if (isNull) {
             return null;
@@ -129,7 +129,7 @@ public class DataTypeNullable implements IDataType {
     }
 
     @Override
-    public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object[] deserializeBinaryBulk(int rows, CompositeSource deserializer) throws SQLException, IOException {
         Object[] nullMap = nullMapDataType.deserializeBinaryBulk(rows, deserializer);
 
         Object[] data = nestedDataType.deserializeBinaryBulk(rows, deserializer);

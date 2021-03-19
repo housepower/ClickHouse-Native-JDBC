@@ -16,14 +16,14 @@ package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.CompositeSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class TotalsResponse implements Response {
 
-    public static TotalsResponse readFrom(BinaryDeserializer deserializer, NativeContext.ServerContext info)
+    public static TotalsResponse readFrom(CompositeSource deserializer, NativeContext.ServerContext info)
             throws IOException, SQLException {
         return new TotalsResponse(deserializer.readUTF8Binary(), Block.readFrom(deserializer, info));
     }

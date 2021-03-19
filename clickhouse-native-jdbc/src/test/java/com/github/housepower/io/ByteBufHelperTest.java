@@ -14,11 +14,8 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.ExceptionUtil.CheckedBiConsumer;
 import com.github.housepower.misc.ExceptionUtil.CheckedFunction;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.ReferenceCountUtil;
@@ -33,7 +30,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(booleans = {true, false})
     void testBoolean(boolean value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeBoolean, BinaryDeserializer::readBoolean,
+                CompositeSink::writeBoolean, CompositeSource::readBoolean,
                 ByteBuf::writeBoolean, ByteBuf::readBoolean);
     }
 
@@ -41,7 +38,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(bytes = {0, 1, Byte.MIN_VALUE, Byte.MAX_VALUE})
     void testByte(byte value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeByte, BinaryDeserializer::readByte,
+                CompositeSink::writeByte, CompositeSource::readByte,
                 ((CheckedBiConsumer<ByteBuf, Byte>) ByteBuf::writeByte), ByteBuf::readByte);
     }
 
@@ -49,7 +46,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(shorts = {0, 1, Short.MIN_VALUE, Short.MAX_VALUE})
     void testShort(short value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeShortLE, BinaryDeserializer::readShortLE,
+                CompositeSink::writeShortLE, CompositeSource::readShortLE,
                 ((CheckedBiConsumer<ByteBuf, Short>) ByteBuf::writeShortLE), ByteBuf::readShortLE);
     }
 
@@ -58,7 +55,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(ints = {0, 1, Integer.MIN_VALUE, Integer.MAX_VALUE})
     void testInt(int value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeIntLE, BinaryDeserializer::readIntLE,
+                CompositeSink::writeIntLE, CompositeSource::readIntLE,
                 ByteBuf::writeIntLE, ByteBuf::readIntLE);
     }
 
@@ -66,7 +63,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(longs = {0L, 1L, Long.MIN_VALUE, Long.MAX_VALUE})
     void testLong(long value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeLongLE, BinaryDeserializer::readLongLE,
+                CompositeSink::writeLongLE, CompositeSource::readLongLE,
                 ByteBuf::writeLongLE, ByteBuf::readLongLE);
     }
 
@@ -74,7 +71,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(floats = {0.0F, 1.1F, Float.MIN_VALUE, Float.MAX_VALUE, Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY})
     void testFloat(float value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeFloatLE, BinaryDeserializer::readFloatLE,
+                CompositeSink::writeFloatLE, CompositeSource::readFloatLE,
                 ByteBuf::writeFloatLE, ByteBuf::readFloatLE);
     }
 
@@ -82,7 +79,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(doubles = {0.0, 1.1, Double.MIN_VALUE, Double.MAX_VALUE, Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY})
     void testDouble(double value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeDoubleLE, BinaryDeserializer::readDoubleLE,
+                CompositeSink::writeDoubleLE, CompositeSource::readDoubleLE,
                 ByteBuf::writeDoubleLE, ByteBuf::readDoubleLE);
     }
 
@@ -90,7 +87,7 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(longs = {0L, 1L, Integer.MAX_VALUE, Long.MAX_VALUE})
     void testVarInt(long value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeVarInt, BinaryDeserializer::readVarInt,
+                CompositeSink::writeVarInt, CompositeSource::readVarInt,
                 this::writeVarInt, this::readVarInt);
     }
 
@@ -98,24 +95,24 @@ class ByteBufHelperTest implements ByteBufHelper {
     @ValueSource(strings = {"", "abc", "哈哈", "😝"})
     void testUTF8Binary(String value) throws Exception {
         testSerde(value,
-                BinarySerializer::writeUTF8Binary, BinaryDeserializer::readUTF8Binary,
+                CompositeSink::writeUTF8Binary, CompositeSource::readUTF8Binary,
                 this::writeUTF8Binary, this::readUTF8Binary);
     }
 
     private <T> void testSerde(T value,
-                               CheckedBiConsumer<BinarySerializer, T> legacySerialize,
-                               CheckedFunction<BinaryDeserializer, T> legacyDeserialize,
+                               CheckedBiConsumer<CompositeSink, T> legacySerialize,
+                               CheckedFunction<CompositeSource, T> legacyDeserialize,
                                CheckedBiConsumer<ByteBuf, T> nettySerialize,
                                CheckedFunction<ByteBuf, T> nettyDeserialize) throws Exception {
-        ByteBufBinaryWriter memoryWriter = new ByteBufBinaryWriter();
-        BinarySerializer serializer = new BinarySerializer(memoryWriter, false, null);
+        ByteBufSink memoryWriter = new ByteBufSink();
+        CompositeSink serializer = new CompositeSink(memoryWriter, false, null);
         legacySerialize.accept(serializer, value);
         ByteBuf legacyBuf = memoryWriter.retain();
         ByteBuf nettyBuf = heapBuf();
         nettySerialize.accept(nettyBuf, value);
         assertEquals(legacyBuf, nettyBuf);
 
-        BinaryDeserializer deserializer = new BinaryDeserializer(new ByteBufBinaryReader(legacyBuf), false);
+        CompositeSource deserializer = new CompositeSource(new ByteBufSource(legacyBuf), false);
         assertEquals(value, legacyDeserialize.apply(deserializer));
         assertEquals(value, nettyDeserialize.apply(nettyBuf));
 

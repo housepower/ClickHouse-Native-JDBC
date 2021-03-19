@@ -25,8 +25,8 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
 
@@ -106,12 +106,12 @@ public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public void serializeBinary(ZonedDateTime data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(ZonedDateTime data, CompositeSink serializer) throws SQLException, IOException {
         serializer.writeIntLE((int) DateTimeUtil.toEpochSecond(data));
     }
 
     @Override
-    public ZonedDateTime deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public ZonedDateTime deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
         int epochSeconds = deserializer.readIntLE();
         return DateTimeUtil.toZonedDateTime(epochSeconds, 0, tz);
     }

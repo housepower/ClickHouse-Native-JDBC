@@ -14,13 +14,13 @@
 
 package com.github.housepower.client;
 
-import com.github.housepower.io.SocketBinaryReader;
-import com.github.housepower.io.SocketBinaryWriter;
+import com.github.housepower.io.SocketSource;
+import com.github.housepower.io.SocketSink;
 import com.github.housepower.data.Block;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.*;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
@@ -58,8 +58,8 @@ public class NativeClient {
 
             return new NativeClient(socket,
                     // TODO support zstd
-                    new BinarySerializer(new SocketBinaryWriter(socket), true, new Lz4Compressor()),
-                    new BinaryDeserializer(new SocketBinaryReader(socket), true));
+                    new CompositeSink(new SocketSink(socket), true, new Lz4Compressor()),
+                    new CompositeSource(new SocketSource(socket), true));
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -67,10 +67,10 @@ public class NativeClient {
 
     private final Socket socket;
     private final SocketAddress address;
-    private final BinarySerializer serializer;
-    private final BinaryDeserializer deserializer;
+    private final CompositeSink serializer;
+    private final CompositeSource deserializer;
 
-    public NativeClient(Socket socket, BinarySerializer serializer, BinaryDeserializer deserializer) {
+    public NativeClient(Socket socket, CompositeSink serializer, CompositeSource deserializer) {
         this.socket = socket;
         this.address = socket.getLocalSocketAddress();
         this.serializer = serializer;

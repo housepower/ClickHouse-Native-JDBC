@@ -16,8 +16,8 @@ package com.github.housepower.data.type;
 
 import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -56,12 +56,12 @@ public class DataTypeIPv4 implements IDataType<Long, Long> {
     }
 
     @Override
-    public void serializeBinary(Long data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(Long data, CompositeSink serializer) throws SQLException, IOException {
         serializer.writeIntLE(data.intValue());
     }
 
     @Override
-    public Long deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Long deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
         return deserializer.readIntLE() & 0xffffffffL;
     }
 

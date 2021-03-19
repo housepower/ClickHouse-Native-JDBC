@@ -15,8 +15,8 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.client.NativeContext;
-import com.github.housepower.serde.BinarySerializer;
-import com.github.housepower.serde.SettingType;
+import com.github.housepower.io.CompositeSink;
+import com.github.housepower.settings.SettingType;
 import com.github.housepower.settings.SettingKey;
 
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class QueryRequest implements Request {
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException, SQLException {
+    public void writeImpl(CompositeSink serializer) throws IOException, SQLException {
         serializer.writeUTF8Binary(queryId);
         clientContext.writeTo(serializer);
 

@@ -20,8 +20,8 @@ import java.sql.Types;
 
 import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 public class DataTypeNothing implements IDataType<Object, Object> {
 
@@ -59,11 +59,11 @@ public class DataTypeNothing implements IDataType<Object, Object> {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(Object data, CompositeSink serializer) throws SQLException, IOException {
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
         return new Object();
     }
 

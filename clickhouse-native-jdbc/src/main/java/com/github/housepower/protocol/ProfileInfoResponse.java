@@ -14,13 +14,13 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.CompositeSource;
 
 import java.io.IOException;
 
 public class ProfileInfoResponse implements Response {
 
-    public static ProfileInfoResponse readFrom(BinaryDeserializer deserializer) throws IOException {
+    public static ProfileInfoResponse readFrom(CompositeSource deserializer) throws IOException {
         long rows = deserializer.readVarInt();
         long blocks = deserializer.readVarInt();
         long bytes = deserializer.readVarInt();

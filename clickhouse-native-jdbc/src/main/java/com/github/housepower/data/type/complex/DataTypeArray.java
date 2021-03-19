@@ -20,8 +20,8 @@ import com.github.housepower.data.type.DataTypeInt64;
 import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.Array;
@@ -110,7 +110,7 @@ public class DataTypeArray implements IDataType<ClickHouseArray, Array> {
     }
 
     @Override
-    public void serializeBinary(ClickHouseArray data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(ClickHouseArray data, CompositeSink serializer) throws SQLException, IOException {
         for (Object f : data.getArray()) {
             getElemDataType().serializeBinary(f, serializer);
         }
@@ -118,20 +118,20 @@ public class DataTypeArray implements IDataType<ClickHouseArray, Array> {
 
 
     @Override
-    public void serializeBinaryBulk(ClickHouseArray[] data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinaryBulk(ClickHouseArray[] data, CompositeSink serializer) throws SQLException, IOException {
         offsetIDataType.serializeBinary((long) data.length, serializer);
         getElemDataType().serializeBinaryBulk(data, serializer);
     }
 
     @Override
-    public ClickHouseArray deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public ClickHouseArray deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
         Long offset = offsetIDataType.deserializeBinary(deserializer);
         Object[] data = getElemDataType().deserializeBinaryBulk(offset.intValue(), deserializer);
         return new ClickHouseArray(elemDataType, data);
     }
 
     @Override
-    public ClickHouseArray[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException, SQLException {
+    public ClickHouseArray[] deserializeBinaryBulk(int rows, CompositeSource deserializer) throws IOException, SQLException {
         ClickHouseArray[] arrays = new ClickHouseArray[rows];
         if (rows == 0) {
             return arrays;

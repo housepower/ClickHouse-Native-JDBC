@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.io;
 
 public interface SupportCompress {
 

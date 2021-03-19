@@ -12,25 +12,23 @@
  * limitations under the License.
  */
 
-package com.github.housepower.serde;
+package com.github.housepower.io;
 
-import com.github.housepower.io.BinaryReader;
-import com.github.housepower.io.DecompressBinaryReader;
 import com.github.housepower.misc.Switcher;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.Charset;
 
-public class BinaryDeserializer implements BinaryReader, SupportCompress {
+public class CompositeSource implements ISource, SupportCompress {
 
-    private final Switcher<BinaryReader> switcher;
+    private final Switcher<ISource> switcher;
     private final boolean enableCompress;
 
-    public BinaryDeserializer(BinaryReader buffedReader, boolean enableCompress) {
+    public CompositeSource(ISource buffedReader, boolean enableCompress) {
         this.enableCompress = enableCompress;
-        BinaryReader compressedReader = null;
+        ISource compressedReader = null;
         if (enableCompress) {
-            compressedReader = new DecompressBinaryReader(buffedReader);
+            compressedReader = new DecompressSource(buffedReader);
         }
         switcher = new Switcher<>(compressedReader, buffedReader);
     }

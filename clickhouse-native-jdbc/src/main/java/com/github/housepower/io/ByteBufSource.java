@@ -14,18 +14,17 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.ByteBufHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class ByteBufBinaryReader implements BinaryReader, ByteBufHelper {
+public class ByteBufSource implements ISource, ByteBufHelper {
 
     private final ByteBuf buf;
 
-    public ByteBufBinaryReader(ByteBuf buf) {
+    public ByteBufSource(ByteBuf buf) {
         this.buf = buf;
     }
 

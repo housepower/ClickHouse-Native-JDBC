@@ -15,14 +15,14 @@
 package com.github.housepower.protocol;
 
 import com.github.housepower.exception.ClickHouseSQLException;
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.CompositeSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class ExceptionResponse implements Response {
 
-    public static SQLException readExceptionFrom(BinaryDeserializer deserializer) throws IOException {
+    public static SQLException readExceptionFrom(CompositeSource deserializer) throws IOException {
         int code = deserializer.readIntLE();
         String name = deserializer.readUTF8Binary();
         String message = deserializer.readUTF8Binary();
