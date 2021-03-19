@@ -17,8 +17,6 @@ package com.github.housepower.io;
 import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.ExceptionUtil.CheckedBiConsumer;
 import com.github.housepower.misc.ExceptionUtil.CheckedFunction;
-import com.github.housepower.serde.LegacyBinaryDeserializer;
-import com.github.housepower.serde.LegacyBinarySerializer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
@@ -110,14 +108,14 @@ class ByteBufHelperTest implements ByteBufHelper {
                                CheckedBiConsumer<ByteBuf, T> nettySerialize,
                                CheckedFunction<ByteBuf, T> nettyDeserialize) throws Exception {
         ByteBufBinaryWriter memoryWriter = new ByteBufBinaryWriter();
-        LegacyBinarySerializer serializer = new LegacyBinarySerializer(memoryWriter, false, null);
+        BinarySerializer serializer = new BinarySerializer(memoryWriter, false, null);
         legacySerialize.accept(serializer, value);
         ByteBuf legacyBuf = memoryWriter.retain();
         ByteBuf nettyBuf = heapBuf();
         nettySerialize.accept(nettyBuf, value);
         assertEquals(legacyBuf, nettyBuf);
 
-        LegacyBinaryDeserializer deserializer = new LegacyBinaryDeserializer(new ByteBufBinaryReader(legacyBuf), false);
+        BinaryDeserializer deserializer = new BinaryDeserializer(new ByteBufBinaryReader(legacyBuf), false);
         assertEquals(value, legacyDeserialize.apply(deserializer));
         assertEquals(value, nettyDeserialize.apply(nettyBuf));
 

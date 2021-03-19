@@ -18,6 +18,7 @@ import com.github.housepower.misc.ByteBufHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class ByteBufBinaryReader implements BinaryReader, ByteBufHelper {
@@ -80,14 +81,19 @@ public class ByteBufBinaryReader implements BinaryReader, ByteBufHelper {
     }
 
     @Override
-    public ByteBuf readBytesBinary() {
+    public CharSequence readCharSequence(int len, Charset charset) {
+        return buf.readCharSequence(len, charset);
+    }
+
+    @Override
+    public ByteBuf readBinary() {
         int len = (int) readVarInt();
         return buf.readSlice(len);
     }
 
     @Override
     public String readUTF8Binary() {
-        ByteBuf data = readBytesBinary();
+        ByteBuf data = readBinary();
         return data.readableBytes() > 0 ? data.readCharSequence(data.readableBytes(), StandardCharsets.UTF_8).toString() : "";
     }
 

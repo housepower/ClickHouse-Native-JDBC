@@ -26,6 +26,7 @@ import io.netty.util.ReferenceCountUtil;
 import javax.annotation.Nullable;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
@@ -105,7 +106,13 @@ public class DecompressBinaryReader implements BinaryReader, ByteBufHelper, Code
     }
 
     @Override
-    public ByteBuf readBytesBinary() {
+    public CharSequence readCharSequence(int len, Charset charset) {
+        maybeDecompress(len);
+        return decompressedBuf.readCharSequence(len, charset);
+    }
+
+    @Override
+    public ByteBuf readBinary() {
         int len = (int) readVarInt();
         return readBytes(len);
     }

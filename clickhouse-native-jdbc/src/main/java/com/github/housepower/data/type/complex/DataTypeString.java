@@ -72,7 +72,7 @@ public class DataTypeString implements IDataType<CharSequence, String> {
 
     @Override
     public void serializeBinary(CharSequence data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeStringBinary(data, charset);
+        serializer.writeCharSequenceBinary(data, charset);
     }
 
     /**
@@ -81,7 +81,7 @@ public class DataTypeString implements IDataType<CharSequence, String> {
      */
     @Override
     public CharSequence deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
-        ByteBuf buf = deserializer.readBytesBinary();
+        ByteBuf buf = deserializer.readBinary();
         return buf.readCharSequence(buf.readableBytes(), charset);
     }
 

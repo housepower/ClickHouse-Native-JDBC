@@ -21,8 +21,6 @@ import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.*;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
-import com.github.housepower.serde.LegacyBinaryDeserializer;
-import com.github.housepower.serde.LegacyBinarySerializer;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
@@ -60,8 +58,8 @@ public class NativeClient {
 
             return new NativeClient(socket,
                     // TODO support zstd
-                    new LegacyBinarySerializer(new SocketBinaryWriter(socket), true, new Lz4Compressor()),
-                    new LegacyBinaryDeserializer(new SocketBinaryReader(socket), true));
+                    new BinarySerializer(new SocketBinaryWriter(socket), true, new Lz4Compressor()),
+                    new BinaryDeserializer(new SocketBinaryReader(socket), true));
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }

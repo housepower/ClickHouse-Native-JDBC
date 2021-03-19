@@ -44,6 +44,12 @@ public class CompressBinaryWriter implements BinaryWriter, CodecHelper, ByteBufH
     }
 
     @Override
+    public void writeZero(int len) {
+        buf.writeZero(len);
+        flush(false);
+    }
+
+    @Override
     public void writeBoolean(boolean b) {
         buf.writeBoolean(b);
         flush(false);
@@ -99,21 +105,27 @@ public class CompressBinaryWriter implements BinaryWriter, CodecHelper, ByteBufH
     }
 
     @Override
+    public void writeCharSequence(CharSequence seq, Charset charset) {
+        buf.writeCharSequence(seq, charset);
+        flush(false);
+    }
+
+    @Override
     public void writeUTF8Binary(CharSequence utf8) {
         writeUTF8Binary(buf, utf8);
         flush(false);
     }
 
     @Override
-    public void writeStringBinary(CharSequence seq, Charset charset) {
+    public void writeCharSequenceBinary(CharSequence seq, Charset charset) {
         ByteBuf buf = NettyUtil.alloc().buffer();
         buf.writeCharSequence(seq, charset);
-        writeBytesBinary(buf);
+        writeBinary(buf);
         flush(false);
     }
 
     @Override
-    public void writeBytesBinary(ByteBuf bytes) {
+    public void writeBinary(ByteBuf bytes) {
         writeBinary(buf, bytes);
         flush(false);
     }
