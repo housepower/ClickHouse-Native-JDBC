@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class SocketBinaryReader implements BinaryReader, ByteBufHelper {
@@ -111,7 +112,13 @@ public class SocketBinaryReader implements BinaryReader, ByteBufHelper {
     }
 
     @Override
-    public ByteBuf readBytesBinary() {
+    public CharSequence readCharSequence(int len, Charset charset) {
+        maybeRefill(len);
+        return buf.readCharSequence(len, charset);
+    }
+
+    @Override
+    public ByteBuf readBinary() {
         maybeRefill(1);
         int len = (int) readVarInt();
         maybeRefill(len);

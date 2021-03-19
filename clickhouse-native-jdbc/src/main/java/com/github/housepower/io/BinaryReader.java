@@ -16,6 +16,8 @@ package com.github.housepower.io;
 
 import io.netty.buffer.ByteBuf;
 
+import java.nio.charset.Charset;
+
 public interface BinaryReader extends AutoCloseable {
 
     void skipBytes(int len);
@@ -38,7 +40,9 @@ public interface BinaryReader extends AutoCloseable {
 
     ByteBuf readBytes(int maxLen);
 
-    ByteBuf readBytesBinary();
+    CharSequence readCharSequence(int len, Charset charset);
+
+    ByteBuf readBinary();
 
     String readUTF8Binary();
 

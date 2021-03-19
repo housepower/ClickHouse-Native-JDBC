@@ -15,7 +15,6 @@
 package com.github.housepower.io;
 
 import com.github.housepower.serde.BinarySerializer;
-import com.github.housepower.serde.LegacyBinarySerializer;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -28,7 +27,7 @@ public class ColumnWriterBuffer implements AutoCloseable {
 
     public ColumnWriterBuffer() {
         this.columnWriter = new ByteBufBinaryWriter();
-        this.column = new LegacyBinarySerializer(columnWriter, false, null);
+        this.column = new BinarySerializer(columnWriter, false, null);
     }
 
     public void writeTo(BinarySerializer serializer) throws IOException {

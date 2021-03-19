@@ -40,6 +40,11 @@ public class SocketBinaryWriter implements BinaryWriter, ByteBufHelper {
     }
 
     @Override
+    public void writeZero(int len) {
+        buf.writeZero(len);
+    }
+
+    @Override
     public void writeBoolean(boolean b) {
         buf.writeBoolean(b);
     }
@@ -86,19 +91,24 @@ public class SocketBinaryWriter implements BinaryWriter, ByteBufHelper {
     }
 
     @Override
+    public void writeCharSequence(CharSequence seq, Charset charset) {
+        buf.writeCharSequence(seq, charset);
+    }
+
+    @Override
     public void writeUTF8Binary(CharSequence utf8) {
         writeUTF8Binary(buf, utf8);
     }
 
     @Override
-    public void writeStringBinary(CharSequence seq, Charset charset) {
+    public void writeCharSequenceBinary(CharSequence seq, Charset charset) {
         ByteBuf buf = NettyUtil.alloc().buffer();
         buf.writeCharSequence(seq, charset);
-        writeBytesBinary(buf);
+        writeBinary(buf);
     }
 
     @Override
-    public void writeBytesBinary(ByteBuf bytes) {
+    public void writeBinary(ByteBuf bytes) {
         writeBinary(buf, bytes);
     }
 

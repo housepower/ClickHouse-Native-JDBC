@@ -20,6 +20,8 @@ import java.nio.charset.Charset;
 
 public interface BinaryWriter extends AutoCloseable {
 
+    void writeZero(int len);
+
     void writeBoolean(boolean b);
 
     void writeByte(byte b);
@@ -38,11 +40,13 @@ public interface BinaryWriter extends AutoCloseable {
 
     void writeBytes(ByteBuf bytes);
 
+    void writeCharSequence(CharSequence seq, Charset charset);
+
+    void writeCharSequenceBinary(CharSequence seq, Charset charset);
+
     void writeUTF8Binary(CharSequence utf8);
 
-    void writeStringBinary(CharSequence seq, Charset charset);
-
-    void writeBytesBinary(ByteBuf bytes);
+    void writeBinary(ByteBuf bytes);
 
     void flush(boolean force);
 

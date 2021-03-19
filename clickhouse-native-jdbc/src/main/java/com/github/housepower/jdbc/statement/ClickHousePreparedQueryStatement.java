@@ -14,7 +14,6 @@
 
 package com.github.housepower.jdbc.statement;
 
-
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.misc.DateTimeUtil;
