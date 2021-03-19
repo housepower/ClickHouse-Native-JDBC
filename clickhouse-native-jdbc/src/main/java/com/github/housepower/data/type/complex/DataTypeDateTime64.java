@@ -14,6 +14,15 @@
 
 package com.github.housepower.data.type.complex;
 
+import com.github.housepower.client.NativeContext.ServerContext;
+import com.github.housepower.data.IDataType;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
+import com.github.housepower.misc.DateTimeUtil;
+import com.github.housepower.misc.SQLLexer;
+import com.github.housepower.misc.StringView;
+import com.github.housepower.misc.Validate;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -22,15 +31,6 @@ import java.sql.Types;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-
-import com.github.housepower.client.NativeContext.ServerContext;
-import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.DateTimeUtil;
-import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.misc.StringView;
-import com.github.housepower.misc.Validate;
-import com.github.housepower.io.CompositeSource;
-import com.github.housepower.io.CompositeSink;
 
 public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
 
@@ -136,7 +136,7 @@ public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public void serializeBinary(ZonedDateTime data, CompositeSink sink) throws IOException {
+    public void serializeBinary(ZonedDateTime data, ISink sink) throws IOException {
         long epochSeconds = DateTimeUtil.toEpochSecond(data);
         int nanos = data.getNano();
         long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
@@ -144,7 +144,7 @@ public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public ZonedDateTime deserializeBinary(CompositeSource source) throws IOException {
+    public ZonedDateTime deserializeBinary(ISource source) throws IOException {
         long value = source.readLongLE() * POW_10[MAX_SCALA - scale];
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);

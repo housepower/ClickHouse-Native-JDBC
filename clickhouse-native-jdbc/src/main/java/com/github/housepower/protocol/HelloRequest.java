@@ -17,8 +17,6 @@ package com.github.housepower.protocol;
 import com.github.housepower.io.CompositeSink;
 import com.github.housepower.settings.ClickHouseDefines;
 
-import java.io.IOException;
-
 public class HelloRequest implements Request {
 
     private final String clientName;
@@ -42,7 +40,7 @@ public class HelloRequest implements Request {
     }
 
     @Override
-    public void writeImpl(CompositeSink sink) throws IOException {
+    public void writeImpl(CompositeSink sink) {
         sink.writeUTF8Binary(ClickHouseDefines.NAME + " " + clientName);
         sink.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
         sink.writeVarInt(ClickHouseDefines.MINOR_VERSION);

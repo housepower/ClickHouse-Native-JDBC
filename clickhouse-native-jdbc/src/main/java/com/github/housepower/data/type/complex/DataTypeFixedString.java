@@ -17,10 +17,10 @@ package com.github.housepower.data.type.complex;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.exception.ClickHouseClientException;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.io.CompositeSource;
-import com.github.housepower.io.CompositeSink;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.util.AsciiString;
@@ -93,7 +93,7 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public void serializeBinary(CharSequence data, CompositeSink sink) throws SQLException, IOException {
+    public void serializeBinary(CharSequence data, ISink sink) throws SQLException, IOException {
         int writeLen;
         int paddingLen;
         if (data instanceof AsciiString) {
@@ -120,7 +120,7 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public CharSequence deserializeBinary(CompositeSource source) throws SQLException, IOException {
+    public CharSequence deserializeBinary(ISource source) throws SQLException, IOException {
         return source.readCharSequence(n, charset);
     }
 

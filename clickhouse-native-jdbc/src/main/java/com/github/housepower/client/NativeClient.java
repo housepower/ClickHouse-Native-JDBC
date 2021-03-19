@@ -14,20 +14,20 @@
 
 package com.github.housepower.client;
 
-import com.github.housepower.io.SocketSource;
-import com.github.housepower.io.SocketSink;
 import com.github.housepower.data.Block;
+import com.github.housepower.io.CompositeSink;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.SocketSink;
+import com.github.housepower.io.SocketSource;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.*;
-import com.github.housepower.io.CompositeSource;
-import com.github.housepower.io.CompositeSink;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
-import com.github.housepower.log.Logger;
-import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.stream.QueryResult;
 import com.github.housepower.stream.ClickHouseQueryResult;
+import com.github.housepower.stream.QueryResult;
 import io.airlift.compress.lz4.Lz4Compressor;
 
 import java.io.IOException;

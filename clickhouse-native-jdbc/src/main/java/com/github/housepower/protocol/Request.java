@@ -25,9 +25,9 @@ public interface Request {
 
     void writeImpl(CompositeSink sink) throws IOException, SQLException;
 
-    default void writeTo(CompositeSink source) throws IOException, SQLException {
-        source.writeVarInt(type().id());
-        this.writeImpl(source);
+    default void writeTo(CompositeSink sink) throws IOException, SQLException {
+        sink.writeVarInt(type().id());
+        this.writeImpl(sink);
     }
 
     enum ProtoType {
