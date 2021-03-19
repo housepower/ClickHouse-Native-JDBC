@@ -67,14 +67,14 @@ public class NativeClient {
 
     private final Socket socket;
     private final SocketAddress address;
-    private final CompositeSink serializer;
-    private final CompositeSource deserializer;
+    private final CompositeSink sink;
+    private final CompositeSource source;
 
-    public NativeClient(Socket socket, CompositeSink serializer, CompositeSource deserializer) {
+    public NativeClient(Socket socket, CompositeSink sink, CompositeSource source) {
         this.socket = socket;
         this.address = socket.getLocalSocketAddress();
-        this.serializer = serializer;
-        this.deserializer = deserializer;
+        this.sink = sink;
+        this.source = source;
     }
 
     public SocketAddress address() {
@@ -153,10 +153,10 @@ public class NativeClient {
                 return;
             }
             LOG.trace("flush and close socket");
-            serializer.flush(true);
+            sink.flush(true);
             socket.close();
-            serializer.close();
-            deserializer.close();
+            sink.close();
+            source.close();
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -170,8 +170,8 @@ public class NativeClient {
     private void sendRequest(Request request) throws SQLException {
         try {
             LOG.trace("send request: {}", request.type());
-            request.writeTo(serializer);
-            serializer.flush(true);
+            request.writeTo(sink);
+            sink.flush(true);
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -180,7 +180,7 @@ public class NativeClient {
     private Response receiveResponse(Duration soTimeout, NativeContext.ServerContext info) throws SQLException {
         try {
             socket.setSoTimeout(((int) soTimeout.toMillis()));
-            Response response = Response.readFrom(deserializer, info);
+            Response response = Response.readFrom(source, info);
             LOG.trace("recv response: {}", response.type());
             return response;
         } catch (IOException ex) {

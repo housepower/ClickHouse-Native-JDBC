@@ -112,29 +112,29 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
     }
 
     @Override
-    public void serializeBinary(BigDecimal data, CompositeSink serializer) throws IOException {
+    public void serializeBinary(BigDecimal data, CompositeSink sink) throws IOException {
         BigDecimal targetValue = data.multiply(scaleFactor);
         switch (this.nobits) {
             case 32: {
-                serializer.writeIntLE(targetValue.intValue());
+                sink.writeIntLE(targetValue.intValue());
                 break;
             }
             case 64: {
-                serializer.writeLongLE(targetValue.longValue());
+                sink.writeLongLE(targetValue.longValue());
                 break;
             }
             case 128: {
                 BigInteger res = targetValue.toBigInteger();
-                serializer.writeLongLE(res.longValue());
-                serializer.writeLongLE(res.shiftRight(64).longValue());
+                sink.writeLongLE(res.longValue());
+                sink.writeLongLE(res.shiftRight(64).longValue());
                 break;
             }
             case 256: {
                 BigInteger res = targetValue.toBigInteger();
-                serializer.writeLongLE(targetValue.longValue());
-                serializer.writeLongLE(res.shiftRight(64).longValue());
-                serializer.writeLongLE(res.shiftRight(64 * 2).longValue());
-                serializer.writeLongLE(res.shiftRight(64 * 3).longValue());
+                sink.writeLongLE(targetValue.longValue());
+                sink.writeLongLE(res.shiftRight(64).longValue());
+                sink.writeLongLE(res.shiftRight(64 * 2).longValue());
+                sink.writeLongLE(res.shiftRight(64 * 3).longValue());
                 break;
             }
             default: {
@@ -145,17 +145,17 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
     }
 
     @Override
-    public BigDecimal deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
+    public BigDecimal deserializeBinary(CompositeSource source) throws SQLException, IOException {
         BigDecimal value;
         switch (this.nobits) {
             case 32: {
-                int v = deserializer.readIntLE();
+                int v = source.readIntLE();
                 value = BigDecimal.valueOf(v);
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
             }
             case 64: {
-                long v = deserializer.readLongLE();
+                long v = source.readLongLE();
                 value = BigDecimal.valueOf(v);
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
                 break;
@@ -163,8 +163,8 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
 
             case 128: {
                 long []array = new long[2];
-                array[1] = deserializer.readLongLE();
-                array[0] = deserializer.readLongLE();
+                array[1] = source.readLongLE();
+                array[0] = source.readLongLE();
 
                 value = new BigDecimal(new BigInteger(getBytes(array)));
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);
@@ -173,10 +173,10 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
 
             case 256: {
                 long []array = new long[4];
-                array[3] = deserializer.readLongLE();
-                array[2] = deserializer.readLongLE();
-                array[1] = deserializer.readLongLE();
-                array[0] = deserializer.readLongLE();
+                array[3] = source.readLongLE();
+                array[2] = source.readLongLE();
+                array[1] = source.readLongLE();
+                array[0] = source.readLongLE();
 
                 value = new BigDecimal(new BigInteger(getBytes(array)));
                 value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);

@@ -24,13 +24,13 @@ import java.sql.SQLException;
 public class DataResponse implements Response {
 
     public static DataResponse readFrom(
-            CompositeSource deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
+            CompositeSource source, NativeContext.ServerContext info) throws IOException, SQLException {
 
-        String name = deserializer.readUTF8Binary();
+        String name = source.readUTF8Binary();
 
-        deserializer.maybeEnableCompressed();
-        Block block = Block.readFrom(deserializer, info);
-        deserializer.maybeDisableCompressed();
+        source.maybeEnableCompressed();
+        Block block = Block.readFrom(source, info);
+        source.maybeDisableCompressed();
 
         return new DataResponse(name, block);
     }

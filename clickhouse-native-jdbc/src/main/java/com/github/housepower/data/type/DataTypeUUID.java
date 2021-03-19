@@ -67,13 +67,13 @@ public class DataTypeUUID implements IDataType<UUID, String> {
     }
 
     @Override
-    public void serializeBinary(UUID data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeLongLE(data.getMostSignificantBits());
-        serializer.writeLongLE(data.getLeastSignificantBits());
+    public void serializeBinary(UUID data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeLongLE(data.getMostSignificantBits());
+        sink.writeLongLE(data.getLeastSignificantBits());
     }
 
     @Override
-    public UUID deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        return new UUID(deserializer.readLongLE(), deserializer.readLongLE());
+    public UUID deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        return new UUID(source.readLongLE(), source.readLongLE());
     }
 }

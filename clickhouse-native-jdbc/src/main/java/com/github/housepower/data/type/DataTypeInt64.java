@@ -44,13 +44,13 @@ public class DataTypeInt64 implements BaseDataTypeInt64<Long, Long> {
     }
 
     @Override
-    public void serializeBinary(Long data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeLongLE(data);
+    public void serializeBinary(Long data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeLongLE(data);
     }
 
     @Override
-    public Long deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        return deserializer.readLongLE();
+    public Long deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        return source.readLongLE();
     }
 
     @Override

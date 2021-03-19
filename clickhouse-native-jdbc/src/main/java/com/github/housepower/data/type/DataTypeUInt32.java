@@ -44,13 +44,13 @@ public class DataTypeUInt32 implements BaseDataTypeInt32<Long, Long> {
     }
 
     @Override
-    public void serializeBinary(Long data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeIntLE(data.intValue());
+    public void serializeBinary(Long data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeIntLE(data.intValue());
     }
 
     @Override
-    public Long deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        int res = deserializer.readIntLE();
+    public Long deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        int res = source.readIntLE();
         return 0xffffffffL & res;
     }
 

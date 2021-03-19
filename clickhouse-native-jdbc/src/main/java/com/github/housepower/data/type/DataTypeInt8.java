@@ -44,13 +44,13 @@ public class DataTypeInt8 implements BaseDataTypeInt8<Byte, Byte> {
     }
 
     @Override
-    public void serializeBinary(Byte data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeByte(data);
+    public void serializeBinary(Byte data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeByte(data);
     }
 
     @Override
-    public Byte deserializeBinary(CompositeSource deserializer) throws IOException {
-        return deserializer.readByte();
+    public Byte deserializeBinary(CompositeSource source) throws IOException {
+        return source.readByte();
     }
 
     @Override

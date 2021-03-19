@@ -105,15 +105,15 @@ class ByteBufHelperTest implements ByteBufHelper {
                                CheckedBiConsumer<ByteBuf, T> nettySerialize,
                                CheckedFunction<ByteBuf, T> nettyDeserialize) throws Exception {
         ByteBufSink memoryWriter = new ByteBufSink();
-        CompositeSink serializer = new CompositeSink(memoryWriter, false, null);
-        legacySerialize.accept(serializer, value);
+        CompositeSink sink = new CompositeSink(memoryWriter, false, null);
+        legacySerialize.accept(sink, value);
         ByteBuf legacyBuf = memoryWriter.retain();
         ByteBuf nettyBuf = heapBuf();
         nettySerialize.accept(nettyBuf, value);
         assertEquals(legacyBuf, nettyBuf);
 
-        CompositeSource deserializer = new CompositeSource(new ByteBufSource(legacyBuf), false);
-        assertEquals(value, legacyDeserialize.apply(deserializer));
+        CompositeSource source = new CompositeSource(new ByteBufSource(legacyBuf), false);
+        assertEquals(value, legacyDeserialize.apply(source));
         assertEquals(value, nettyDeserialize.apply(nettyBuf));
 
         ReferenceCountUtil.release(legacyBuf);

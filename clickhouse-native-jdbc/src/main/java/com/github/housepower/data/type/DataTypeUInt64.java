@@ -49,13 +49,13 @@ public class DataTypeUInt64 implements BaseDataTypeInt64<BigInteger, BigInteger>
     }
 
     @Override
-    public void serializeBinary(BigInteger data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeLongLE(data.longValue());
+    public void serializeBinary(BigInteger data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeLongLE(data.longValue());
     }
 
     @Override
-    public BigInteger deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        long l = deserializer.readLongLE();
+    public BigInteger deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        long l = source.readLongLE();
         return new BigInteger(1, getBytes(l));
     }
 

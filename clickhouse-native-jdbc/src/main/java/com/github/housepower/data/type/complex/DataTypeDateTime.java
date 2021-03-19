@@ -106,13 +106,13 @@ public class DataTypeDateTime implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public void serializeBinary(ZonedDateTime data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeIntLE((int) DateTimeUtil.toEpochSecond(data));
+    public void serializeBinary(ZonedDateTime data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeIntLE((int) DateTimeUtil.toEpochSecond(data));
     }
 
     @Override
-    public ZonedDateTime deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        int epochSeconds = deserializer.readIntLE();
+    public ZonedDateTime deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        int epochSeconds = source.readIntLE();
         return DateTimeUtil.toZonedDateTime(epochSeconds, 0, tz);
     }
 

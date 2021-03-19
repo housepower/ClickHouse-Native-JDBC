@@ -71,8 +71,8 @@ public class DataTypeString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public void serializeBinary(CharSequence data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeCharSequenceBinary(data, charset);
+    public void serializeBinary(CharSequence data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeCharSequenceBinary(data, charset);
     }
 
     /**
@@ -80,8 +80,8 @@ public class DataTypeString implements IDataType<CharSequence, String> {
      * for getBytes(idx) method, we encode the String again
      */
     @Override
-    public CharSequence deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        ByteBuf buf = deserializer.readBinary();
+    public CharSequence deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        ByteBuf buf = source.readBinary();
         return buf.readCharSequence(buf.readableBytes(), charset);
     }
 

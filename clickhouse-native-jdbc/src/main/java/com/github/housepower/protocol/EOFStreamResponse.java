@@ -20,7 +20,7 @@ public class EOFStreamResponse implements Response {
 
     public static final EOFStreamResponse INSTANCE = new EOFStreamResponse();
 
-    public static Response readFrom(CompositeSource deserializer) {
+    public static Response readFrom(CompositeSource source) {
         return INSTANCE;
     }
 

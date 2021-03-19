@@ -28,36 +28,36 @@ public class BlockSettings {
         this.settings = settings;
     }
 
-    public void writeTo(CompositeSink serializer) throws IOException {
+    public void writeTo(CompositeSink sink) throws IOException {
         for (Setting setting : settings) {
-            serializer.writeVarInt(setting.num);
+            sink.writeVarInt(setting.num);
 
             if (Boolean.class.isAssignableFrom(setting.clazz)) {
-                serializer.writeBoolean((Boolean) setting.defaultValue);
+                sink.writeBoolean((Boolean) setting.defaultValue);
             } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                serializer.writeIntLE((Integer) setting.defaultValue);
+                sink.writeIntLE((Integer) setting.defaultValue);
             }
         }
-        serializer.writeVarInt(0);
+        sink.writeVarInt(0);
     }
 
-    public static BlockSettings readFrom(CompositeSource deserializer) throws IOException {
-        return new BlockSettings(readSettingsFrom(1, deserializer));
+    public static BlockSettings readFrom(CompositeSource source) throws IOException {
+        return new BlockSettings(readSettingsFrom(1, source));
     }
 
-    private static Setting[] readSettingsFrom(int currentSize, CompositeSource deserializer) throws IOException {
-        long num = deserializer.readVarInt();
+    private static Setting[] readSettingsFrom(int currentSize, CompositeSource source) {
+        long num = source.readVarInt();
 
         for (Setting setting : Setting.defaultValues()) {
             if (setting.num == num) {
                 if (Boolean.class.isAssignableFrom(setting.clazz)) {
-                    Setting receiveSetting = new Setting(setting.num, deserializer.readBoolean());
-                    Setting[] settings = readSettingsFrom(currentSize + 1, deserializer);
+                    Setting receiveSetting = new Setting(setting.num, source.readBoolean());
+                    Setting[] settings = readSettingsFrom(currentSize + 1, source);
                     settings[currentSize - 1] = receiveSetting;
                     return settings;
                 } else if (Integer.class.isAssignableFrom(setting.clazz)) {
-                    Setting receiveSetting = new Setting(setting.num, deserializer.readIntLE());
-                    Setting[] settings = readSettingsFrom(currentSize + 1, deserializer);
+                    Setting receiveSetting = new Setting(setting.num, source.readIntLE());
+                    Setting[] settings = readSettingsFrom(currentSize + 1, source);
                     settings[currentSize - 1] = receiveSetting;
                     return settings;
                 }

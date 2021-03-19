@@ -48,18 +48,18 @@ public class ColumnNullable extends AbstractColumn {
     }
 
     @Override
-    public void flushToSerializer(CompositeSink serializer, boolean immediate) throws IOException {
+    public void flush(CompositeSink sink, boolean immediate) throws IOException {
         if (isExported()) {
-            serializer.writeUTF8Binary(name);
-            serializer.writeUTF8Binary(type.name());
+            sink.writeUTF8Binary(name);
+            sink.writeUTF8Binary(type.name());
         }
 
         for (byte sign : nullableSign) {
-            serializer.writeByte(sign);
+            sink.writeByte(sign);
         }
 
         if (immediate)
-            buffer.writeTo(serializer);
+            buffer.writeTo(sink);
     }
 
     @Override

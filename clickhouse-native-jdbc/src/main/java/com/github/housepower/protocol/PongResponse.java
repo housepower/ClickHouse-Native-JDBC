@@ -23,7 +23,7 @@ public class PongResponse implements Response {
 
     public static final PongResponse INSTANCE = new PongResponse();
 
-    public static PongResponse readFrom(CompositeSource deserializer) throws IOException, SQLException {
+    public static PongResponse readFrom(CompositeSource source) throws IOException, SQLException {
         return INSTANCE;
     }
 

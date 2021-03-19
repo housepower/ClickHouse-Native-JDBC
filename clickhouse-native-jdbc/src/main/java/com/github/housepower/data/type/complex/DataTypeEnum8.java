@@ -104,10 +104,10 @@ public class DataTypeEnum8 implements IDataType<String, String> {
     }
 
     @Override
-    public void serializeBinary(String data, CompositeSink serializer) throws SQLException, IOException {
+    public void serializeBinary(String data, CompositeSink sink) throws SQLException, IOException {
         for (int i = 0; i < names.length; i++) {
             if (data.equals(names[i])) {
-                serializer.writeByte(values[i]);
+                sink.writeByte(values[i]);
                 return;
             }
         }
@@ -120,8 +120,8 @@ public class DataTypeEnum8 implements IDataType<String, String> {
     }
 
     @Override
-    public String deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        byte value = deserializer.readByte();
+    public String deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        byte value = source.readByte();
         for (int i = 0; i < values.length; i++) {
             if (values[i].equals(value)) {
                 return names[i];

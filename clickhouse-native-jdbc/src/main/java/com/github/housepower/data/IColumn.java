@@ -35,10 +35,10 @@ public interface IColumn {
     /**
      * Flush to socket output stream
      *
-     * @param serializer is serializer wrapper of tcp socket
-     * @param now        means we should flush all the buffer to serializer now
+     * @param sink is sink wrapper of tcp socket
+     * @param now        means we should flush all the buffer to sink now
      */
-    void flushToSerializer(CompositeSink serializer, boolean now) throws IOException, SQLException;
+    void flush(CompositeSink sink, boolean now) throws IOException, SQLException;
 
     void clear();
 

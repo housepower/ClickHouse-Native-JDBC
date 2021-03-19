@@ -46,20 +46,20 @@ public class ColumnTuple extends AbstractColumn {
     }
 
     @Override
-    public void flushToSerializer(CompositeSink serializer, boolean now) throws SQLException, IOException {
+    public void flush(CompositeSink sink, boolean now) throws SQLException, IOException {
         if (isExported()) {
-            serializer.writeUTF8Binary(name);
-            serializer.writeUTF8Binary(type.name());
+            sink.writeUTF8Binary(name);
+            sink.writeUTF8Binary(type.name());
         }
 
-        // we should to flush all the nested data to serializer
+        // we should to flush all the nested data
         // because they are using separate buffers.
-        for (IColumn data : columnDataArray) {
-            data.flushToSerializer(serializer, true);
+        for (IColumn column : columnDataArray) {
+            column.flush(sink, true);
         }
 
         if (now) {
-            buffer.writeTo(serializer);
+            buffer.writeTo(sink);
         }
     }
 

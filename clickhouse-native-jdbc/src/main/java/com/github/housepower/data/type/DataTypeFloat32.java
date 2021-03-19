@@ -56,13 +56,13 @@ public class DataTypeFloat32 implements IDataType<Float, Float> {
     }
 
     @Override
-    public void serializeBinary(Float data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeFloatLE(data);
+    public void serializeBinary(Float data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeFloatLE(data);
     }
 
     @Override
-    public Float deserializeBinary(CompositeSource deserializer) throws IOException {
-        return deserializer.readFloatLE();
+    public Float deserializeBinary(CompositeSource source) throws IOException {
+        return source.readFloatLE();
     }
 
     @Override

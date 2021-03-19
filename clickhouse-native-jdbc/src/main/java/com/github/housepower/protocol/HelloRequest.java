@@ -42,13 +42,13 @@ public class HelloRequest implements Request {
     }
 
     @Override
-    public void writeImpl(CompositeSink serializer) throws IOException {
-        serializer.writeUTF8Binary(ClickHouseDefines.NAME + " " + clientName);
-        serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
-        serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
-        serializer.writeVarInt(clientReversion);
-        serializer.writeUTF8Binary(defaultDatabase);
-        serializer.writeUTF8Binary(clientUsername);
-        serializer.writeUTF8Binary(clientPassword);
+    public void writeImpl(CompositeSink sink) throws IOException {
+        sink.writeUTF8Binary(ClickHouseDefines.NAME + " " + clientName);
+        sink.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
+        sink.writeVarInt(ClickHouseDefines.MINOR_VERSION);
+        sink.writeVarInt(clientReversion);
+        sink.writeUTF8Binary(defaultDatabase);
+        sink.writeUTF8Binary(clientUsername);
+        sink.writeUTF8Binary(clientPassword);
     }
 }

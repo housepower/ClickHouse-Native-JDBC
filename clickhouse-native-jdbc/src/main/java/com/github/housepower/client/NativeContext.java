@@ -62,21 +62,21 @@ public class NativeContext {
             this.initialAddress = initialAddress;
         }
 
-        public void writeTo(CompositeSink serializer) throws IOException {
-            serializer.writeVarInt(ClientContext.INITIAL_QUERY);
-            serializer.writeUTF8Binary("");
-            serializer.writeUTF8Binary("");
-            serializer.writeUTF8Binary(initialAddress);
+        public void writeTo(CompositeSink sink) throws IOException {
+            sink.writeVarInt(ClientContext.INITIAL_QUERY);
+            sink.writeUTF8Binary("");
+            sink.writeUTF8Binary("");
+            sink.writeUTF8Binary(initialAddress);
 
             // for TCP kind
-            serializer.writeVarInt(TCP_KINE);
-            serializer.writeUTF8Binary("");
-            serializer.writeUTF8Binary(clientHostname);
-            serializer.writeUTF8Binary(clientName);
-            serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
-            serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);
-            serializer.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
-            serializer.writeUTF8Binary("");
+            sink.writeVarInt(TCP_KINE);
+            sink.writeUTF8Binary("");
+            sink.writeUTF8Binary(clientHostname);
+            sink.writeUTF8Binary(clientName);
+            sink.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
+            sink.writeVarInt(ClickHouseDefines.MINOR_VERSION);
+            sink.writeVarInt(ClickHouseDefines.CLIENT_REVISION);
+            sink.writeUTF8Binary("");
         }
     }
 

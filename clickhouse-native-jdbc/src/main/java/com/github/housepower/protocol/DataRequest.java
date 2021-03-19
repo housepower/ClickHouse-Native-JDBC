@@ -42,11 +42,11 @@ public class DataRequest implements Request {
     }
 
     @Override
-    public void writeImpl(CompositeSink serializer) throws IOException, SQLException {
-        serializer.writeUTF8Binary(name);
+    public void writeImpl(CompositeSink sink) throws IOException, SQLException {
+        sink.writeUTF8Binary(name);
 
-        serializer.maybeEnableCompressed();
-        block.writeTo(serializer);
-        serializer.maybeDisableCompressed();
+        sink.maybeEnableCompressed();
+        block.writeTo(sink);
+        sink.maybeDisableCompressed();
     }
 }

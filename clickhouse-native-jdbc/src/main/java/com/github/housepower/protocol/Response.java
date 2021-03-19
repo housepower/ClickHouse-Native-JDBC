@@ -25,26 +25,26 @@ public interface Response {
 
     ProtoType type();
 
-    static Response readFrom(CompositeSource deserializer, NativeContext.ServerContext info) throws IOException, SQLException {
-        switch ((int) deserializer.readVarInt()) {
+    static Response readFrom(CompositeSource source, NativeContext.ServerContext info) throws IOException, SQLException {
+        switch ((int) source.readVarInt()) {
             case 0:
-                return HelloResponse.readFrom(deserializer);
+                return HelloResponse.readFrom(source);
             case 1:
-                return DataResponse.readFrom(deserializer, info);
+                return DataResponse.readFrom(source, info);
             case 2:
-                throw ExceptionResponse.readExceptionFrom(deserializer);
+                throw ExceptionResponse.readExceptionFrom(source);
             case 3:
-                return ProgressResponse.readFrom(deserializer);
+                return ProgressResponse.readFrom(source);
             case 4:
-                return PongResponse.readFrom(deserializer);
+                return PongResponse.readFrom(source);
             case 5:
-                return EOFStreamResponse.readFrom(deserializer);
+                return EOFStreamResponse.readFrom(source);
             case 6:
-                return ProfileInfoResponse.readFrom(deserializer);
+                return ProfileInfoResponse.readFrom(source);
             case 7:
-                return TotalsResponse.readFrom(deserializer, info);
+                return TotalsResponse.readFrom(source, info);
             case 8:
-                return ExtremesResponse.readFrom(deserializer, info);
+                return ExtremesResponse.readFrom(source, info);
             case 9:
                 throw new NotImplementedException("RESPONSE_TABLES_STATUS_RESPONSE");
             default:
