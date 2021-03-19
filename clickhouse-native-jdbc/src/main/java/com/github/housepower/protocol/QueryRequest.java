@@ -66,23 +66,23 @@ public class QueryRequest implements Request {
     }
 
     @Override
-    public void writeImpl(CompositeSink serializer) throws IOException, SQLException {
-        serializer.writeUTF8Binary(queryId);
-        clientContext.writeTo(serializer);
+    public void writeImpl(CompositeSink sink) throws IOException, SQLException {
+        sink.writeUTF8Binary(queryId);
+        clientContext.writeTo(sink);
 
         for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
-            serializer.writeUTF8Binary(entry.getKey().name());
+            sink.writeUTF8Binary(entry.getKey().name());
             @SuppressWarnings("rawtypes")
             SettingType type = entry.getKey().type();
             //noinspection unchecked
-            type.serializeSetting(serializer, entry.getValue());
+            type.serializeSetting(sink, entry.getValue());
         }
-        serializer.writeUTF8Binary("");
-        serializer.writeVarInt(stage);
-        serializer.writeBoolean(compression);
-        serializer.writeUTF8Binary(queryString);
+        sink.writeUTF8Binary("");
+        sink.writeVarInt(stage);
+        sink.writeBoolean(compression);
+        sink.writeUTF8Binary(queryString);
         // empty data to server
-        DataRequest.EMPTY.writeTo(serializer);
+        DataRequest.EMPTY.writeTo(sink);
 
     }
 }

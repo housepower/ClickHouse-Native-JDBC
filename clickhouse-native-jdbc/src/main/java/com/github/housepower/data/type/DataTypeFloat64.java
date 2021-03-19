@@ -56,13 +56,13 @@ public class DataTypeFloat64 implements IDataType<Double, Double> {
     }
 
     @Override
-    public void serializeBinary(Double data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeDoubleLE(data);
+    public void serializeBinary(Double data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeDoubleLE(data);
     }
 
     @Override
-    public Double deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        return deserializer.readDoubleLE();
+    public Double deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        return source.readDoubleLE();
     }
 
     @Override

@@ -20,8 +20,8 @@ import java.io.IOException;
 
 public class ProgressResponse implements Response {
 
-    public static ProgressResponse readFrom(CompositeSource deserializer) throws IOException {
-        return new ProgressResponse(deserializer.readVarInt(), deserializer.readVarInt(), deserializer.readVarInt());
+    public static ProgressResponse readFrom(CompositeSource source) throws IOException {
+        return new ProgressResponse(source.readVarInt(), source.readVarInt(), source.readVarInt());
     }
 
     private final long newRows;

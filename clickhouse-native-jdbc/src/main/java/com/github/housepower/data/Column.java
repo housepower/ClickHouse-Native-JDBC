@@ -28,18 +28,18 @@ public class Column extends AbstractColumn {
 
     @Override
     public void write(Object object) throws IOException, SQLException {
-        type().serializeBinary(object, buffer.column);
+        type().serializeBinary(object, buffer.columnSink);
     }
 
     @Override
-    public void flushToSerializer(CompositeSink serializer, boolean now) throws IOException, SQLException {
+    public void flush(CompositeSink sink, boolean now) throws IOException {
         if (isExported()) {
-            serializer.writeUTF8Binary(name);
-            serializer.writeUTF8Binary(type.name());
+            sink.writeUTF8Binary(name);
+            sink.writeUTF8Binary(type.name());
         }
 
         if (now) {
-            buffer.writeTo(serializer);
+            buffer.writeTo(sink);
         }
     }
 }

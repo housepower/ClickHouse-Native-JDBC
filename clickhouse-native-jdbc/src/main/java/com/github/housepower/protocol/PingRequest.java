@@ -28,7 +28,7 @@ public class PingRequest implements Request {
     }
 
     @Override
-    public void writeImpl(CompositeSink serializer) throws IOException {
+    public void writeImpl(CompositeSink sink) throws IOException {
         // Nothing
     }
 }

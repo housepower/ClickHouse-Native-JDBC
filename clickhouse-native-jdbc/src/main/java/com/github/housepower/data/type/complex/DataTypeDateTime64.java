@@ -136,16 +136,16 @@ public class DataTypeDateTime64 implements IDataType<ZonedDateTime, Timestamp> {
     }
 
     @Override
-    public void serializeBinary(ZonedDateTime data, CompositeSink serializer) throws IOException {
+    public void serializeBinary(ZonedDateTime data, CompositeSink sink) throws IOException {
         long epochSeconds = DateTimeUtil.toEpochSecond(data);
         int nanos = data.getNano();
         long value = (epochSeconds * NANOS_IN_SECOND + nanos) / POW_10[MAX_SCALA - scale];
-        serializer.writeLongLE(value);
+        sink.writeLongLE(value);
     }
 
     @Override
-    public ZonedDateTime deserializeBinary(CompositeSource deserializer) throws IOException {
-        long value = deserializer.readLongLE() * POW_10[MAX_SCALA - scale];
+    public ZonedDateTime deserializeBinary(CompositeSource source) throws IOException {
+        long value = source.readLongLE() * POW_10[MAX_SCALA - scale];
         long epochSeconds = value / NANOS_IN_SECOND;
         int nanos = (int) (value % NANOS_IN_SECOND);
 

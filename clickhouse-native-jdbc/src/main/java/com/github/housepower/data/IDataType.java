@@ -63,23 +63,23 @@ public interface IDataType<CK, JDBC> {
         return value.toString();
     }
 
-    void serializeBinary(CK data, CompositeSink serializer) throws SQLException, IOException;
+    void serializeBinary(CK data, CompositeSink sink) throws SQLException, IOException;
 
-    default void serializeBinaryBulk(CK[] data, CompositeSink serializer) throws SQLException, IOException {
+    default void serializeBinaryBulk(CK[] data, CompositeSink sink) throws SQLException, IOException {
         for (CK d : data) {
-            serializeBinary(d, serializer);
+            serializeBinary(d, sink);
         }
     }
 
     CK deserializeText(SQLLexer lexer) throws SQLException;
 
-    CK deserializeBinary(CompositeSource deserializer) throws SQLException, IOException;
+    CK deserializeBinary(CompositeSource source) throws SQLException, IOException;
 
     // fuck type erasure
-    default Object[] deserializeBinaryBulk(int rows, CompositeSource deserializer) throws SQLException, IOException {
+    default Object[] deserializeBinaryBulk(int rows, CompositeSource source) throws SQLException, IOException {
         Object[] data = new Object[rows];
         for (int row = 0; row < rows; row++) {
-            data[row] = this.deserializeBinary(deserializer);
+            data[row] = this.deserializeBinary(source);
         }
         return data;
     }

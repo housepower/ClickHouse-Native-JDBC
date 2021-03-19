@@ -22,25 +22,25 @@ import java.time.ZoneId;
 
 public class HelloResponse implements Response {
 
-    public static HelloResponse readFrom(CompositeSource deserializer) throws IOException {
-        String name = deserializer.readUTF8Binary();
-        long majorVersion = deserializer.readVarInt();
-        long minorVersion = deserializer.readVarInt();
-        long serverReversion = deserializer.readVarInt();
-        String serverTimeZone = getTimeZone(deserializer, serverReversion);
-        String serverDisplayName = getDisplayName(deserializer, serverReversion);
+    public static HelloResponse readFrom(CompositeSource source) throws IOException {
+        String name = source.readUTF8Binary();
+        long majorVersion = source.readVarInt();
+        long minorVersion = source.readVarInt();
+        long serverReversion = source.readVarInt();
+        String serverTimeZone = getTimeZone(source, serverReversion);
+        String serverDisplayName = getDisplayName(source, serverReversion);
 
         return new HelloResponse(name, majorVersion, minorVersion, serverReversion, serverTimeZone, serverDisplayName);
     }
 
-    private static String getTimeZone(CompositeSource deserializer, long serverReversion) throws IOException {
+    private static String getTimeZone(CompositeSource source, long serverReversion) {
         return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_TIMEZONE ?
-                deserializer.readUTF8Binary() : ZoneId.systemDefault().getId();
+                source.readUTF8Binary() : ZoneId.systemDefault().getId();
     }
 
-    private static String getDisplayName(CompositeSource deserializer, long serverReversion) throws IOException {
+    private static String getDisplayName(CompositeSource source, long serverReversion) {
         return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_DISPLAY_NAME ?
-                deserializer.readUTF8Binary() : "localhost";
+                source.readUTF8Binary() : "localhost";
     }
 
     private final long majorVersion;

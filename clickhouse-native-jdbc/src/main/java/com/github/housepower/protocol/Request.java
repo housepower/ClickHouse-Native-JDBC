@@ -23,11 +23,11 @@ public interface Request {
 
     ProtoType type();
 
-    void writeImpl(CompositeSink serializer) throws IOException, SQLException;
+    void writeImpl(CompositeSink sink) throws IOException, SQLException;
 
-    default void writeTo(CompositeSink serializer) throws IOException, SQLException {
-        serializer.writeVarInt(type().id());
-        this.writeImpl(serializer);
+    default void writeTo(CompositeSink source) throws IOException, SQLException {
+        source.writeVarInt(type().id());
+        this.writeImpl(source);
     }
 
     enum ProtoType {

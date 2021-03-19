@@ -93,25 +93,25 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public void serializeBinary(CharSequence data, CompositeSink serializer) throws SQLException, IOException {
+    public void serializeBinary(CharSequence data, CompositeSink sink) throws SQLException, IOException {
         int writeLen;
         int paddingLen;
         if (data instanceof AsciiString) {
             writeLen = data.length();
             checkWriteLength(writeLen);
-            serializer.writeCharSequence(data, StandardCharsets.US_ASCII);
+            sink.writeCharSequence(data, StandardCharsets.US_ASCII);
         } else if (charset.equals(StandardCharsets.UTF_8)) {
             writeLen = ByteBufUtil.utf8Bytes(data);
             checkWriteLength(writeLen);
-            serializer.writeCharSequence(data, charset);
+            sink.writeCharSequence(data, charset);
         } else {
             byte[] bytes = data.toString().getBytes(charset);
             writeLen = bytes.length;
             checkWriteLength(writeLen);
-            serializer.writeBytes(Unpooled.wrappedBuffer(bytes));
+            sink.writeBytes(Unpooled.wrappedBuffer(bytes));
         }
         paddingLen = n - writeLen;
-        serializer.writeZero(paddingLen);
+        sink.writeZero(paddingLen);
     }
 
     private void checkWriteLength(int writeLen) {
@@ -120,8 +120,8 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public CharSequence deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        return deserializer.readCharSequence(n, charset);
+    public CharSequence deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        return source.readCharSequence(n, charset);
     }
 
     @Override

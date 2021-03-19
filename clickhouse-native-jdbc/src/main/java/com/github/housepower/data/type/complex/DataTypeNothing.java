@@ -59,11 +59,11 @@ public class DataTypeNothing implements IDataType<Object, Object> {
     }
 
     @Override
-    public void serializeBinary(Object data, CompositeSink serializer) throws SQLException, IOException {
+    public void serializeBinary(Object data, CompositeSink sink) throws SQLException, IOException {
     }
 
     @Override
-    public Object deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
+    public Object deserializeBinary(CompositeSource source) throws SQLException, IOException {
         return new Object();
     }
 

@@ -69,14 +69,14 @@ public class DataTypeDate implements IDataType<LocalDate, Date> {
     }
 
     @Override
-    public void serializeBinary(LocalDate data, CompositeSink serializer) throws SQLException, IOException {
+    public void serializeBinary(LocalDate data, CompositeSink sink) throws SQLException, IOException {
         long epochDay = data.toEpochDay();
-        serializer.writeShortLE((short) epochDay);
+        sink.writeShortLE((short) epochDay);
     }
 
     @Override
-    public LocalDate deserializeBinary(CompositeSource deserializer) throws IOException {
-        short epochDay = deserializer.readShortLE();
+    public LocalDate deserializeBinary(CompositeSource source) throws IOException {
+        short epochDay = source.readShortLE();
         return LocalDate.ofEpochDay(epochDay);
     }
 

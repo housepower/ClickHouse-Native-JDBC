@@ -44,13 +44,13 @@ public class DataTypeUInt16 implements BaseDataTypeInt16<Integer, Integer> {
     }
 
     @Override
-    public void serializeBinary(Integer data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeShortLE(data.shortValue());
+    public void serializeBinary(Integer data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeShortLE(data.shortValue());
     }
 
     @Override
-    public Integer deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        short s = deserializer.readShortLE();
+    public Integer deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        short s = source.readShortLE();
         return s & 0xffff;
     }
 

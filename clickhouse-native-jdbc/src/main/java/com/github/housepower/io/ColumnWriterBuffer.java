@@ -22,20 +22,20 @@ public class ColumnWriterBuffer implements AutoCloseable {
 
     private final ByteBufSink columnWriter;
 
-    public CompositeSink column;
+    public CompositeSink columnSink;
 
     public ColumnWriterBuffer() {
         this.columnWriter = new ByteBufSink();
-        this.column = new CompositeSink(columnWriter, false, null);
+        this.columnSink = new CompositeSink(columnWriter, false, null);
     }
 
-    public void writeTo(CompositeSink serializer) throws IOException {
+    public void writeTo(CompositeSink sink) throws IOException {
         ByteBuf buf = columnWriter.retain();
-        serializer.writeBytes(buf);
+        sink.writeBytes(buf);
     }
 
     @Override
     public void close() {
-        column.close();
+        columnSink.close();
     }
 }

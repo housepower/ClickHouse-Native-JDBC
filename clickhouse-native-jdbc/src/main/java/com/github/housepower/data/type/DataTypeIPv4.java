@@ -56,13 +56,13 @@ public class DataTypeIPv4 implements IDataType<Long, Long> {
     }
 
     @Override
-    public void serializeBinary(Long data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeIntLE(data.intValue());
+    public void serializeBinary(Long data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeIntLE(data.intValue());
     }
 
     @Override
-    public Long deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        return deserializer.readIntLE() & 0xffffffffL;
+    public Long deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        return source.readIntLE() & 0xffffffffL;
     }
 
     @Override

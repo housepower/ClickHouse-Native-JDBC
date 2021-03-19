@@ -47,23 +47,23 @@ public class ColumnArray extends AbstractColumn {
     }
 
     @Override
-    public void flushToSerializer(CompositeSink serializer, boolean immediate) throws SQLException, IOException {
+    public void flush(CompositeSink sink, boolean immediate) throws SQLException, IOException {
         if (isExported()) {
-            serializer.writeUTF8Binary(name);
-            serializer.writeUTF8Binary(type.name());
+            sink.writeUTF8Binary(name);
+            sink.writeUTF8Binary(type.name());
         }
 
-        flushOffsets(serializer);
-        data.flushToSerializer(serializer, false);
+        flushOffsets(sink);
+        data.flush(sink, false);
 
         if (immediate) {
-            buffer.writeTo(serializer);
+            buffer.writeTo(sink);
         }
     }
 
-    public void flushOffsets(CompositeSink serializer) throws IOException {
+    public void flushOffsets(CompositeSink sink) {
         for (long offsetList : offsets) {
-            serializer.writeLongLE(offsetList);
+            sink.writeLongLE(offsetList);
         }
     }
 

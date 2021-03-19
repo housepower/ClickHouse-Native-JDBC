@@ -44,13 +44,13 @@ public class DataTypeUInt8 implements BaseDataTypeInt8<Short, Short> {
     }
 
     @Override
-    public void serializeBinary(Short data, CompositeSink serializer) throws SQLException, IOException {
-        serializer.writeByte(data.byteValue());
+    public void serializeBinary(Short data, CompositeSink sink) throws SQLException, IOException {
+        sink.writeByte(data.byteValue());
     }
 
     @Override
-    public Short deserializeBinary(CompositeSource deserializer) throws IOException {
-        byte b = deserializer.readByte();
+    public Short deserializeBinary(CompositeSource source) throws IOException {
+        byte b = source.readByte();
         return (short) (b & 0xff);
     }
 

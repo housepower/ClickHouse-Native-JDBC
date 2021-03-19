@@ -110,36 +110,36 @@ public class DataTypeArray implements IDataType<ClickHouseArray, Array> {
     }
 
     @Override
-    public void serializeBinary(ClickHouseArray data, CompositeSink serializer) throws SQLException, IOException {
+    public void serializeBinary(ClickHouseArray data, CompositeSink sink) throws SQLException, IOException {
         for (Object f : data.getArray()) {
-            getElemDataType().serializeBinary(f, serializer);
+            getElemDataType().serializeBinary(f, sink);
         }
     }
 
 
     @Override
-    public void serializeBinaryBulk(ClickHouseArray[] data, CompositeSink serializer) throws SQLException, IOException {
-        offsetIDataType.serializeBinary((long) data.length, serializer);
-        getElemDataType().serializeBinaryBulk(data, serializer);
+    public void serializeBinaryBulk(ClickHouseArray[] data, CompositeSink sink) throws SQLException, IOException {
+        offsetIDataType.serializeBinary((long) data.length, sink);
+        getElemDataType().serializeBinaryBulk(data, sink);
     }
 
     @Override
-    public ClickHouseArray deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
-        Long offset = offsetIDataType.deserializeBinary(deserializer);
-        Object[] data = getElemDataType().deserializeBinaryBulk(offset.intValue(), deserializer);
+    public ClickHouseArray deserializeBinary(CompositeSource source) throws SQLException, IOException {
+        Long offset = offsetIDataType.deserializeBinary(source);
+        Object[] data = getElemDataType().deserializeBinaryBulk(offset.intValue(), source);
         return new ClickHouseArray(elemDataType, data);
     }
 
     @Override
-    public ClickHouseArray[] deserializeBinaryBulk(int rows, CompositeSource deserializer) throws IOException, SQLException {
+    public ClickHouseArray[] deserializeBinaryBulk(int rows, CompositeSource source) throws IOException, SQLException {
         ClickHouseArray[] arrays = new ClickHouseArray[rows];
         if (rows == 0) {
             return arrays;
         }
 
-        int[] offsets = Arrays.stream(offsetIDataType.deserializeBinaryBulk(rows, deserializer)).mapToInt(value -> ((Long) value).intValue()).toArray();
+        int[] offsets = Arrays.stream(offsetIDataType.deserializeBinaryBulk(rows, source)).mapToInt(value -> ((Long) value).intValue()).toArray();
         ClickHouseArray res = new ClickHouseArray(elemDataType,
-                elemDataType.deserializeBinaryBulk(offsets[rows - 1], deserializer));
+                elemDataType.deserializeBinaryBulk(offsets[rows - 1], source));
 
         for (int row = 0, lastOffset = 0; row < rows; row++) {
             int offset = offsets[row];
