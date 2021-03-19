@@ -14,23 +14,22 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.serde.BinarySerializer;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
 public class ColumnWriterBuffer implements AutoCloseable {
 
-    private final ByteBufBinaryWriter columnWriter;
+    private final ByteBufSink columnWriter;
 
-    public BinarySerializer column;
+    public CompositeSink column;
 
     public ColumnWriterBuffer() {
-        this.columnWriter = new ByteBufBinaryWriter();
-        this.column = new BinarySerializer(columnWriter, false, null);
+        this.columnWriter = new ByteBufSink();
+        this.column = new CompositeSink(columnWriter, false, null);
     }
 
-    public void writeTo(BinarySerializer serializer) throws IOException {
+    public void writeTo(CompositeSink serializer) throws IOException {
         ByteBuf buf = columnWriter.retain();
         serializer.writeBytes(buf);
     }

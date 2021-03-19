@@ -14,8 +14,6 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.ByteBufHelper;
-import com.github.housepower.misc.CodecHelper;
 import com.github.housepower.misc.NettyUtil;
 import io.airlift.compress.Decompressor;
 import io.airlift.compress.lz4.Lz4Decompressor;
@@ -32,15 +30,15 @@ import java.nio.charset.StandardCharsets;
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-public class DecompressBinaryReader implements BinaryReader, ByteBufHelper, CodecHelper {
+public class DecompressSource implements ISource, ByteBufHelper, CodecHelper {
 
-    private final BinaryReader compressedReader;
+    private final ISource compressedReader;
     private final ByteBuf decompressedBuf;
 
     private final Decompressor lz4Decompressor = new Lz4Decompressor();
     private final Decompressor zstdDecompressor = new ZstdDecompressor();
 
-    public DecompressBinaryReader(BinaryReader reader) {
+    public DecompressSource(ISource reader) {
         this.compressedReader = reader;
         this.decompressedBuf = NettyUtil.alloc().buffer(); // TODO set a init size
     }

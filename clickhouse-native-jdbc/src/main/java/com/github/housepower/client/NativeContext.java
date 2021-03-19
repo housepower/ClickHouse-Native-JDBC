@@ -14,7 +14,7 @@
 
 package com.github.housepower.client;
 
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSink;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.ClickHouseDefines;
 
@@ -62,7 +62,7 @@ public class NativeContext {
             this.initialAddress = initialAddress;
         }
 
-        public void writeTo(BinarySerializer serializer) throws IOException {
+        public void writeTo(CompositeSink serializer) throws IOException {
             serializer.writeVarInt(ClientContext.INITIAL_QUERY);
             serializer.writeUTF8Binary("");
             serializer.writeUTF8Binary("");

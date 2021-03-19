@@ -15,7 +15,7 @@
 package com.github.housepower.data;
 
 import com.github.housepower.io.ColumnWriterBuffer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -38,7 +38,7 @@ public interface IColumn {
      * @param serializer is serializer wrapper of tcp socket
      * @param now        means we should flush all the buffer to serializer now
      */
-    void flushToSerializer(BinarySerializer serializer, boolean now) throws IOException, SQLException;
+    void flushToSerializer(CompositeSink serializer, boolean now) throws IOException, SQLException;
 
     void clear();
 

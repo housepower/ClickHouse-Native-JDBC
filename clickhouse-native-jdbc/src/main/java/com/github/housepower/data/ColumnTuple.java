@@ -17,7 +17,7 @@ package com.github.housepower.data;
 import com.github.housepower.io.ColumnWriterBuffer;
 import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.data.type.complex.DataTypeTuple;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -46,7 +46,7 @@ public class ColumnTuple extends AbstractColumn {
     }
 
     @Override
-    public void flushToSerializer(BinarySerializer serializer, boolean now) throws SQLException, IOException {
+    public void flushToSerializer(CompositeSink serializer, boolean now) throws SQLException, IOException {
         if (isExported()) {
             serializer.writeUTF8Binary(name);
             serializer.writeUTF8Binary(type.name());

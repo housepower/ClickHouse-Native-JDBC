@@ -17,8 +17,8 @@ package com.github.housepower.data.type.complex;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -103,7 +103,7 @@ public class DataTypeEnum16 implements IDataType<String, String> {
     }
 
     @Override
-    public void serializeBinary(String data, BinarySerializer serializer) throws SQLException, IOException {
+    public void serializeBinary(String data, CompositeSink serializer) throws SQLException, IOException {
         for (int i = 0; i < names.length; i++) {
             if (data.equals(names[i])) {
                 serializer.writeShortLE(values[i]);
@@ -123,7 +123,7 @@ public class DataTypeEnum16 implements IDataType<String, String> {
     }
 
     @Override
-    public String deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public String deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
         short value = deserializer.readShortLE();
         for (int i = 0; i < values.length; i++) {
             if (values[i].equals(value)) {

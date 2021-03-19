@@ -14,7 +14,7 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinaryDeserializer;
+import com.github.housepower.io.CompositeSource;
 import com.github.housepower.settings.ClickHouseDefines;
 
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.time.ZoneId;
 
 public class HelloResponse implements Response {
 
-    public static HelloResponse readFrom(BinaryDeserializer deserializer) throws IOException {
+    public static HelloResponse readFrom(CompositeSource deserializer) throws IOException {
         String name = deserializer.readUTF8Binary();
         long majorVersion = deserializer.readVarInt();
         long minorVersion = deserializer.readVarInt();
@@ -33,12 +33,12 @@ public class HelloResponse implements Response {
         return new HelloResponse(name, majorVersion, minorVersion, serverReversion, serverTimeZone, serverDisplayName);
     }
 
-    private static String getTimeZone(BinaryDeserializer deserializer, long serverReversion) throws IOException {
+    private static String getTimeZone(CompositeSource deserializer, long serverReversion) throws IOException {
         return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_TIMEZONE ?
                 deserializer.readUTF8Binary() : ZoneId.systemDefault().getId();
     }
 
-    private static String getDisplayName(BinaryDeserializer deserializer, long serverReversion) throws IOException {
+    private static String getDisplayName(CompositeSource deserializer, long serverReversion) throws IOException {
         return serverReversion >= ClickHouseDefines.DBMS_MIN_REVISION_WITH_SERVER_DISPLAY_NAME ?
                 deserializer.readUTF8Binary() : "localhost";
     }

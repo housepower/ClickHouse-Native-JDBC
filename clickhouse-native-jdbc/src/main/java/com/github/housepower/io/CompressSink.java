@@ -14,9 +14,7 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.ClickHouseCityHash;
-import com.github.housepower.misc.CodecHelper;
 import com.github.housepower.misc.NettyUtil;
 import io.airlift.compress.Compressor;
 import io.netty.buffer.ByteBuf;
@@ -29,14 +27,14 @@ import java.nio.charset.Charset;
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-public class CompressBinaryWriter implements BinaryWriter, CodecHelper, ByteBufHelper {
+public class CompressSink implements ISink, CodecHelper, ByteBufHelper {
 
     private final int capacity;
     private final ByteBuf buf;
-    private final BinaryWriter writer;
+    private final ISink writer;
     private final Compressor compressor;
 
-    public CompressBinaryWriter(int capacity, BinaryWriter writer, Compressor compressor) {
+    public CompressSink(int capacity, ISink writer, Compressor compressor) {
         this.capacity = capacity;
         this.buf = NettyUtil.alloc().buffer();
         this.writer = writer;

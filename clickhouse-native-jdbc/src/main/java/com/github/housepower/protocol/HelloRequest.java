@@ -14,7 +14,7 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSink;
 import com.github.housepower.settings.ClickHouseDefines;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class HelloRequest implements Request {
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
+    public void writeImpl(CompositeSink serializer) throws IOException {
         serializer.writeUTF8Binary(ClickHouseDefines.NAME + " " + clientName);
         serializer.writeVarInt(ClickHouseDefines.MAJOR_VERSION);
         serializer.writeVarInt(ClickHouseDefines.MINOR_VERSION);

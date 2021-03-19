@@ -14,7 +14,6 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.NettyUtil;
 import com.github.housepower.settings.ClickHouseDefines;
 import io.netty.buffer.ByteBuf;
@@ -28,16 +27,16 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class SocketBinaryReader implements BinaryReader, ByteBufHelper {
+public class SocketSource implements ISource, ByteBufHelper {
 
     private final InputStream in;
     private final ByteBuf buf;
 
-    public SocketBinaryReader(Socket socket) throws IOException {
+    public SocketSource(Socket socket) throws IOException {
         this(socket.getInputStream(), ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
     }
 
-    SocketBinaryReader(InputStream in, int capacity) {
+    SocketSource(InputStream in, int capacity) {
         this.in = in;
         this.buf = NettyUtil.alloc().buffer(capacity, capacity);
     }

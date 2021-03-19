@@ -18,34 +18,39 @@ import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.Charset;
 
-public interface BinaryReader extends AutoCloseable {
+public interface ISink extends AutoCloseable {
 
-    void skipBytes(int len);
+    void writeZero(int len);
 
-    boolean readBoolean();
+    void writeBoolean(boolean b);
 
-    byte readByte();
+    void writeByte(byte b);
 
-    short readShortLE();
+    void writeShortLE(short s);
 
-    int readIntLE();
+    void writeIntLE(int i);
 
-    long readLongLE();
+    void writeLongLE(long l);
 
-    long readVarInt();
+    void writeVarInt(long v);
 
-    float readFloatLE();
+    void writeFloatLE(float f);
 
-    double readDoubleLE();
+    void writeDoubleLE(double d);
 
-    ByteBuf readBytes(int maxLen);
+    void writeBytes(ByteBuf bytes);
 
-    CharSequence readCharSequence(int len, Charset charset);
+    void writeCharSequence(CharSequence seq, Charset charset);
 
-    ByteBuf readBinary();
+    void writeCharSequenceBinary(CharSequence seq, Charset charset);
 
-    String readUTF8Binary();
+    void writeUTF8Binary(CharSequence utf8);
 
+    void writeBinary(ByteBuf bytes);
+
+    void flush(boolean force);
+
+    // explicitly overwrite to suppress Exception
     @Override
     void close();
 }

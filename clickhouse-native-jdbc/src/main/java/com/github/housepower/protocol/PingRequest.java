@@ -14,7 +14,7 @@
 
 package com.github.housepower.protocol;
 
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 
@@ -28,7 +28,7 @@ public class PingRequest implements Request {
     }
 
     @Override
-    public void writeImpl(BinarySerializer serializer) throws IOException {
+    public void writeImpl(CompositeSink serializer) throws IOException {
         // Nothing
     }
 }

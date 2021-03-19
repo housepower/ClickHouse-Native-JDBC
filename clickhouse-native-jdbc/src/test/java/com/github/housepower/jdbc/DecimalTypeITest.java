@@ -14,7 +14,7 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.misc.CodecHelper;
+import com.github.housepower.io.CodecHelper;
 import com.google.common.base.Strings;
 import org.junit.jupiter.api.Test;
 

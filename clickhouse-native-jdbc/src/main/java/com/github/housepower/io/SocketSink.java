@@ -14,7 +14,6 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.ByteBufHelper;
 import com.github.housepower.misc.NettyUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
@@ -25,16 +24,16 @@ import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.nio.charset.Charset;
 
-public class SocketBinaryWriter implements BinaryWriter, ByteBufHelper {
+public class SocketSink implements ISink, ByteBufHelper {
 
     private final OutputStream out;
     private final ByteBuf buf;
 
-    public SocketBinaryWriter(Socket socket) throws IOException {
+    public SocketSink(Socket socket) throws IOException {
         this(socket.getOutputStream());
     }
 
-    SocketBinaryWriter(OutputStream output) {
+    SocketSink(OutputStream output) {
         this.out = output;
         this.buf = NettyUtil.alloc().buffer();
     }

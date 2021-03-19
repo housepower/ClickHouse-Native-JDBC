@@ -23,12 +23,12 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SocketBinaryReaderTest {
+public class SocketSourceTest {
 
     @Test
     public void successfullyReadTwoIntValue() throws IOException {
         try (InputStream mockedInputStream = new ByteArrayInputStream(new byte[]{1, 0, 0, 0, 2, 0, 3, 4});
-             SocketBinaryReader buffedReader = new SocketBinaryReader(mockedInputStream, 6)) {
+             SocketSource buffedReader = new SocketSource(mockedInputStream, 6)) {
             assertEquals(buffedReader.readByte(), 1);
             ByteBuf ret = buffedReader.readBytes(5);
             assertEquals(ret.readByte(), 0);

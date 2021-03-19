@@ -26,7 +26,7 @@ import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DecompressBinaryReaderTest {
+public class DecompressSourceTest {
 
     @Test
     public void successfullyReadCompressedData() {
@@ -34,7 +34,7 @@ public class DecompressBinaryReaderTest {
                 compressedData(new byte[]{1, 2, 3}),
                 compressedData(new byte[]{4, 5, 6, 7})
         );
-        DecompressBinaryReader compressedReader = new DecompressBinaryReader(new ByteBufBinaryReader(buf));
+        DecompressSource compressedReader = new DecompressSource(new ByteBufSource(buf));
 
         assertEquals(compressedReader.readByte(), 1);
 

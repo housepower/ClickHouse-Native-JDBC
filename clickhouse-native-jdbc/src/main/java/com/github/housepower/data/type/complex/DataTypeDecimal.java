@@ -15,11 +15,11 @@
 package com.github.housepower.data.type.complex;
 
 import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.CodecHelper;
+import com.github.housepower.io.CodecHelper;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -112,7 +112,7 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
     }
 
     @Override
-    public void serializeBinary(BigDecimal data, BinarySerializer serializer) throws IOException {
+    public void serializeBinary(BigDecimal data, CompositeSink serializer) throws IOException {
         BigDecimal targetValue = data.multiply(scaleFactor);
         switch (this.nobits) {
             case 32: {
@@ -145,7 +145,7 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
     }
 
     @Override
-    public BigDecimal deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public BigDecimal deserializeBinary(CompositeSource deserializer) throws SQLException, IOException {
         BigDecimal value;
         switch (this.nobits) {
             case 32: {

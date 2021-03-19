@@ -18,8 +18,8 @@ import com.github.housepower.io.ColumnWriterBuffer;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.serde.BinaryDeserializer;
-import com.github.housepower.serde.BinarySerializer;
+import com.github.housepower.io.CompositeSource;
+import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -28,7 +28,7 @@ import java.util.Map;
 
 public class Block {
 
-    public static Block readFrom(BinaryDeserializer deserializer,
+    public static Block readFrom(CompositeSource deserializer,
                                  NativeContext.ServerContext serverContext) throws IOException, SQLException {
         BlockSettings info = BlockSettings.readFrom(deserializer);
 
@@ -113,7 +113,7 @@ public class Block {
         }
     }
 
-    public void writeTo(BinarySerializer serializer) throws IOException, SQLException {
+    public void writeTo(CompositeSink serializer) throws IOException, SQLException {
         settings.writeTo(serializer);
 
         serializer.writeVarInt(columns.length);
