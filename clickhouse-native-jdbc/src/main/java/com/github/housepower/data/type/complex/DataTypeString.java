@@ -15,9 +15,9 @@
 package com.github.housepower.data.type.complex;
 
 import com.github.housepower.data.IDataType;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.io.CompositeSource;
-import com.github.housepower.io.CompositeSink;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class DataTypeString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public void serializeBinary(CharSequence data, CompositeSink sink) throws SQLException, IOException {
+    public void serializeBinary(CharSequence data, ISink sink) throws SQLException, IOException {
         sink.writeCharSequenceBinary(data, charset);
     }
 
@@ -80,7 +80,7 @@ public class DataTypeString implements IDataType<CharSequence, String> {
      * for getBytes(idx) method, we encode the String again
      */
     @Override
-    public CharSequence deserializeBinary(CompositeSource source) throws SQLException, IOException {
+    public CharSequence deserializeBinary(ISource source) throws SQLException, IOException {
         ByteBuf buf = source.readBinary();
         return buf.readCharSequence(buf.readableBytes(), charset);
     }

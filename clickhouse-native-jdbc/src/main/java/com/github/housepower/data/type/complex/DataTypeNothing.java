@@ -14,14 +14,14 @@
 
 package com.github.housepower.data.type.complex;
 
+import com.github.housepower.data.IDataType;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
+import com.github.housepower.misc.SQLLexer;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
-
-import com.github.housepower.data.IDataType;
-import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.io.CompositeSource;
-import com.github.housepower.io.CompositeSink;
 
 public class DataTypeNothing implements IDataType<Object, Object> {
 
@@ -59,11 +59,11 @@ public class DataTypeNothing implements IDataType<Object, Object> {
     }
 
     @Override
-    public void serializeBinary(Object data, CompositeSink sink) throws SQLException, IOException {
+    public void serializeBinary(Object data, ISink sink) throws SQLException, IOException {
     }
 
     @Override
-    public Object deserializeBinary(CompositeSource source) throws SQLException, IOException {
+    public Object deserializeBinary(ISource source) throws SQLException, IOException {
         return new Object();
     }
 

@@ -21,7 +21,6 @@ import com.github.housepower.settings.SettingKey;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -44,10 +43,6 @@ public class QueryRequest implements Request {
     private final boolean compression;
     private final NativeContext.ClientContext clientContext;
     private final Map<SettingKey, Serializable> settings;
-
-    public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString) {
-        this(queryId, clientContext, stage, compression, queryString, new HashMap<>());
-    }
 
     public QueryRequest(String queryId, NativeContext.ClientContext clientContext, int stage, boolean compression, String queryString,
                         Map<SettingKey, Serializable> settings) {

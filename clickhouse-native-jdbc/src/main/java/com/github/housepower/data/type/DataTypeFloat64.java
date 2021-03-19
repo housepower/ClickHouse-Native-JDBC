@@ -15,9 +15,9 @@
 package com.github.housepower.data.type;
 
 import com.github.housepower.data.IDataType;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.io.CompositeSource;
-import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -56,12 +56,12 @@ public class DataTypeFloat64 implements IDataType<Double, Double> {
     }
 
     @Override
-    public void serializeBinary(Double data, CompositeSink sink) throws SQLException, IOException {
+    public void serializeBinary(Double data, ISink sink) throws SQLException, IOException {
         sink.writeDoubleLE(data);
     }
 
     @Override
-    public Double deserializeBinary(CompositeSource source) throws SQLException, IOException {
+    public Double deserializeBinary(ISource source) throws SQLException, IOException {
         return source.readDoubleLE();
     }
 

@@ -14,9 +14,9 @@
 
 package com.github.housepower.data.type;
 
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
-import com.github.housepower.io.CompositeSource;
-import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -44,12 +44,12 @@ public class DataTypeUInt16 implements BaseDataTypeInt16<Integer, Integer> {
     }
 
     @Override
-    public void serializeBinary(Integer data, CompositeSink sink) throws SQLException, IOException {
+    public void serializeBinary(Integer data, ISink sink) throws SQLException, IOException {
         sink.writeShortLE(data.shortValue());
     }
 
     @Override
-    public Integer deserializeBinary(CompositeSource source) throws SQLException, IOException {
+    public Integer deserializeBinary(ISource source) throws SQLException, IOException {
         short s = source.readShortLE();
         return s & 0xffff;
     }

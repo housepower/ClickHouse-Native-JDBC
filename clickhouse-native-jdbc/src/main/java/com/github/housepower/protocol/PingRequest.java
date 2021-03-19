@@ -16,8 +16,6 @@ package com.github.housepower.protocol;
 
 import com.github.housepower.io.CompositeSink;
 
-import java.io.IOException;
-
 public class PingRequest implements Request {
 
     public static final PingRequest INSTANCE = new PingRequest();
@@ -28,7 +26,7 @@ public class PingRequest implements Request {
     }
 
     @Override
-    public void writeImpl(CompositeSink sink) throws IOException {
+    public void writeImpl(CompositeSink sink) {
         // Nothing
     }
 }

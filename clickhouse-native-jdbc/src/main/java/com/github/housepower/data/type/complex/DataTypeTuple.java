@@ -14,13 +14,13 @@
 
 package com.github.housepower.data.type.complex;
 
-import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.data.DataTypeFactory;
 import com.github.housepower.data.IDataType;
+import com.github.housepower.io.ISink;
+import com.github.housepower.io.ISource;
+import com.github.housepower.jdbc.ClickHouseStruct;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.io.CompositeSource;
-import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -99,14 +99,14 @@ public class DataTypeTuple implements IDataType<ClickHouseStruct, Struct> {
     }
 
     @Override
-    public void serializeBinary(ClickHouseStruct data, CompositeSink sink) throws SQLException, IOException {
+    public void serializeBinary(ClickHouseStruct data, ISink sink) throws SQLException, IOException {
         for (int i = 0; i < getNestedTypes().length; i++) {
             getNestedTypes()[i].serializeBinary(data.getAttributes()[i], sink);
         }
     }
 
     @Override
-    public void serializeBinaryBulk(ClickHouseStruct[] data, CompositeSink sink) throws SQLException, IOException {
+    public void serializeBinaryBulk(ClickHouseStruct[] data, ISink sink) throws SQLException, IOException {
         for (int i = 0; i < getNestedTypes().length; i++) {
             Object[] elemsData = new Object[data.length];
             for (int row = 0; row < data.length; row++) {
@@ -117,7 +117,7 @@ public class DataTypeTuple implements IDataType<ClickHouseStruct, Struct> {
     }
 
     @Override
-    public ClickHouseStruct deserializeBinary(CompositeSource source) throws SQLException, IOException {
+    public ClickHouseStruct deserializeBinary(ISource source) throws SQLException, IOException {
         Object[] attrs = new Object[getNestedTypes().length];
         for (int i = 0; i < getNestedTypes().length; i++) {
             attrs[i] = getNestedTypes()[i].deserializeBinary(source);
@@ -126,7 +126,7 @@ public class DataTypeTuple implements IDataType<ClickHouseStruct, Struct> {
     }
 
     @Override
-    public ClickHouseStruct[] deserializeBinaryBulk(int rows, CompositeSource source) throws SQLException, IOException {
+    public ClickHouseStruct[] deserializeBinaryBulk(int rows, ISource source) throws SQLException, IOException {
         Object[][] rowsWithElems = getRowsWithElems(rows, source);
 
         ClickHouseStruct[] rowsData = new ClickHouseStruct[rows];
@@ -141,7 +141,7 @@ public class DataTypeTuple implements IDataType<ClickHouseStruct, Struct> {
         return rowsData;
     }
 
-    private Object[][] getRowsWithElems(int rows, CompositeSource source) throws IOException, SQLException {
+    private Object[][] getRowsWithElems(int rows, ISource source) throws IOException, SQLException {
         Object[][] rowsWithElems = new Object[getNestedTypes().length][];
         for (int index = 0; index < getNestedTypes().length; index++) {
             rowsWithElems[index] = getNestedTypes()[index].deserializeBinaryBulk(rows, source);
