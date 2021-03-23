@@ -19,7 +19,7 @@ import io.netty.buffer.PooledByteBufAllocator;
 
 public class NettyUtil {
 
-    private final static ByteBufAllocator alloc = new PooledByteBufAllocator(false);
+    private final static ByteBufAllocator alloc = new PooledByteBufAllocator(true);
 
     public static ByteBufAllocator alloc() {
         return alloc;
