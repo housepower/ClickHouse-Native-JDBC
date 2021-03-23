@@ -30,7 +30,7 @@ public class SocketSourceTest {
         try (InputStream mockedInputStream = new ByteArrayInputStream(new byte[]{1, 0, 0, 0, 2, 0, 3, 4});
              SocketSource buffedReader = new SocketSource(mockedInputStream, 6)) {
             assertEquals(buffedReader.readByte(), 1);
-            ByteBuf ret = buffedReader.readBytes(5);
+            ByteBuf ret = buffedReader.readSlice(5);
             assertEquals(ret.readByte(), 0);
             assertEquals(ret.readByte(), 0);
             assertEquals(ret.readByte(), 0);

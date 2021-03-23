@@ -38,11 +38,15 @@ public interface ISource extends AutoCloseable {
 
     double readDoubleLE();
 
-    ByteBuf readBytes(int maxLen);
+    ByteBuf readSlice(int len);
+
+    ByteBuf readRetainedSlice(int len);
 
     CharSequence readCharSequence(int len, Charset charset);
 
-    ByteBuf readBinary();
+    ByteBuf readSliceBinary();
+
+    CharSequence readCharSequenceBinary(Charset charset);
 
     String readUTF8Binary();
 

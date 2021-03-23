@@ -74,26 +74,37 @@ public class ByteBufSource implements ISource, ByteBufHelper {
     }
 
     @Override
-    public ByteBuf readBytes(int maxLen) {
-        int len = Math.min(buf.readableBytes(), maxLen);
+    public ByteBuf readSlice(int len) {
+        return buf.readSlice(len);
+    }
+
+    @Override
+    public ByteBuf readRetainedSlice(int len) {
         return buf.readRetainedSlice(len);
     }
 
     @Override
     public CharSequence readCharSequence(int len, Charset charset) {
+        if (len == 0)
+            return "";
         return buf.readCharSequence(len, charset);
     }
 
     @Override
-    public ByteBuf readBinary() {
+    public ByteBuf readSliceBinary() {
         int len = (int) readVarInt();
         return buf.readSlice(len);
     }
 
     @Override
+    public CharSequence readCharSequenceBinary(Charset charset) {
+        int len = (int) readVarInt();
+        return readCharSequence(len, charset);
+    }
+
+    @Override
     public String readUTF8Binary() {
-        ByteBuf data = readBinary();
-        return data.readableBytes() > 0 ? data.readCharSequence(data.readableBytes(), StandardCharsets.UTF_8).toString() : "";
+        return readCharSequenceBinary(StandardCharsets.UTF_8).toString();
     }
 
     @Override

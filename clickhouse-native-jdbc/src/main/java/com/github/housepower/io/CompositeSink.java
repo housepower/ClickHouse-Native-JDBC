@@ -87,13 +87,13 @@ public class CompositeSink implements ISink, SupportCompress, ByteBufHelper {
     }
 
     @Override
-    public void writeBinary(ByteBuf bs) {
-        switcher.get().writeBinary(bs);
+    public void writeCharSequence(CharSequence seq, Charset charset) {
+        switcher.get().writeCharSequence(seq, charset);
     }
 
     @Override
-    public void writeCharSequence(CharSequence seq, Charset charset) {
-        switcher.get().writeCharSequence(seq, charset);
+    public void writeBinary(ByteBuf bs) {
+        switcher.get().writeBinary(bs);
     }
 
     @Override

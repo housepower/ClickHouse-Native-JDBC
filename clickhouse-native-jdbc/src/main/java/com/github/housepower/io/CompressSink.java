@@ -107,23 +107,20 @@ public class CompressSink implements ISink, CodecHelper, ByteBufHelper {
     }
 
     @Override
-    public void writeUTF8Binary(CharSequence utf8) {
-        writeUTF8Binary(buf, utf8);
+    public void writeBinary(ByteBuf bytes) {
+        writeBinary(buf, bytes);
         flush(false);
     }
 
     @Override
     public void writeCharSequenceBinary(CharSequence seq, Charset charset) {
-        // TODO optimize for ASCII, UTF8
-        ByteBuf buf = NettyUtil.alloc().buffer();
-        buf.writeCharSequence(seq, charset);
-        writeBinary(buf);
+        writeCharSequenceBinary(buf, seq, charset);
         flush(false);
     }
 
     @Override
-    public void writeBinary(ByteBuf bytes) {
-        writeBinary(buf, bytes);
+    public void writeUTF8Binary(CharSequence utf8) {
+        writeUTF8Binary(buf, utf8);
         flush(false);
     }
 
@@ -145,7 +142,7 @@ public class CompressSink implements ISink, CodecHelper, ByteBufHelper {
             int compressedSize = COMPRESSION_HEADER_LENGTH + compressedDataLen;
             ByteBuf compressed = NettyUtil.alloc().buffer(compressedSize, compressedSize);
 
-            compressed.writeByte(0x82); // TODO not sure if it works for ZStd
+            compressed.writeByte(LZ4); // TODO not sure if it works for ZStd
             compressed.writeIntLE(compressedSize);
             compressed.writeIntLE(decompressedLen);
             compressed.writeBytes(compressedData);

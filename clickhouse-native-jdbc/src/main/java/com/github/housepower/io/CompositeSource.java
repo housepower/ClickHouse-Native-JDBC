@@ -79,8 +79,13 @@ public class CompositeSource implements ISource, SupportCompress {
     }
 
     @Override
-    public ByteBuf readBytes(int len) {
-        return switcher.get().readBytes(len);
+    public ByteBuf readSlice(int len) {
+        return switcher.get().readSlice(len);
+    }
+
+    @Override
+    public ByteBuf readRetainedSlice(int len) {
+        return switcher.get().readRetainedSlice(len);
     }
 
     @Override
@@ -89,8 +94,13 @@ public class CompositeSource implements ISource, SupportCompress {
     }
 
     @Override
-    public ByteBuf readBinary() {
-        return switcher.get().readBinary();
+    public ByteBuf readSliceBinary() {
+        return switcher.get().readSliceBinary();
+    }
+
+    @Override
+    public CharSequence readCharSequenceBinary(Charset charset) {
+        return switcher.get().readCharSequenceBinary(charset);
     }
 
     @Override
