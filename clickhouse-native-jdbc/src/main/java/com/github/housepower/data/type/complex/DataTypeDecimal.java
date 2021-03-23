@@ -162,7 +162,7 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
             }
 
             case 128: {
-                long []array = new long[2];
+                long[] array = new long[2];
                 array[1] = source.readLongLE();
                 array[0] = source.readLongLE();
 
@@ -172,7 +172,7 @@ public class DataTypeDecimal implements IDataType<BigDecimal, BigDecimal>, Codec
             }
 
             case 256: {
-                long []array = new long[4];
+                long[] array = new long[4];
                 array[3] = source.readLongLE();
                 array[2] = source.readLongLE();
                 array[1] = source.readLongLE();

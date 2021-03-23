@@ -14,6 +14,7 @@
 
 package com.github.housepower.io;
 
+import com.github.housepower.misc.NettyUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.util.ReferenceCountUtil;
@@ -55,15 +56,15 @@ public interface ByteBufHelper {
         buf.writeCharSequence(seq, StandardCharsets.UTF_8);
     }
 
-    default CharSequence readCharSeqBinary(ByteBuf buf, Charset charset) {
+    default CharSequence readCharSequenceBinary(ByteBuf buf, Charset charset) {
         int len = (int) readVarInt(buf);
-        return buf.readCharSequence(len, charset).toString();
+        return buf.readCharSequence(len, charset);
     }
 
-    @Deprecated
-    default void writeCharSeqBinary(ByteBuf buf, CharSequence seq, Charset charset) {
-        writeVarInt(buf, ByteBufUtil.utf8Bytes(seq));
-        buf.writeCharSequence(seq, charset);
+    default void writeCharSequenceBinary(ByteBuf buf, CharSequence seq, Charset charset) {
+        ByteBuf temp = NettyUtil.alloc().buffer();
+        temp.writeCharSequence(seq, charset);
+        writeBinary(buf, temp);
     }
 
     default void writeBinary(ByteBuf buf, ByteBuf data) {

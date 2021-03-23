@@ -95,20 +95,18 @@ public class SocketSink implements ISink, ByteBufHelper {
     }
 
     @Override
-    public void writeUTF8Binary(CharSequence utf8) {
-        writeUTF8Binary(buf, utf8);
+    public void writeBinary(ByteBuf bytes) {
+        writeBinary(buf, bytes);
     }
 
     @Override
     public void writeCharSequenceBinary(CharSequence seq, Charset charset) {
-        ByteBuf buf = NettyUtil.alloc().buffer();
-        buf.writeCharSequence(seq, charset);
-        writeBinary(buf);
+        writeCharSequenceBinary(buf, seq, charset);
     }
 
     @Override
-    public void writeBinary(ByteBuf bytes) {
-        writeBinary(buf, bytes);
+    public void writeUTF8Binary(CharSequence utf8) {
+        writeUTF8Binary(buf, utf8);
     }
 
     @Override

@@ -98,30 +98,40 @@ public class DecompressSource implements ISource, ByteBufHelper, CodecHelper {
     }
 
     @Override
-    public ByteBuf readBytes(int size) {
-        maybeDecompress(size);
-        return decompressedBuf.readRetainedSlice(size);
+    public ByteBuf readSlice(int len) {
+        maybeDecompress(len);
+        return decompressedBuf.readSlice(len);
+    }
+
+    @Override
+    public ByteBuf readRetainedSlice(int len) {
+        maybeDecompress(len);
+        return decompressedBuf.readRetainedSlice(len);
     }
 
     @Override
     public CharSequence readCharSequence(int len, Charset charset) {
+        if (len == 0)
+            return "";
         maybeDecompress(len);
         return decompressedBuf.readCharSequence(len, charset);
     }
 
     @Override
-    public ByteBuf readBinary() {
+    public ByteBuf readSliceBinary() {
         int len = (int) readVarInt();
-        return readBytes(len);
+        return readSlice(len);
+    }
+
+    @Override
+    public CharSequence readCharSequenceBinary(Charset charset) {
+        int len = (int) readVarInt();
+        return readCharSequence(len, charset);
     }
 
     @Override
     public String readUTF8Binary() {
-        int len = (int) readVarInt();
-        ByteBuf data = readBytes(len);
-        String ret = data.readableBytes() > 0 ? data.readCharSequence(len, StandardCharsets.UTF_8).toString() : "";
-        ReferenceCountUtil.safeRelease(data);
-        return ret;
+        return readCharSequenceBinary(StandardCharsets.UTF_8).toString();
     }
 
     @Override
@@ -171,7 +181,7 @@ public class DecompressSource implements ISource, ByteBufHelper, CodecHelper {
     }
 
     private void readCompressedData(int compressedSize, int decompressedSize, @Nullable Decompressor decompressor) {
-        ByteBuf compressed = compressedReader.readBytes(compressedSize);
+        ByteBuf compressed = compressedReader.readSlice(compressedSize);
         if (decompressor == null) {
             decompressedBuf.writeBytes(compressed);
         } else {
@@ -180,6 +190,5 @@ public class DecompressSource implements ISource, ByteBufHelper, CodecHelper {
             decompressed.flip();
             decompressedBuf.writeBytes(decompressed);
         }
-        ReferenceCountUtil.safeRelease(compressed);
     }
 }

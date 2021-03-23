@@ -42,11 +42,11 @@ public interface ISink extends AutoCloseable {
 
     void writeCharSequence(CharSequence seq, Charset charset);
 
+    void writeBinary(ByteBuf bytes);
+
     void writeCharSequenceBinary(CharSequence seq, Charset charset);
 
     void writeUTF8Binary(CharSequence utf8);
-
-    void writeBinary(ByteBuf bytes);
 
     void flush(boolean force);
 

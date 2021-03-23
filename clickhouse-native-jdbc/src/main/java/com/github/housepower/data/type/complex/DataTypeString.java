@@ -18,7 +18,6 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.io.ISink;
 import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
-import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -81,8 +80,7 @@ public class DataTypeString implements IDataType<CharSequence, String> {
      */
     @Override
     public CharSequence deserializeBinary(ISource source) throws SQLException, IOException {
-        ByteBuf buf = source.readBinary();
-        return buf.readCharSequence(buf.readableBytes(), charset);
+        return source.readCharSequenceBinary(charset);
     }
 
     @Override

@@ -96,43 +96,51 @@ public class SocketSource implements ISource, ByteBufHelper {
     }
 
     @Override
-    public ByteBuf readBytes(int maxLen) {
-        ByteBuf ret = NettyUtil.alloc().buffer(maxLen);
-        for (int i = 0; i < maxLen; ) {
-            maybeRefill(maxLen);
-            int writableBytes = maxLen - i;
-            int len = Math.min(writableBytes, buf.readableBytes());
-            if (len > 0) {
-                ret.writeBytes(buf, len);
-                i += len;
+    public ByteBuf readSlice(int len) {
+        maybeRefill(len);
+        return buf.readSlice(len);
+    }
+
+    @Override
+    public ByteBuf readRetainedSlice(int len) {
+        ByteBuf ret = NettyUtil.alloc().buffer(len);
+        int p = 0;
+        do {
+            maybeRefill(len);
+            int writableBytes = len - p;
+            int l = Math.min(writableBytes, buf.readableBytes());
+            if (l > 0) {
+                ret.writeBytes(buf, l);
+                p += l;
             }
-        }
+        } while (p < len);
         return ret;
     }
 
     @Override
     public CharSequence readCharSequence(int len, Charset charset) {
+        if (len == 0)
+            return "";
         maybeRefill(len);
         return buf.readCharSequence(len, charset);
     }
 
     @Override
-    public ByteBuf readBinary() {
-        maybeRefill(1);
+    public ByteBuf readSliceBinary() {
         int len = (int) readVarInt();
         maybeRefill(len);
         return buf.readSlice(len);
     }
 
     @Override
-    public String readUTF8Binary() {
-        maybeRefill(1);
+    public CharSequence readCharSequenceBinary(Charset charset) {
         int len = (int) readVarInt();
-        maybeRefill(len);
-        ByteBuf data = readBytes(len);
-        String ret = data.readableBytes() > 0 ? data.readCharSequence(len, StandardCharsets.UTF_8).toString() : "";
-        ReferenceCountUtil.safeRelease(data);
-        return ret;
+        return readCharSequence(len, charset);
+    }
+
+    @Override
+    public String readUTF8Binary() {
+        return readCharSequenceBinary(StandardCharsets.UTF_8).toString();
     }
 
     @Override
@@ -155,10 +163,11 @@ public class SocketSource implements ISource, ByteBufHelper {
                 buf.writeBytes(remaining);
                 ReferenceCountUtil.safeRelease(remaining);
             }
-            int n = buf.writeBytes(in, buf.writableBytes());
-            if (n <= 0) {
-                throw new UncheckedIOException(new EOFException("Attempt to read after eof."));
-            }
+            do {
+                if (buf.writeBytes(in, buf.writableBytes()) <= 0) {
+                    throw new UncheckedIOException(new EOFException("Attempt to read after eof."));
+                }
+            } while (!buf.isReadable(atLeastReadableBytes));
         } catch (IOException rethrow) {
             throw new UncheckedIOException(rethrow);
         }

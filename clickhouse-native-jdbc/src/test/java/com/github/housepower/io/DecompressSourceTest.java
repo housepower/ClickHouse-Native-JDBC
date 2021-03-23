@@ -38,7 +38,7 @@ public class DecompressSourceTest {
 
         assertEquals(compressedReader.readByte(), 1);
 
-        ByteBuf ret = compressedReader.readBytes(5);
+        ByteBuf ret = compressedReader.readSlice(5);
         assertEquals(ret.readByte(), 2);
         assertEquals(ret.readByte(), 3);
         assertEquals(ret.readByte(), 4);

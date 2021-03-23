@@ -118,6 +118,7 @@ class ByteBufHelperTest implements ByteBufHelper {
 
         ReferenceCountUtil.release(legacyBuf);
         ReferenceCountUtil.release(nettyBuf);
+        memoryWriter.close();
     }
 
     private ByteBuf heapBuf() {
