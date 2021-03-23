@@ -49,12 +49,7 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
         this.n = n;
         this.name = name;
         this.charset = serverContext.getConfigure().charset();
-
-        byte[] data = new byte[n];
-        for (int i = 0; i < n; i++) {
-            data[i] = '\u0000';
-        }
-        this.defaultValue = new String(data, charset);
+        this.defaultValue = new String(new byte[n], charset);
     }
 
     @Override
