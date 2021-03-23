@@ -146,6 +146,11 @@ public class DecompressSource implements ISource, ByteBufHelper, CodecHelper {
             ReferenceCountUtil.safeRelease(remaining);
         }
 
+        // 16 bits checksum
+        //  1 bit  compressed method
+        //  4 bits compressed size
+        //  4 bits decompressed size
+        //         compressed data
         compressedReader.skipBytes(CHECKSUM_LENGTH); // TODO validate checksum
         int compressMethod = compressedReader.readByte() & 0x0FF;
         int compressedSize = compressedReader.readIntLE();
@@ -166,15 +171,15 @@ public class DecompressSource implements ISource, ByteBufHelper, CodecHelper {
     }
 
     private void readCompressedData(int compressedSize, int decompressedSize, @Nullable Decompressor decompressor) {
-        ByteBuf src = compressedReader.readBytes(compressedSize);
+        ByteBuf compressed = compressedReader.readBytes(compressedSize);
         if (decompressor == null) {
-            decompressedBuf.writeBytes(src);
+            decompressedBuf.writeBytes(compressed);
         } else {
-            ByteBuffer ret = ByteBuffer.allocate(decompressedSize);
-            decompressor.decompress(src.nioBuffer(), ret);
-            ret.flip();
-            decompressedBuf.writeBytes(ret);
+            ByteBuffer decompressed = ByteBuffer.allocate(decompressedSize);
+            decompressor.decompress(compressed.nioBuffer(), decompressed);
+            decompressed.flip();
+            decompressedBuf.writeBytes(decompressed);
         }
-        ReferenceCountUtil.safeRelease(src);
+        ReferenceCountUtil.safeRelease(compressed);
     }
 }

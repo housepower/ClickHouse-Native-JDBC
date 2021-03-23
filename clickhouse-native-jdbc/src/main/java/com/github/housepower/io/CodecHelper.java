@@ -22,21 +22,9 @@ public interface CodecHelper {
     int ZSTD = 0x90;
     // @formatter:on
 
-    default byte[] getBytesLE(int i) {
-        byte[] memory = new byte[Integer.BYTES];
-        setIntLE(memory, 0, i);
-        return memory;
-    }
-
     default byte[] getBytes(long l) {
         byte[] memory = new byte[Long.BYTES];
         setLong(memory, 0, l);
-        return memory;
-    }
-
-    default byte[] getBytesLE(long l) {
-        byte[] memory = new byte[Long.BYTES];
-        setLongLE(memory, 0, l);
         return memory;
     }
 
@@ -49,15 +37,6 @@ public interface CodecHelper {
         return memory;
     }
 
-    default void setIntLE(byte[] memory, int index, int value) {
-        // @formatter:off
-        memory[index]     = (byte) value;
-        memory[index + 1] = (byte) (value >>> 8);
-        memory[index + 2] = (byte) (value >>> 16);
-        memory[index + 3] = (byte) (value >>> 24);
-        // @formatter:on
-    }
-
     default void setLong(byte[] memory, int index, long value) {
         // @formatter:off
         memory[index]     = (byte) (value >>> 56);
@@ -68,19 +47,6 @@ public interface CodecHelper {
         memory[index + 5] = (byte) (value >>> 16);
         memory[index + 6] = (byte) (value >>> 8);
         memory[index + 7] = (byte) value;
-        // @formatter:on
-    }
-
-    default void setLongLE(byte[] memory, int index, long value) {
-        // @formatter:off
-        memory[index]     = (byte) value;
-        memory[index + 1] = (byte) (value >>> 8);
-        memory[index + 2] = (byte) (value >>> 16);
-        memory[index + 3] = (byte) (value >>> 24);
-        memory[index + 4] = (byte) (value >>> 32);
-        memory[index + 5] = (byte) (value >>> 40);
-        memory[index + 6] = (byte) (value >>> 48);
-        memory[index + 7] = (byte) (value >>> 56);
         // @formatter:on
     }
 }

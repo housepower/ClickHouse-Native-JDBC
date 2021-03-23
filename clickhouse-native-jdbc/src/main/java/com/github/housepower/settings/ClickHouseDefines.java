@@ -33,6 +33,9 @@ public class ClickHouseDefines {
 
     public static final int DATA_TYPE_CACHE_SIZE = 1024;
 
-    public static final int COMPRESSION_HEADER_LENGTH = 9;
     public static final int CHECKSUM_LENGTH = 16;
+    public static final int DECOMPRESSED_SIZE_LENGTH = 4;
+    public static final int COMPRESSED_SIZE_LENGTH = 4;
+    public static final int COMPRESSION_METHOD_LENGTH = 1;
+    public static final int COMPRESSION_HEADER_LENGTH = DECOMPRESSED_SIZE_LENGTH + COMPRESSED_SIZE_LENGTH + COMPRESSION_METHOD_LENGTH;
 }
