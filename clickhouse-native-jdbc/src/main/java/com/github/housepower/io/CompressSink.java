@@ -14,30 +14,28 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.ClickHouseCityHash;
+import com.github.housepower.misc.ClickHouseCityHash2;
 import com.github.housepower.misc.NettyUtil;
 import io.airlift.compress.Compressor;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.util.ReferenceCountUtil;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
 public class CompressSink implements ISink, CodecHelper, ByteBufHelper {
 
     private final int capacity;
     private final ByteBuf buf;
-    private final ISink writer;
+    private final ISink sink;
     private final Compressor compressor;
 
-    public CompressSink(int capacity, ISink writer, Compressor compressor) {
+    public CompressSink(int capacity, ISink sink, Compressor compressor) {
         this.capacity = capacity;
         this.buf = NettyUtil.alloc().buffer();
-        this.writer = writer;
+        this.sink = sink;
         this.compressor = compressor;
     }
 
@@ -116,6 +114,7 @@ public class CompressSink implements ISink, CodecHelper, ByteBufHelper {
 
     @Override
     public void writeCharSequenceBinary(CharSequence seq, Charset charset) {
+        // TODO optimize for ASCII, UTF8
         ByteBuf buf = NettyUtil.alloc().buffer();
         buf.writeCharSequence(seq, charset);
         writeBinary(buf);
@@ -131,29 +130,39 @@ public class CompressSink implements ISink, CodecHelper, ByteBufHelper {
     @Override
     public void flush(boolean force) {
         if (buf.isReadable() && (force || buf.readableBytes() >= capacity)) {
-            byte[] writtenBuf = ByteBufUtil.getBytes(buf);
+            // 16 bits checksum
+            //  1 bit  compressed method
+            //  4 bits compressed size
+            //  4 bits decompressed size
+            //         compressed data
+            int decompressedLen = buf.readableBytes();
+            int maxCompressedLen = compressor.maxCompressedLength(decompressedLen);
+            ByteBuffer compressedData = ByteBuffer.allocate(maxCompressedLen);
+            compressor.compress(buf.nioBuffer(), compressedData);
+            compressedData.flip();
+            int compressedDataLen = compressedData.remaining();
+
+            int compressedSize = COMPRESSION_HEADER_LENGTH + compressedDataLen;
+            ByteBuf compressed = NettyUtil.alloc().buffer(compressedSize, compressedSize);
+
+            compressed.writeByte(0x82); // TODO not sure if it works for ZStd
+            compressed.writeIntLE(compressedSize);
+            compressed.writeIntLE(decompressedLen);
+            compressed.writeBytes(compressedData);
+            ReferenceCountUtil.safeRelease(compressedData);
+
+            long[] checksum = ClickHouseCityHash2.cityHash128(compressed, 0, compressedSize);
+            sink.writeLongLE(checksum[0]);
+            sink.writeLongLE(checksum[1]);
+            sink.writeBytes(compressed);
+
             buf.clear();
-
-            int maxLen = compressor.maxCompressedLength(writtenBuf.length);
-            byte[] compressedBytes = new byte[maxLen + COMPRESSION_HEADER_LENGTH + CHECKSUM_LENGTH];
-            int compressedDataLen = compressor.compress(writtenBuf, 0, writtenBuf.length, compressedBytes, COMPRESSION_HEADER_LENGTH + CHECKSUM_LENGTH, compressedBytes.length);
-
-            compressedBytes[CHECKSUM_LENGTH] = (byte) 0x82; // TODO not sure if it works for ZStd
-            int compressedSize = compressedDataLen + COMPRESSION_HEADER_LENGTH;
-            System.arraycopy(getBytesLE(compressedSize), 0, compressedBytes, CHECKSUM_LENGTH + 1, Integer.BYTES);
-            System.arraycopy(getBytesLE(writtenBuf.length), 0, compressedBytes, CHECKSUM_LENGTH + Integer.BYTES + 1, Integer.BYTES);
-
-            long[] checksum = ClickHouseCityHash.cityHash128(compressedBytes, CHECKSUM_LENGTH, compressedSize);
-            System.arraycopy(getBytesLE(checksum[0]), 0, compressedBytes, 0, Long.BYTES);
-            System.arraycopy(getBytesLE(checksum[1]), 0, compressedBytes, Long.BYTES, Long.BYTES);
-
-            writer.writeBytes(Unpooled.wrappedBuffer(compressedBytes, 0, compressedSize + CHECKSUM_LENGTH));
         }
     }
 
     @Override
     public void close() {
-        writer.close();
+        sink.close();
         ReferenceCountUtil.safeRelease(buf);
     }
 }
