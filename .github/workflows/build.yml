@@ -6,7 +6,7 @@ on:
       - "master"
       - "2.4"
       - "2.5"
-  pull_request_target:
+  pull_request:
     branches:
       - "master"
       - "2.4"
