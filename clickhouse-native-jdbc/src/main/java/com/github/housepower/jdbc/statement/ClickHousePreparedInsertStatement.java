@@ -142,7 +142,6 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             // Empty insert when close.
             this.connection.sendInsertRequest(new Block());
             this.blockInit = false;
-            this.block.initWriteBuffer();
         }
         super.close();
     }

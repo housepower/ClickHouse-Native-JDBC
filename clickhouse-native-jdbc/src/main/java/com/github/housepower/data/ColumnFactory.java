@@ -30,6 +30,6 @@ public class ColumnFactory {
         if (type instanceof DataTypeTuple)
             return new ColumnTuple(name, (DataTypeTuple) type, values);
 
-        return new Column(name, type, values);
+        return new ColumnSimple(name, type, values);
     }
 }

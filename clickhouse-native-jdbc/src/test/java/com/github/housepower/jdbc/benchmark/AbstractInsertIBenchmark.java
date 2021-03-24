@@ -49,11 +49,13 @@ public class AbstractInsertIBenchmark extends AbstractIBenchmark {
             }
         }
         stmt.executeQuery(createSQL + ")Engine = Log");
+        stmt.close();
     }
 
     protected void wideColumnAfter(Connection connection) throws SQLException {
         Statement stmt = connection.createStatement();
         stmt.executeQuery("DROP TABLE " + getTableName());
+        stmt.close();
     }
 
     protected String getTableName() {

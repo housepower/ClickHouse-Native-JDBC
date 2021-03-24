@@ -46,6 +46,8 @@ public class WideColumnStringInsertIBenchmark extends AbstractInsertIBenchmark {
         }
         int[] res = pstmt.executeBatch();
         assertEquals(res.length, batchSize);
+        pstmt.close();
+
         wideColumnAfter(connection);
     };
 

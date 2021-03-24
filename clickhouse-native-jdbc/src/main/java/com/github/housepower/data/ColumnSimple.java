@@ -19,16 +19,16 @@ import com.github.housepower.io.CompositeSink;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class Column extends AbstractColumn {
+public class ColumnSimple extends AbstractColumn {
 
-    public Column(String name, IDataType<?, ?> type, Object[] values) {
+    public ColumnSimple(String name, IDataType<?, ?> type, Object[] values) {
         super(name, type, values);
-        this.values = values;
+        this.sourceValues = values;
     }
 
     @Override
     public void write(Object object) throws IOException, SQLException {
-        type().serializeBinary(object, buffer.columnSink);
+        type().serializeBinary(object, sinkBuf);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class Column extends AbstractColumn {
         }
 
         if (now) {
-            buffer.writeTo(sink);
+            sink.writeBytes(sinkBuf.retain());
         }
     }
 }

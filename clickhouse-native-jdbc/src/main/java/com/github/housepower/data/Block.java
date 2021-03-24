@@ -14,7 +14,7 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ColumnWriterBuffer;
+import com.github.housepower.io.ByteBufSink;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
 import com.github.housepower.misc.Validate;
@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Block {
+public class Block implements AutoCloseable {
 
     public static Block readFrom(CompositeSource source,
                                  NativeContext.ServerContext serverContext) throws IOException, SQLException {
@@ -147,11 +147,18 @@ public class Block {
 
     public void initWriteBuffer() {
         for (IColumn column : columns) {
-            ColumnWriterBuffer oldBuf = column.getColumnWriterBuffer();
+            ByteBufSink oldBuf = column.getColumnWriterBuffer();
             if (oldBuf != null) {
                 oldBuf.close();
             }
-            column.setColumnWriterBuffer(new ColumnWriterBuffer());
+            column.setColumnWriterBuffer(new ByteBufSink());
+        }
+    }
+
+    @Override
+    public void close() {
+        for (IColumn column : columns) {
+            column.close();
         }
     }
 }

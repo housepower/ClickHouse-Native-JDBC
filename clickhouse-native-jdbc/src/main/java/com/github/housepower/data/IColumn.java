@@ -14,13 +14,13 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ColumnWriterBuffer;
+import com.github.housepower.io.ByteBufSink;
 import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-public interface IColumn {
+public interface IColumn extends AutoCloseable {
 
     boolean isExported();
 
@@ -40,11 +40,13 @@ public interface IColumn {
      */
     void flush(CompositeSink sink, boolean now) throws IOException, SQLException;
 
-    void clear();
+    void setColumnWriterBuffer(ByteBufSink buffer);
 
-    void setColumnWriterBuffer(ColumnWriterBuffer buffer);
+    ByteBufSink getColumnWriterBuffer();
 
-    ColumnWriterBuffer getColumnWriterBuffer();
+    // explicitly overwrite to suppress Exception
+    @Override
+    void close();
 }
 
 
