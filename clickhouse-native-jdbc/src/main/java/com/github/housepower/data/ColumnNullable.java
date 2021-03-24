@@ -14,7 +14,7 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ColumnWriterBuffer;
+import com.github.housepower.io.ByteBufSink;
 import com.github.housepower.data.type.complex.DataTypeNullable;
 import com.github.housepower.io.CompositeSink;
 
@@ -48,7 +48,7 @@ public class ColumnNullable extends AbstractColumn {
     }
 
     @Override
-    public void flush(CompositeSink sink, boolean immediate) throws IOException {
+    public void flush(CompositeSink sink, boolean now) throws IOException {
         if (isExported()) {
             sink.writeUTF8Binary(name);
             sink.writeUTF8Binary(type.name());
@@ -58,13 +58,21 @@ public class ColumnNullable extends AbstractColumn {
             sink.writeByte(sign);
         }
 
-        if (immediate)
-            buffer.writeTo(sink);
+        if (now) {
+            sink.writeBytes(sinkBuf.retain());
+        }
     }
 
     @Override
-    public void setColumnWriterBuffer(ColumnWriterBuffer buffer) {
+    public void setColumnWriterBuffer(ByteBufSink buffer) {
         super.setColumnWriterBuffer(buffer);
         data.setColumnWriterBuffer(buffer);
+    }
+
+    @Override
+    public void close() {
+        nullableSign.clear();
+        data.close();
+        super.close();
     }
 }
