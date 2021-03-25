@@ -31,7 +31,7 @@ import java.sql.*;
 import java.time.ZoneId;
 import java.util.Enumeration;
 
-import static io.netty.util.ResourceLeakDetector.Level.*;
+import static io.netty.util.ResourceLeakDetector.Level.PARANOID;
 
 @Testcontainers
 public abstract class AbstractITest implements Serializable {
@@ -39,8 +39,8 @@ public abstract class AbstractITest implements Serializable {
     public static final Logger LOG = LoggerFactory.getLogger(AbstractITest.class);
 
     static {
-        String levelProp = SystemUtil.loadProp("NETTY_RESOURCE_LEAK_DETECT_LEVEL", "SIMPLE");
-        ResourceLeakDetector.Level level = SIMPLE;
+        String levelProp = SystemUtil.loadProp("NETTY_RESOURCE_LEAK_DETECT_LEVEL", "PARANOID");
+        ResourceLeakDetector.Level level = PARANOID;
         try {
             level = ResourceLeakDetector.Level.valueOf(levelProp);
         } catch (IllegalArgumentException ex) {

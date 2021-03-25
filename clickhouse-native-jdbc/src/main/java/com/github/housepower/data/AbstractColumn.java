@@ -56,11 +56,6 @@ public abstract class AbstractColumn implements IColumn {
     }
 
     @Override
-    public ByteBufSink getColumnWriterBuffer() {
-        return sinkBuf;
-    }
-
-    @Override
     public void close() {
         if (sourceValues != null) {
             sourceValues = new Object[0];

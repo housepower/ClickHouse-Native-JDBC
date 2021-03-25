@@ -147,10 +147,7 @@ public class Block implements AutoCloseable {
 
     public void initWriteBuffer() {
         for (IColumn column : columns) {
-            ByteBufSink oldBuf = column.getColumnWriterBuffer();
-            if (oldBuf != null) {
-                oldBuf.close();
-            }
+            column.close();
             column.setColumnWriterBuffer(new ByteBufSink());
         }
     }
