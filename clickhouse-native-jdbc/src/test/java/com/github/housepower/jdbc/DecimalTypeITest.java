@@ -15,6 +15,7 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.io.CodecHelper;
+import joptsimple.internal.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -23,9 +24,6 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
-
-import joptsimple.internal.Strings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -33,7 +31,7 @@ public class DecimalTypeITest extends AbstractITest implements CodecHelper {
 
     @Test
     public void testDecimalType() throws Exception {
-        withNewConnection(connection -> {
+        withStatement(statement -> {
             BigDecimal value32 = BigDecimal.valueOf(1.32);
             value32 = value32.setScale(2, RoundingMode.HALF_UP);
             BigDecimal value64 = new BigDecimal("12343143412341.21");
@@ -52,27 +50,29 @@ public class DecimalTypeITest extends AbstractITest implements CodecHelper {
                     BigDecimal.valueOf(412341.21D).setScale(3, RoundingMode.HALF_UP),
                     BigDecimal.valueOf(512341.25D).setScale(3, RoundingMode.HALF_UP)
             };
-            Statement statement = connection.createStatement();
+
             statement.execute("DROP TABLE IF EXISTS decimal_test");
             statement.execute("CREATE TABLE IF NOT EXISTS decimal_test (value32 Decimal(7,2), "
-                              + "value64 Decimal(15,5), "
-                              + "value128 Decimal(38, 16),"
-                              + "value256 Decimal(76, 26),"
-                              + "value256_neg Decimal(76, 26),"
-                              + "value_array Array(Decimal(5,3))) Engine=Memory()");
-            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO decimal_test"
-                                                                  + "(value32,value64,value128,value256,value256_neg,value_array) "
-                                                                  + "values(?,?,?,?,?,?);");
-            for (int i = 0; i < 300; i++) {
-                pstmt.setBigDecimal(1, value32);
-                pstmt.setBigDecimal(2, value64);
-                pstmt.setBigDecimal(3, value128);
-                pstmt.setBigDecimal(4, value256);
-                pstmt.setBigDecimal(5, value256Neg);
-                pstmt.setArray(6, connection.createArrayOf("Decimal(5,3)", valueArray));
-                pstmt.addBatch();
+                    + "value64 Decimal(15,5), "
+                    + "value128 Decimal(38, 16),"
+                    + "value256 Decimal(76, 26),"
+                    + "value256_neg Decimal(76, 26),"
+                    + "value_array Array(Decimal(5,3))) Engine=Memory()");
+
+            try (PreparedStatement pstmt = statement.getConnection().prepareStatement("INSERT INTO decimal_test"
+                    + "(value32,value64,value128,value256,value256_neg,value_array) "
+                    + "values(?,?,?,?,?,?);")) {
+                for (int i = 0; i < 300; i++) {
+                    pstmt.setBigDecimal(1, value32);
+                    pstmt.setBigDecimal(2, value64);
+                    pstmt.setBigDecimal(3, value128);
+                    pstmt.setBigDecimal(4, value256);
+                    pstmt.setBigDecimal(5, value256Neg);
+                    pstmt.setArray(6, pstmt.getConnection().createArrayOf("Decimal(5,3)", valueArray));
+                    pstmt.addBatch();
+                }
+                pstmt.executeBatch();
             }
-            pstmt.executeBatch();
 
             // Check data count
             ResultSet rs = statement.executeQuery("SELECT * FROM decimal_test;");
@@ -91,7 +91,7 @@ public class DecimalTypeITest extends AbstractITest implements CodecHelper {
                 assertEquals(value256Neg, rsValue256Neg);
 
                 ClickHouseArray rsValueArray = (ClickHouseArray) rs.getArray(6);
-                Object[] decimalArray = (Object[]) rsValueArray.getArray();
+                Object[] decimalArray = rsValueArray.getArray();
                 assertEquals(decimalArray.length, valueArray.length);
                 for (int i = 0; i < valueArray.length; i++) {
                     assertEquals(decimalArray[i], valueArray[i]);
@@ -115,7 +115,7 @@ public class DecimalTypeITest extends AbstractITest implements CodecHelper {
         long l2 = res.shiftRight(64).longValue();
 
         // v =  -1820000
-        long []arr = new long[]{l2, l1};
+        long[] arr = new long[]{l2, l1};
         BigInteger v = new BigInteger(getBytes(arr));
         BigDecimal value = new BigDecimal(v);
         value = value.divide(scaleFactor, scale, RoundingMode.HALF_UP);

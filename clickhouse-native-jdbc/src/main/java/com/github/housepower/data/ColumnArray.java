@@ -47,7 +47,7 @@ public class ColumnArray extends AbstractColumn {
     }
 
     @Override
-    public void flush(CompositeSink sink, boolean immediate) throws SQLException, IOException {
+    public void flush(CompositeSink sink, boolean now) throws SQLException, IOException {
         if (isExported()) {
             sink.writeUTF8Binary(name);
             sink.writeUTF8Binary(type.name());
@@ -56,21 +56,16 @@ public class ColumnArray extends AbstractColumn {
         flushOffsets(sink);
         data.flush(sink, false);
 
-        if (immediate) {
+        if (now) {
             sink.writeBytes(sinkBuf.retain());
-        }
-    }
-
-    public void flushOffsets(CompositeSink sink) {
-        for (long offsetList : offsets) {
-            sink.writeLongLE(offsetList);
         }
     }
 
     @Override
     public void setColumnWriterBuffer(ByteBufSink buffer) {
-        super.setColumnWriterBuffer(buffer);
+        buffer.retain();
         data.setColumnWriterBuffer(buffer);
+        super.setColumnWriterBuffer(buffer);
     }
 
     @Override
@@ -78,5 +73,11 @@ public class ColumnArray extends AbstractColumn {
         offsets.clear();
         data.close();
         super.close();
+    }
+
+    private void flushOffsets(CompositeSink sink) {
+        for (long offsetList : offsets) {
+            sink.writeLongLE(offsetList);
+        }
     }
 }

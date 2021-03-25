@@ -42,8 +42,6 @@ public interface IColumn extends AutoCloseable {
 
     void setColumnWriterBuffer(ByteBufSink buffer);
 
-    ByteBufSink getColumnWriterBuffer();
-
     // explicitly overwrite to suppress Exception
     @Override
     void close();

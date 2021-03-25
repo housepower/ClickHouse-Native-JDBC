@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.Duration;
 import java.util.Locale;
@@ -40,83 +39,84 @@ public class BalancedClickhouseDataSourceITest extends AbstractITest {
 
     @Test
     public void testSingleDatabaseConnection() throws Exception {
-        Connection connection = singleDs.getConnection();
-        connection.createStatement().execute("CREATE DATABASE IF NOT EXISTS test");
-        connection.createStatement().execute("DROP TABLE IF EXISTS test.insert_test");
-        connection.createStatement().execute(
-                "CREATE TABLE IF NOT EXISTS test.insert_test (i Int32, s String) ENGINE = TinyLog");
-        PreparedStatement statement = connection.prepareStatement("INSERT INTO test.insert_test (s, i) VALUES (?, ?)");
-        statement.setString(1, "asd");
-        statement.setInt(2, 42);
-        statement.execute();
+        withNewConnection(singleDs, connection -> {
+            withStatement(connection, stmt -> stmt.execute("CREATE DATABASE IF NOT EXISTS test"));
+            withStatement(connection, stmt -> stmt.execute("DROP TABLE IF EXISTS test.insert_test"));
+            withStatement(connection, stmt -> stmt.execute("CREATE TABLE IF NOT EXISTS test.insert_test (i Int32, s String) ENGINE = TinyLog"));
 
-        ResultSet rs = connection.createStatement().executeQuery("SELECT * from test.insert_test");
-        rs.next();
+            withPreparedStatement(connection, "INSERT INTO test.insert_test (s, i) VALUES (?, ?)", pstmt -> {
+                pstmt.setString(1, "asd");
+                pstmt.setInt(2, 42);
+                pstmt.execute();
 
-        assertEquals("asd", rs.getString("s"));
-        assertEquals(42, rs.getInt("i"));
+                ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM test.insert_test");
+                rs.next();
+
+                assertEquals("asd", rs.getString("s"));
+                assertEquals(42, rs.getInt("i"));
+            });
+        });
     }
 
     @Test
-    public void testDoubleDatabaseConnection() throws Exception {
-        Connection connection = dualDs.getConnection();
-        connection.createStatement().execute("CREATE DATABASE IF NOT EXISTS test");
-        connection = dualDs.getConnection();
-        connection.createStatement().execute("DROP TABLE IF EXISTS test.insert_test");
-        connection.createStatement().execute(
-                "CREATE TABLE IF NOT EXISTS test.insert_test (i Int32, s String) ENGINE = TinyLog");
+    public void testDualDatabaseConnection() throws Exception {
+        withNewConnection(dualDs, connection ->
+                withStatement(connection, stmt -> stmt.execute("CREATE DATABASE IF NOT EXISTS test"))
+        );
 
-        connection = dualDs.getConnection();
+        withNewConnection(dualDs, connection -> {
+            withStatement(connection, stmt -> stmt.execute("DROP TABLE IF EXISTS test.insert_test"));
+            withStatement(connection, stmt -> stmt.execute("CREATE TABLE IF NOT EXISTS test.insert_test (i Int32, s String) ENGINE = TinyLog"));
+        });
 
-        PreparedStatement statement = connection.prepareStatement("INSERT INTO test.insert_test (s, i) VALUES (?, ?)");
-        statement.setString(1, "asd");
-        statement.setInt(2, 42);
-        statement.execute();
+        withNewConnection(dualDs, connection -> {
+            withPreparedStatement(connection, "INSERT INTO test.insert_test (s, i) VALUES (?, ?)", pstmt -> {
+                pstmt.setString(1, "asd");
+                pstmt.setInt(2, 42);
+                pstmt.execute();
+            });
+            withStatement(connection, stmt -> {
+                ResultSet rs = stmt.executeQuery("SELECT * FROM test.insert_test");
+                rs.next();
+                assertEquals("asd", rs.getString("s"));
+                assertEquals(42, rs.getInt("i"));
+            });
+        });
 
-        ResultSet rs = connection.createStatement().executeQuery("SELECT * from test.insert_test");
-        rs.next();
+        withNewConnection(dualDs, connection -> {
+            withPreparedStatement(connection, "INSERT INTO test.insert_test (s, i) VALUES (?, ?)", pstmt -> {
+                pstmt.setString(1, "asd");
+                pstmt.setInt(2, 42);
+                pstmt.execute();
+            });
 
-        assertEquals("asd", rs.getString("s"));
-        assertEquals(42, rs.getInt("i"));
+            withStatement(connection, stmt -> {
+                ResultSet rs = stmt.executeQuery("SELECT * from test.insert_test");
+                rs.next();
 
-        connection = dualDs.getConnection();
-
-        statement = connection.prepareStatement("INSERT INTO test.insert_test (s, i) VALUES (?, ?)");
-        statement.setString(1, "asd");
-        statement.setInt(2, 42);
-        statement.execute();
-
-        rs = connection.createStatement().executeQuery("SELECT * from test.insert_test");
-        rs.next();
-
-        assertEquals("asd", rs.getString("s"));
-        assertEquals(42, rs.getInt("i"));
-
+                assertEquals("asd", rs.getString("s"));
+                assertEquals(42, rs.getInt("i"));
+            });
+        });
     }
-
 
     @Test
     public void testCorrectActualizationDatabaseConnection() throws Exception {
         singleDs.actualize();
-        try (Connection connection = singleDs.getConnection()) {
-            assertTrue(connection.isValid(1000));
-        }
+        withNewConnection(singleDs, connection -> assertTrue(connection.isValid(1000)));
     }
-
 
     @Test
     public void testDisableConnection() {
         BalancedClickhouseDataSource badDatasource = new BalancedClickhouseDataSource(
                 "jdbc:clickhouse://not.existed.url:" + CK_PORT, new Properties());
         badDatasource.actualize();
-        try {
-            Connection connection = badDatasource.getConnection();
+        try (Connection ignored = badDatasource.getConnection()) {
             fail();
         } catch (Exception e) {
             // There is no enabled connections
         }
     }
-
 
     @Test
     public void testWorkWithEnabledUrl() throws Exception {
@@ -124,40 +124,45 @@ public class BalancedClickhouseDataSourceITest extends AbstractITest {
                 String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s,%s:%s", "not.existed.url", CK_PORT, CK_IP, CK_PORT), new Properties());
 
         halfDatasource.actualize();
-        Connection connection = halfDatasource.getConnection();
 
-        connection.createStatement().execute("CREATE DATABASE IF NOT EXISTS test");
-        connection = halfDatasource.getConnection();
-        connection.createStatement().execute("DROP TABLE IF EXISTS test.insert_test");
-        connection.createStatement().execute(
-                "CREATE TABLE IF NOT EXISTS test.insert_test (i Int32, s String) ENGINE = TinyLog"
+        withNewConnection(halfDatasource, connection ->
+                withStatement(connection, stmt -> stmt.execute("CREATE DATABASE IF NOT EXISTS test"))
         );
 
-        connection = halfDatasource.getConnection();
+        withNewConnection(halfDatasource, connection -> {
+            withStatement(connection, stmt -> stmt.execute("DROP TABLE IF EXISTS test.insert_test"));
+            withStatement(connection, stmt -> stmt.execute("CREATE TABLE IF NOT EXISTS test.insert_test (i Int32, s String) ENGINE = TinyLog"));
+        });
 
-        PreparedStatement statement = connection.prepareStatement("INSERT INTO test.insert_test (s, i) VALUES (?, ?)");
-        statement.setString(1, "asd");
-        statement.setInt(2, 42);
-        statement.execute();
+        withNewConnection(halfDatasource, connection -> {
+            withPreparedStatement(connection, "INSERT INTO test.insert_test (s, i) VALUES (?, ?)", pstmt -> {
+                pstmt.setString(1, "asd");
+                pstmt.setInt(2, 42);
+                pstmt.execute();
+            });
 
-        ResultSet rs = connection.createStatement().executeQuery("SELECT * from test.insert_test");
-        rs.next();
+            withStatement(connection, stmt -> {
+                ResultSet rs = stmt.getConnection().createStatement().executeQuery("SELECT * FROM test.insert_test");
+                rs.next();
+                assertEquals("asd", rs.getString("s"));
+                assertEquals(42, rs.getInt("i"));
+            });
+        });
 
-        assertEquals("asd", rs.getString("s"));
-        assertEquals(42, rs.getInt("i"));
+        withNewConnection(halfDatasource, connection -> {
+            withPreparedStatement(connection, "INSERT INTO test.insert_test (s, i) VALUES (?, ?)", pstmt -> {
+                pstmt.setString(1, "asd");
+                pstmt.setInt(2, 42);
+                pstmt.execute();
+            });
 
-        connection = halfDatasource.getConnection();
-
-        statement = connection.prepareStatement("INSERT INTO test.insert_test (s, i) VALUES (?, ?)");
-        statement.setString(1, "asd");
-        statement.setInt(2, 42);
-        statement.execute();
-
-        rs = connection.createStatement().executeQuery("SELECT * from test.insert_test");
-        rs.next();
-
-        assertEquals("asd", rs.getString("s"));
-        assertEquals(42, rs.getInt("i"));
+            withStatement(connection, stmt -> {
+                ResultSet rs = stmt.executeQuery("SELECT * from test.insert_test");
+                rs.next();
+                assertEquals("asd", rs.getString("s"));
+                assertEquals(42, rs.getInt("i"));
+            });
+        });
     }
 
     @Test

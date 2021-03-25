@@ -27,14 +27,11 @@ import org.testcontainers.utility.MountableFile;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.ZoneId;
 import java.util.Enumeration;
 
-import static io.netty.util.ResourceLeakDetector.Level.*;
+import static io.netty.util.ResourceLeakDetector.Level.PARANOID;
 
 @Testcontainers
 public abstract class AbstractITest implements Serializable {
@@ -42,8 +39,8 @@ public abstract class AbstractITest implements Serializable {
     public static final Logger LOG = LoggerFactory.getLogger(AbstractITest.class);
 
     static {
-        String levelProp = SystemUtil.loadProp("NETTY_RESOURCE_LEAK_DETECT_LEVEL", "SIMPLE");
-        ResourceLeakDetector.Level level = SIMPLE;
+        String levelProp = SystemUtil.loadProp("NETTY_RESOURCE_LEAK_DETECT_LEVEL", "PARANOID");
+        ResourceLeakDetector.Level level = PARANOID;
         try {
             level = ResourceLeakDetector.Level.valueOf(levelProp);
         } catch (IllegalArgumentException ex) {
@@ -146,8 +143,42 @@ public abstract class AbstractITest implements Serializable {
         }
     }
 
+    protected void withStatement(Connection connection, WithStatement withStatement) throws Exception {
+        try (Statement stmt = connection.createStatement()) {
+            withStatement.apply(stmt);
+        }
+    }
+
+    protected void withStatement(WithStatement withStatement, Object... args) throws Exception {
+        withNewConnection(connection -> withStatement(connection, withStatement), args);
+    }
+
+    protected void withPreparedStatement(Connection connection,
+                                         String sql,
+                                         WithPreparedStatement withPreparedStatement) throws Exception {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            withPreparedStatement.apply(pstmt);
+        }
+    }
+
+    protected void withPreparedStatement(String sql,
+                                         WithPreparedStatement withPreparedStatement,
+                                         Object... args) throws Exception {
+        withNewConnection(connection -> withPreparedStatement(connection, sql, withPreparedStatement), args);
+    }
+
     @FunctionalInterface
     public interface WithConnection {
         void apply(Connection connection) throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface WithStatement {
+        void apply(Statement stmt) throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface WithPreparedStatement {
+        void apply(PreparedStatement pstmt) throws Exception;
     }
 }

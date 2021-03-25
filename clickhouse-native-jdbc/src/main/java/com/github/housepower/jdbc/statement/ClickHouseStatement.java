@@ -126,9 +126,11 @@ public class ClickHouseStatement implements SQLStatement {
     @Override
     public void close() throws SQLException {
         LOG.debug("close Statement");
-        this.isClosed = true;
-        if (block != null) {
-            block.close();
+        if (!isClosed) {
+            this.isClosed = true;
+            if (block != null) {
+                block.close();
+            }
         }
     }
 

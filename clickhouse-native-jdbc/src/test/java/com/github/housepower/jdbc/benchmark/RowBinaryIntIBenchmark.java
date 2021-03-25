@@ -15,15 +15,13 @@
 package com.github.housepower.jdbc.benchmark;
 
 import com.google.common.base.Strings;
-
 import org.openjdk.jmh.annotations.Benchmark;
-
-import java.sql.PreparedStatement;
-
 import ru.yandex.clickhouse.ClickHouseStatement;
 import ru.yandex.clickhouse.domain.ClickHouseFormat;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.sql.PreparedStatement;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  */

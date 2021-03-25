@@ -65,15 +65,11 @@ public class ColumnTuple extends AbstractColumn {
 
     @Override
     public void setColumnWriterBuffer(ByteBufSink buffer) {
-        super.setColumnWriterBuffer(buffer);
-
         for (IColumn column : columnDataArray) {
-            ByteBufSink oldBuf = column.getColumnWriterBuffer();
-            if (oldBuf != null) {
-                oldBuf.close();
-            }
+            column.close();
             column.setColumnWriterBuffer(new ByteBufSink());
         }
+        super.setColumnWriterBuffer(buffer);
     }
 
     @Override

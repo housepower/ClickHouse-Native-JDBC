@@ -22,7 +22,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InsertIBenchmark extends AbstractInsertIBenchmark {
     AtomicInteger tableMaxId = new AtomicInteger();

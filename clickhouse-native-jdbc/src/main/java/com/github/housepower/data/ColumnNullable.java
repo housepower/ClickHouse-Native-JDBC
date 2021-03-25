@@ -65,8 +65,9 @@ public class ColumnNullable extends AbstractColumn {
 
     @Override
     public void setColumnWriterBuffer(ByteBufSink buffer) {
-        super.setColumnWriterBuffer(buffer);
+        buffer.retain();
         data.setColumnWriterBuffer(buffer);
+        super.setColumnWriterBuffer(buffer);
     }
 
     @Override
