@@ -1206,7 +1206,7 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
 
     @Override
     public boolean supportsBatchUpdates() throws SQLException {
-        return false;
+        return true;
     }
 
     @Override
