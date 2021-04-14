@@ -104,6 +104,7 @@
         <google.jsr305.version>3.0.2</google.jsr305.version>
         <netty.version>4.1.47.Final</netty.version>
         <jmh.version>1.27</jmh.version>
+        <okio.version>1.17.5</okio.version>
         <yandex-clickhouse-jdbc.version>0.2.5</yandex-clickhouse-jdbc.version>
         <mockito.version>3.6.28</mockito.version>
         <guava.version>16.0.1</guava.version>
@@ -172,6 +173,11 @@
                 <groupId>io.airlift</groupId>
                 <artifactId>aircompressor</artifactId>
                 <version>${aircompressor.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${okio.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>

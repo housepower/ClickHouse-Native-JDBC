@@ -68,6 +68,10 @@
                                     <shadedPattern>com.github.housepower.repackaged.io.airlift</shadedPattern>
                                 </relocation>
                                 <relocation>
+                                    <pattern>okio</pattern>
+                                    <shadedPattern>com.github.housepower.repackaged.okio</shadedPattern>
+                                </relocation>
+                                <relocation>
                                     <pattern>io.netty</pattern>
                                     <shadedPattern>com.github.housepower.repackaged.io.netty</shadedPattern>
                                 </relocation>
