@@ -18,10 +18,8 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 
 import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SelectIBenchmark extends AbstractIBenchmark {
 
@@ -29,17 +27,18 @@ public class SelectIBenchmark extends AbstractIBenchmark {
     protected long selectNumber = 100000;
 
     public WithConnection benchSelect = connection -> {
-        long sum = 0;
-        Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery(String.format(Locale.ROOT, "SELECT number as n1, 'i_am_a_string' , now(), today() from numbers(%d)", selectNumber));
-        while (rs.next()) {
-            sum += rs.getLong(1);
-
-            rs.getString(2);
-            rs.getTimestamp(3);
-            rs.getDate(4);
-        }
-        assertEquals((selectNumber - 1) * selectNumber / 2, sum);
+        withStatement(connection, stmt -> {
+            long sum = 0;
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT number as n1, 'i_am_a_string' , now(), today() from numbers(" + selectNumber + ")");
+            while (rs.next()) {
+                sum += rs.getLong(1);
+                rs.getString(2);
+                rs.getTimestamp(3);
+                rs.getDate(4);
+            }
+            assertEquals((selectNumber - 1) * selectNumber / 2, sum);
+        });
     };
 
     @Benchmark

@@ -19,18 +19,15 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.Timestamp;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QueryRandomITest extends AbstractITest {
 
     @Test
     public void successfullyDateTime64DataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test_random");
             statement.executeQuery("CREATE TABLE test_random "
                                    + "(name String, value UInt32, arr Array(Float64), day Date, time DateTime, dc Decimal(7,2))"

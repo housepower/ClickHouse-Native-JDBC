@@ -24,10 +24,7 @@ import org.testcontainers.utility.MountableFile;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.ZoneId;
 import java.util.Enumeration;
 
@@ -127,8 +124,42 @@ public abstract class AbstractITest implements Serializable {
         }
     }
 
+    protected void withStatement(Connection connection, WithStatement withStatement) throws Exception {
+        try (Statement stmt = connection.createStatement()) {
+            withStatement.apply(stmt);
+        }
+    }
+
+    protected void withStatement(WithStatement withStatement, Object... args) throws Exception {
+        withNewConnection(connection -> withStatement(connection, withStatement), args);
+    }
+
+    protected void withPreparedStatement(Connection connection,
+                                         String sql,
+                                         WithPreparedStatement withPreparedStatement) throws Exception {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            withPreparedStatement.apply(pstmt);
+        }
+    }
+
+    protected void withPreparedStatement(String sql,
+                                         WithPreparedStatement withPreparedStatement,
+                                         Object... args) throws Exception {
+        withNewConnection(connection -> withPreparedStatement(connection, sql, withPreparedStatement), args);
+    }
+
     @FunctionalInterface
     public interface WithConnection {
         void apply(Connection connection) throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface WithStatement {
+        void apply(Statement stmt) throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface WithPreparedStatement {
+        void apply(PreparedStatement pstmt) throws Exception;
     }
 }

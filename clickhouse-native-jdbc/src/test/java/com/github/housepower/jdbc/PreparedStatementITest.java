@@ -17,7 +17,9 @@ package com.github.housepower.jdbc;
 import com.github.housepower.misc.DateTimeUtil;
 import org.junit.jupiter.api.Test;
 
-import java.sql.*;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,12 +33,10 @@ public class PreparedStatementITest extends AbstractITest {
 
     @Test
     public void successfullyInt8Query() throws Exception {
-        withNewConnection(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT ?,?");
-
-            preparedStatement.setByte(1, (byte) 1);
-            preparedStatement.setByte(2, (byte) 2);
-            ResultSet rs = preparedStatement.executeQuery();
+        withPreparedStatement("SELECT ?,?", pstmt -> {
+            pstmt.setByte(1, (byte) 1);
+            pstmt.setByte(2, (byte) 2);
+            ResultSet rs = pstmt.executeQuery();
             assertTrue(rs.next());
             assertEquals(1, rs.getByte(1));
             assertEquals(2, rs.getByte(2));
@@ -46,12 +46,10 @@ public class PreparedStatementITest extends AbstractITest {
 
     @Test
     public void successfullyInt16Query() throws Exception {
-        withNewConnection(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT ?,?");
-
-            preparedStatement.setShort(1, (short) 1);
-            preparedStatement.setShort(2, (short) 2);
-            ResultSet rs = preparedStatement.executeQuery();
+        withPreparedStatement("SELECT ?,?", pstmt -> {
+            pstmt.setShort(1, (short) 1);
+            pstmt.setShort(2, (short) 2);
+            ResultSet rs = pstmt.executeQuery();
             assertTrue(rs.next());
             assertEquals(1, rs.getShort(1));
             assertEquals(2, rs.getShort(2));
@@ -61,12 +59,10 @@ public class PreparedStatementITest extends AbstractITest {
 
     @Test
     public void successfullyInt32Query() throws Exception {
-        withNewConnection(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT ?,?");
-
-            preparedStatement.setInt(1, 1);
-            preparedStatement.setInt(2, 2);
-            ResultSet rs = preparedStatement.executeQuery();
+        withPreparedStatement("SELECT ?,?", pstmt -> {
+            pstmt.setInt(1, 1);
+            pstmt.setInt(2, 2);
+            ResultSet rs = pstmt.executeQuery();
             assertTrue(rs.next());
             assertEquals(1, rs.getInt(1));
             assertEquals(2, rs.getInt(2));
@@ -76,12 +72,10 @@ public class PreparedStatementITest extends AbstractITest {
 
     @Test
     public void successfullyInt64Query() throws Exception {
-        withNewConnection(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT ?,?");
-
-            preparedStatement.setLong(1, 1);
-            preparedStatement.setLong(2, 2);
-            ResultSet rs = preparedStatement.executeQuery();
+        withPreparedStatement("SELECT ?,?", pstmt -> {
+            pstmt.setLong(1, 1);
+            pstmt.setLong(2, 2);
+            ResultSet rs = pstmt.executeQuery();
             assertTrue(rs.next());
             assertEquals(1, rs.getLong(1));
             assertEquals(2, rs.getLong(2));
@@ -91,12 +85,10 @@ public class PreparedStatementITest extends AbstractITest {
 
     @Test
     public void successfullyStringQuery() throws Exception {
-        withNewConnection(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT ?,?");
-
-            preparedStatement.setString(1, "test1");
-            preparedStatement.setString(2, "test2");
-            ResultSet rs = preparedStatement.executeQuery();
+        withPreparedStatement("SELECT ?,?", pstmt -> {
+            pstmt.setString(1, "test1");
+            pstmt.setString(2, "test2");
+            ResultSet rs = pstmt.executeQuery();
             assertTrue(rs.next());
             assertEquals("test1", rs.getString(1));
             assertEquals("test2", rs.getString(2));
@@ -106,12 +98,10 @@ public class PreparedStatementITest extends AbstractITest {
 
     @Test
     public void successfullyNullable() throws Exception {
-        withNewConnection(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT arrayJoin([?,?])");
-
-            preparedStatement.setString(1, null);
-            preparedStatement.setString(2, "test2");
-            ResultSet rs = preparedStatement.executeQuery();
+        withPreparedStatement("SELECT arrayJoin([?,?])", pstmt -> {
+            pstmt.setString(1, null);
+            pstmt.setString(2, "test2");
+            ResultSet rs = pstmt.executeQuery();
             assertTrue(rs.next());
             assertNull(rs.getString(1));
             assertTrue(rs.wasNull());
@@ -143,17 +133,16 @@ public class PreparedStatementITest extends AbstractITest {
         assertEquals("2020-11-07 09:43:12", serverDateTimeLiteral);
 
         // use server_time_zone
-        withNewConnection(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT " +
-                    "toDate('" + dateLiteral + "'),               toDate(?),     toDate(?),     toDate(?), " +
-                    "toDateTime('" + serverDateTimeLiteral + "'), toDateTime(?), toDateTime(?), toDateTime(?)");
-            preparedStatement.setDate(1, Date.valueOf(date));
-            preparedStatement.setString(2, dateLiteral);
-            preparedStatement.setShort(3, (short) date.toEpochDay());
-            preparedStatement.setTimestamp(4, Timestamp.valueOf(clientDateTime));
-            preparedStatement.setString(5, serverDateTimeLiteral);
-            preparedStatement.setLong(6, serverDateTime.atZone(SERVER_TZ).toEpochSecond());
-            ResultSet rs = preparedStatement.executeQuery();
+        withPreparedStatement("SELECT " +
+                "toDate('" + dateLiteral + "'),               toDate(?),     toDate(?),     toDate(?), " +
+                "toDateTime('" + serverDateTimeLiteral + "'), toDateTime(?), toDateTime(?), toDateTime(?)", pstmt -> {
+            pstmt.setDate(1, Date.valueOf(date));
+            pstmt.setString(2, dateLiteral);
+            pstmt.setShort(3, (short) date.toEpochDay());
+            pstmt.setTimestamp(4, Timestamp.valueOf(clientDateTime));
+            pstmt.setString(5, serverDateTimeLiteral);
+            pstmt.setLong(6, serverDateTime.atZone(SERVER_TZ).toEpochSecond());
+            ResultSet rs = pstmt.executeQuery();
             assertTrue(rs.next());
             assertEquals(date.toEpochDay(), rs.getDate(1).toLocalDate().toEpochDay());
             assertEquals(date.toEpochDay(), rs.getDate(2).toLocalDate().toEpochDay());
@@ -175,17 +164,16 @@ public class PreparedStatementITest extends AbstractITest {
         });
 
         // use client_time_zone
-        withNewConnection(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT " +
-                    "toDate('" + dateLiteral + "'),               toDate(?),     toDate(?),     toDate(?), " +
-                    "toDateTime('" + serverDateTimeLiteral + "'), toDateTime(?), toDateTime(?), toDateTime(?)");
-            preparedStatement.setDate(1, Date.valueOf(date));
-            preparedStatement.setString(2, dateLiteral);
-            preparedStatement.setShort(3, (short) date.toEpochDay());
-            preparedStatement.setTimestamp(4, Timestamp.valueOf(serverDateTime));
-            preparedStatement.setString(5, serverDateTimeLiteral);
-            preparedStatement.setLong(6, clientDateTime.atZone(CLIENT_TZ).toEpochSecond());
-            ResultSet rs = preparedStatement.executeQuery();
+        withPreparedStatement("SELECT " +
+                "toDate('" + dateLiteral + "'),               toDate(?),     toDate(?),     toDate(?), " +
+                "toDateTime('" + serverDateTimeLiteral + "'), toDateTime(?), toDateTime(?), toDateTime(?)", pstmt -> {
+            pstmt.setDate(1, Date.valueOf(date));
+            pstmt.setString(2, dateLiteral);
+            pstmt.setShort(3, (short) date.toEpochDay());
+            pstmt.setTimestamp(4, Timestamp.valueOf(serverDateTime));
+            pstmt.setString(5, serverDateTimeLiteral);
+            pstmt.setLong(6, clientDateTime.atZone(CLIENT_TZ).toEpochSecond());
+            ResultSet rs = pstmt.executeQuery();
             assertTrue(rs.next());
             assertEquals(date.toEpochDay(), rs.getDate(1).toLocalDate().toEpochDay());
             assertEquals(date.toEpochDay(), rs.getDate(2).toLocalDate().toEpochDay());
@@ -209,30 +197,27 @@ public class PreparedStatementITest extends AbstractITest {
 
     @Test
     public void successfullyInsertData() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(stmt -> {
 
-            statement.execute("DROP TABLE IF EXISTS test");
-            statement.execute("CREATE TABLE test(" +
+            stmt.execute("DROP TABLE IF EXISTS test");
+            stmt.execute("CREATE TABLE test(" +
                     "id UInt8, " +
                     "day Date, " +
                     "time DateTime, " +
                     "flag Boolean" +
                     ")ENGINE = Log");
 
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO test VALUES(?, ?, ?, ?)");
-
-            // 2018-07-01 19:00:00  GMT
-            // 2018-07-02 03:00:00  Asia/Shanghai
-            long time = 1530403200 + 19 * 3600;
-
-            // FIXME support setByte on UInt8
-            preparedStatement.setByte(1, (byte) 1);
-            preparedStatement.setDate(2, new Date(time * 1000));
-            preparedStatement.setTimestamp(3, new Timestamp(time * 1000));
-            preparedStatement.setBoolean(4, true);
-            assertEquals(1, preparedStatement.executeUpdate());
+            withPreparedStatement(stmt.getConnection(), "INSERT INTO test VALUES(?, ?, ?, ?)", pstmt -> {
+                // 2018-07-01 19:00:00  GMT
+                // 2018-07-02 03:00:00  Asia/Shanghai
+                long time = 1530403200 + 19 * 3600;
+                // FIXME support setByte on UInt8
+                pstmt.setByte(1, (byte) 1);
+                pstmt.setDate(2, new Date(time * 1000));
+                pstmt.setTimestamp(3, new Timestamp(time * 1000));
+                pstmt.setBoolean(4, true);
+                assertEquals(1, pstmt.executeUpdate());
+            });
         });
     }
-
 }

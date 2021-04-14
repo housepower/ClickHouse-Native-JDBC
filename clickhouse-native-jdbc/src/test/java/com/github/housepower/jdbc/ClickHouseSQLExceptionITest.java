@@ -17,19 +17,15 @@ import com.github.housepower.exception.ClickHouseSQLException;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ClickHouseSQLExceptionITest extends AbstractITest {
 
     @Test
     public void errorCodeShouldBeAssigned() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(statement -> {
             try {
                 statement.executeQuery("DROP TABLE test");
             } catch (SQLException e) {

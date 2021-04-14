@@ -22,9 +22,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.testcontainers.containers.ClickHouseContainer;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
+import java.sql.*;
 import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
@@ -83,9 +81,33 @@ public class AbstractIBenchmark {
         }
     }
 
-    public interface WithConnection {
+    protected void withStatement(Connection connection, AbstractITest.WithStatement withStatement) throws Exception {
+        try (Statement stmt = connection.createStatement()) {
+            withStatement.apply(stmt);
+        }
+    }
 
+    protected void withPreparedStatement(Connection connection,
+                                         String sql,
+                                         AbstractITest.WithPreparedStatement withPreparedStatement) throws Exception {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            withPreparedStatement.apply(pstmt);
+        }
+    }
+
+    @FunctionalInterface
+    public interface WithConnection {
         void apply(Connection connection) throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface WithStatement {
+        void apply(Statement stmt) throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface WithPreparedStatement {
+        void apply(PreparedStatement pstmt) throws Exception;
     }
 
     public enum ConnectionType {

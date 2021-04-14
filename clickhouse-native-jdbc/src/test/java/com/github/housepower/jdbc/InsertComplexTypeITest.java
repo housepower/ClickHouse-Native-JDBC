@@ -16,7 +16,9 @@ package com.github.housepower.jdbc;
 
 import org.junit.jupiter.api.Test;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.Struct;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,9 +27,7 @@ public class InsertComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyArrayDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_Array Array(UInt8), test_Array2 Array(Array(String)), n3 Array(Nullable(UInt8)) )ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES ([1, 2, 3, 4], [ ['1', '2'] ], [1, 2, NULL] )");
@@ -36,7 +36,7 @@ public class InsertComplexTypeITest extends AbstractITest {
             assertArrayEquals(new Short[]{1, 2, 3, 4}, (Object[]) rs.getArray(1).getArray());
             Object[] objects = (Object[]) rs.getArray(2).getArray();
             ClickHouseArray array = (ClickHouseArray) objects[0];
-            assertArrayEquals(new Object[]{"1", "2"}, (Object[]) array.getArray());
+            assertArrayEquals(new Object[]{"1", "2"}, array.getArray());
 
             objects = (Object[]) rs.getArray(3).getArray();
             assertArrayEquals(new Short[]{1, 2, null}, objects);
@@ -48,16 +48,15 @@ public class InsertComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyFixedStringDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(str FixedString(3))ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES('abc')");
 
-            PreparedStatement stmt = connection.prepareStatement("INSERT INTO test VALUES(?)");
-            stmt.setObject(1, "abc");
-            stmt.executeUpdate();
+            withPreparedStatement(statement.getConnection(), "INSERT INTO test VALUES(?)", pstmt -> {
+                pstmt.setObject(1, "abc");
+                pstmt.executeUpdate();
+            });
 
             ResultSet rs = statement.executeQuery("SELECT str, COUNT(0) FROM test group by str");
             assertTrue(rs.next());
@@ -70,9 +69,7 @@ public class InsertComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyNullableDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_nullable Nullable(UInt8))ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(Null)(1)(3)(Null)");
@@ -92,9 +89,7 @@ public class InsertComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyDateTimeDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_datetime DateTime('UTC'), test_datetime2 DateTime('Asia/Shanghai') )ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES('2000-01-01 08:01:01', '2000-01-01 08:01:01')");
@@ -116,9 +111,7 @@ public class InsertComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyDateTime64DataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(seq UInt8, test_datetime DateTime64(9, 'UTC'))ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(1, toDateTime64('2000-01-01 00:01:01.123456789'))");
@@ -138,9 +131,7 @@ public class InsertComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyMinDateTime64DataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_datetime DateTime64(9, 'UTC'))ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(toDateTime64('1970-01-01 00:00:00.000000000'))");
@@ -156,9 +147,7 @@ public class InsertComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyMaxDateTime64DataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_datetime DateTime64(9, 'UTC'))ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(toDateTime64('2105-12-31 23:59:59.999999999'))");
@@ -175,9 +164,7 @@ public class InsertComplexTypeITest extends AbstractITest {
 
     @Test
     public void successfullyTupleDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_tuple Tuple(String, UInt8),"
                                    + " tuple_array  Tuple(Array(Nullable(String)), Nullable(UInt8)),"
