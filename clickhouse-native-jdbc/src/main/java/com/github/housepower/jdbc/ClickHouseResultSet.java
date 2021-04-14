@@ -26,7 +26,6 @@ import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.DataResponse;
 import com.github.housepower.settings.ClickHouseConfig;
-import io.netty.util.AsciiString;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -272,9 +271,6 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (data == null) {
             return null;
         }
-        if (data instanceof AsciiString) {
-            return ((AsciiString) data).toByteArray();
-        }
         if (data instanceof String) {
             return ((String) data).getBytes(cfg.charset());
         }
@@ -312,9 +308,10 @@ public class ClickHouseResultSet implements SQLResultSet {
         if (obj instanceof LocalDate) {
             return Date.valueOf(((LocalDate) obj));
         }
-        if (obj instanceof AsciiString) {
-            return ((AsciiString) obj).toByteArray();
-        }
+        // It's not necessary, because we always return a String, but keep it here for future refactor.
+        // if (obj instanceof BytesCharSeq) {
+        //    return ((BytesCharSeq) obj).bytes();
+        // }
         return obj;
     }
 

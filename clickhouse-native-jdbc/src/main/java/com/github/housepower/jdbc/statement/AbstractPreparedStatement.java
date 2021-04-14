@@ -16,10 +16,10 @@ package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.jdbc.ClickHouseConnection;
 import com.github.housepower.client.NativeContext;
+import com.github.housepower.misc.BytesCharSeq;
 import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
-import io.netty.util.AsciiString;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -120,7 +120,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void setBytes(int index, byte[] x) throws SQLException {
-        setObject(index, new AsciiString(x, false));
+        setObject(index, new BytesCharSeq(x));
     }
 
     @Override
