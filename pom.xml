@@ -102,7 +102,6 @@
 
         <aircompressor.version>0.18</aircompressor.version>
         <google.jsr305.version>3.0.2</google.jsr305.version>
-        <netty.version>4.1.47.Final</netty.version>
         <jmh.version>1.27</jmh.version>
         <yandex-clickhouse-jdbc.version>0.2.5</yandex-clickhouse-jdbc.version>
         <mockito.version>3.6.28</mockito.version>
@@ -177,11 +176,6 @@
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>${google.jsr305.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-buffer</artifactId>
-                <version>${netty.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.openjdk.jmh</groupId>
