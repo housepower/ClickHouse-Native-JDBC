@@ -15,11 +15,13 @@
 package com.github.housepower.jdbc.tool;
 
 import com.github.housepower.jdbc.AbstractITest;
-import com.google.common.base.Joiner;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
+import com.google.common.base.Joiner;
 
-import java.sql.*;
+import java.sql.Array;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -156,29 +158,25 @@ public class TestHarness extends AbstractITest {
         String sql = sb.toString();
         LOG.trace("CREATE TABLE DDL: \n{}", sql);
 
-        withNewConnection(connection -> {
-            Statement stmt = connection.createStatement();
-            stmt.execute(sql);
-        });
+        withStatement(stmt -> stmt.execute(sql));
     }
 
     public void insert() throws Exception {
         String sql = insertSQL();
-        withNewConnection(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sql);
+        withPreparedStatement(sql, pstmt -> {
             for (int row = 0; row < RECORD_COUNT; row++) {
                 for (int i = 0; i < types.size(); i++) {
                     if (types.get(i).name.get().startsWith("Array(")) {
-                        Array array =
-                                connection.createArrayOf("String", (Object[]) types.get(i).data.apply(row));
-                        stmt.setObject(i + 1, array);
+                        Array array = pstmt.getConnection().createArrayOf("String",
+                                (Object[]) types.get(i).data.apply(row));
+                        pstmt.setObject(i + 1, array);
                     } else {
-                        stmt.setObject(i + 1, types.get(i).data.apply(row));
+                        pstmt.setObject(i + 1, types.get(i).data.apply(row));
                     }
                 }
-                stmt.addBatch();
+                pstmt.addBatch();
             }
-            stmt.executeBatch();
+            pstmt.executeBatch();
         });
     }
 
@@ -199,8 +197,7 @@ public class TestHarness extends AbstractITest {
         String sql = sqlBuilder.toString();
         LOG.debug("AGG SQL: \n{}", sql);
 
-        withNewConnection(connection -> {
-            Statement stmt = connection.createStatement();
+        withStatement(stmt -> {
             ResultSet rs = stmt.executeQuery(sql);
 
             assertTrue(rs.next());
@@ -214,8 +211,7 @@ public class TestHarness extends AbstractITest {
     }
 
     public void checkItem() throws Exception {
-        withNewConnection(connection -> {
-            Statement stmt = connection.createStatement();
+        withStatement(stmt -> {
             ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName);
             int[] r = {0};
             while (rs.next()) {
@@ -246,10 +242,7 @@ public class TestHarness extends AbstractITest {
 
     public void clean() throws Exception {
         String sql = "DROP TABLE IF EXISTS " + tableName;
-        withNewConnection(connection -> {
-            Statement stmt = connection.createStatement();
-            stmt.execute(sql);
-        });
+        withStatement(stmt -> stmt.execute(sql));
     }
 
     public void removeType(String typeName) throws Exception {

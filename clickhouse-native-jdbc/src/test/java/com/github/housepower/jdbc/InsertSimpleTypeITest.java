@@ -17,9 +17,7 @@ package com.github.housepower.jdbc;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,9 +26,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyInt8DataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_uInt8 UInt8, test_Int8 Int8)ENGINE=Log");
 
@@ -48,9 +44,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyInt16DataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_uInt16 UInt16, test_Int16 Int16)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Short.MAX_VALUE + "," + Short.MIN_VALUE + ")");
@@ -65,9 +59,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyInt32DataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_uInt32 UInt32, test_Int32 Int32)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Integer.MAX_VALUE + "," + Integer.MIN_VALUE + ")");
@@ -82,20 +74,21 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyIPv4DataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(statement -> {
             long minIp = 0L;
             long maxIp = (1L << 32) - 1;
 
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(min_ip IPv4,max_ip IPv4)ENGINE=Log");
-            PreparedStatement pstmt = connection.prepareStatement("INSERT INTO test(min_ip, max_ip) VALUES(?, ?)");
-            for (int i = 0; i < 1; i++) {
-                pstmt.setLong(1, minIp);
-                pstmt.setLong(2, maxIp);
-                pstmt.addBatch();
-            }
-            pstmt.executeBatch();
+
+            withPreparedStatement(statement.getConnection(), "INSERT INTO test(min_ip, max_ip) VALUES(?, ?)", pstmt -> {
+                for (int i = 0; i < 1; i++) {
+                    pstmt.setLong(1, minIp);
+                    pstmt.setLong(2, maxIp);
+                    pstmt.addBatch();
+                }
+                pstmt.executeBatch();
+            });
             ResultSet rs = statement.executeQuery("SELECT min_ip,max_ip FROM test");
             assertTrue(rs.next());
             assertEquals(minIp, rs.getLong(1));
@@ -107,9 +100,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyInt64DataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_uInt64 UInt64, test_Int64 Int64)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Long.MAX_VALUE + "," + Long.MIN_VALUE + ")");
@@ -124,9 +115,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyStringDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test String)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES('我爱祖国')");
@@ -140,9 +129,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyDateDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test Date, test2 Date)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES('2000-01-01', '2000-01-31')");
@@ -162,9 +149,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyFloatDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_float32 Float32)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Float.MIN_VALUE + ")(" + Float.MAX_VALUE + ")");
@@ -181,9 +166,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyDoubleDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_float64 Float64)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES(" + Double.MIN_VALUE + ")(" + Double.MAX_VALUE + ")");
@@ -199,9 +182,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyUUIDDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test UUID)ENGINE=Log");
             statement.executeQuery("INSERT INTO test VALUES('01234567-89ab-cdef-0123-456789abcdef')");
@@ -215,8 +196,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyMultipleValuesWithComma() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.execute("CREATE TABLE test(id Int32) ENGINE = Log");
             statement.execute("INSERT INTO test VALUES (1), (2)");
@@ -232,9 +212,7 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyUnsignedDataType() throws Exception {
-        withNewConnection(connection -> {
-            Statement statement = connection.createStatement();
-
+        withStatement(statement -> {
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(i8 UInt8, i16 UInt16, i32 UInt32, i64 UInt64)ENGINE=Log");
 
@@ -264,17 +242,15 @@ public class InsertSimpleTypeITest extends AbstractITest {
 
     @Test
     public void successfullyCharset() throws Exception {
-        String []charsets = new String[]{ "UTF-8", "GB2312", "UTF-16"};
+        String[] charsets = new String[]{"UTF-8", "GB2312", "UTF-16"};
         for (String charset : charsets) {
-            withNewConnection(connection -> {
-                Statement statement = connection.createStatement();
-
+            withStatement(statement -> {
                 statement.executeQuery("DROP TABLE IF EXISTS test");
                 statement.executeQuery("CREATE TABLE test(s1 String, s2 String)ENGINE=Log");
 
                 String insertSQL = "INSERT INTO test VALUES('" + "我爱中国" +
-                                   "','" + "我爱地球" +
-                                   "')";
+                        "','" + "我爱地球" +
+                        "')";
 
                 statement.executeQuery(insertSQL);
 
