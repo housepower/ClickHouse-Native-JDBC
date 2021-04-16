@@ -46,6 +46,12 @@
 
     <profiles>
         <profile>
+            <id>spark-3.0</id>
+            <modules>
+                <module>clickhouse-integration-spark3</module>
+            </modules>
+        </profile>
+        <profile>
             <id>spark-3.1</id>
             <modules>
                 <module>clickhouse-integration-spark3</module>

@@ -18,8 +18,7 @@ import com.github.housepower.data.IDataType
 import com.github.housepower.data.`type`.{DataTypeInt16, DataTypeInt32, DataTypeInt64, DataTypeInt8, DataTypeUInt8}
 import com.github.housepower.data.`type`.complex.{DataTypeNullable, DataTypeString}
 import org.apache.spark.sql.ClickHouseAnalysisException
-import org.apache.spark.sql.types.{ByteType, IntegerType, LongType, ShortType, StringType, StructField, StructType}
-
+import org.apache.spark.sql.types._
 import java.nio.charset.StandardCharsets
 
 object ClickHouseSchemaUtil {
@@ -43,10 +42,11 @@ object ClickHouseSchemaUtil {
     StructType(structFields)
   }
 
-  def toClickHouseSchema(sparkSchema: StructType): Seq[(String, IDataType[_, _])] = {
+  def toClickHouseSchema(sparkSchema: StructType): Seq[(String, IDataType[_, _])] =
     sparkSchema.fields
       .map { field =>
         val chType = field.dataType match {
+          case BooleanType => new DataTypeInt8
           case ByteType => new DataTypeInt8
           case ShortType => new DataTypeInt16
           case IntegerType => new DataTypeInt32
@@ -56,7 +56,6 @@ object ClickHouseSchemaUtil {
         }
         (field.name, if (field.nullable) nullable(chType) else chType)
       }
-  }
 
   private def nullable(chType: IDataType[_, _]): IDataType[_, _] =
     new DataTypeNullable(s"Nullable(${chType.name()})", new DataTypeUInt8, chType)

@@ -14,19 +14,6 @@
 
 package com.github.housepower.spark
 
-import com.github.housepower.settings.ClickHouseConfig
-import org.apache.spark.sql.connector.write.{LogicalWriteInfo, SupportsTruncate, WriteBuilder}
+import org.apache.spark.sql.connector.write.WriterCommitMessage
 
-class ClickHouseWriteBuilder(
-    val info: LogicalWriteInfo,
-    val cfg: ClickHouseConfig,
-    database: String,
-    table: String
-) extends WriteBuilder
-    with SupportsTruncate {
-
-  override def buildForBatch(): ClickHouseBatchWrite =
-    new ClickHouseBatchWrite(cfg, info.queryId(), info.schema(), database, table)
-
-  override def truncate(): WriteBuilder = ???
-}
+object ClickHouseWriterCommitMessage extends WriterCommitMessage

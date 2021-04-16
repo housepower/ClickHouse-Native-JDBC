@@ -22,16 +22,22 @@ import com.github.housepower.settings.ClickHouseConfig
 import org.apache.spark.sql.connector.catalog._
 import org.apache.spark.sql.connector.catalog.TableCapability._
 import org.apache.spark.sql.connector.expressions.Transform
+import org.apache.spark.sql.connector.read.ScanBuilder
 import org.apache.spark.sql.connector.write.LogicalWriteInfo
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 case class Shard()
 
-class ClickHouseTable(ident: Identifier,
-                      override val schema: StructType,
-                      override val properties: util.Map[String, String],
-                      cfg: ClickHouseConfig
-                     ) extends Table with SupportsWrite with SupportsMetadataColumns {
+class ClickHouseTable(
+    ident: Identifier,
+    override val schema: StructType,
+    override val properties: util.Map[String, String],
+    cfg: ClickHouseConfig
+) extends Table
+    with SupportsRead
+    with SupportsWrite
+    with SupportsMetadataColumns {
 
   override val name: String = ident.toString
 
@@ -40,9 +46,10 @@ class ClickHouseTable(ident: Identifier,
 
   override def partitioning(): Array[Transform] = super.partitioning()
 
-  override def newWriteBuilder(info: LogicalWriteInfo): ClickHouseWriteBuilder = {
+  override def newScanBuilder(options: CaseInsensitiveStringMap): ScanBuilder = ???
+
+  override def newWriteBuilder(info: LogicalWriteInfo): ClickHouseWriteBuilder =
     new ClickHouseWriteBuilder(info, cfg, ident.namespace().head, ident.name())
-  }
 
   // TODO cluster, shard, partition
   override def metadataColumns(): Array[MetadataColumn] = Array()

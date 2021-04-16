@@ -14,19 +14,6 @@
 
 package com.github.housepower.spark
 
-import com.github.housepower.settings.ClickHouseConfig
-import org.apache.spark.sql.connector.write.{LogicalWriteInfo, SupportsTruncate, WriteBuilder}
+import com.github.housepower.exception.ClickHouseException
 
-class ClickHouseWriteBuilder(
-    val info: LogicalWriteInfo,
-    val cfg: ClickHouseConfig,
-    database: String,
-    table: String
-) extends WriteBuilder
-    with SupportsTruncate {
-
-  override def buildForBatch(): ClickHouseBatchWrite =
-    new ClickHouseBatchWrite(cfg, info.queryId(), info.schema(), database, table)
-
-  override def truncate(): WriteBuilder = ???
-}
+case class RetryableClickHouseException(code: Int, msg: String) extends ClickHouseException(code, msg)

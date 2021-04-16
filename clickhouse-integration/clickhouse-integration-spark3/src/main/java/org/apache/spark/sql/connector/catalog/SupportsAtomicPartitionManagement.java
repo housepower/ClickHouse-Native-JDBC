@@ -43,16 +43,10 @@ import java.util.Map;
 public interface SupportsAtomicPartitionManagement extends SupportsPartitionManagement {
 
   @Override
-  default void createPartition(
-      InternalRow ident,
-      Map<String, String> properties)
-      throws PartitionAlreadyExistsException, UnsupportedOperationException {
-    try {
-      createPartitions(new InternalRow[]{ident}, new Map[]{properties});
-    } catch (PartitionsAlreadyExistException e) {
-      throw new PartitionAlreadyExistsException(e.getMessage());
-    }
-  }
+  void createPartition(
+          InternalRow ident,
+          Map<String, String> properties)
+          throws PartitionAlreadyExistsException, UnsupportedOperationException;
 
   @Override
   default boolean dropPartition(InternalRow ident) {

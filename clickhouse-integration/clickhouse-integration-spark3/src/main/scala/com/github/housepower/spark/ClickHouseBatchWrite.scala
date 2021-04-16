@@ -18,20 +18,20 @@ import com.github.housepower.settings.ClickHouseConfig
 import org.apache.spark.sql.connector.write._
 import org.apache.spark.sql.types.StructType
 
-class ClickHouseBatchWrite(val cfg: ClickHouseConfig,
-                           queryId: String,
-                           schema: StructType,
-                           database: String,
-                           table: String) extends BatchWrite with Serializable {
+class ClickHouseBatchWrite(
+    val cfg: ClickHouseConfig,
+    queryId: String,
+    schema: StructType,
+    database: String,
+    table: String
+) extends BatchWrite
+    with Serializable {
 
-  override def createBatchWriterFactory(info: PhysicalWriteInfo): DataWriterFactory = {
-
+  override def createBatchWriterFactory(info: PhysicalWriteInfo): DataWriterFactory =
     new DataWriterFactory() {
-      override def createWriter(partitionId: Int, taskId: Long): ClickHouseBatchWriter = {
+      override def createWriter(partitionId: Int, taskId: Long): ClickHouseBatchWriter =
         new ClickHouseBatchWriter(cfg, queryId, database, table, schema)
-      }
     }
-  }
 
   override def commit(messages: Array[WriterCommitMessage]): Unit = {}
 

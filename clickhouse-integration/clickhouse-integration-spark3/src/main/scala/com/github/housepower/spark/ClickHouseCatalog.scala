@@ -28,10 +28,11 @@ import org.apache.spark.sql.ClickHouseAnalysisException
 import org.apache.spark.sql.catalyst.analysis.{NoSuchDatabaseException, NoSuchNamespaceException, NoSuchTableException}
 import org.apache.spark.sql.connector.catalog._
 import org.apache.spark.sql.connector.expressions.Transform
+import org.apache.spark.sql.connector.ExternalCommandRunner
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
-class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Logging {
+class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with ExternalCommandRunner with Logging {
 
   private var catalogName: String = _
 
@@ -50,7 +51,8 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
     val user = options.getOrDefault("user", "default")
     val password = options.getOrDefault("password", "")
     this.currentDb = options.getOrDefault("database", "default")
-    this.cfg = ClickHouseConfig.Builder.builder()
+    this.cfg = ClickHouseConfig.Builder
+      .builder()
       .host(host)
       .port(port)
       .user(user)
@@ -65,13 +67,22 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
       throw ClickHouseAnalysisException(s"Error[${ex.getCode}] ${ex.getDisplayText}")
   }
 
+  // ugly implementation
+  override def executeCommand(sql: String, options: CaseInsensitiveStringMap): Array[String] = {
+    initialize("__clickhouse_runner", options)
+    val result = grpcConn.syncQuery(sql)
+    if (result.getException.getCode != 0)
+      throw ClickHouseAnalysisException(result.getException.getDisplayText)
+    Array(result.getOutput)
+  }
+
   override def name(): String = catalogName
 
   override def listTables(namespace: Array[String]): Array[Identifier] = namespace match {
     case Array(database) =>
       val result = grpcConn.syncQuery(s"SHOW TABLES IN ${quote(database)}")
       Option(result.getException)
-        .filterNot { ex => ex.getCode == 0 }
+        .filterNot(ex => ex.getCode == 0)
         .foreach {
           case ex if ex.getCode == 81 => throw new NoSuchDatabaseException(namespace.mkString("."))
           case ex =>
@@ -79,9 +90,7 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
         }
 
       val output = om.readValue[JSONOutput](result.getOutput)
-      output.data.map { row => row.get("name").asText() }
-        .map { table => Identifier.of(namespace, table) }
-        .toArray
+      output.data.map(row => row.get("name").asText()).map(table => Identifier.of(namespace, table)).toArray
 
     case _ => throw new NoSuchDatabaseException(namespace.mkString("."))
   }
@@ -111,10 +120,13 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
          |   `lifetime_rows`, `lifetime_bytes`
          | FROM `system`.`tables`
          | WHERE `database`='${ident.namespace().mkString}' AND `name`='${ident.name()}'
-         | """.stripMargin)
+         | """.stripMargin
+    )
 
     if (tableResult.getException.getCode != 0)
-      throw ClickHouseAnalysisException(s"Error[${tableResult.getException.getCode}] ${tableResult.getException.getDisplayText}")
+      throw ClickHouseAnalysisException(
+        s"Error[${tableResult.getException.getCode}] ${tableResult.getException.getDisplayText}"
+      )
 
     val tableOutput = om.readValue[JSONOutput](tableResult.getOutput)
     assert(tableOutput.rows == 1)
@@ -148,14 +160,18 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
          | FROM `system`.`columns`
          | WHERE `database`='${ident.namespace().mkString}' AND `table`='${ident.name()}'
          | ORDER BY `position` ASC
-         | """.stripMargin)
+         | """.stripMargin
+    )
 
     if (columnResult.getException.getCode != 0)
-      throw ClickHouseAnalysisException(s"Error[${columnResult.getException.getCode}] ${columnResult.getException.getDisplayText}")
+      throw ClickHouseAnalysisException(
+        s"Error[${columnResult.getException.getCode}] ${columnResult.getException.getDisplayText}"
+      )
 
     val columnOutput = om.readValue[JSONOutput](columnResult.getOutput)
     val schema = ClickHouseSchemaUtil.fromClickHouseSchema(columnOutput.data.map { row =>
-      val mockServerCtx = new ServerContext(0L, 0L, 0L, ClickHouseConfig.Builder.builder().build(), ZoneId.systemDefault(), "")
+      val mockServerCtx =
+        new ServerContext(0L, 0L, 0L, ClickHouseConfig.Builder.builder().build(), ZoneId.systemDefault(), "")
       val fieldName = row.get("name").asText
       val ckType = DataTypeFactory.get(row.get("type").asText, mockServerCtx)
       (fieldName, ckType)
@@ -164,7 +180,6 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
   }
 
   /**
-   *
    * <h2>MergeTree Engine</h2>
    * {{{
    * CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
@@ -204,27 +219,28 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
    *
    * `ver` — column with version. Type `UInt*`, `Date` or `DateTime`.
    */
-  override def createTable(ident: Identifier,
-                           schema: StructType,
-                           partitions: Array[Transform],
-                           properties: util.Map[String, String]): ClickHouseTable = {
+  override def createTable(
+      ident: Identifier,
+      schema: StructType,
+      partitions: Array[Transform],
+      properties: util.Map[String, String]
+  ): ClickHouseTable = {
     val tbl = quoteTable(ident) match {
       case Some(t) => t
       case None => throw ClickHouseAnalysisException(s"Invalid table identifier: $ident")
     }
     val props = properties.asScala
-    val engineExpr = props.get("engine").map { e => s"ENGINE = $e" }.getOrElse {
-      throw ClickHouseAnalysisException("Missing property 'engine'")
-    }
+    val engineExpr = props.get("engine").map(e => s"ENGINE = $e")
+      .getOrElse(throw ClickHouseAnalysisException("Missing property 'engine'"))
     val partitionsExpr = partitions match {
       case transforms if transforms.nonEmpty =>
         transforms.map(_.describe).mkString("PARTITION BY (", ", ", ")")
       case _ => ""
     }
-    val clusterExpr = props.get("cluster").map { c => s"ON CLUSTER $c" }.getOrElse("")
-    val orderExpr = props.get("order_by").map { o => s"ORDER BY $o" }.getOrElse("")
-    val primaryKeyExpr = props.get("primary_key").map { p => s"PRIMARY KEY $p" }.getOrElse("")
-    val sampleExpr = props.get("sample_by").map { p => s"SAMPLE BY $p" }.getOrElse("")
+    val clusterExpr = props.get("cluster").map(c => s"ON CLUSTER $c").getOrElse("")
+    val orderExpr = props.get("order_by").map(o => s"ORDER BY $o").getOrElse("")
+    val primaryKeyExpr = props.get("primary_key").map(p => s"PRIMARY KEY $p").getOrElse("")
+    val sampleExpr = props.get("sample_by").map(p => s"SAMPLE BY $p").getOrElse("")
 
     val settingsExpr = props.filterKeys(_.startsWith("settings.")) match {
       case settings if settings.nonEmpty =>
@@ -232,13 +248,13 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
       case _ => ""
     }
 
-    val fieldsDefinition = ClickHouseSchemaUtil.toClickHouseSchema(schema).map { case (fieldName, ckType) =>
-      s"${quote(fieldName)} ${ckType.name()}"
-    }.mkString(",\n ")
+    val fieldsDefinition = ClickHouseSchemaUtil
+      .toClickHouseSchema(schema)
+      .map { case (fieldName, ckType) => s"${quote(fieldName)} ${ckType.name()}" }
+      .mkString(",\n ")
 
     val sql =
-      s"""
-         | CREATE TABLE $tbl $clusterExpr (
+      s""" CREATE TABLE $tbl $clusterExpr (
          | $fieldsDefinition
          | ) $engineExpr
          | $partitionsExpr
@@ -256,7 +272,8 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
     loadTable(ident)
   }
 
-  override def alterTable(ident: Identifier, changes: TableChange*): ClickHouseTable = throw new UnsupportedOperationException
+  override def alterTable(ident: Identifier, changes: TableChange*): ClickHouseTable =
+    throw new UnsupportedOperationException
 
   override def dropTable(ident: Identifier): Boolean = quoteTable(ident).exists { tbl =>
     val result = grpcConn.syncQuery(s"DROP TABLE $tbl")
@@ -278,7 +295,7 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
   override def listNamespaces(): Array[Array[String]] = {
     val result = grpcConn.syncQuery("SHOW DATABASES")
     val output = om.readValue[JSONOutput](result.getOutput)
-    output.data.map { row => Array(row.get("name").asText) }.toArray
+    output.data.map(row => Array(row.get("name").asText)).toArray
   }
 
   override def listNamespaces(namespace: Array[String]): Array[Array[String]] = namespace match {
@@ -290,16 +307,15 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
     case Array(database) =>
       listNamespaces()
         .map { case Array(db) => db }
-        .find { db => database == db }
-        .map { _ => Map.empty[String, String].asJava }
+        .find(db => database == db)
+        .map(_ => Map.empty[String, String].asJava)
         .getOrElse {
           throw new NoSuchDatabaseException(namespace.map(quote).mkString("."))
         }
     case _ => throw new NoSuchDatabaseException(namespace.map(quote).mkString("."))
   }
 
-  override def createNamespace(namespace: Array[String],
-                               metadata: util.Map[String, String]): Unit = namespace match {
+  override def createNamespace(namespace: Array[String], metadata: util.Map[String, String]): Unit = namespace match {
     case Array(database) => grpcConn.syncQuery(s"CREATE DATABASE ${quote(database)}")
   }
 
@@ -308,7 +324,7 @@ class ClickHouseCatalog extends TableCatalog with SupportsNamespaces with Loggin
   override def dropNamespace(namespace: Array[String]): Boolean = namespace match {
     case Array(database) =>
       val result = grpcConn.syncQuery(s"DROP DATABASE ${quote(database)}")
-      result.getException == null
+      result.getException.getCode == 0
     case _ => false
   }
 

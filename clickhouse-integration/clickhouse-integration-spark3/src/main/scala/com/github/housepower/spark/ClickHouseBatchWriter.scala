@@ -28,17 +28,20 @@ import scala.collection.mutable
 
 import com.github.housepower.settings.ClickHouseConfig
 
-class ClickHouseBatchWriter(val cfg: ClickHouseConfig,
-                            val queryId: String,
-                            val database: String,
-                            val table: String,
-                            val schema: StructType,
-                            val batchSize: Int = 1000
-                           ) extends DataWriter[InternalRow] with Logging {
+class ClickHouseBatchWriter(
+    val cfg: ClickHouseConfig,
+    val queryId: String,
+    val database: String,
+    val table: String,
+    val schema: StructType,
+    val batchSize: Int = 1000
+) extends DataWriter[InternalRow]
+    with Logging {
 
   @transient val grpcConn: GrpcConnection = GrpcConnection.create(cfg)
 
-  val ckSchema: util.Map[String, String] = ClickHouseSchemaUtil.toClickHouseSchema(schema)
+  val ckSchema: util.Map[String, String] = ClickHouseSchemaUtil
+    .toClickHouseSchema(schema)
     .foldLeft(new util.LinkedHashMap[String, String]) { case (acc, (k, v)) =>
       acc.put(k, v.name()); acc
     }
@@ -54,7 +57,7 @@ class ClickHouseBatchWriter(val cfg: ClickHouseConfig,
   override def commit(): WriterCommitMessage = {
     if (buf.nonEmpty)
       flush()
-    new WriterCommitMessage {}
+    ClickHouseWriterCommitMessage
   }
 
   override def abort(): Unit = {}
@@ -63,8 +66,7 @@ class ClickHouseBatchWriter(val cfg: ClickHouseConfig,
 
   // TODO retry
   def flush(): Unit = {
-    val result = grpcConn.syncInsert(database, table, "JSONEachRow",
-      buf.mkString.getBytes(StandardCharsets.UTF_8))
+    val result = grpcConn.syncInsert(database, table, "JSONEachRow", buf.mkString.getBytes(StandardCharsets.UTF_8))
     result.getException match {
       case e if e.getCode != 0 => throw new IOException(e.getDisplayText)
       case _ => buf.clear

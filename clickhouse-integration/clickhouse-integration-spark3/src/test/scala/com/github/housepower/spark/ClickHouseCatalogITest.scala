@@ -49,7 +49,17 @@ class ClickHouseCatalogITest extends AbstractITest with Logging {
       .writeTo("clickhouse.default.spark_tbl")
       .append
 
-    spark.sql(""" DESC default.spark_tbl """).show(false)
+    val conf = Map(
+      "host" -> AbstractITest.CK_HOST,
+      "port" -> AbstractITest.CK_GRPC_PORT.toString,
+      "user" -> AbstractITest.CLICKHOUSE_USER,
+      "password" -> AbstractITest.CLICKHOUSE_PASSWORD,
+      "database" -> AbstractITest.CLICKHOUSE_DB)
+    spark.executeCommand(classOf[ClickHouseCatalog].getName,
+      "create table default.spark_tbl_1 as default.spark_tbl",
+      conf).collect
+
+    spark.sql(""" DESC default.spark_tbl_1 """).show(false)
   }
 
   @transient lazy implicit val spark: SparkSession = {
