@@ -27,7 +27,7 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class SocketSource implements ISource, ByteBufHelper {
+public class SocketSource implements ISource, OkioHelper {
 
     private final InputStream in;
     private final ByteBuf buf;

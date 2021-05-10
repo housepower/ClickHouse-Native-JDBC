@@ -16,6 +16,7 @@ package com.github.housepower.io;
 
 import com.github.housepower.misc.Switcher;
 import io.netty.buffer.ByteBuf;
+import okio.ByteString;
 
 import java.nio.charset.Charset;
 
@@ -96,6 +97,11 @@ public class CompositeSource implements ISource, SupportCompress {
     @Override
     public ByteBuf readSliceBinary() {
         return switcher.get().readSliceBinary();
+    }
+
+    @Override
+    public ByteString readByteString(int len) {
+        return switcher.get().readByteString(len);
     }
 
     @Override

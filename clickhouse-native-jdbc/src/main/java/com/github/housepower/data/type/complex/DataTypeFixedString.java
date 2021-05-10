@@ -14,42 +14,36 @@
 
 package com.github.housepower.data.type.complex;
 
-import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.exception.ClickHouseClientException;
 import com.github.housepower.io.ISink;
 import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
-import io.netty.util.AsciiString;
+import okio.ByteString;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class DataTypeFixedString implements IDataType<CharSequence, String> {
+public class DataTypeFixedString implements IDataType<ByteString, String> {
 
-    public static DataTypeCreator<CharSequence, String> creator = (lexer, serverContext) -> {
+    public static DataTypeCreator<ByteString, String> creator = (lexer, serverContext) -> {
         Validate.isTrue(lexer.character() == '(');
         Number fixedStringN = lexer.numberLiteral();
         Validate.isTrue(lexer.character() == ')');
-        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue(), serverContext);
+        return new DataTypeFixedString("FixedString(" + fixedStringN.intValue() + ")", fixedStringN.intValue());
     };
 
     private final int n;
     private final String name;
-    private final String defaultValue;
-    private final Charset charset;
+    private final ByteString defaultValue;
 
-    public DataTypeFixedString(String name, int n, NativeContext.ServerContext serverContext) {
+    public DataTypeFixedString(String name, int n) {
         this.n = n;
         this.name = name;
-        this.charset = serverContext.getConfigure().charset();
-        this.defaultValue = new String(new byte[n], charset);
+        this.defaultValue = ByteString.of(new byte[n]);
     }
 
     @Override
@@ -63,13 +57,13 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public String defaultValue() {
+    public ByteString defaultValue() {
         return defaultValue;
     }
 
     @Override
-    public Class<CharSequence> javaType() {
-        return CharSequence.class;
+    public Class<ByteString> javaType() {
+        return ByteString.class;
     }
 
     @Override
@@ -88,40 +82,27 @@ public class DataTypeFixedString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public void serializeBinary(CharSequence data, ISink sink) throws SQLException, IOException {
-        int writeLen;
-        int paddingLen;
-        if (data instanceof AsciiString) {
-            writeLen = data.length();
-            checkWriteLength(writeLen);
-            sink.writeCharSequence(data, StandardCharsets.US_ASCII);
-        } else if (charset.equals(StandardCharsets.UTF_8)) {
-            writeLen = ByteBufUtil.utf8Bytes(data);
-            checkWriteLength(writeLen);
-            sink.writeCharSequence(data, charset);
-        } else {
-            byte[] bytes = data.toString().getBytes(charset);
-            writeLen = bytes.length;
-            checkWriteLength(writeLen);
-            sink.writeBytes(Unpooled.wrappedBuffer(bytes));
-        }
-        paddingLen = n - writeLen;
+    public void serializeBinary(ByteString data, ISink sink) throws SQLException, IOException {
+        int writeLen = data.size();
+        int paddingLen = n - writeLen;
+        checkWriteLength(writeLen);
+        sink.writeBytes(data.toByteArray());
         sink.writeZero(paddingLen);
     }
 
     private void checkWriteLength(int writeLen) {
         if (writeLen > n)
-            throw new ClickHouseClientException("The size of FixString column is too large, got " + writeLen);
+            throw new ClickHouseClientException("The size of FixedString column is too large, got " + writeLen);
     }
 
     @Override
-    public CharSequence deserializeBinary(ISource source) throws SQLException, IOException {
-        return source.readCharSequence(n, charset);
+    public ByteString deserializeBinary(ISource source) throws SQLException, IOException {
+        return source.readByteString(n);
     }
 
     @Override
-    public CharSequence deserializeText(SQLLexer lexer) throws SQLException {
-        return lexer.stringLiteral();
+    public ByteString deserializeText(SQLLexer lexer) throws SQLException {
+        return ByteString.encodeString(lexer.stringLiteral(), StandardCharsets.UTF_8);
     }
 
     @Override

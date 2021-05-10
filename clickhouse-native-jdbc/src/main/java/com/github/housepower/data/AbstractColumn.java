@@ -14,7 +14,7 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ByteBufSink;
+import com.github.housepower.io.BufferSink;
 
 public abstract class AbstractColumn implements IColumn {
 
@@ -22,7 +22,7 @@ public abstract class AbstractColumn implements IColumn {
     protected final IDataType<?, ?> type;
 
     protected Object[] sourceValues;
-    protected ByteBufSink sinkBuf;
+    protected BufferSink sinkBuf;
 
     public AbstractColumn(String name, IDataType<?, ?> type, Object[] sourceValues) {
         this.name = name;
@@ -51,7 +51,7 @@ public abstract class AbstractColumn implements IColumn {
     }
 
     @Override
-    public void setColumnWriterBuffer(ByteBufSink buffer) {
+    public void setColumnWriterBuffer(BufferSink buffer) {
         this.sinkBuf = buffer;
     }
 

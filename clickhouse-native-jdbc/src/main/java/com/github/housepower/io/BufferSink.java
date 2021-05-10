@@ -14,34 +14,33 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.NettyUtil;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.util.ReferenceCountUtil;
+import okio.Buffer;
+import okio.ByteString;
 
 import java.nio.charset.Charset;
 
-@Deprecated
-public class ByteBufSink implements ISink, OkioHelper {
+public class BufferSink implements ISink, OkioHelper {
 
-    private final ByteBuf buf;
+    private final Buffer buf;
 
-    public ByteBufSink() {
-        this.buf = NettyUtil.alloc().buffer();
+    public BufferSink() {
+        this.buf = new Buffer();
     }
 
-    public ByteBuf retain() {
-        return buf.retain();
+    public Buffer internal() {
+        return this.buf;
     }
 
     @Override
     public void writeZero(int len) {
-        buf.writeZero(len);
+        OkioUtil.writeZero(buf, len);
     }
 
     @Override
     public void writeBoolean(boolean b) {
-        buf.writeBoolean(b);
+        buf.writeByte(b ? 1 : 0);
     }
 
     @Override
@@ -51,17 +50,17 @@ public class ByteBufSink implements ISink, OkioHelper {
 
     @Override
     public void writeShortLE(short s) {
-        buf.writeShortLE(s);
+        buf.writeShortLe(s);
     }
 
     @Override
     public void writeIntLE(int i) {
-        buf.writeIntLE(i);
+        buf.writeIntLe(i);
     }
 
     @Override
     public void writeLongLE(long l) {
-        buf.writeLongLE(l);
+        buf.writeLongLe(l);
     }
 
     @Override
@@ -71,38 +70,39 @@ public class ByteBufSink implements ISink, OkioHelper {
 
     @Override
     public void writeFloatLE(float f) {
-        buf.writeFloatLE(f);
+        buf.writeIntLe(Float.floatToRawIntBits(f));
     }
 
     @Override
     public void writeDoubleLE(double d) {
-        buf.writeDoubleLE(d);
+        buf.writeLongLe(Double.doubleToRawLongBits(d));
     }
 
     @Override
     public void writeBytes(byte[] bytes) {
-        buf.writeBytes(bytes);
+        buf.write(bytes);
     }
 
     @Override
     public void writeBytes(ByteBuf bytes) {
-        buf.writeBytes(bytes);
+        buf.write(bytes.array());
         ReferenceCountUtil.safeRelease(bytes);
     }
 
     @Override
     public void writeCharSequence(CharSequence seq, Charset charset) {
-        buf.writeCharSequence(seq, charset);
+        buf.write(ByteString.encodeString(seq.toString(), charset));
     }
 
     @Override
     public void writeBinary(byte[] bytes) {
-        writeBinary(buf, Unpooled.wrappedBuffer(bytes));
+        writeBinary(buf, bytes);
     }
 
     @Override
     public void writeBinary(ByteBuf bytes) {
-        writeBinary(buf, bytes);
+        writeBinary(buf, bytes.array());
+        ReferenceCountUtil.safeRelease(bytes);
     }
 
     @Override
@@ -117,10 +117,11 @@ public class ByteBufSink implements ISink, OkioHelper {
 
     @Override
     public void flush(boolean force) {
+        buf.flush();
     }
 
     @Override
     public void close() {
-        ReferenceCountUtil.safeRelease(buf);
+        buf.close();
     }
 }

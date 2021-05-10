@@ -14,7 +14,7 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ByteBufSink;
+import com.github.housepower.io.BufferSink;
 import com.github.housepower.io.CompositeSink;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ public interface IColumn extends AutoCloseable {
      */
     void flush(CompositeSink sink, boolean now) throws IOException, SQLException;
 
-    void setColumnWriterBuffer(ByteBufSink buffer);
+    void setColumnWriterBuffer(BufferSink buffer);
 
     // explicitly overwrite to suppress Exception
     @Override

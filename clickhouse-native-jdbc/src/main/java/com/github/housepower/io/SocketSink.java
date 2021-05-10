@@ -14,58 +14,77 @@
 
 package com.github.housepower.io;
 
-import com.github.housepower.misc.NettyUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
+import okio.BufferedSink;
+import okio.ByteString;
+import okio.Okio;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.nio.charset.Charset;
 
-public class SocketSink implements ISink, ByteBufHelper {
+public class SocketSink implements ISink, OkioHelper {
 
-    private final OutputStream out;
-    private final ByteBuf buf;
+    private final BufferedSink buf;
 
     public SocketSink(Socket socket) throws IOException {
-        this(socket.getOutputStream());
-    }
-
-    SocketSink(OutputStream output) {
-        this.out = output;
-        this.buf = NettyUtil.alloc().buffer();
+        this.buf = Okio.buffer(Okio.sink(socket));
     }
 
     @Override
     public void writeZero(int len) {
-        buf.writeZero(len);
+        try {
+            for (int i = 0; i < len; i++) buf.writeByte(0);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 
     @Override
     public void writeBoolean(boolean b) {
-        buf.writeBoolean(b);
+        try {
+            buf.writeByte(b ? 1 : 0);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 
     @Override
     public void writeByte(byte byt) {
-        buf.writeByte(byt);
+        try {
+            buf.writeByte(byt);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 
     @Override
     public void writeShortLE(short s) {
-        buf.writeShortLE(s);
+        try {
+            buf.writeShortLe(s);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 
     @Override
     public void writeIntLE(int i) {
-        buf.writeIntLE(i);
+        try {
+            buf.writeIntLe(i);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 
     @Override
     public void writeLongLE(long l) {
-        buf.writeLongLE(l);
+        try {
+            buf.writeLongLe(l);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 
     @Override
@@ -75,28 +94,59 @@ public class SocketSink implements ISink, ByteBufHelper {
 
     @Override
     public void writeFloatLE(float f) {
-        buf.writeFloatLE(f);
+        try {
+            buf.writeIntLe(Float.floatToRawIntBits(f));
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 
     @Override
     public void writeDoubleLE(double d) {
-        buf.writeDoubleLE(d);
+        try {
+            buf.writeLongLe(Double.doubleToRawLongBits(d));
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
+    }
+
+    @Override
+    public void writeBytes(byte[] bytes) {
+        try {
+            buf.write(bytes);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 
     @Override
     public void writeBytes(ByteBuf bytes) {
-        buf.writeBytes(bytes);
-        ReferenceCountUtil.safeRelease(bytes);
+        try {
+            buf.write(bytes.array());
+            ReferenceCountUtil.safeRelease(bytes);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 
     @Override
     public void writeCharSequence(CharSequence seq, Charset charset) {
-        buf.writeCharSequence(seq, charset);
+        try {
+            buf.write(ByteString.encodeString(seq.toString(), charset));
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
+    }
+
+    @Override
+    public void writeBinary(byte[] bytes) {
+        writeBinary(buf, bytes);
     }
 
     @Override
     public void writeBinary(ByteBuf bytes) {
-        writeBinary(buf, bytes);
+        writeBinary(buf, bytes.array());
+        ReferenceCountUtil.safeRelease(bytes);
     }
 
     @Override
@@ -112,9 +162,7 @@ public class SocketSink implements ISink, ByteBufHelper {
     @Override
     public void flush(boolean force) {
         try {
-            buf.readBytes(out, buf.readableBytes());
-            buf.clear();
-            out.flush();
+            buf.flush();
         } catch (IOException rethrow) {
             throw new UncheckedIOException(rethrow);
         }
@@ -122,6 +170,10 @@ public class SocketSink implements ISink, ByteBufHelper {
 
     @Override
     public void close() {
-        ReferenceCountUtil.safeRelease(buf);
+        try {
+            buf.close();
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
     }
 }

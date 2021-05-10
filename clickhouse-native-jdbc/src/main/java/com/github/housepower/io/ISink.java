@@ -15,6 +15,9 @@
 package com.github.housepower.io;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import okio.Buffer;
+import okio.ByteString;
 
 import java.nio.charset.Charset;
 
@@ -38,10 +41,16 @@ public interface ISink extends AutoCloseable {
 
     void writeDoubleLE(double d);
 
+    void writeBytes(byte[] bytes);
+
+    @Deprecated
     void writeBytes(ByteBuf bytes);
 
     void writeCharSequence(CharSequence seq, Charset charset);
 
+    void writeBinary(byte[] bytes);
+
+    @Deprecated
     void writeBinary(ByteBuf bytes);
 
     void writeCharSequenceBinary(CharSequence seq, Charset charset);

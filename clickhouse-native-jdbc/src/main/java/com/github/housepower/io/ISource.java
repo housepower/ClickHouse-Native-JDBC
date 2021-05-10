@@ -15,6 +15,7 @@
 package com.github.housepower.io;
 
 import io.netty.buffer.ByteBuf;
+import okio.ByteString;
 
 import java.nio.charset.Charset;
 
@@ -38,15 +39,24 @@ public interface ISource extends AutoCloseable {
 
     double readDoubleLE();
 
+    @Deprecated
     ByteBuf readSlice(int len);
 
+    @Deprecated
     ByteBuf readRetainedSlice(int len);
 
+    ByteString readByteString(int len);
+
+    @Deprecated
     CharSequence readCharSequence(int len, Charset charset);
 
+    @Deprecated
     ByteBuf readSliceBinary();
 
+    @Deprecated
     CharSequence readCharSequenceBinary(Charset charset);
+
+    ByteString readByteStringBinary();
 
     String readUTF8Binary();
 

@@ -20,6 +20,7 @@ import io.airlift.compress.lz4.Lz4Decompressor;
 import io.airlift.compress.zstd.ZstdDecompressor;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
+import okio.ByteString;
 
 import javax.annotation.Nullable;
 
@@ -30,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 import static com.github.housepower.settings.ClickHouseDefines.CHECKSUM_LENGTH;
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-public class DecompressSource implements ISource, ByteBufHelper, CodecHelper {
+public class DecompressSource implements ISource, OkioHelper, CodecHelper {
 
     private final ISource compressedReader;
     private final ByteBuf decompressedBuf;
@@ -107,6 +108,12 @@ public class DecompressSource implements ISource, ByteBufHelper, CodecHelper {
     public ByteBuf readRetainedSlice(int len) {
         maybeDecompress(len);
         return decompressedBuf.readRetainedSlice(len);
+    }
+
+    @Override
+    public ByteString readByteString(int len) {
+        maybeDecompress(len);
+        return null;
     }
 
     @Override

@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ByteBufHelperTest implements ByteBufHelper {
+class OkioHelperTest implements OkioHelper {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})

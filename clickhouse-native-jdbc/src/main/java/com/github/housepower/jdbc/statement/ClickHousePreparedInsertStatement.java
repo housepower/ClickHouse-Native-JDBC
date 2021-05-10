@@ -31,6 +31,7 @@ import com.github.housepower.misc.ExceptionUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.stream.ValuesWithParametersNativeInputFormat;
 import io.netty.util.AsciiString;
+import okio.ByteString;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -198,13 +199,13 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         }
         // put the most common cast at first to avoid `instanceof` test overhead
         if (type instanceof DataTypeString || type instanceof DataTypeFixedString) {
-            if (obj instanceof CharSequence)
-                return obj;
+            if (obj instanceof String)
+                return ByteString.encodeString((String) obj, cfg.charset());
             if (obj instanceof byte[])
-                return new AsciiString((byte[]) obj, false);
+                return ByteString.of((byte[]) obj);
             String objStr = obj.toString();
             LOG.debug("set value[{}]: {} on String Column", obj.getClass(), obj);
-            return objStr;
+            return ByteString.encodeString(objStr, cfg.charset());
         }
         if (type instanceof DataTypeDate) {
             if (obj instanceof java.util.Date)

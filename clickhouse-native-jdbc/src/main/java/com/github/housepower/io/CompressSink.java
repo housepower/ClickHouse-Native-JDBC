@@ -19,35 +19,36 @@ import com.github.housepower.misc.NettyUtil;
 import io.airlift.compress.Compressor;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
+import okio.Buffer;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import static com.github.housepower.settings.ClickHouseDefines.COMPRESSION_HEADER_LENGTH;
 
-public class CompressSink implements ISink, CodecHelper, ByteBufHelper {
+public class CompressSink implements ISink, CodecHelper, OkioHelper {
 
     private final int capacity;
-    private final ByteBuf buf;
+    private final Buffer buf;
     private final ISink sink;
     private final Compressor compressor;
 
     public CompressSink(int capacity, ISink sink, Compressor compressor) {
         this.capacity = capacity;
-        this.buf = NettyUtil.alloc().buffer();
+        this.buf = new Buffer();
         this.sink = sink;
         this.compressor = compressor;
     }
 
     @Override
     public void writeZero(int len) {
-        buf.writeZero(len);
+        OkioUtil.writeZero(buf, len);
         flush(false);
     }
 
     @Override
     public void writeBoolean(boolean b) {
-        buf.writeBoolean(b);
+        OkioUtil.writeBoolean(buf, b);
         flush(false);
     }
 
@@ -94,6 +95,12 @@ public class CompressSink implements ISink, CodecHelper, ByteBufHelper {
     }
 
     @Override
+    public void writeBytes(byte[] bytes) {
+        buf.writeBytes(bytes);
+        flush(false);
+    }
+
+    @Override
     public void writeBytes(ByteBuf bytes) {
         buf.writeBytes(bytes);
         ReferenceCountUtil.safeRelease(bytes);
@@ -103,6 +110,12 @@ public class CompressSink implements ISink, CodecHelper, ByteBufHelper {
     @Override
     public void writeCharSequence(CharSequence seq, Charset charset) {
         buf.writeCharSequence(seq, charset);
+        flush(false);
+    }
+
+    @Override
+    public void writeBinary(byte[] bytes) {
+        writeBinary(buf, bytes);
         flush(false);
     }
 

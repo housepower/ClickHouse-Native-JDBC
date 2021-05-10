@@ -59,6 +59,15 @@ public class ExceptionUtil {
         };
     }
 
+    public static void unchecked(CheckedRunnable checked) {
+        try {
+            checked.run();
+        } catch (Exception rethrow) {
+            throw unchecked(rethrow);
+        }
+    }
+
+
     public static void rethrowSQLException(CheckedRunnable checked) throws ClickHouseSQLException {
         try {
             checked.run();

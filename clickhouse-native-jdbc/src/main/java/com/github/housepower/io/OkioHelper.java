@@ -14,16 +14,24 @@
 
 package com.github.housepower.io;
 
+import com.github.housepower.misc.ExceptionUtil;
 import com.github.housepower.misc.NettyUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.util.ReferenceCountUtil;
+import okio.*;
 
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public interface ByteBufHelper {
-
+public interface OkioHelper {
+    ///////////////////////////////////////
+    /////////////// ByteBuf ///////////////
+    ///////////////////////////////////////
+    @Deprecated
     default long readVarInt(ByteBuf buf) {
         long number = 0;
         for (int i = 0; i < 9; i++) {
@@ -34,6 +42,7 @@ public interface ByteBufHelper {
         return number;
     }
 
+    @Deprecated
     default void writeVarInt(ByteBuf buf, long value) {
         for (int i = 0; i < 9; i++) {
             byte byt = (byte) (value & 0x7F);
@@ -44,32 +53,39 @@ public interface ByteBufHelper {
         }
     }
 
+    @Deprecated
     default String readUTF8Binary(ByteBuf buf) {
         int len = (int) readVarInt(buf);
         // the method has optimized for UTF-8, ISO-8859-1 and US-ASCII
         return buf.readCharSequence(len, StandardCharsets.UTF_8).toString();
     }
 
+    @Deprecated
     default void writeUTF8Binary(ByteBuf buf, CharSequence seq) {
         writeVarInt(buf, ByteBufUtil.utf8Bytes(seq));
         // the method has optimized for UTF-8, ISO-8859-1 and US-ASCII
         buf.writeCharSequence(seq, StandardCharsets.UTF_8);
     }
 
+    @Deprecated
     default CharSequence readCharSequenceBinary(ByteBuf buf, Charset charset) {
         int len = (int) readVarInt(buf);
         return buf.readCharSequence(len, charset);
     }
 
+    @Deprecated
     default void writeCharSequenceBinary(ByteBuf buf, CharSequence seq, Charset charset) {
         ByteBuf temp = NettyUtil.alloc().buffer();
         temp.writeCharSequence(seq, charset);
         writeBinary(buf, temp);
     }
 
+    @Deprecated
     default void writeBinary(ByteBuf buf, ByteBuf data) {
         writeVarInt(buf, data.readableBytes());
         buf.writeBytes(data);
         ReferenceCountUtil.safeRelease(data);
     }
+
+
 }

@@ -49,7 +49,7 @@ public class ClickHouseStatement implements SQLStatement {
     protected final ClickHouseConnection connection;
     protected final NativeContext nativeContext;
 
-    private ClickHouseConfig cfg;
+    protected ClickHouseConfig cfg;
     private long maxRows;
     private String db;
     private String table = "unknown";

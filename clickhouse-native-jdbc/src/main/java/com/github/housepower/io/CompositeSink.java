@@ -22,7 +22,7 @@ import io.netty.buffer.ByteBuf;
 import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 
-public class CompositeSink implements ISink, SupportCompress, ByteBufHelper {
+public class CompositeSink implements ISink, SupportCompress, OkioHelper {
 
     private final Switcher<ISink> switcher;
     private final boolean enableCompress;
@@ -82,6 +82,11 @@ public class CompositeSink implements ISink, SupportCompress, ByteBufHelper {
     }
 
     @Override
+    public void writeBytes(byte[] bytes) {
+        switcher.get().writeBytes(bytes);
+    }
+
+    @Override
     public void writeBytes(ByteBuf bytes) {
         switcher.get().writeBytes(bytes);
     }
@@ -89,6 +94,11 @@ public class CompositeSink implements ISink, SupportCompress, ByteBufHelper {
     @Override
     public void writeCharSequence(CharSequence seq, Charset charset) {
         switcher.get().writeCharSequence(seq, charset);
+    }
+
+    @Override
+    public void writeBinary(byte[] bytes) {
+        switcher.get().writeBinary(bytes);
     }
 
     @Override

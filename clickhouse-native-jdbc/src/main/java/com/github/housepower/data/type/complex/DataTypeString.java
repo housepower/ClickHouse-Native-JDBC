@@ -18,21 +18,16 @@ import com.github.housepower.data.IDataType;
 import com.github.housepower.io.ISink;
 import com.github.housepower.io.ISource;
 import com.github.housepower.misc.SQLLexer;
+import okio.ByteString;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class DataTypeString implements IDataType<CharSequence, String> {
+public class DataTypeString implements IDataType<ByteString, String> {
 
-    public static DataTypeCreator<CharSequence, String> CREATOR = (lexer, serverContext) -> new DataTypeString(serverContext.getConfigure().charset());
-
-    private final Charset charset;
-
-    public DataTypeString(Charset charset) {
-        this.charset = charset;
-    }
+    public static DataTypeCreator<ByteString, String> CREATOR = (lexer, serverContext) -> new DataTypeString();
 
     @Override
     public String name() {
@@ -45,13 +40,13 @@ public class DataTypeString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public String defaultValue() {
-        return "";
+    public ByteString defaultValue() {
+        return ByteString.EMPTY;
     }
 
     @Override
-    public Class<CharSequence> javaType() {
-        return CharSequence.class;
+    public Class<ByteString> javaType() {
+        return ByteString.class;
     }
 
     @Override
@@ -70,8 +65,8 @@ public class DataTypeString implements IDataType<CharSequence, String> {
     }
 
     @Override
-    public void serializeBinary(CharSequence data, ISink sink) throws SQLException, IOException {
-        sink.writeCharSequenceBinary(data, charset);
+    public void serializeBinary(ByteString data, ISink sink) throws SQLException, IOException {
+        sink.writeBinary(data.toByteArray());
     }
 
     /**
@@ -79,13 +74,13 @@ public class DataTypeString implements IDataType<CharSequence, String> {
      * for getBytes(idx) method, we encode the String again
      */
     @Override
-    public CharSequence deserializeBinary(ISource source) throws SQLException, IOException {
-        return source.readCharSequenceBinary(charset);
+    public ByteString deserializeBinary(ISource source) throws SQLException, IOException {
+        return source.readByteStringBinary();
     }
 
     @Override
-    public CharSequence deserializeText(SQLLexer lexer) throws SQLException {
-        return lexer.stringView();
+    public ByteString deserializeText(SQLLexer lexer) throws SQLException {
+        return ByteString.encodeString(lexer.stringLiteral(), StandardCharsets.UTF_8);
     }
 
     @Override

@@ -39,7 +39,7 @@ public class ColumnSimple extends AbstractColumn {
         }
 
         if (now) {
-            sink.writeBytes(sinkBuf.retain());
+            sink.writeBytes(sinkBuf.internal());
         }
     }
 }

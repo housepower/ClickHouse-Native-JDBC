@@ -20,7 +20,8 @@ import io.netty.util.ReferenceCountUtil;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class ByteBufSource implements ISource, ByteBufHelper {
+@Deprecated
+public class ByteBufSource implements ISource, OkioHelper {
 
     private final ByteBuf buf;
 

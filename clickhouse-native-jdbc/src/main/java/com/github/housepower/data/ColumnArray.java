@@ -14,7 +14,7 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ByteBufSink;
+import com.github.housepower.io.BufferSink;
 import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.data.type.complex.DataTypeArray;
 import com.github.housepower.io.CompositeSink;
@@ -57,13 +57,12 @@ public class ColumnArray extends AbstractColumn {
         data.flush(sink, false);
 
         if (now) {
-            sink.writeBytes(sinkBuf.retain());
+            sink.writeBytes(sinkBuf.internal());
         }
     }
 
     @Override
-    public void setColumnWriterBuffer(ByteBufSink buffer) {
-        buffer.retain();
+    public void setColumnWriterBuffer(BufferSink buffer) {
         data.setColumnWriterBuffer(buffer);
         super.setColumnWriterBuffer(buffer);
     }

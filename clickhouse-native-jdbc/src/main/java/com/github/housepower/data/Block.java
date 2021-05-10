@@ -14,7 +14,7 @@
 
 package com.github.housepower.data;
 
-import com.github.housepower.io.ByteBufSink;
+import com.github.housepower.io.BufferSink;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.BlockSettings.Setting;
 import com.github.housepower.misc.Validate;
@@ -148,7 +148,7 @@ public class Block implements AutoCloseable {
     public void initWriteBuffer() {
         for (IColumn column : columns) {
             column.close();
-            column.setColumnWriterBuffer(new ByteBufSink());
+            column.setColumnWriterBuffer(new BufferSink());
         }
     }
 

@@ -20,6 +20,7 @@ import com.github.housepower.misc.DateTimeUtil;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.jdbc.wrapper.SQLPreparedStatement;
 import io.netty.util.AsciiString;
+import okio.ByteString;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -120,7 +121,7 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
 
     @Override
     public void setBytes(int index, byte[] x) throws SQLException {
-        setObject(index, new AsciiString(x, false));
+        setObject(index, x);
     }
 
     @Override
