@@ -42,6 +42,38 @@ public class OkioUtil {
         }
     }
 
+    public static void writeByte(BufferedSink buf, byte b) {
+        try {
+            buf.writeByte(b);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
+    }
+
+    public static void writeShortLe(BufferedSink buf, short s) {
+        try {
+            buf.writeShortLe(s);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
+    }
+
+    public static void writeIntLe(BufferedSink buf, int i) {
+        try {
+            buf.writeIntLe(i);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
+    }
+
+    public static void writeLongLe(BufferedSink buf, long l) {
+        try {
+            buf.writeLongLe(l);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
+    }
+
     public static long readVarInt(BufferedSource buf) {
         try {
             long number = 0;
@@ -70,6 +102,30 @@ public class OkioUtil {
         }
     }
 
+    public static void writeFloatLe(BufferedSink buf, float f) {
+        try {
+            buf.writeIntLe(Float.floatToRawIntBits(f));
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
+    }
+
+    public static void writeDoubleLe(BufferedSink buf, double d) {
+        try {
+            buf.writeLongLe(Double.doubleToRawLongBits(d));
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
+    }
+
+    public static void writeBytes(BufferedSink buf, byte[] bytes) {
+        try {
+            buf.write(bytes);
+        } catch (IOException rethrow) {
+            throw new UncheckedIOException(rethrow);
+        }
+    }
+
     public static String readUTF8Binary(BufferedSource buf) {
         long len = readVarInt(buf);
         try {
@@ -92,10 +148,10 @@ public class OkioUtil {
         writeBinary(buf, ByteString.encodeString(seq.toString(), charset));
     }
 
-    public static void writeBinary(BufferedSink buf, byte[] data) {
-        writeVarInt(buf, data.length);
+    public static void writeBinary(BufferedSink buf, byte[] bytes) {
+        writeVarInt(buf, bytes.length);
         try {
-            buf.write(data);
+            buf.write(bytes);
         } catch (IOException rethrow) {
             throw new UncheckedIOException(rethrow);
         }

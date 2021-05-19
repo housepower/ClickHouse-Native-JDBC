@@ -110,6 +110,11 @@ public class CompositeSource implements ISource, SupportCompress {
     }
 
     @Override
+    public ByteString readByteStringBinary() {
+        return switcher.get().readByteStringBinary();
+    }
+
+    @Override
     public String readUTF8Binary() {
         return switcher.get().readUTF8Binary();
     }

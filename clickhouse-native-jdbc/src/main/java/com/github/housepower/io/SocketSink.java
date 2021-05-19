@@ -122,7 +122,7 @@ public class SocketSink implements ISink, OkioHelper {
     @Override
     public void writeBytes(ByteBuf bytes) {
         try {
-            buf.write(bytes.array());
+            buf.write(bytes.array().clone());
             ReferenceCountUtil.safeRelease(bytes);
         } catch (IOException rethrow) {
             throw new UncheckedIOException(rethrow);
@@ -145,7 +145,7 @@ public class SocketSink implements ISink, OkioHelper {
 
     @Override
     public void writeBinary(ByteBuf bytes) {
-        writeBinary(buf, bytes.array());
+        writeBinary(buf, bytes.array().clone());
         ReferenceCountUtil.safeRelease(bytes);
     }
 

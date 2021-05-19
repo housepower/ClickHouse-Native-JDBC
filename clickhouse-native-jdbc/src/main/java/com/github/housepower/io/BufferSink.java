@@ -40,79 +40,82 @@ public class BufferSink implements ISink, OkioHelper {
 
     @Override
     public void writeBoolean(boolean b) {
-        buf.writeByte(b ? 1 : 0);
+        OkioUtil.writeBoolean(buf, b);
     }
 
     @Override
     public void writeByte(byte byt) {
-        buf.writeByte(byt);
+        OkioUtil.writeByte(buf, byt);
     }
 
     @Override
     public void writeShortLE(short s) {
-        buf.writeShortLe(s);
+        OkioUtil.writeShortLe(buf, s);
     }
 
     @Override
     public void writeIntLE(int i) {
-        buf.writeIntLe(i);
+        OkioUtil.writeIntLe(buf, i);
     }
 
     @Override
     public void writeLongLE(long l) {
-        buf.writeLongLe(l);
+        OkioUtil.writeLongLe(buf, l);
     }
 
     @Override
     public void writeVarInt(long v) {
-        writeVarInt(buf, v);
+        OkioUtil.writeVarInt(buf, v);
     }
 
     @Override
     public void writeFloatLE(float f) {
-        buf.writeIntLe(Float.floatToRawIntBits(f));
+        OkioUtil.writeIntLe(buf, Float.floatToRawIntBits(f));
     }
 
     @Override
     public void writeDoubleLE(double d) {
-        buf.writeLongLe(Double.doubleToRawLongBits(d));
+        OkioUtil.writeLongLe(buf, Double.doubleToRawLongBits(d));
     }
 
     @Override
     public void writeBytes(byte[] bytes) {
-        buf.write(bytes);
+        OkioUtil.writeBytes(buf, bytes);
     }
 
     @Override
+    @Deprecated
     public void writeBytes(ByteBuf bytes) {
-        buf.write(bytes.array());
+        buf.write(bytes.array().clone());
         ReferenceCountUtil.safeRelease(bytes);
     }
 
     @Override
+    @Deprecated
     public void writeCharSequence(CharSequence seq, Charset charset) {
         buf.write(ByteString.encodeString(seq.toString(), charset));
     }
 
     @Override
     public void writeBinary(byte[] bytes) {
-        writeBinary(buf, bytes);
+        OkioUtil.writeBinary(buf, bytes);
     }
 
     @Override
+    @Deprecated
     public void writeBinary(ByteBuf bytes) {
-        writeBinary(buf, bytes.array());
+        OkioUtil.writeBinary(buf, bytes.array().clone());
         ReferenceCountUtil.safeRelease(bytes);
     }
 
     @Override
     public void writeCharSequenceBinary(CharSequence seq, Charset charset) {
-        writeCharSequenceBinary(buf, seq, charset);
+        OkioUtil.writeCharSequenceBinary(buf, seq, charset);
     }
 
     @Override
     public void writeUTF8Binary(CharSequence utf8) {
-        writeUTF8Binary(buf, utf8);
+        OkioUtil.writeUTF8Binary(buf, utf8);
     }
 
     @Override

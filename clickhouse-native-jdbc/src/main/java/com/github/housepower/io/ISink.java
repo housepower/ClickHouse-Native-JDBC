@@ -46,6 +46,7 @@ public interface ISink extends AutoCloseable {
     @Deprecated
     void writeBytes(ByteBuf bytes);
 
+    @Deprecated
     void writeCharSequence(CharSequence seq, Charset charset);
 
     void writeBinary(byte[] bytes);
@@ -53,6 +54,7 @@ public interface ISink extends AutoCloseable {
     @Deprecated
     void writeBinary(ByteBuf bytes);
 
+    @Deprecated
     void writeCharSequenceBinary(CharSequence seq, Charset charset);
 
     void writeUTF8Binary(CharSequence utf8);

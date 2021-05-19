@@ -20,6 +20,7 @@ import io.airlift.compress.Compressor;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
 import okio.Buffer;
+import okio.ByteString;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -54,101 +55,102 @@ public class CompressSink implements ISink, CodecHelper, OkioHelper {
 
     @Override
     public void writeByte(byte byt) {
-        buf.writeByte(byt);
+        OkioUtil.writeByte(buf, byt);
         flush(false);
     }
 
     @Override
     public void writeShortLE(short s) {
-        buf.writeShortLE(s);
+        OkioUtil.writeShortLe(buf, s);
         flush(false);
     }
 
     @Override
     public void writeIntLE(int i) {
-        buf.writeIntLE(i);
+        OkioUtil.writeIntLe(buf, i);
         flush(false);
     }
 
     @Override
     public void writeLongLE(long l) {
-        buf.writeLongLE(l);
+        OkioUtil.writeLongLe(buf, l);
         flush(false);
     }
 
     @Override
     public void writeVarInt(long v) {
-        writeVarInt(buf, v);
+        OkioUtil.writeVarInt(buf, v);
         flush(false);
     }
 
     @Override
     public void writeFloatLE(float f) {
-        buf.writeFloatLE(f);
+        OkioUtil.writeFloatLe(buf, f);
         flush(false);
     }
 
     @Override
     public void writeDoubleLE(double d) {
-        buf.writeDoubleLE(d);
+        OkioUtil.writeDoubleLe(buf, d);
         flush(false);
     }
 
     @Override
     public void writeBytes(byte[] bytes) {
-        buf.writeBytes(bytes);
+        OkioUtil.writeBytes(buf, bytes);
         flush(false);
     }
 
     @Override
     public void writeBytes(ByteBuf bytes) {
-        buf.writeBytes(bytes);
+        OkioUtil.writeBytes(buf, bytes.array().clone());
         ReferenceCountUtil.safeRelease(bytes);
         flush(false);
     }
 
     @Override
     public void writeCharSequence(CharSequence seq, Charset charset) {
-        buf.writeCharSequence(seq, charset);
+        buf.write(ByteString.encodeString(seq.toString(), charset));
         flush(false);
     }
 
     @Override
     public void writeBinary(byte[] bytes) {
-        writeBinary(buf, bytes);
+        OkioUtil.writeBinary(buf, bytes);
         flush(false);
     }
 
     @Override
     public void writeBinary(ByteBuf bytes) {
-        writeBinary(buf, bytes);
+        OkioUtil.writeBinary(buf, bytes.array().clone());
+        ReferenceCountUtil.safeRelease(bytes);
         flush(false);
     }
 
     @Override
     public void writeCharSequenceBinary(CharSequence seq, Charset charset) {
-        writeCharSequenceBinary(buf, seq, charset);
+        OkioUtil.writeCharSequenceBinary(buf, seq, charset);
         flush(false);
     }
 
     @Override
     public void writeUTF8Binary(CharSequence utf8) {
-        writeUTF8Binary(buf, utf8);
+        OkioUtil.writeUTF8Binary(buf, utf8);
         flush(false);
     }
 
     @Override
     public void flush(boolean force) {
-        if (buf.isReadable() && (force || buf.readableBytes() >= capacity)) {
+        if (force || buf.size() >= capacity) {
             // 16 bits checksum
             //  1 bit  compressed method
             //  4 bits compressed size
             //  4 bits decompressed size
             //         compressed data
-            int decompressedLen = buf.readableBytes();
+            int decompressedLen = (int) buf.size();
             int maxCompressedLen = compressor.maxCompressedLength(decompressedLen);
             ByteBuffer compressedData = ByteBuffer.allocate(maxCompressedLen);
-            compressor.compress(buf.nioBuffer(), compressedData);
+            compressor.compress(buf, compressedData);
             compressedData.flip();
             int compressedDataLen = compressedData.remaining();
 
