@@ -114,6 +114,12 @@ public abstract class AbstractPreparedStatement extends ClickHouseStatement impl
     }
 
     @Override
+    public void setDate(int index, Date x, Calendar cal) throws SQLException {
+        // just ignore cal, date has no concepts of timezone
+        setObject(index, x.toLocalDate());
+    }
+
+    @Override
     public void setBigDecimal(int index, BigDecimal x) throws SQLException {
         setObject(index, x);
     }
