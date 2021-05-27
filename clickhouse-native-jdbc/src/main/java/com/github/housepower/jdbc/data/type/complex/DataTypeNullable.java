@@ -106,6 +106,9 @@ public class DataTypeNullable implements IDataType {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
+        if (data == null) {
+            this.nestedDataType.serializeBinary(this.nestedDataType.defaultValue(), serializer);
+        }
         this.nestedDataType.serializeBinary(data, serializer);
     }
 
