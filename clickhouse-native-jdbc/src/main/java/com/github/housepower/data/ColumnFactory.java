@@ -23,7 +23,7 @@ public class ColumnFactory {
 
     public static IColumn createColumn(String name, IDataType<?, ?> type, Object[] values) {
         if (type instanceof DataTypeArray || type instanceof DataTypeMap)
-            return new ColumnArray(name, (DataTypeArray)((DataTypeMap)type).getElementType(), values);
+            return new ColumnArray(name, (DataTypeArray) ((DataTypeMap) type).getElementType(), values);
 
         if (type instanceof DataTypeNullable)
             return new ColumnNullable(name, (DataTypeNullable) type, values);

@@ -14,13 +14,19 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.data.IDataType;
+import com.github.housepower.data.type.complex.DataTypeString;
+import com.github.housepower.data.type.complex.DataTypeTuple;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -194,6 +200,35 @@ public class BatchInsertITest extends AbstractITest {
             while (rs.next()) {
                 assertEquals(selectTime * 1000, rs.getTimestamp(1).getTime());
                 selectTime += 3600;
+            }
+        });
+
+    }
+
+    @Test
+    public void successfullyBatchInsertMap() throws Exception {
+        withStatement(statement -> {
+
+            statement.execute("DROP TABLE IF EXISTS test");
+            statement.execute("CREATE TABLE test(kv Map(String, String))ENGINE=Log");
+
+            withPreparedStatement(statement.getConnection(), "INSERT INTO test VALUES(?)", pstmt -> {
+                for (int i = 0; i < 10; i++) {
+                    Map<String, String> map = new HashMap<String, String>();
+                    map.put("key", "value");
+                    map.put("keyAlternate", "valueAlternate");
+                    pstmt.setObject(1, map);
+                    pstmt.addBatch();
+                }
+                assertBatchInsertResult(pstmt.executeBatch(), 10);
+            });
+            ResultSet rs = statement.executeQuery("SELECT kv FROM test");
+            while (rs.next()) {
+                ClickHouseArray ck = (ClickHouseArray) rs.getObject(1);
+                ClickHouseStruct t = (ClickHouseStruct) ((Object[]) ck.getArray())[0];;
+                ClickHouseStruct t1 = (ClickHouseStruct) ((Object[]) ck.getArray())[1];
+                assertEquals(new Object[]{"key", "value"}, t.getAttributes());
+                assertEquals( new Object[]{"keyAlternate", "valueAlternate"}, t1.getAttributes());
             }
         });
 

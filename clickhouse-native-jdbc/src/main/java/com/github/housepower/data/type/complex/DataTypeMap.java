@@ -12,12 +12,12 @@ import com.github.housepower.serde.BinarySerializer;
 import java.io.IOException;
 import java.sql.SQLException;
 
-/**
+/*
  * @ClassName: DataTypeMap
  * @Description: TODO
  * @Author: Amitola
  * @Date: 2021/5/20
- **/
+ */
 public class DataTypeMap implements IDataType {
 
     private final String name;
@@ -119,10 +119,10 @@ public class DataTypeMap implements IDataType {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {}
+    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException { }
 
     @Override
-    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException {}
+    public void serializeBinaryBulk(Object[] data, BinarySerializer serializer) throws SQLException, IOException { }
 
     @Override
     public Object deserializeText(SQLLexer lexer) throws SQLException {

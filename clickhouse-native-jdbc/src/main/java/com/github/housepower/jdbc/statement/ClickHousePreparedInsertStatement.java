@@ -11,7 +11,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.github.housepower.jdbc.statement;
 
 import com.github.housepower.client.NativeContext;
@@ -21,7 +20,6 @@ import com.github.housepower.data.IColumn;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.data.type.*;
 import com.github.housepower.data.type.complex.*;
-import com.github.housepower.exception.ClickHouseException;
 import com.github.housepower.exception.ClickHouseSQLException;
 import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.jdbc.ClickHouseConnection;
@@ -283,7 +281,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             return convertToCkDataType(((DataTypeNullable) type).getNestedDataType(), obj);
         }
         if (type instanceof DataTypeArray) {
-            if(obj instanceof Map) obj = mapAssembleToCkArray(obj);
+            if (obj instanceof Map) obj = mapAssembleToCkArray(obj);
             if (!(obj instanceof ClickHouseArray)) {
                 throw new ClickHouseSQLException(-1, "require ClickHouseArray for column: " + type.name() + ", but found " + obj.getClass());
             }
@@ -300,7 +298,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
     }
 
     private Object mapAssembleToCkArray(Object obj) {
-        if(obj instanceof ClickHouseArray) return obj;
+        if (obj instanceof ClickHouseArray) return obj;
         if (obj instanceof Map) {
             try {
                 IDataType key = null;

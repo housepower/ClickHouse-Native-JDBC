@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.data.type.complex.DataTypeTuple;
 import org.junit.jupiter.api.Test;
 
 import java.sql.ResultSet;
@@ -191,6 +192,21 @@ public class InsertComplexTypeITest extends AbstractITest {
             assertArrayEquals(new Object[]{(long) 22, null}, t2.getAttributes());
 
             assertFalse(rs.next());
+            statement.executeQuery("DROP TABLE IF EXISTS test");
+        });
+    }
+
+    @Test
+    public void successfullyMapDataType() throws Exception {
+        withStatement(statement -> {
+            statement.executeQuery("DROP TABLE IF EXISTS test");
+            statement.executeQuery("CREATE TABLE test(test_map Map(String, String))ENGINE=Log");
+            statement.executeQuery("INSERT INTO test VALUES( {'key':'value'})");
+            ResultSet rs = statement.executeQuery("SELECT test_map FROM test");
+            assertTrue(rs.next());
+            ClickHouseArray clickHouseArray = (ClickHouseArray) rs.getObject(1);
+            ClickHouseStruct t1 = (ClickHouseStruct) ((Object[]) clickHouseArray.getArray())[0];
+            assertArrayEquals(new Object[]{"key", "value"}, t1.getAttributes());
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
