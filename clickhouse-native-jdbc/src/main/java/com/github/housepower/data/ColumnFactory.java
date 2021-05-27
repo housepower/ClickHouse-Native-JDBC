@@ -15,14 +15,15 @@
 package com.github.housepower.data;
 
 import com.github.housepower.data.type.complex.DataTypeArray;
+import com.github.housepower.data.type.complex.DataTypeMap;
 import com.github.housepower.data.type.complex.DataTypeNullable;
 import com.github.housepower.data.type.complex.DataTypeTuple;
 
 public class ColumnFactory {
 
     public static IColumn createColumn(String name, IDataType<?, ?> type, Object[] values) {
-        if (type instanceof DataTypeArray)
-            return new ColumnArray(name, (DataTypeArray) type, values);
+        if (type instanceof DataTypeArray || type instanceof DataTypeMap)
+            return new ColumnArray(name, (DataTypeArray)((DataTypeMap)type).getElementType(), values);
 
         if (type instanceof DataTypeNullable)
             return new ColumnNullable(name, (DataTypeNullable) type, values);
