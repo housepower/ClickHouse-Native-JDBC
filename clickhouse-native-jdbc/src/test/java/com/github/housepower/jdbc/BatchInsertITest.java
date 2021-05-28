@@ -221,7 +221,7 @@ public class BatchInsertITest extends AbstractITest {
             ResultSet rs = statement.executeQuery("SELECT kv FROM test");
             while (rs.next()) {
                 ClickHouseArray ck = (ClickHouseArray) rs.getObject(1);
-                ClickHouseStruct t = (ClickHouseStruct) ((Object[]) ck.getArray())[0];;
+                ClickHouseStruct t = (ClickHouseStruct) ((Object[]) ck.getArray())[0];
                 ClickHouseStruct t1 = (ClickHouseStruct) ((Object[]) ck.getArray())[1];
                 assertEquals(new Object[]{"key", "value"}, t.getAttributes());
                 assertEquals( new Object[]{"keyAlternate", "valueAlternate"}, t1.getAttributes());
