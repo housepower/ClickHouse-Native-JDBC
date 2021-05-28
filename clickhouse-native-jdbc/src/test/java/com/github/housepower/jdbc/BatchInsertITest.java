@@ -219,7 +219,8 @@ public class BatchInsertITest extends AbstractITest {
             while (rs.next()) {
                 ClickHouseArray ck = (ClickHouseArray) rs.getObject(1);
                 ClickHouseStruct t = (ClickHouseStruct) ((Object[]) ck.getArray())[0];
-                assertEquals(new Object[]{"key", "value"}, t.getAttributes());
+                assertEquals("key", t.getAttributes()[0]);
+                assertEquals("value", t.getAttributes()[1]);
             }
         });
 
