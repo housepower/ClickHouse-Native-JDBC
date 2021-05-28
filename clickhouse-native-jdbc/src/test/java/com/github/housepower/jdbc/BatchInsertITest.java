@@ -19,10 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -211,9 +208,8 @@ public class BatchInsertITest extends AbstractITest {
 
             withPreparedStatement(statement.getConnection(), "INSERT INTO test VALUES(?)", pstmt -> {
                 for (int i = 0; i < 10; i++) {
-                    Map<String, String> map = new HashMap<String, String>();
+                    Map<String, String> map = new HashMap<>();
                     map.put("key", "value");
-                    map.put("keyAlternate", "valueAlternate");
                     pstmt.setObject(1, map);
                     pstmt.addBatch();
                 }
@@ -223,9 +219,7 @@ public class BatchInsertITest extends AbstractITest {
             while (rs.next()) {
                 ClickHouseArray ck = (ClickHouseArray) rs.getObject(1);
                 ClickHouseStruct t = (ClickHouseStruct) ((Object[]) ck.getArray())[0];
-                ClickHouseStruct t1 = (ClickHouseStruct) ((Object[]) ck.getArray())[1];
                 assertEquals(new Object[]{"key", "value"}, t.getAttributes());
-                assertEquals( new Object[]{"keyAlternate", "valueAlternate"}, t1.getAttributes());
             }
         });
 
