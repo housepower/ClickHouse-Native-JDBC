@@ -14,7 +14,6 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.data.type.complex.DataTypeTuple;
 import org.junit.jupiter.api.Test;
 
 import java.sql.ResultSet;

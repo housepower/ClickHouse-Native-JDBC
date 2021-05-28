@@ -14,12 +14,8 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.data.IDataType;
-import com.github.housepower.data.type.complex.DataTypeString;
-import com.github.housepower.data.type.complex.DataTypeTuple;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
