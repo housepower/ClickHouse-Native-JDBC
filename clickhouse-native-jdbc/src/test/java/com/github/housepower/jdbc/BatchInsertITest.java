@@ -207,6 +207,7 @@ public class BatchInsertITest extends AbstractITest {
 
             statement.execute("DROP TABLE IF EXISTS test");
             statement.execute("CREATE TABLE test(kv Map(String, String))ENGINE=Log");
+            statement.execute("SET allow_experimental_map_type = 1");
 
             withPreparedStatement(statement.getConnection(), "INSERT INTO test VALUES(?)", pstmt -> {
                 for (int i = 0; i < 10; i++) {
