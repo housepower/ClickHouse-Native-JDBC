@@ -198,9 +198,9 @@ public class InsertComplexTypeITest extends AbstractITest {
     @Test
     public void successfullyMapDataType() throws Exception {
         withStatement(statement -> {
+            statement.execute("SET allow_experimental_map_type = 1");
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(test_map Map(String, String))ENGINE=Log");
-            statement.execute("SET allow_experimental_map_type = 1");
             statement.executeQuery("INSERT INTO test VALUES( {'key':'value'})");
             ResultSet rs = statement.executeQuery("SELECT test_map FROM test");
             assertTrue(rs.next());
