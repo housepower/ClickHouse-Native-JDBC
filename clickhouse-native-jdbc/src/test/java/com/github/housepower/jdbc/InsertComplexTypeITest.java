@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.Struct;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -201,12 +202,18 @@ public class InsertComplexTypeITest extends AbstractITest {
             statement.execute("SET allow_experimental_map_type = 1");
             statement.executeQuery("DROP TABLE IF EXISTS test");
             statement.executeQuery("CREATE TABLE test(kv Map(String, String))ENGINE=Log");
-            statement.executeQuery("INSERT INTO test VALUES({\'key\':\'value\'})");
-            ResultSet rs = statement.executeQuery("SELECT test_map FROM test");
+            withPreparedStatement(statement.getConnection(), "INSERT INTO test VALUES(?)", pstmt -> {
+                HashMap <String, String> map = new HashMap<>();
+                map.put("key", "value");
+                pstmt.setObject(1, map);
+                pstmt.executeUpdate();
+            });
+            ResultSet rs = statement.executeQuery("SELECT kv FROM test");
             assertTrue(rs.next());
             ClickHouseArray clickHouseArray = (ClickHouseArray) rs.getObject(1);
             ClickHouseStruct t1 = (ClickHouseStruct) ((Object[]) clickHouseArray.getArray())[0];
-            assertArrayEquals(new Object[]{"key", "value"}, t1.getAttributes());
+            assertEquals(new Object[]{"key", "value"}[0], t1.getAttributes()[0]);
+            assertEquals(new Object[]{"key", "value"}[1], t1.getAttributes()[1]);
             statement.executeQuery("DROP TABLE IF EXISTS test");
         });
     }
