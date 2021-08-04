@@ -172,6 +172,18 @@ public class ClickHouseConfig implements Serializable {
         return tcpKeepAlive;
     }
 
+    public boolean ssl() {
+        return (boolean) this.settings.getOrDefault(SettingKey.ssl, false);
+    }
+
+    public String sslMode() {
+        return (String) this.settings.getOrDefault(SettingKey.sslMode, (String) SettingKey.sslMode.defaultValue());
+    }
+
+    public String sslRootCertificate() {
+        return (String) this.settings.getOrDefault(SettingKey.sslRootCertificate, (String) SettingKey.sslRootCertificate.defaultValue());
+    }
+
     public static final class Builder {
         private String host;
         private int port;

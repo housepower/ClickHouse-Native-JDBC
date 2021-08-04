@@ -834,6 +834,27 @@ public class SettingKey implements Serializable {
             .withType(SettingType.Bool)
             .build();
 
+    public static SettingKey ssl = SettingKey.builder()
+            .withName("ssl")
+            .withType(SettingType.Bool)
+            .withDefaultValue(false)
+            .withDescription("Establish secure connection with TLS")
+            .build();
+
+    public static SettingKey sslMode = SettingKey.builder()
+            .withName("ssl_mode")
+            .withType(SettingType.UTF8)
+            .withDefaultValue("strict")
+            .withDescription("verify or not certificate: none (don't verify), strict (verify)")
+            .build();
+
+    public static SettingKey sslRootCertificate = SettingKey.builder()
+            .withName("ssl_root_certificate")
+            .withType(SettingType.UTF8)
+            .withDefaultValue("")
+            .withDescription("SSL/TLS root certificate")
+            .build();
+
     public static SettingKey charset = SettingKey.builder()
             .withName("charset")
             .withType(SettingType.UTF8)

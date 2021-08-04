@@ -16,6 +16,7 @@ package com.github.housepower.client;
 
 import com.github.housepower.buffer.SocketBuffedReader;
 import com.github.housepower.buffer.SocketBuffedWriter;
+import com.github.housepower.client.ssl.SSLContextBuilder;
 import com.github.housepower.data.Block;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.*;
@@ -29,11 +30,13 @@ import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.stream.QueryResult;
 import com.github.housepower.stream.ClickHouseQueryResult;
 
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Map;
@@ -47,18 +50,29 @@ public class NativeClient {
     public static NativeClient connect(ClickHouseConfig configure) throws SQLException {
         try {
             SocketAddress endpoint = new InetSocketAddress(configure.host(), configure.port());
-            // TODO support proxy
-            Socket socket = new Socket();
+            Socket socket = null;
+            boolean isSecureConnection = configure.ssl();
+            if (!isSecureConnection) {
+                socket = new Socket();
+            } else {
+                SSLContext context = new SSLContextBuilder(configure).getSSLContext();
+                System.setProperty("javax.net.ssl.file", (String) configure.settings().get(SettingKey.sslRootCertificate));
+                SSLSocketFactory factory = context.getSocketFactory();
+                socket = (SSLSocket) factory.createSocket();
+
+            }
             socket.setTcpNoDelay(true);
             socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
             socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
             socket.setKeepAlive(configure.tcpKeepAlive());
             socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
-
+            if (isSecureConnection) {
+                ((SSLSocket) socket).startHandshake();
+            }
             return new NativeClient(socket,
                     new BinarySerializer(new SocketBuffedWriter(socket), true),
                     new BinaryDeserializer(new SocketBuffedReader(socket), true));
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
     }
