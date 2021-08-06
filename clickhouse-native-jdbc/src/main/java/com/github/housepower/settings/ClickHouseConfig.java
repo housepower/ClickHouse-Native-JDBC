@@ -173,7 +173,7 @@ public class ClickHouseConfig implements Serializable {
     }
 
     public boolean ssl() {
-        return (boolean) this.settings.getOrDefault(SettingKey.ssl, false);
+        return (boolean) this.settings.getOrDefault(SettingKey.ssl, (boolean) SettingKey.ssl.defaultValue());
     }
 
     public String sslMode() {

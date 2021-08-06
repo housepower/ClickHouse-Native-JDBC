@@ -49,16 +49,14 @@ public class NativeClient {
     public static NativeClient connect(ClickHouseConfig configure) throws SQLException {
         try {
             SocketAddress endpoint = new InetSocketAddress(configure.host(), configure.port());
-            Socket socket = null;
+            Socket socket;
             boolean isSecureConnection = configure.ssl();
             if (!isSecureConnection) {
                 socket = new Socket();
             } else {
                 SSLContext context = new SSLContextBuilder(configure).getSSLContext();
-                System.setProperty("javax.net.ssl.file", (String) configure.settings().get(SettingKey.sslRootCertificate));
                 SSLSocketFactory factory = context.getSocketFactory();
                 socket = (SSLSocket) factory.createSocket();
-
             }
             socket.setTcpNoDelay(true);
             socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
