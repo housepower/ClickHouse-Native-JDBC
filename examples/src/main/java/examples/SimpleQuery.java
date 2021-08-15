@@ -25,7 +25,7 @@ import java.sql.Statement;
 public class SimpleQuery {
 
     public static void main(String[] args) throws Exception {
-        try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:clickhouse://127.0.0.1:9000?client_name=ck-example")) {
             try (Statement stmt = connection.createStatement()) {
                 try (ResultSet rs = stmt.executeQuery(
                         "SELECT (number % 3 + 1) as n, sum(number) FROM numbers(10000000) GROUP BY n")) {

@@ -14,22 +14,22 @@
 
 package com.github.housepower.jdbc;
 
-import com.github.housepower.client.SessionState;
 import com.github.housepower.client.NativeClient;
 import com.github.housepower.client.NativeContext;
+import com.github.housepower.client.SessionState;
 import com.github.housepower.data.Block;
 import com.github.housepower.data.DataTypeFactory;
-import com.github.housepower.misc.Validate;
-import com.github.housepower.protocol.HelloResponse;
-import com.github.housepower.stream.QueryResult;
-import com.github.housepower.settings.ClickHouseConfig;
-import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.jdbc.statement.ClickHousePreparedInsertStatement;
 import com.github.housepower.jdbc.statement.ClickHousePreparedQueryStatement;
 import com.github.housepower.jdbc.statement.ClickHouseStatement;
 import com.github.housepower.jdbc.wrapper.SQLConnection;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.protocol.HelloResponse;
+import com.github.housepower.settings.ClickHouseConfig;
+import com.github.housepower.settings.ClickHouseDefines;
+import com.github.housepower.stream.QueryResult;
 
 import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
@@ -37,7 +37,6 @@ import java.sql.*;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -313,7 +312,7 @@ public class ClickHouseConnection implements SQLConnection {
     private static NativeContext.ClientContext clientContext(NativeClient nativeClient, ClickHouseConfig configure) throws SQLException {
         Validate.isTrue(nativeClient.address() instanceof InetSocketAddress);
         InetSocketAddress address = (InetSocketAddress) nativeClient.address();
-        String clientName = String.format(Locale.ROOT, "%s %s", ClickHouseDefines.NAME, "client");
+        String clientName = configure.clientName();
         String initialAddress = "[::ffff:127.0.0.1]:0";
         return new NativeContext.ClientContext(initialAddress, address.getHostName(), clientName);
     }
