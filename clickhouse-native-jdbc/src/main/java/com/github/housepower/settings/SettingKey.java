@@ -797,6 +797,12 @@ public class SettingKey implements Serializable {
             .withDescription("Allow Int128, Int256, UInt256 and Decimal256 types")
             .build();
 
+    public static SettingKey client_name = SettingKey.builder()
+            .withName("client_name")
+            .withType(SettingType.UTF8)
+            .withDescription("identify who you are, it will record in system.query_log")
+            .build();
+
 
     public static SettingKey port = SettingKey.builder()
             .withName("port")

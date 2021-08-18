@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -39,10 +40,11 @@ public class ClickHouseConfig implements Serializable {
     private final String charset; // use String because Charset is not serializable
     private final Map<SettingKey, Serializable> settings;
     private final boolean tcpKeepAlive;
+    private final String clientName;
 
     private ClickHouseConfig(String host, int port, String database, String user, String password,
                              Duration queryTimeout, Duration connectTimeout, boolean tcpKeepAlive,
-                             String charset, Map<SettingKey, Serializable> settings) {
+                             String charset, String clientName, Map<SettingKey, Serializable> settings) {
         this.host = host;
         this.port = port;
         this.database = database;
@@ -52,6 +54,7 @@ public class ClickHouseConfig implements Serializable {
         this.connectTimeout = connectTimeout;
         this.tcpKeepAlive = tcpKeepAlive;
         this.charset = charset;
+        this.clientName = clientName;
         this.settings = settings;
     }
 
@@ -87,12 +90,17 @@ public class ClickHouseConfig implements Serializable {
         return Charset.forName(charset);
     }
 
+    public String clientName() {
+        return this.clientName;
+    }
+
     public String jdbcUrl() {
         StringBuilder builder = new StringBuilder(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX)
                 .append("//").append(host).append(":").append(port).append("/").append(database)
                 .append("?").append(SettingKey.query_timeout.name()).append("=").append(queryTimeout.getSeconds())
                 .append("&").append(SettingKey.connect_timeout.name()).append("=").append(connectTimeout.getSeconds())
                 .append("&").append(SettingKey.charset.name()).append("=").append(charset)
+                .append("&").append(SettingKey.client_name.name()).append("=").append(clientName)
                 .append("&").append(SettingKey.tcp_keep_alive.name()).append("=").append(tcpKeepAlive);
 
         for (Map.Entry<SettingKey, Serializable> entry : settings.entrySet()) {
@@ -143,6 +151,12 @@ public class ClickHouseConfig implements Serializable {
                 .build();
     }
 
+    public ClickHouseConfig withClientName(String clientName) {
+        return Builder.builder(this)
+                .clientName(clientName)
+                .build();
+    }
+
     public ClickHouseConfig withSettings(Map<SettingKey, Serializable> settings) {
         return Builder.builder(this)
                 .withSettings(settings)
@@ -182,6 +196,7 @@ public class ClickHouseConfig implements Serializable {
         private Duration queryTimeout;
         private boolean tcpKeepAlive;
         private Charset charset;
+        private String clientName;
         private Map<SettingKey, Serializable> settings = new HashMap<>();
 
         private Builder() {
@@ -202,6 +217,7 @@ public class ClickHouseConfig implements Serializable {
                     .queryTimeout(cfg.queryTimeout())
                     .charset(cfg.charset())
                     .tcpKeepAlive(cfg.tcpKeepAlive())
+                    .clientName(cfg.clientName())
                     .withSettings(cfg.settings());
         }
 
@@ -265,6 +281,11 @@ public class ClickHouseConfig implements Serializable {
             return this;
         }
 
+        public Builder clientName(String clientName) {
+            this.withSetting(SettingKey.client_name, clientName);
+            return this;
+        }
+
         public Builder settings(Map<SettingKey, Serializable> settings) {
             this.settings = settings;
             return this;
@@ -293,12 +314,14 @@ public class ClickHouseConfig implements Serializable {
             this.queryTimeout = (Duration) this.settings.getOrDefault(SettingKey.query_timeout, Duration.ZERO);
             this.tcpKeepAlive = (boolean) this.settings.getOrDefault(SettingKey.tcp_keep_alive, false);
             this.charset = Charset.forName((String) this.settings.getOrDefault(SettingKey.charset, "UTF-8"));
+            this.clientName = (String) this.settings.getOrDefault(SettingKey.client_name,
+                    String.format(Locale.ROOT, "%s %s", ClickHouseDefines.NAME, "client"));
 
             revisit();
             purgeSettings();
 
             return new ClickHouseConfig(
-                    host, port, database, user, password, queryTimeout, connectTimeout, tcpKeepAlive, charset.name(), settings);
+                    host, port, database, user, password, queryTimeout, connectTimeout, tcpKeepAlive, charset.name(), clientName, settings);
         }
 
         private void revisit() {
@@ -321,6 +344,7 @@ public class ClickHouseConfig implements Serializable {
             this.settings.remove(SettingKey.connect_timeout);
             this.settings.remove(SettingKey.tcp_keep_alive);
             this.settings.remove(SettingKey.charset);
+            this.settings.remove(SettingKey.client_name);
         }
     }
 }
