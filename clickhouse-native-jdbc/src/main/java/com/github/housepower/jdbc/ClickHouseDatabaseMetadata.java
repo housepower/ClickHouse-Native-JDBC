@@ -914,7 +914,7 @@ public final class ClickHouseDatabaseMetadata implements SQLDatabaseMetadata {
             //data type
             row.add(dataType.sqlTypeId());
             //type name
-            row.add(descTable.getString("name"));
+            row.add(dataType.name());
             // column size / precision
             row.add(dataType.getPrecision());
             //buffer length
