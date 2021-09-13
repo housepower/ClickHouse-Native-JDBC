@@ -14,15 +14,21 @@
 
 package com.github.housepower.jdbc;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class BatchInsertITest extends AbstractITest {
 
@@ -194,6 +200,36 @@ public class BatchInsertITest extends AbstractITest {
             while (rs.next()) {
                 assertEquals(selectTime * 1000, rs.getTimestamp(1).getTime());
                 selectTime += 3600;
+            }
+        });
+
+    }
+    
+    @Test
+    public void successfullyBatchInsertMap() throws Exception {
+        withStatement(statement -> {
+
+            statement.execute("SET allow_experimental_map_type = 1");
+            statement.execute("DROP TABLE IF EXISTS test");
+            statement.execute("CREATE TABLE test(tags Map(String, String))ENGINE=Log");
+
+            withPreparedStatement(statement.getConnection(), "INSERT INTO test VALUES(?)", pstmt -> {
+                for (int i = 0; i < 10; i++) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("key", "value");
+                    pstmt.setObject(1, map);
+                    pstmt.addBatch();
+                }
+                assertBatchInsertResult(pstmt.executeBatch(), 10);
+            });
+
+            ResultSet rs = statement.executeQuery("SELECT tags FROM test");
+            while (rs.next()) {
+                Map<Object, Object> kv = (Map<Object, Object>) rs.getObject(1);
+                for (Entry<Object, Object> each : kv.entrySet()) {
+                   assertEquals("key", each.getKey());
+                   assertEquals("value", each.getValue());
+                }
             }
         });
 
