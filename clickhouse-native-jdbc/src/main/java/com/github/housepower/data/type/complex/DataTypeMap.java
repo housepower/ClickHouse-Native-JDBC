@@ -119,15 +119,13 @@ public class DataTypeMap implements IDataType<Object, Object> {
                 lexer.character();
                 break;
             }
-            if (lexer.isCharacter(':')) {
-                key = getNestedTypes()[0].deserializeText(lexer);
-            }
-
+            key = getNestedTypes()[0].deserializeText(lexer);
+            Validate.isTrue(lexer.character() == ':');
+            value = getNestedTypes()[1].deserializeText(lexer);
             if (lexer.isCharacter(',')) {
-                value = getNestedTypes()[1].deserializeText(lexer);
-                result.put(key, value);
                 lexer.character();
             }
+            result.put(key, value);
         }
 
         return result;
