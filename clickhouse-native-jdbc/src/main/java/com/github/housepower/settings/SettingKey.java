@@ -846,7 +846,12 @@ public class SettingKey implements Serializable {
             .withDescription("charset for converting between Bytes and String")
             .build();
 
-
+    public static SettingKey allow_experimental_map_type = SettingKey.builder()
+          .withName("allow_experimental_map_type")
+          .withType(SettingType.Int32)
+          .withDescription("Allow Map field to be use")
+          .build();
+    
     public static Builder builder() {
         return new Builder();
     }

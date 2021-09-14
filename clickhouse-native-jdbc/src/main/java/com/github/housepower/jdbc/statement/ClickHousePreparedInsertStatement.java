@@ -14,23 +14,7 @@
 
 package com.github.housepower.jdbc.statement;
 
-import com.github.housepower.client.NativeContext;
-import com.github.housepower.data.Block;
-import com.github.housepower.data.IColumn;
-import com.github.housepower.data.IDataType;
-import com.github.housepower.data.type.*;
-import com.github.housepower.data.type.complex.*;
-import com.github.housepower.exception.ClickHouseSQLException;
-import com.github.housepower.jdbc.ClickHouseArray;
-import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.ClickHouseStruct;
-import com.github.housepower.log.Logger;
-import com.github.housepower.log.LoggerFactory;
-import com.github.housepower.misc.BytesCharSeq;
-import com.github.housepower.misc.DateTimeUtil;
-import com.github.housepower.misc.ExceptionUtil;
-import com.github.housepower.misc.Validate;
-import com.github.housepower.stream.ValuesWithParametersNativeInputFormat;
+import static com.github.housepower.misc.ExceptionUtil.unchecked;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -42,9 +26,48 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
-import static com.github.housepower.misc.ExceptionUtil.unchecked;
+import com.github.housepower.client.NativeContext;
+import com.github.housepower.data.Block;
+import com.github.housepower.data.IColumn;
+import com.github.housepower.data.IDataType;
+import com.github.housepower.data.type.DataTypeDate;
+import com.github.housepower.data.type.DataTypeFloat32;
+import com.github.housepower.data.type.DataTypeFloat64;
+import com.github.housepower.data.type.DataTypeInt16;
+import com.github.housepower.data.type.DataTypeInt32;
+import com.github.housepower.data.type.DataTypeInt64;
+import com.github.housepower.data.type.DataTypeInt8;
+import com.github.housepower.data.type.DataTypeUInt16;
+import com.github.housepower.data.type.DataTypeUInt32;
+import com.github.housepower.data.type.DataTypeUInt64;
+import com.github.housepower.data.type.DataTypeUInt8;
+import com.github.housepower.data.type.DataTypeUUID;
+import com.github.housepower.data.type.complex.DataTypeArray;
+import com.github.housepower.data.type.complex.DataTypeDateTime;
+import com.github.housepower.data.type.complex.DataTypeDateTime64;
+import com.github.housepower.data.type.complex.DataTypeDecimal;
+import com.github.housepower.data.type.complex.DataTypeFixedString;
+import com.github.housepower.data.type.complex.DataTypeMap;
+import com.github.housepower.data.type.complex.DataTypeNothing;
+import com.github.housepower.data.type.complex.DataTypeNullable;
+import com.github.housepower.data.type.complex.DataTypeString;
+import com.github.housepower.data.type.complex.DataTypeTuple;
+import com.github.housepower.exception.ClickHouseSQLException;
+import com.github.housepower.jdbc.ClickHouseArray;
+import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.jdbc.ClickHouseStruct;
+import com.github.housepower.log.Logger;
+import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.misc.BytesCharSeq;
+import com.github.housepower.misc.DateTimeUtil;
+import com.github.housepower.misc.ExceptionUtil;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.stream.ValuesWithParametersNativeInputFormat;
 
 public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement {
 
@@ -290,6 +313,23 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             }
             return ((ClickHouseStruct) obj).mapAttributes(((DataTypeTuple) type).getNestedTypes(), unchecked(this::convertToCkDataType));
         }
+        if (type instanceof DataTypeMap) {
+            if (obj instanceof Map) {
+                // return obj;
+                Map<Object, Object> result = new HashMap<Object, Object>();
+                IDataType<?, ?>[] nestedTypes = ((DataTypeMap) type).getNestedTypes();
+                Map<?, ?> dataMap = (Map<?, ?>) obj;
+                for (Entry<?, ?> entry : dataMap.entrySet()) {
+                    Object key = convertToCkDataType(nestedTypes[0], entry.getKey());
+                    Object value = convertToCkDataType(nestedTypes[1], entry.getValue());
+                    result.put(key, value);
+                }
+                return result;
+            } else {
+                throw new ClickHouseSQLException(-1, "require Map for column: " + type.name() + ", but found " + obj.getClass());
+            }
+        }
+        
         LOG.debug("unhandled type: {}[{}]", type.name(), obj.getClass());
         return obj;
     }

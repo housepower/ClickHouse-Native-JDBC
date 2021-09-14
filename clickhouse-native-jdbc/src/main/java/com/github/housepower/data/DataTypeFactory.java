@@ -20,7 +20,19 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.github.housepower.client.NativeContext;
-import com.github.housepower.data.type.*;
+import com.github.housepower.data.type.DataTypeDate;
+import com.github.housepower.data.type.DataTypeFloat32;
+import com.github.housepower.data.type.DataTypeFloat64;
+import com.github.housepower.data.type.DataTypeIPv4;
+import com.github.housepower.data.type.DataTypeInt16;
+import com.github.housepower.data.type.DataTypeInt32;
+import com.github.housepower.data.type.DataTypeInt64;
+import com.github.housepower.data.type.DataTypeInt8;
+import com.github.housepower.data.type.DataTypeUInt16;
+import com.github.housepower.data.type.DataTypeUInt32;
+import com.github.housepower.data.type.DataTypeUInt64;
+import com.github.housepower.data.type.DataTypeUInt8;
+import com.github.housepower.data.type.DataTypeUUID;
 import com.github.housepower.data.type.complex.DataTypeArray;
 import com.github.housepower.data.type.complex.DataTypeCreator;
 import com.github.housepower.data.type.complex.DataTypeDateTime;
@@ -29,6 +41,7 @@ import com.github.housepower.data.type.complex.DataTypeDecimal;
 import com.github.housepower.data.type.complex.DataTypeEnum16;
 import com.github.housepower.data.type.complex.DataTypeEnum8;
 import com.github.housepower.data.type.complex.DataTypeFixedString;
+import com.github.housepower.data.type.complex.DataTypeMap;
 import com.github.housepower.data.type.complex.DataTypeNothing;
 import com.github.housepower.data.type.complex.DataTypeNullable;
 import com.github.housepower.data.type.complex.DataTypeString;
@@ -83,6 +96,8 @@ public class DataTypeFactory {
             return DataTypeString.CREATOR.createDataType(lexer, serverContext);
         } else if (dataTypeName.equalsIgnoreCase("Nothing")) {
             return DataTypeNothing.CREATOR.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("Map")) {
+           return DataTypeMap.creator.createDataType(lexer, serverContext);
         } else {
             IDataType<?, ?> dataType = dataTypes.get(dataTypeName.toLowerCase(Locale.ROOT));
             Validate.isTrue(dataType != null, "Unknown data type: " + dataTypeName);

@@ -14,15 +14,22 @@
 
 package com.github.housepower.jdbc;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class BatchInsertITest extends AbstractITest {
 
@@ -196,6 +203,88 @@ public class BatchInsertITest extends AbstractITest {
                 selectTime += 3600;
             }
         });
+
+    }
+    
+    @Test
+    public void successfullyBatchInsertMap() throws Exception {
+        String[] valueTypes = new String[]{"UInt32", "String", "Tuple(Int32, String)", "Array(UInt16)"};
+        for (int j = 0; j < valueTypes.length; j++) {
+            final int m = j;
+            String eachType = valueTypes[j];
+            withStatement(statement -> {
+                statement.execute("SET allow_experimental_map_type = 1");
+                statement.execute("DROP TABLE IF EXISTS test");
+                statement.execute("CREATE TABLE test(tags Map(String, " + eachType + "))ENGINE=Log");
+
+                withPreparedStatement(statement.getConnection(), "INSERT INTO test VALUES(?)", pstmt -> {
+                    for (int i = 1; i <= 10; i++) {
+                        Map<String, Object> map = new HashMap<>();
+                        Object value = null;
+                        switch (m) {
+                            case 0: {
+                                value = (long) i;
+                                break;
+                            }
+                            case 1: {
+                                value = "value" + i;
+                                break;
+                            }
+                            case 2: {
+                                value = pstmt.getConnection().createStruct("Tuple", new Object[]{(Integer) i, "value" + i});
+                                break;
+                            }
+                            case 3: {
+                                List<Integer> list = new ArrayList<Integer>();
+                                for (int n = i; n > 0; n--) {
+                                    list.add(n);
+                                }
+                                value = pstmt.getConnection().createArrayOf("Integer", list.toArray());
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+                        map.put("key" + i, value);
+                        pstmt.setObject(1, map);
+                        pstmt.addBatch();
+                    }
+                    assertBatchInsertResult(pstmt.executeBatch(), 10);
+                });
+
+                ResultSet rs = statement.executeQuery("SELECT tags FROM test");
+                while (rs.next()) {
+                    Map<Object, Object> kv = (Map<Object, Object>) rs.getObject(1);
+                    for (Entry<Object, Object> each : kv.entrySet()) {
+                        int v = 0;
+                        switch (m) {
+                            case 0: {
+                                v = ((Long) each.getValue()).intValue();
+                                break;
+                            }
+                            case 1: {
+                                String vStr = (String) each.getValue();
+                                v = Integer.parseInt(vStr.substring(5));
+                                break;
+                            }
+                            case 2: {
+                                v = (Integer) (((ClickHouseStruct) each.getValue()).getAttributes()[0]);
+                                break;
+                            }
+                            case 3: {
+                                v = (Integer) (((ClickHouseArray) each.getValue()).getArray()[0]);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+                        assertEquals(each.getKey(), "key" + v);
+                    }
+                }
+            });
+        }
 
     }
 }
