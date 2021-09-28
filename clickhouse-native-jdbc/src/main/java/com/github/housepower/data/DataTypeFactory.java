@@ -21,6 +21,7 @@ import java.util.Map;
 
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.type.DataTypeDate;
+import com.github.housepower.data.type.DataTypeDate32;
 import com.github.housepower.data.type.DataTypeFloat32;
 import com.github.housepower.data.type.DataTypeFloat64;
 import com.github.housepower.data.type.DataTypeIPv4;
@@ -127,6 +128,7 @@ public class DataTypeFactory {
         registerType(creators, new DataTypeUInt64());
 
         registerType(creators, new DataTypeDate());
+        registerType(creators, new DataTypeDate32());
         return creators;
     }
 
