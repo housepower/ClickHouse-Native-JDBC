@@ -16,8 +16,11 @@ package com.github.housepower.jdbc;
 
 import org.junit.jupiter.api.Test;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -129,6 +132,41 @@ public class QuerySimpleTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyDate32Column() throws Exception {
+        withNewConnection(connect -> {
+            Statement statement = connect.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT toDate32('1955-01-01') AS value, toTypeName(value)");
+
+            assertTrue(rs.next());
+            assertEquals(Date.valueOf("1955-01-01"), rs.getDate(1));
+            assertEquals("Date32", rs.getString(2));
+        });
+
+        withNewConnection(connection -> {
+            try (Statement statement = connection.createStatement()) {
+
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+                statement.executeQuery("CREATE TABLE test(a Date32)ENGINE=Memory");
+
+                try (PreparedStatement ps = connection.prepareStatement("INSERT INTO test VALUES(?)")) {
+                    ps.setDate(1, Date.valueOf("1955-01-01"));
+                    assertEquals(1, ps.executeUpdate());
+                }
+
+                try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM test WHERE a = toDate32(?)")) {
+                    ps.setDate(1, Date.valueOf("1955-01-01"));
+                    try (ResultSet rs = ps.executeQuery()) {
+                        assertTrue(rs.next());
+                        assertEquals(Date.valueOf("1955-01-01"), rs.getDate(1));
+                        assertFalse(rs.next());
+                    }
+                }
+                statement.executeQuery("DROP TABLE IF EXISTS test");
+            }
+        });
+    }
+
+    @Test
     public void successfullyUUIDColumn() throws Exception {
         withStatement(statement -> {
             ResultSet rs = statement.executeQuery("SELECT materialize('01234567-89ab-cdef-0123-456789abcdef')");
@@ -142,7 +180,7 @@ public class QuerySimpleTypeITest extends AbstractITest {
     public void successfullyMetadata() throws Exception {
         withStatement(statement -> {
             ResultSet rs = statement.executeQuery(
-                    "SELECT number as a1, toString(number) as a2, now() as a3, today() as a4 from numbers(1)");
+                    "SELECT number as a1, toString(number) as a2, now() as a3, today() as a4, toDate32(today()) as a5 from numbers(1)");
 
             assertTrue(rs.next());
             ResultSetMetaData metaData = rs.getMetaData();
@@ -161,6 +199,10 @@ public class QuerySimpleTypeITest extends AbstractITest {
             assertEquals("a4", metaData.getColumnName(4));
             assertEquals("Date", metaData.getColumnTypeName(4));
             assertEquals("java.sql.Date", metaData.getColumnClassName(4));
+
+            assertEquals("a5", metaData.getColumnName(5));
+            assertEquals("Date32", metaData.getColumnTypeName(5));
+            assertEquals("java.sql.Date", metaData.getColumnClassName(5));
         });
     }
 

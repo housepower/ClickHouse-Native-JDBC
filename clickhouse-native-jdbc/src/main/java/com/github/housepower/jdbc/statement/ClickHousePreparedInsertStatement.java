@@ -36,6 +36,7 @@ import com.github.housepower.data.Block;
 import com.github.housepower.data.IColumn;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.data.type.DataTypeDate;
+import com.github.housepower.data.type.DataTypeDate32;
 import com.github.housepower.data.type.DataTypeFloat32;
 import com.github.housepower.data.type.DataTypeFloat64;
 import com.github.housepower.data.type.DataTypeInt16;
@@ -231,6 +232,13 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             return objStr;
         }
         if (type instanceof DataTypeDate) {
+            if (obj instanceof java.util.Date)
+                return ((Date) obj).toLocalDate();
+            if (obj instanceof LocalDate)
+                return obj;
+        }
+
+        if (type instanceof DataTypeDate32) {
             if (obj instanceof java.util.Date)
                 return ((Date) obj).toLocalDate();
             if (obj instanceof LocalDate)

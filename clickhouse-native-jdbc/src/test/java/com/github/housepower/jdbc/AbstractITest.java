@@ -35,9 +35,7 @@ public abstract class AbstractITest implements Serializable {
     protected static final ZoneId SERVER_TZ = ZoneId.of("UTC");
     protected static final String DRIVER_CLASS_NAME = "com.github.housepower.jdbc.ClickHouseDriver";
 
-    // ClickHouse support gRPC from v21.1.2.15-stable 2021-01-18
-    // link: https://github.com/ClickHouse/ClickHouse/blob/master/CHANGELOG.md#clickhouse-release-v211215-stable-2021-01-18
-    public static final String CLICKHOUSE_IMAGE = SystemUtil.loadProp("CLICKHOUSE_IMAGE", "yandex/clickhouse-server:21.3");
+    public static final String CLICKHOUSE_IMAGE = System.getProperty("CLICKHOUSE_IMAGE", "yandex/clickhouse-server:21.9");
 
     protected static final String CLICKHOUSE_USER = SystemUtil.loadProp("CLICKHOUSE_USER", "default");
     protected static final String CLICKHOUSE_PASSWORD = SystemUtil.loadProp("CLICKHOUSE_PASSWORD", "");
