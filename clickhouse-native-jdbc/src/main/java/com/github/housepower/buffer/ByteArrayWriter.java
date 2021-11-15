@@ -16,6 +16,7 @@ package com.github.housepower.buffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,13 +24,15 @@ public class ByteArrayWriter implements BuffedWriter {
     private final int blockSize;
     private ByteBuffer buffer;
 
-    // TODO pooling
     private final List<ByteBuffer> byteBufferList = new LinkedList<>();
 
+    // LIFO queue
+    private final Deque<ByteBuffer> freeList = new LinkedList<>();
+    
     public ByteArrayWriter(int blockSize) {
         this.blockSize = blockSize;
-        this.buffer = ByteBuffer.allocate(blockSize);
-        this.byteBufferList.add(buffer);
+        
+        reuseOrAllocateByteBuffer();
     }
 
     @Override
@@ -64,11 +67,31 @@ public class ByteArrayWriter implements BuffedWriter {
         if (buffer.hasRemaining() && !force) {
             return;
         }
-        buffer = ByteBuffer.allocate(blockSize);
-        byteBufferList.add(buffer);
+        reuseOrAllocateByteBuffer();
     }
 
     public List<ByteBuffer> getBufferList() {
         return byteBufferList;
+    }
+    
+    public void reset() {
+        byteBufferList.forEach(b -> {
+            b.clear();
+            freeList.addLast(b);
+        });
+        byteBufferList.clear();
+        
+        reuseOrAllocateByteBuffer();
+    }
+    
+    private ByteBuffer reuseOrAllocateByteBuffer() {
+        ByteBuffer newBuffer = freeList.pollLast();
+        if (newBuffer == null) {
+            newBuffer = ByteBuffer.allocate(blockSize);
+        }
+        
+        buffer = newBuffer;
+        byteBufferList.add(buffer);
+        return buffer;
     }
 }
