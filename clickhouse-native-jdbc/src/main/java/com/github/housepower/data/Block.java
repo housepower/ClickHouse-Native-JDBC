@@ -145,8 +145,28 @@ public class Block {
     }
 
     public void initWriteBuffer() {
+        ColumnWriterBufferFactory bufferFactory = ColumnWriterBufferFactory.getInstance();
         for (IColumn column : columns) {
-            column.setColumnWriterBuffer(new ColumnWriterBuffer());
+            ColumnWriterBuffer writeBuffer = column.getColumnWriterBuffer();
+            
+            // recycle a buffer and get a new one from buffer factory
+            if (writeBuffer != null) {
+                bufferFactory.recycleBuffer(writeBuffer);
+            }
+            
+            column.setColumnWriterBuffer(bufferFactory.getBuffer());
+        }
+    }
+    
+    public void cleanup() {
+        ColumnWriterBufferFactory bufferFactory = ColumnWriterBufferFactory.getInstance();
+        for (IColumn column : columns) {
+            ColumnWriterBuffer writeBuffer = column.getColumnWriterBuffer();
+            // recycle used buffer
+            if (writeBuffer != null) {
+                bufferFactory.recycleBuffer(writeBuffer);
+                column.setColumnWriterBuffer(null);
+            }
         }
     }
 }

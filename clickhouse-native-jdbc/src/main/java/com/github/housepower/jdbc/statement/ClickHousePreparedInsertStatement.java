@@ -168,6 +168,8 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             this.blockInit = false;
             this.block.initWriteBuffer();
         }
+        // clean up block on close
+        this.block.cleanup();
         super.close();
     }
 

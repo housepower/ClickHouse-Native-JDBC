@@ -27,7 +27,8 @@ public class BinarySerializer {
 
     private final Switcher<BuffedWriter> switcher;
     private final boolean enableCompress;
-
+    private final byte[] writeBuffer;
+    
     public BinarySerializer(BuffedWriter writer, boolean enableCompress) {
         this.enableCompress = enableCompress;
         BuffedWriter compressWriter = null;
@@ -35,6 +36,8 @@ public class BinarySerializer {
             compressWriter = new CompressedBuffedWriter(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES, writer);
         }
         switcher = new Switcher<>(compressWriter, writer);
+        // max num of byte is 8 for double and long
+        writeBuffer = new byte[8];
     }
 
     public void writeVarInt(long x) throws IOException {
@@ -65,32 +68,35 @@ public class BinarySerializer {
     @SuppressWarnings("PointlessBitwiseExpression")
     public void writeShort(short i) throws IOException {
         // @formatter:off
-        switcher.get().writeBinary((byte) ((i >> 0) & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 8) & 0xFF));
+        writeBuffer[0] = (byte) ((i >> 0) & 0xFF);
+        writeBuffer[1] = (byte) ((i >> 8) & 0xFF);
+        switcher.get().writeBinary(writeBuffer, 0, 2);
         // @formatter:on
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
     public void writeInt(int i) throws IOException {
         // @formatter:off
-        switcher.get().writeBinary((byte) ((i >> 0)  & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 8)  & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 16) & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 24) & 0xFF));
+        writeBuffer[0] = (byte) ((i >> 0)  & 0xFF);
+        writeBuffer[1] = (byte) ((i >> 8)  & 0xFF);
+        writeBuffer[2] = (byte) ((i >> 16) & 0xFF);
+        writeBuffer[3] = (byte) ((i >> 24) & 0xFF);
+        switcher.get().writeBinary(writeBuffer, 0, 4);
         // @formatter:on
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
     public void writeLong(long i) throws IOException {
         // @formatter:off
-        switcher.get().writeBinary((byte) ((i >> 0)  & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 8)  & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 16) & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 24) & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 32) & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 40) & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 48) & 0xFF));
-        switcher.get().writeBinary((byte) ((i >> 56) & 0xFF));
+        writeBuffer[0] = (byte) ((i >> 0)  & 0xFF);
+        writeBuffer[1] = (byte) ((i >> 8)  & 0xFF);
+        writeBuffer[2] = (byte) ((i >> 16) & 0xFF);
+        writeBuffer[3] = (byte) ((i >> 24) & 0xFF);
+        writeBuffer[4] = (byte) ((i >> 32) & 0xFF);
+        writeBuffer[5] = (byte) ((i >> 40) & 0xFF);
+        writeBuffer[6] = (byte) ((i >> 48) & 0xFF);
+        writeBuffer[7] = (byte) ((i >> 56) & 0xFF);
+        switcher.get().writeBinary(writeBuffer, 0, 8);
         // @formatter:on
     }
 
@@ -134,18 +140,23 @@ public class BinarySerializer {
     public void writeDouble(double datum) throws IOException {
         long x = Double.doubleToLongBits(datum);
         // @formatter:off
-        switcher.get().writeBinary((byte) ((x >>> 0)  & 0xFF));
-        switcher.get().writeBinary((byte) ((x >>> 8)  & 0xFF));
-        switcher.get().writeBinary((byte) ((x >>> 16) & 0xFF));
-        switcher.get().writeBinary((byte) ((x >>> 24) & 0xFF));
-        switcher.get().writeBinary((byte) ((x >>> 32) & 0xFF));
-        switcher.get().writeBinary((byte) ((x >>> 40) & 0xFF));
-        switcher.get().writeBinary((byte) ((x >>> 48) & 0xFF));
-        switcher.get().writeBinary((byte) ((x >>> 56) & 0xFF));
+        writeBuffer[0] = (byte) ((x >>> 0)  & 0xFF);
+        writeBuffer[1] = (byte) ((x >>> 8)  & 0xFF);
+        writeBuffer[2] = (byte) ((x >>> 16) & 0xFF);
+        writeBuffer[3] = (byte) ((x >>> 24) & 0xFF);
+        writeBuffer[4] = (byte) ((x >>> 32) & 0xFF);
+        writeBuffer[5] = (byte) ((x >>> 40) & 0xFF);
+        writeBuffer[6] = (byte) ((x >>> 48) & 0xFF);
+        writeBuffer[7] = (byte) ((x >>> 56) & 0xFF);
+        switcher.get().writeBinary(writeBuffer, 0, 8);
         // @formatter:on
     }
 
     public void writeBytes(byte[] bytes) throws IOException {
         switcher.get().writeBinary(bytes);
+    }
+    
+    public void writeBytes(byte[] bytes, int offset, int length) throws IOException {
+        switcher.get().writeBinary(bytes, offset, length);
     }
 }
