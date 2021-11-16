@@ -54,18 +54,18 @@ public class ColumnWriterBufferFactory {
         }
     }
 
-	/**
-	 * Clear all buffers to free the buffered memory
-	 * This method is exported to be called by users manually
-	 */
-	public void clearAllBuffers() {
-		while (true)  {
-			ColumnWriterBuffer pop = stack.pollLast();
-			if (pop == null) {
-				break;
-			}
-		}
-	}
+    /**
+     * Clear all buffers to free the buffered memory
+     * This method is exported to be called by users manually
+     */
+    public void clearAllBuffers() {
+        while (true)  {
+            ColumnWriterBuffer pop = stack.pollLast();
+            if (pop == null) {
+                break;
+            }
+        }
+    }
 
     public void recycleBuffer(ColumnWriterBuffer buffer) {
         stack.addLast(buffer);
