@@ -90,8 +90,7 @@ public class DataTypeDate implements IDataType {
     public Object[] deserializeBinaryBulk(int rows, BinaryDeserializer deserializer) throws IOException {
         LocalDate[] data = new LocalDate[rows];
         for (int row = 0; row < rows; row++) {
-            short epochDay = deserializer.readShort();
-            data[row] = LocalDate.ofEpochDay(epochDay);
+            data[row] = (LocalDate) deserializeBinary(deserializer);
         }
         return data;
     }
