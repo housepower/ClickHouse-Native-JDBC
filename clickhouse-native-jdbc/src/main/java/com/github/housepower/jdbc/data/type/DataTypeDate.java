@@ -83,7 +83,7 @@ public class DataTypeDate implements IDataType {
     @Override
     public Object deserializeBinary(BinaryDeserializer deserializer) throws IOException {
         short epochDay = deserializer.readShort();
-        return LocalDate.ofEpochDay(epochDay);
+        return LocalDate.ofEpochDay(epochDay & 0xFFFF);
     }
 
     @Override
