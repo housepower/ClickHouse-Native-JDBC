@@ -75,6 +75,18 @@ public class QuerySimpleTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyDateColumn() throws Exception {
+        withNewConnection(connect -> {
+            Statement statement = connect.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT toDate('2105-12-30') AS value, toTypeName(value)");
+
+            assertTrue(rs.next());
+            assertEquals(Date.valueOf("2105-12-30"), rs.getDate(1));
+            assertEquals("Date", rs.getString(2));
+        });
+    }
+
+    @Test
     public void successfullyIntColumn() throws Exception {
         withStatement(statement -> {
             ResultSet rs = statement.executeQuery(
