@@ -100,7 +100,7 @@
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
         <maven.checkstyle.plugin.version>3.1.1</maven.checkstyle.plugin.version>
 
-        <aircompressor.version>0.18</aircompressor.version>
+        <aircompressor.version>0.21</aircompressor.version>
         <google.jsr305.version>3.0.2</google.jsr305.version>
         <jmh.version>1.27</jmh.version>
         <yandex-clickhouse-jdbc.version>0.2.5</yandex-clickhouse-jdbc.version>
