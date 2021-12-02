@@ -6,11 +6,13 @@ on:
       - "master"
       - "2.4"
       - "2.5"
+      - "2.6"
   pull_request:
     branches:
       - "master"
       - "2.4"
       - "2.5"
+      - "2.6"
 
 jobs:
   build:
@@ -25,4 +27,4 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Build with Maven
-        run: mvn -B clean package -Pscala-2.12 -Pspark-3.1
+        run: mvn -B clean package -Pscala-2.12 -Pspark-3.2

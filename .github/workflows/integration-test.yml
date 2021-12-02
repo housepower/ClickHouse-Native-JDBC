@@ -13,16 +13,11 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        java: [ '8', '11' ]
-        scala: [ '2.11', '2.12' ]
-        spark: [ '2.4', '3.0', '3.1' ]
-        exclude:
-          - java: '11'
-            spark: '2.4'
-          - scala: '2.11'
-            spark: '3.0'
-          - scala: '2.11'
-            spark: '3.1'
+        include:
+          - { java: '8',  spark: '2.4', scala: '2.11' }
+          - { java: '8',  spark: '2.4', scala: '2.12' }
+          - { java: '8',  spark: '3.2', scala: '2.12' }
+          - { java: '11', spark: '3.2', scala: '2.12' }
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
@@ -34,5 +29,5 @@ jobs:
       - name: upload code coverage report
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        if: matrix.java == '8' && matrix.scala == '2.12' && matrix.spark == '3.1'
+        if: matrix.java == '8' && matrix.scala == '2.12' && matrix.spark == '3.2'
         run: bash <(curl -s https://codecov.io/bash)
