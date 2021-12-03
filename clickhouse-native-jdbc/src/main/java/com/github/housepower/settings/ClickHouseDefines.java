@@ -25,14 +25,23 @@ public class ClickHouseDefines {
     public static final int DBMS_MIN_REVISION_WITH_SERVER_TIMEZONE = 54058;
     public static final int DBMS_MIN_REVISION_WITH_SERVER_DISPLAY_NAME = 54372;
 
-    public static final int MAX_BLOCK_BYTES = 1024 * 1024 * 10;
-    public static final int SOCKET_SEND_BUFFER_BYTES = 1024 * 1024;
-    public static final int SOCKET_RECV_BUFFER_BYTES = 1024 * 1024;
-
-    public static final int COLUMN_BUFFER_BYTES = 1024 * 1024;
-
-    public static final int DATA_TYPE_CACHE_SIZE = 1024;
-
     public static final int COMPRESSION_HEADER_LENGTH = 9;
     public static final int CHECKSUM_LENGTH = 16;
+
+    /**
+     * The optimal size for receive buffer and send buffer should be
+     *   latency * network_bandwidth.
+     * Assuming latency = 1ms, network_bandwidth = 10Gbps
+     *   buffer size should be ~ 1.25MB
+     *
+     * Reduce the buffer size can reduce the memory usage
+     */
+    public static int SOCKET_SEND_BUFFER_BYTES = 1024 * 1024;
+    public static int SOCKET_RECV_BUFFER_BYTES = 1024 * 1024;
+
+    // MAX_BLOCK_BYTES does not work
+    public static int MAX_BLOCK_BYTES = 10 * 1024 * 1024;
+    public static int COLUMN_BUFFER_BYTES = 1024 * 1024;
+
+    public static int DATA_TYPE_CACHE_SIZE = 1024;
 }
