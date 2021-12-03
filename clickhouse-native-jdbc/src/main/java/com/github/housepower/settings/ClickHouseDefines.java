@@ -30,9 +30,9 @@ public class ClickHouseDefines {
 
     /**
      * The optimal size for receive buffer and send buffer should be
-     *  latency * network_bandwidth.
+     *   latency * network_bandwidth.
      * Assuming latency = 1ms, network_bandwidth = 10Gbps
-     *  buffer size should be ~ 1.25MB
+     *   buffer size should be ~ 1.25MB
      *
      * Reduce the buffer size can reduce the memory usage
      */
