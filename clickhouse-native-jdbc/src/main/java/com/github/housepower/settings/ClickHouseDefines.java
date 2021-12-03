@@ -29,7 +29,7 @@ public class ClickHouseDefines {
     public static final int CHECKSUM_LENGTH = 16;
 
     public static boolean WRITE_COMPRESS = true;
-    public static boolean READ_COMPRESS = true;
+    public static boolean READ_DECOMPRESS = true;
 
     /**
      * The optimal size for receive buffer and send buffer should be

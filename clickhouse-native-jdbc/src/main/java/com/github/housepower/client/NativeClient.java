@@ -57,7 +57,7 @@ public class NativeClient {
 
             return new NativeClient(socket,
                     new BinarySerializer(new SocketBuffedWriter(socket), ClickHouseDefines.WRITE_COMPRESS),
-                    new BinaryDeserializer(new SocketBuffedReader(socket), ClickHouseDefines.READ_COMPRESS));
+                    new BinaryDeserializer(new SocketBuffedReader(socket), ClickHouseDefines.READ_DECOMPRESS));
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
