@@ -28,6 +28,9 @@ public class ClickHouseDefines {
     public static final int COMPRESSION_HEADER_LENGTH = 9;
     public static final int CHECKSUM_LENGTH = 16;
 
+    public static boolean WRITE_COMPRESS = true;
+    public static boolean READ_COMPRESS = true;
+
     /**
      * The optimal size for receive buffer and send buffer should be
      *   latency * network_bandwidth.
