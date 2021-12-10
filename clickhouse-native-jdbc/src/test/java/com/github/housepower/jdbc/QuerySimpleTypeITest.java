@@ -16,10 +16,7 @@ package com.github.housepower.jdbc;
 
 import org.junit.jupiter.api.Test;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
+import java.sql.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
