@@ -189,6 +189,17 @@ public class QuerySimpleTypeITest extends AbstractITest {
     }
 
     @Test
+    public void successfullyNothingColumn() throws Exception {
+        withStatement(statement -> {
+            ResultSet rs = statement.executeQuery("select null as aa, null as bb");
+
+            assertTrue(rs.next());
+            assertEquals(null, rs.getObject(1));
+            assertEquals(null, rs.getObject(2));
+        });
+    }
+
+    @Test
     public void successfullyMetadata() throws Exception {
         withStatement(statement -> {
             ResultSet rs = statement.executeQuery(
