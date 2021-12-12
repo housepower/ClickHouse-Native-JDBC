@@ -28,7 +28,7 @@ import java.sql.Types;
 public class DataTypeNothing implements IDataType<Object, Object> {
 
     public static DataTypeCreator<Object, Object> CREATOR =
-            (lexer, serverContext) -> new DataTypeNothing(serverContext);
+        (lexer, serverContext) -> new DataTypeNothing(serverContext);
 
     public DataTypeNothing(NativeContext.ServerContext serverContext) {
     }
@@ -64,12 +64,14 @@ public class DataTypeNothing implements IDataType<Object, Object> {
     }
 
     @Override
-    public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeByte((byte)0);
+    public void serializeBinary(Object data, BinarySerializer serializer)
+        throws SQLException, IOException {
+        serializer.writeByte((byte) 0);
     }
 
     @Override
-    public Object deserializeBinary(BinaryDeserializer deserializer) throws SQLException, IOException {
+    public Object deserializeBinary(BinaryDeserializer deserializer)
+        throws SQLException, IOException {
         deserializer.readByte();
         return null;
     }
