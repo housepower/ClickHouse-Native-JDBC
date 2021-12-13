@@ -17,6 +17,7 @@ package com.github.housepower.jdbc;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Array;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Struct;
@@ -251,6 +252,20 @@ public class QueryComplexTypeITest extends AbstractITest {
             assertEquals(array.getBaseTypeName(), "Nullable(Nothing)");
         });
     }
+
+    @Test
+    public void successfullyDateArrayColumn() throws Exception {
+        withNewConnection(connect -> {
+            Statement statement = connect.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT array(toDate('2105-12-30')) AS value, toTypeName(value)");
+
+            assertTrue(rs.next());
+            Object[] values = (Object[]) rs.getArray(1).getArray();
+            assertEquals(Date.valueOf("2105-12-30"), Date.valueOf((LocalDate) values[0]));
+            assertEquals("Array(Date)", rs.getString(2));
+        });
+    }
+
 
     @Test
     public void successfullyTuple() throws Exception {
