@@ -14,16 +14,16 @@
 
 package com.github.housepower.data.type.complex;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Types;
-
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.IDataType;
 import com.github.housepower.exception.InvalidOperationException;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.serde.BinaryDeserializer;
 import com.github.housepower.serde.BinarySerializer;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Types;
 
 public class DataTypeNothing implements IDataType<Object, Object> {
 
@@ -65,7 +65,7 @@ public class DataTypeNothing implements IDataType<Object, Object> {
 
     @Override
     public void serializeBinary(Object data, BinarySerializer serializer) throws SQLException, IOException {
-        serializer.writeByte((byte)0);
+        serializer.writeByte((byte) 0);
     }
 
     @Override
