@@ -15,6 +15,7 @@
 package com.github.housepower.buffer;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -28,10 +29,10 @@ public class ByteArrayWriter implements BuffedWriter {
 
     // LIFO queue
     private final Deque<ByteBuffer> freeList = new LinkedList<>();
-    
+
     public ByteArrayWriter(int blockSize) {
         this.blockSize = blockSize;
-        
+
         reuseOrAllocateByteBuffer();
     }
 
@@ -73,23 +74,25 @@ public class ByteArrayWriter implements BuffedWriter {
     public List<ByteBuffer> getBufferList() {
         return byteBufferList;
     }
-    
+
     public void reset() {
         byteBufferList.forEach(b -> {
-            b.clear();
+            // upcast is necessary, see detail at:
+            // https://bitbucket.org/ijabz/jaudiotagger/issues/313/java-8-javalangnosuchmethoderror
+            ((Buffer) b).clear();
             freeList.addLast(b);
         });
         byteBufferList.clear();
-        
+
         reuseOrAllocateByteBuffer();
     }
-    
+
     private ByteBuffer reuseOrAllocateByteBuffer() {
         ByteBuffer newBuffer = freeList.pollLast();
         if (newBuffer == null) {
             newBuffer = ByteBuffer.allocate(blockSize);
         }
-        
+
         buffer = newBuffer;
         byteBufferList.add(buffer);
         return buffer;
