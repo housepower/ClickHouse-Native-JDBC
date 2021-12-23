@@ -130,7 +130,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         addParameters();
         int result = connection.sendInsertRequest(block);
         this.blockInit = false;
-        this.block.initWriteBuffer();
+        this.block.cleanup();
         return result;
     }
 
@@ -156,7 +156,7 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
         Arrays.fill(result, 1);
         clearBatch();
         this.blockInit = false;
-        this.block.initWriteBuffer();
+        this.block.cleanup();
         return result;
     }
 
@@ -166,7 +166,6 @@ public class ClickHousePreparedInsertStatement extends AbstractPreparedStatement
             // Empty insert when close.
             this.connection.sendInsertRequest(new Block());
             this.blockInit = false;
-            this.block.initWriteBuffer();
         }
         // clean up block on close
         this.block.cleanup();

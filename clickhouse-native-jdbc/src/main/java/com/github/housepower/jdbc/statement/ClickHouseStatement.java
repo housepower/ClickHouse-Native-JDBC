@@ -86,6 +86,7 @@ public class ClickHouseStatement implements SQLStatement {
                 block.initWriteBuffer();
                 new ValuesNativeInputFormat(matcher.end() - 1, query).fill(block);
                 updateCount = connection.sendInsertRequest(block);
+                block.cleanup();
                 return updateCount;
             }
             updateCount = -1;
