@@ -111,7 +111,7 @@ public class BinarySerializer {
 
     public void writeBytesBinary(byte[] bs) throws IOException {
         writeVarInt(bs.length);
-        switcher.get().writeBinary(bs);
+        switcher.get().writeBinary(bs, 0, bs.length);
     }
 
     public void flushToTarget(boolean force) throws IOException {
@@ -153,7 +153,7 @@ public class BinarySerializer {
     }
 
     public void writeBytes(byte[] bytes) throws IOException {
-        switcher.get().writeBinary(bytes);
+        writeBytes(bytes, 0, bytes.length);
     }
     
     public void writeBytes(byte[] bytes, int offset, int length) throws IOException {

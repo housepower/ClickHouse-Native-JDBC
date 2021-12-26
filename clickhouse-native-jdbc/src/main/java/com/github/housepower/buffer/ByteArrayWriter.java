@@ -43,11 +43,6 @@ public class ByteArrayWriter implements BuffedWriter {
     }
 
     @Override
-    public void writeBinary(byte[] bytes) throws IOException {
-        writeBinary(bytes, 0, bytes.length);
-    }
-
-    @Override
     public void writeBinary(byte[] bytes, int offset, int length) throws IOException {
 
         while (buffer.remaining() < length) {
