@@ -55,9 +55,7 @@ public class NativeClient {
             socket.setKeepAlive(configure.tcpKeepAlive());
             socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
 
-            return new NativeClient(socket,
-                    new BinarySerializer(new SocketBuffedWriter(socket), ClickHouseDefines.WRITE_COMPRESS),
-                    new BinaryDeserializer(new SocketBuffedReader(socket), ClickHouseDefines.READ_DECOMPRESS));
+            return new NativeClient(socket);
         } catch (IOException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
@@ -65,14 +63,17 @@ public class NativeClient {
 
     private final Socket socket;
     private final SocketAddress address;
+    private final boolean compression;
     private final BinarySerializer serializer;
     private final BinaryDeserializer deserializer;
 
-    public NativeClient(Socket socket, BinarySerializer serializer, BinaryDeserializer deserializer) {
+    private NativeClient(Socket socket) throws IOException {
         this.socket = socket;
         this.address = socket.getLocalSocketAddress();
-        this.serializer = serializer;
-        this.deserializer = deserializer;
+        this.compression = ClickHouseDefines.COMPRESSION;
+
+        this.serializer = new BinarySerializer(new SocketBuffedWriter(socket), compression);
+        this.deserializer = new BinaryDeserializer(new SocketBuffedReader(socket), compression);
     }
 
     public SocketAddress address() {
@@ -160,7 +161,7 @@ public class NativeClient {
 
     private void sendQuery(String id, int stage, NativeContext.ClientContext info, String query,
                            Map<SettingKey, Serializable> settings) throws SQLException {
-        sendRequest(new QueryRequest(id, info, stage, true, query, settings));
+        sendRequest(new QueryRequest(id, info, stage, compression, query, settings));
     }
 
     private void sendRequest(Request request) throws SQLException {

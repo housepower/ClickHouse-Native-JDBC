@@ -28,8 +28,10 @@ public class ClickHouseDefines {
     public static final int COMPRESSION_HEADER_LENGTH = 9;
     public static final int CHECKSUM_LENGTH = 16;
 
-    public static boolean WRITE_COMPRESS = true;
-    public static boolean READ_DECOMPRESS = true;
+    /**
+     * Enable or disable compression of data sent over network (like "--compression" flag of the native cli).
+     */
+    public static boolean COMPRESSION = true;
 
     /**
      * The optimal size for receive buffer and send buffer should be
