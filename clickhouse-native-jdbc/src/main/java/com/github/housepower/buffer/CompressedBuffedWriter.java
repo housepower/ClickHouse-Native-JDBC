@@ -49,11 +49,6 @@ public class CompressedBuffedWriter implements BuffedWriter, BytesHelper {
     }
 
     @Override
-    public void writeBinary(byte[] bytes) throws IOException {
-        writeBinary(bytes, 0, bytes.length);
-    }
-
-    @Override
     public void writeBinary(byte[] bytes, int offset, int length) throws IOException {
         while (remaining() < length) {
             int num = remaining();

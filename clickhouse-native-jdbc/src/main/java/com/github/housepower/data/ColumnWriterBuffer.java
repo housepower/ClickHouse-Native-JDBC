@@ -18,37 +18,25 @@ import com.github.housepower.buffer.ByteArrayWriter;
 import com.github.housepower.serde.BinarySerializer;
 import com.github.housepower.settings.ClickHouseDefines;
 
-import static java.lang.Math.min;
-
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class ColumnWriterBuffer {
 
     private final ByteArrayWriter columnWriter;
 
-    public BinarySerializer column;
+    public final BinarySerializer column;
 
     public ColumnWriterBuffer() {
         this.columnWriter = new ByteArrayWriter(ClickHouseDefines.COLUMN_BUFFER_BYTES);
         this.column = new BinarySerializer(columnWriter, false);
     }
 
-    @SuppressWarnings("RedundantCast")
     public void writeTo(BinarySerializer serializer) throws IOException {
-        // add a temp buffer to reduce memory requirement in case of large remaining data in buffer
-        byte[] writeBuffer = new byte[4*1024];
         for (ByteBuffer buffer : columnWriter.getBufferList()) {
-            // upcast is necessary, see detail at:
-            // https://bitbucket.org/ijabz/jaudiotagger/issues/313/java-8-javalangnosuchmethoderror
-            ((Buffer) buffer).flip();
-            while (buffer.hasRemaining()) {
-                int remaining = buffer.remaining();
-                int thisLength = min(remaining, writeBuffer.length);
-                buffer.get(writeBuffer, 0, thisLength);
-                serializer.writeBytes(writeBuffer, 0, thisLength);
-            }
+            serializer.writeBytes(buffer.array(), buffer.arrayOffset(), buffer.position());
+            // put buffer into state matching original flip() + relative get() behaviour; likely unnecessary
+            buffer.limit(buffer.position());
         }
     }
 
