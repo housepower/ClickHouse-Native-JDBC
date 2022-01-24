@@ -25,9 +25,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Locale;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ConnectionParamITest extends AbstractITest {
 
@@ -113,4 +115,45 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals(Duration.ofSeconds(50), config.connectTimeout());
     }
 
+    @Test
+    public void successWithQueryId() throws Exception {
+        String queryId = UUID.randomUUID().toString();
+
+        try (Connection connection = DriverManager
+                .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s", CK_HOST, CK_PORT))
+        ) {
+            withStatement(connection, stmt -> {
+                stmt.execute("SELECT 1");
+                Thread.sleep(12 * 1000); // wait insert into ch log table
+                ResultSet rs = stmt.executeQuery(String.format(Locale.ROOT, "SELECT count() FROM system.query_log where query_id='%s'", queryId));
+
+                long rows = 0;
+
+                if (rs.next()) {
+                    rows = rs.getLong(1);
+                }
+
+                assertTrue(rows == 0);
+            });
+        }
+
+        try (Connection connection = DriverManager
+                .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s:%s?query_id=%s", CK_HOST, CK_PORT,
+                        queryId))
+        ) {
+            withStatement(connection, stmt -> {
+                stmt.execute("SELECT 1");
+                Thread.sleep(12 * 1000); // wait insert into ch log table
+                ResultSet rs = stmt.executeQuery(String.format(Locale.ROOT, "SELECT count() FROM system.query_log where query_id='%s'", queryId));
+
+                long rows = 0;
+
+                if (rs.next()) {
+                    rows = rs.getLong(1);
+                }
+
+                assertTrue(rows > 0);
+            });
+        }
+    }
 }
