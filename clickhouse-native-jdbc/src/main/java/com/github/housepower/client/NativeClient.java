@@ -114,7 +114,8 @@ public class NativeClient {
     }
 
     public void sendQuery(String query, NativeContext.ClientContext info, Map<SettingKey, Serializable> settings) throws SQLException {
-        sendQuery(UUID.randomUUID().toString(), QueryRequest.STAGE_COMPLETE, info, query, settings);
+        sendQuery((String) settings.getOrDefault(SettingKey.query_id, UUID.randomUUID().toString()),
+                QueryRequest.STAGE_COMPLETE, info, query, settings);
     }
 
     public void sendData(Block data) throws SQLException {

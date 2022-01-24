@@ -851,6 +851,12 @@ public class SettingKey implements Serializable {
           .withType(SettingType.Int32)
           .withDescription("Allow Map field to be use")
           .build();
+
+    public static SettingKey query_id = SettingKey.builder()
+            .withName("query_id")
+            .withType(SettingType.UTF8)
+            .withDescription("set current session query")
+            .build();
     
     public static Builder builder() {
         return new Builder();
