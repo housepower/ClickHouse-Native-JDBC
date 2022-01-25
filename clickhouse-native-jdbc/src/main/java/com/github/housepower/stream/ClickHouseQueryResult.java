@@ -19,6 +19,7 @@ import com.github.housepower.misc.CheckedIterator;
 import com.github.housepower.misc.CheckedSupplier;
 import com.github.housepower.protocol.DataResponse;
 import com.github.housepower.protocol.EOFStreamResponse;
+import com.github.housepower.protocol.ProgressResponse;
 import com.github.housepower.protocol.Response;
 
 import java.sql.SQLException;
@@ -85,12 +86,19 @@ public class ClickHouseQueryResult implements QueryResult {
     }
 
     private DataResponse consumeDataResponse() throws SQLException {
+        long readRows = 0;
+        long readBytes = 0;
         while (!atEnd) {
             Response response = responseSupplier.get();
             if (response instanceof DataResponse) {
-                return (DataResponse) response;
+                DataResponse dataResponse = (DataResponse) response;
+                dataResponse.block().setProgress(readRows, readBytes);
+                return dataResponse;
             } else if (response instanceof EOFStreamResponse || response == null) {
                 atEnd = true;
+            } else if (response instanceof ProgressResponse) {
+                readRows += ((ProgressResponse) response).newRows();
+                readBytes += ((ProgressResponse) response).newBytes();
             }
         }
 
