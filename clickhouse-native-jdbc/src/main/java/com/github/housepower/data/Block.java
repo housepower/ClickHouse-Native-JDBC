@@ -55,6 +55,8 @@ public class Block {
     private final Object[] rowData;
     private final int[] placeholderIndexes;
     private int rowCnt;
+    private long readRows = 0;
+    private long readBytes = 0;
 
     public Block() {
         this(0, new IColumn[0]);
@@ -169,4 +171,18 @@ public class Block {
             }
         }
     }
+
+    public void setProgress(long readRows, long readBytes) {
+        this.readRows = readRows;
+        this.readBytes = readBytes;
+    }
+
+    public long readRows() {
+        return readRows;
+    }
+
+    public long readBytes() {
+        return readBytes;
+    }
+
 }

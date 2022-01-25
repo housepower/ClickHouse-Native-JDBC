@@ -56,6 +56,8 @@ public class ClickHouseResultSet implements SQLResultSet {
     private boolean isFirst = false;
     private boolean isAfterLast = false;
     private boolean isClosed = false;
+    private long readRows = 0;
+    private long readBytes = 0;
 
     public ClickHouseResultSet(ClickHouseStatement statement,
                                ClickHouseConfig cfg,
@@ -406,7 +408,13 @@ public class ClickHouseResultSet implements SQLResultSet {
         boolean isBeforeFirst = isBeforeFirst();
         LOG.trace("check status[before]: is_before_first: {}, is_first: {}, is_after_last: {}", isBeforeFirst, isFirst, isAfterLast);
 
-        boolean hasNext = ++currentRowNum < currentBlock.rowCnt() || (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
+        boolean hasNext = ++currentRowNum < currentBlock.rowCnt();
+
+        if (!hasNext) {
+            hasNext = (currentRowNum = 0) < (currentBlock = fetchBlock()).rowCnt();
+            readRows += currentBlock.readRows();
+            readBytes += currentBlock.readBytes();
+        }
 
         isFirst = isBeforeFirst && hasNext;
         isAfterLast = !hasNext;
@@ -435,14 +443,33 @@ public class ClickHouseResultSet implements SQLResultSet {
     }
 
     private Block fetchBlock() throws SQLException {
+        long readRows = 0;
+        long readBytes = 0;
+
         while (dataResponses.hasNext()) {
             LOG.trace("fetch next DataResponse");
             DataResponse next = dataResponses.next();
+
+            readRows += next.block().readRows();
+            readBytes += next.block().readBytes();
+
             if (next.block().rowCnt() > 0) {
+                next.block().setProgress(readRows, readBytes);
                 return next.block();
             }
         }
         LOG.debug("no more DataResponse, return empty Block");
-        return new Block();
+
+        Block bk = new Block();
+        bk.setProgress(readRows, readBytes);
+        return bk;
+    }
+
+    public long getReadRows() {
+        return this.readRows;
+    }
+
+    public long getReadBytes() {
+        return this.readBytes;
     }
 }
