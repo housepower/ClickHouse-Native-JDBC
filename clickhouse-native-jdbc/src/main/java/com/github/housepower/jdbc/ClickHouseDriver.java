@@ -57,7 +57,7 @@ public class ClickHouseDriver implements Driver {
             case SINGLE_CONNECTION:
             default:
                 return singleConnection(url, properties);
-        }ClickHouseConnection
+        }
     }
 
     ClickHouseConnection connect(String url, ClickHouseConfig cfg) throws SQLException {
