@@ -71,7 +71,7 @@ public class FailoverConnectionProxy extends MultiHostConnectionProxy {
                     }
                 }
             }
-            while (!multiHostConnectionProxy.isClosed && isExecute && tryIndex != urlsList.size() - 1);
+            while (!currentConnection.isClosed() && isExecute && tryIndex != urlsList.size() - 1);
 
             throw t;
         }

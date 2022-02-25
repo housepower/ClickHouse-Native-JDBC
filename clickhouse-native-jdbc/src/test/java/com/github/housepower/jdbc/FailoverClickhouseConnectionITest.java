@@ -148,4 +148,29 @@ public class FailoverClickhouseConnectionITest extends AbstractITest {
 
         assertNotNull(ex);
     }
+
+    @Test
+    public void testClickhouseAllDownBeforeConnect() throws Exception {
+        String haHost = String.format(Locale.ROOT, "%s:%s,%s", CK_HOST, HA_PORT, CK_HOST);
+
+        Exception ex = null;
+        container.stop();
+        containerHA.stop();
+        try (Connection connection = DriverManager
+                .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s/default", haHost))
+        ) {
+            withStatement(connection, stmt -> {
+
+                ResultSet rs = stmt.executeQuery("select count() from system.tables");
+
+                if (rs.next()) {
+                    assertTrue(rs.getLong(1) > 0);
+                }
+            });
+        } catch (Exception e) {
+            ex = e;
+        }
+
+        assertNotNull(ex);
+    }
 }
