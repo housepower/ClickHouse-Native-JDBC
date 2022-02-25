@@ -19,7 +19,12 @@ import com.github.housepower.settings.ClickHouseDefines;
 import com.github.housepower.settings.SettingKey;
 
 import java.io.Serializable;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -39,16 +44,20 @@ public class ClickHouseDriver implements Driver {
     }
 
     @Override
-    public ClickHouseConnection connect(String url, Properties properties) throws SQLException {
+    public Connection connect(String url, Properties properties) throws SQLException {
         if (!this.acceptsURL(url)) {
             return null;
         }
 
-        ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
-                .withJdbcUrl(url)
-                .withProperties(properties)
-                .build();
-        return connect(url, cfg);
+        ConnectionUrl connectionUrl = new ConnectionUrl(url);
+
+        switch (connectionUrl.getType()) {
+            case FAILOVER_CONNECTION:
+                return FailoverConnectionProxy.createProxyInstance(connectionUrl.getSingleConnectUrls(), properties);
+            case SINGLE_CONNECTION:
+            default:
+                return singleConnection(url, properties);
+        }ClickHouseConnection
     }
 
     ClickHouseConnection connect(String url, ClickHouseConfig cfg) throws SQLException {
@@ -58,6 +67,13 @@ public class ClickHouseDriver implements Driver {
         return ClickHouseConnection.createClickHouseConnection(cfg.withJdbcUrl(url));
     }
 
+    ClickHouseConnection singleConnection(String url, Properties properties) throws SQLException {
+        ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
+                .withJdbcUrl(url)
+                .withProperties(properties)
+                .build();
+        return connect(url, cfg);
+    }
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties properties) throws SQLException {
         ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()

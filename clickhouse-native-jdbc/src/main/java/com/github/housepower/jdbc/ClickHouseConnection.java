@@ -74,6 +74,10 @@ public class ClickHouseConnection implements SQLConnection {
         return nativeCtx.clientCtx();
     }
 
+    public NativeContext nativeContext() {
+        return nativeCtx;
+    }
+
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
     }

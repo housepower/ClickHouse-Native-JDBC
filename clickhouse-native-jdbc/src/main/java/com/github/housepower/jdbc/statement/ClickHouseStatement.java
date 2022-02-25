@@ -46,8 +46,8 @@ public class ClickHouseStatement implements SQLStatement {
 
     private ResultSet lastResultSet;
     protected Block block;
-    protected final ClickHouseConnection connection;
-    protected final NativeContext nativeContext;
+    protected volatile ClickHouseConnection connection;
+    protected volatile NativeContext nativeContext;
 
     private ClickHouseConfig cfg;
     private long maxRows;
@@ -259,5 +259,10 @@ public class ClickHouseStatement implements SQLStatement {
             db = "system";
             table = upperSQL.contains("TABLES") ? "tables" : "databases";
         }
+    }
+
+    public void resetConnect(ClickHouseConnection connection, NativeContext nativeContext) {
+        this.connection = connection;
+        this.nativeContext = nativeContext;
     }
 }
