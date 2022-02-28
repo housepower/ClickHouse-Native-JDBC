@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8
+      - run: echo 'Repository Owner ${{ github.repository_owner }}'
       - run: sed -i 's/TRACE/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
       - run: sed -i 's/DEBUG/INFO/g' clickhouse-native-jdbc/src/test/resources/simplelogger.properties
 
