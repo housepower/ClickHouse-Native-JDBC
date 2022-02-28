@@ -2,8 +2,10 @@
 
 ### 使用要求
 
-- Java 8, Scala 2.11/2.12, Spark 2.4.x
-- 或者 Java 8/11, Scala 2.12, Spark 3.0.x
+- Java 8, Scala 2.11/2.12, Spark 2.4
+- 或者 Java 8/11, Scala 2.12, Spark 3.0/3.1
+
+Spark 3.2 推荐使用 [Spark ClickHouse Connector](https://github.com/housepower/spark-clickhouse-connector)
 
 **注意:** Spark 2.3.x(EOL) 理论上也支持。但我们只对 Java 8 和 Java 11 做测试，Spark 自 3.0.0 起官方支持 Java 11。
 
