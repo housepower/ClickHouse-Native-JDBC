@@ -14,6 +14,7 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.exception.InvalidValueException;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
@@ -113,6 +114,36 @@ public class ConnectionParamITest extends AbstractITest {
         assertEquals("system", config.database());
         assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
         assertEquals(Duration.ofSeconds(50), config.connectTimeout());
+    }
+
+    @Test
+    public void successfullyFailoverHostNameWithCustomPort() {
+        String url = "jdbc:clickhouse://my_clickhouse_sever_host_name1:1940,my_clickhouse_sever_host_name2:1941/system?min_insert_block_size_rows=1000&connect_timeout=50";
+        ClickHouseConfig config = ClickHouseConfig.Builder.builder().withJdbcUrl(url).build();
+        assertEquals("my_clickhouse_sever_host_name1:1940,my_clickhouse_sever_host_name2:1941", config.host());
+        assertEquals(2, config.hosts().size());
+        assertEquals(9000, config.port());
+        assertEquals("system", config.database());
+        assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
+        assertEquals(Duration.ofSeconds(50), config.connectTimeout());
+    }
+
+    @Test
+    public void successfullyFailoverHostNameWithDefaultPort() {
+        String url = "jdbc:clickhouse://my_clickhouse_sever_host_name1,my_clickhouse_sever_host_name2/system?min_insert_block_size_rows=1000&connect_timeout=50";
+        ClickHouseConfig config = ClickHouseConfig.Builder.builder().withJdbcUrl(url).build();
+        assertEquals("my_clickhouse_sever_host_name1,my_clickhouse_sever_host_name2", config.host());
+        assertEquals(2, config.hosts().size());
+        assertEquals(9000, config.port());
+        assertEquals("system", config.database());
+        assertEquals(1000L, config.settings().get(SettingKey.min_insert_block_size_rows));
+        assertEquals(Duration.ofSeconds(50), config.connectTimeout());
+    }
+
+    @Test
+    public void successWrongUrlParser() {
+        String url = "jdbc:clickhouse://127.0.0. 1/system?min_insert_block_size_rows=1000&connect_timeout=50";
+        assertThrows(InvalidValueException.class, () -> ClickHouseConfig.Builder.builder().withJdbcUrl(url).build());
     }
 
     @Test

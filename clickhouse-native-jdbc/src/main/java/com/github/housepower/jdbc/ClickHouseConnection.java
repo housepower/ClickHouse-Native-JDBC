@@ -33,7 +33,17 @@ import com.github.housepower.stream.QueryResult;
 
 import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.ClientInfoStatus;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
+import java.sql.Struct;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -44,6 +54,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.github.housepower.jdbc.ClickhouseJdbcUrlParser.PORT_DELIMITER;
 
 public class ClickHouseConnection implements SQLConnection {
 
@@ -305,7 +317,43 @@ public class ClickHouseConnection implements SQLConnection {
     }
 
     private static NativeContext createNativeContext(ClickHouseConfig configure) throws SQLException {
-        NativeClient nativeClient = NativeClient.connect(configure);
+        if (configure.hosts().size() == 1) {
+            NativeClient nativeClient = NativeClient.connect(configure);
+            return new NativeContext(clientContext(nativeClient, configure), serverContext(nativeClient, configure), nativeClient);
+        }
+
+        return createFailoverNativeContext(configure);
+    }
+
+    private static NativeContext createFailoverNativeContext(ClickHouseConfig configure) throws SQLException {
+        NativeClient nativeClient = null;
+        SQLException lastException = null;
+
+        int tryIndex = 0;
+        do {
+            String hostAndPort = configure.hosts().get(tryIndex);
+            String[] hostAndPortSplit = hostAndPort.split(PORT_DELIMITER, 2);
+            String host = hostAndPortSplit[0];
+            int port;
+
+            if (hostAndPortSplit.length == 2) {
+                port = Integer.parseInt(hostAndPortSplit[1]);
+            } else {
+                port = configure.port();
+            }
+
+            try {
+                nativeClient = NativeClient.connect(host, port, configure);
+            } catch (SQLException e) {
+                lastException = e;
+            }
+            tryIndex++;
+        } while (nativeClient == null && tryIndex < configure.hosts().size());
+
+        if (nativeClient == null) {
+            throw lastException;
+        }
+
         return new NativeContext(clientContext(nativeClient, configure), serverContext(nativeClient, configure), nativeClient);
     }
 
