@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -38,6 +39,70 @@ public class ConnectionParamITest extends AbstractITest {
     public void init() throws SQLException {
         resetDriverManager();
     }
+
+    @Test
+    public void connectionPatternTest() {
+        String[] jdbcFalse = new String[]{
+                "//ck1:",
+                "//,ck1",
+                "//ck1,ck2,",
+                "//ck1:,ck2",
+                "//ck1,ck2/"
+        };
+
+        for (String jdbc : jdbcFalse) {
+            assertFalse(ClickhouseJdbcUrlParser.CONNECTION_PATTERN.matcher(jdbc).matches());
+        }
+
+        String[] jdbcTrue = new String[]{
+                "//ch1?max_rows_to_read=1&connect_timeout=10",
+                "//ch1/default?max_rows_to_read=1&connect_timeout=10",
+                "//ch1:1234?max_rows_to_read=1&connect_timeout=10",
+                "//ch1,ch2?max_rows_to_read=1&connect_timeout=10",
+                "//ch1,ch2:1234?max_rows_to_read=1&connect_timeout=10",
+                "//ch1:1234,ch2:1234?max_rows_to_read=1&connect_timeout=10",
+                "//ch1:1234,ch2:1234/default?max_rows_to_read=1&connect_timeout=10",
+                "//ch1:1234,ch2:1234,ch3:2222/default?max_rows_to_read=1&connect_timeout=10",
+                "//ch1:1234,ch2,ch3/default?max_rows_to_read=1&connect_timeout=10"
+        };
+
+        for (String jdbc : jdbcTrue) {
+            ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
+                    .withJdbcUrl(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX + jdbc)
+                    .build();
+
+            if (jdbc.contains("?")) {
+                assertEquals(cfg.connectTimeout().getSeconds(), 10);
+                assertEquals((Long) cfg.settings().get(SettingKey.max_rows_to_read), 1L);
+            }
+
+            if (jdbc.contains("/")) {
+                assertEquals("default", cfg.database());
+            }
+
+            if (jdbc.contains(",")) {
+                assertEquals(jdbc.split(",").length, cfg.hosts().size());
+            }
+        }
+
+        String[] fullJdbc = new String[]{
+                "//ch1:9000/default?query_timeout=1&connect_timeout=10&charset=UTF-8&client_name=test&tcp_keep_alive=true",
+                "//ch1:9001/default?query_timeout=1&connect_timeout=10&charset=UTF-8&client_name=test&tcp_keep_alive=true",
+                "//ch1,ch2:9001/default?query_timeout=1&connect_timeout=10&charset=UTF-8&client_name=test&tcp_keep_alive=false",
+                "//ch1:9001,ch2:9002/default?query_timeout=1&connect_timeout=10&charset=UTF-8&client_name=test&tcp_keep_alive=false"
+        };
+
+        for (String jdbc : fullJdbc) {
+            jdbc = ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX + jdbc;
+            ClickHouseConfig cfg = ClickHouseConfig.Builder.builder()
+                    .withJdbcUrl(jdbc)
+                    .build();
+
+            assertEquals(jdbc, cfg.jdbcUrl());
+        }
+
+    }
+
 
     @Test
     public void successfullyMaxRowsToRead() {

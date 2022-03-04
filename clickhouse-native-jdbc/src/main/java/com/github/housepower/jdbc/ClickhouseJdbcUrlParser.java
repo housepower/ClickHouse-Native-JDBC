@@ -37,7 +37,15 @@ public class ClickhouseJdbcUrlParser {
     public static final String HOST_DELIMITER = ",";
     public static final String PORT_DELIMITER = ":";
 
-    public static final Pattern CONNECTION_PATTERN = Pattern.compile("//(?<hosts>[^/?\\s]+)(?:/(?<database>([a-zA-Z0-9_]+)))?(?:\\?(?<query>.*))?");
+    /**
+     * Jdbc Url sames like:
+     * '//[host1][:port1],[host2][:port2],[host3][:port3]]...[/[database]][?propertyName1=propertyValue1[&propertyName2=propertyValue2]...]'
+     *
+     * Default_port is used when port does not exist.
+     */
+    public static final Pattern CONNECTION_PATTERN = Pattern.compile("//(?<hosts>([^/?:,\\s]+(:\\d+)?)(,[^/?:,\\s]+(:\\d+)?)*)" // hosts: required; starts with "//" followed by any char except "/", "?"
+            + "(?:/(?<database>([a-zA-Z0-9_]+)))?" // database: optional; starts with "/", and then followed by any char except "?"
+            + "(?:\\?(?<properties>.*))?"); // properties: optional; starts with "?", and then followed by any char
 
     private static final Logger LOG = LoggerFactory.getLogger(ClickhouseJdbcUrlParser.class);
 
@@ -52,7 +60,7 @@ public class ClickhouseJdbcUrlParser {
 
         String hosts = matcher.group("hosts");
         String database = matcher.group("database");
-        String query = matcher.group("query");
+        String properties = matcher.group("properties");
 
         if (hosts.contains(HOST_DELIMITER)) { // multi-host
             settings.put(SettingKey.host, hosts);
@@ -70,7 +78,7 @@ public class ClickhouseJdbcUrlParser {
         }
 
         settings.put(SettingKey.database, database);
-        settings.putAll(extractQueryParameters(query));
+        settings.putAll(extractQueryParameters(properties));
 
         return settings;
     }

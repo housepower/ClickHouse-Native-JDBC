@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FailoverClickhouseConnectionITest extends AbstractITest {
     private static final Logger LOG = LoggerFactory.getLogger(FailoverClickhouseConnectionITest.class);
 
+    protected static String HA_HOST;
     protected static int HA_PORT;
 
     @Container
@@ -49,13 +50,14 @@ public class FailoverClickhouseConnectionITest extends AbstractITest {
         containerHA.start();
 
         CK_PORT = container.getMappedPort(ClickHouseContainer.NATIVE_PORT);
+        HA_HOST = containerHA.getHost();
         HA_PORT = containerHA.getMappedPort(ClickHouseContainer.NATIVE_PORT);
         LOG.info("Port1 {}, Port2 {}", CK_PORT, HA_PORT);
     }
 
     @Test
     public void testClickhouseDownBeforeConnect() throws Exception {
-        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, CK_HOST, HA_PORT);
+        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, HA_HOST, HA_PORT);
 
         container.stop();
         try (Connection connection = DriverManager
@@ -73,7 +75,7 @@ public class FailoverClickhouseConnectionITest extends AbstractITest {
 
     @Test
     public void testClickhouseDownBeforeStatement() throws Exception {
-        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, CK_HOST, HA_PORT);
+        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, HA_HOST, HA_PORT);
 
         try (Connection connection = DriverManager
                 .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s/default", haHost))
@@ -91,7 +93,7 @@ public class FailoverClickhouseConnectionITest extends AbstractITest {
 
     @Test
     public void testClickhouseDownBeforePrepareStatement() throws Exception {
-        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, CK_HOST, HA_PORT);
+        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, HA_HOST, HA_PORT);
 
         try (Connection connection = DriverManager
                 .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s/default", haHost))
@@ -109,7 +111,7 @@ public class FailoverClickhouseConnectionITest extends AbstractITest {
 
     @Test
     public void testClickhouseDownBeforeExecute() throws Exception {
-        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, CK_HOST, HA_PORT);
+        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, HA_HOST, HA_PORT);
 
         try (Connection connection = DriverManager
                 .getConnection(String.format(Locale.ROOT, "jdbc:clickhouse://%s/default", haHost))
@@ -127,7 +129,7 @@ public class FailoverClickhouseConnectionITest extends AbstractITest {
 
     @Test
     public void testClickhouseDownBeforeAndAfterConnect() {
-        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, CK_HOST, HA_PORT);
+        String haHost = String.format(Locale.ROOT, "%s:%s,%s:%s", CK_HOST, CK_PORT, HA_HOST, HA_PORT);
 
         Exception ex = null;
         container.stop();
@@ -151,7 +153,7 @@ public class FailoverClickhouseConnectionITest extends AbstractITest {
 
     @Test
     public void testClickhouseAllDownBeforeConnect() throws Exception {
-        String haHost = String.format(Locale.ROOT, "%s:%s,%s", CK_HOST, HA_PORT, CK_HOST);
+        String haHost = String.format(Locale.ROOT, "%s:%s,%s", CK_HOST, HA_PORT, HA_HOST);
 
         Exception ex = null;
         container.stop();
