@@ -153,7 +153,7 @@ public class FailoverClickhouseConnectionITest extends AbstractITest {
 
     @Test
     public void testClickhouseAllDownBeforeConnect() throws Exception {
-        String haHost = String.format(Locale.ROOT, "%s:%s,%s", CK_HOST, HA_PORT, HA_HOST);
+        String haHost = String.format(Locale.ROOT, "%s:%s,%s", CK_HOST, CK_PORT, HA_HOST);
 
         Exception ex = null;
         container.stop();
