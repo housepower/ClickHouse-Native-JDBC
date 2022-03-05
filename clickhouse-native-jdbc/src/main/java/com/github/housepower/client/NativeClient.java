@@ -45,8 +45,12 @@ public class NativeClient {
     private static final Logger LOG = LoggerFactory.getLogger(NativeClient.class);
 
     public static NativeClient connect(ClickHouseConfig configure) throws SQLException {
+        return connect(configure.host(), configure.port(), configure);
+    }
+
+    public static NativeClient connect(String host, int port, ClickHouseConfig configure) throws SQLException {
         try {
-            SocketAddress endpoint = new InetSocketAddress(configure.host(), configure.port());
+            SocketAddress endpoint = new InetSocketAddress(host, port);
             // TODO support proxy
             Socket socket = new Socket();
             socket.setTcpNoDelay(true);

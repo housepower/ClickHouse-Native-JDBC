@@ -22,15 +22,21 @@ import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import static com.github.housepower.jdbc.ClickhouseJdbcUrlParser.HOST_DELIMITER;
+
 @Immutable
 public class ClickHouseConfig implements Serializable {
 
+
     private final String host;
+    private final List<String> hosts;
     private final int port;
     private final String database;
     private final String user;
@@ -46,6 +52,7 @@ public class ClickHouseConfig implements Serializable {
                              Duration queryTimeout, Duration connectTimeout, boolean tcpKeepAlive,
                              String charset, String clientName, Map<SettingKey, Serializable> settings) {
         this.host = host;
+        this.hosts = Arrays.asList(host.split(HOST_DELIMITER));
         this.port = port;
         this.database = database;
         this.user = user;
@@ -60,6 +67,10 @@ public class ClickHouseConfig implements Serializable {
 
     public String host() {
         return this.host;
+    }
+
+    public List<String> hosts() {
+        return this.hosts;
     }
 
     public int port() {
@@ -96,7 +107,13 @@ public class ClickHouseConfig implements Serializable {
 
     public String jdbcUrl() {
         StringBuilder builder = new StringBuilder(ClickhouseJdbcUrlParser.JDBC_CLICKHOUSE_PREFIX)
-                .append("//").append(host).append(":").append(port).append("/").append(database)
+                .append("//").append(host);
+
+        if (hosts.size() == 1) {
+            builder.append(":").append(port);
+        }
+
+        builder.append("/").append(database)
                 .append("?").append(SettingKey.query_timeout.name()).append("=").append(queryTimeout.getSeconds())
                 .append("&").append(SettingKey.connect_timeout.name()).append("=").append(connectTimeout.getSeconds())
                 .append("&").append(SettingKey.charset.name()).append("=").append(charset)

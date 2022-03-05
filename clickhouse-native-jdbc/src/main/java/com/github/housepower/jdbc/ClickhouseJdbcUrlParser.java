@@ -15,15 +15,17 @@
 package com.github.housepower.jdbc;
 
 import com.github.housepower.exception.InvalidValueException;
-import com.github.housepower.misc.Validate;
-import com.github.housepower.settings.SettingKey;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
+import com.github.housepower.misc.Validate;
+import com.github.housepower.settings.SettingKey;
 
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,27 +34,53 @@ public class ClickhouseJdbcUrlParser {
     public static final String CLICKHOUSE_PREFIX = "clickhouse:";
     public static final String JDBC_CLICKHOUSE_PREFIX = JDBC_PREFIX + CLICKHOUSE_PREFIX;
 
-    public static final Pattern DB_PATH_PATTERN = Pattern.compile("/([a-zA-Z0-9_]+)");
-    public static final Pattern HOST_PORT_PATH_PATTERN = Pattern.compile("//(?<host>[^/:\\s]+)(:(?<port>\\d+))?");
+    public static final String HOST_DELIMITER = ",";
+    public static final String PORT_DELIMITER = ":";
+
+    /**
+     * Jdbc Url sames like:
+     * '//[host1][:port1],[host2][:port2],[host3][:port3]]...[/[database]][?propertyName1=propertyValue1[&propertyName2=propertyValue2]...]'
+     *
+     * Default_port is used when port does not exist.
+     */
+    public static final Pattern CONNECTION_PATTERN = Pattern.compile("//(?<hosts>([^/?:,\\s]+(:\\d+)?)(,[^/?:,\\s]+(:\\d+)?)*)" // hosts: required; starts with "//" followed by any char except "/", "?"
+            + "(?:/(?<database>([a-zA-Z0-9_]+)))?" // database: optional; starts with "/", and then followed by any char except "?"
+            + "(?:\\?(?<properties>.*))?"); // properties: optional; starts with "?", and then followed by any char
 
     private static final Logger LOG = LoggerFactory.getLogger(ClickhouseJdbcUrlParser.class);
 
     public static Map<SettingKey, Serializable> parseJdbcUrl(String jdbcUrl) {
-        try {
-            URI uri = new URI(jdbcUrl.substring(JDBC_PREFIX.length()));
-            String host = parseHost(jdbcUrl);
-            Integer port = parsePort(jdbcUrl);
-            String database = parseDatabase(jdbcUrl);
-            Map<SettingKey, Serializable> settings = new HashMap<>();
-            settings.put(SettingKey.host, host);
-            settings.put(SettingKey.port, port);
-            settings.put(SettingKey.database, database);
-            settings.putAll(extractQueryParameters(uri.getQuery()));
-
-            return settings;
-        } catch (URISyntaxException ex) {
-            throw new InvalidValueException(ex);
+        String uri = jdbcUrl.substring(JDBC_CLICKHOUSE_PREFIX.length());
+        Matcher matcher = CONNECTION_PATTERN.matcher(uri);
+        if (!matcher.matches()) {
+            throw new InvalidValueException("Connection is not support");
         }
+
+        Map<SettingKey, Serializable> settings = new HashMap<>();
+
+        String hosts = matcher.group("hosts");
+        String database = matcher.group("database");
+        String properties = matcher.group("properties");
+
+        if (hosts.contains(HOST_DELIMITER)) { // multi-host
+            settings.put(SettingKey.host, hosts);
+        } else { // standard-host
+            String[] hostAndPort = hosts.split(PORT_DELIMITER, 2);
+
+            settings.put(SettingKey.host, hostAndPort[0]);
+
+            if (hostAndPort.length == 2) {
+                if (Integer.parseInt(hostAndPort[1]) == 8123) {
+                    LOG.warn("8123 is default HTTP port, you may connect with error protocol!");
+                }
+                settings.put(SettingKey.port, Integer.parseInt(hostAndPort[1]));
+            }
+        }
+
+        settings.put(SettingKey.database, database);
+        settings.putAll(extractQueryParameters(properties));
+
+        return settings;
     }
 
     public static Map<SettingKey, Serializable> parseProperties(Properties properties) {
@@ -65,59 +93,6 @@ public class ClickhouseJdbcUrlParser {
         }
 
         return settings;
-    }
-
-    private static String parseDatabase(String jdbcUrl) throws URISyntaxException {
-        URI uri = new URI(jdbcUrl.substring(JDBC_PREFIX.length()));
-        String database = uri.getPath();
-        if (database != null && !database.isEmpty()) {
-            Matcher m = DB_PATH_PATTERN.matcher(database);
-            if (m.matches()) {
-                database = m.group(1);
-            } else {
-                throw new URISyntaxException("wrong database name path: '" + database + "'", jdbcUrl);
-            }
-        }
-        if (database != null && database.isEmpty()) {
-            database = "default";
-        }
-        return database;
-    }
-
-    private static String parseHost(String jdbcUrl) throws URISyntaxException {
-        String uriStr = jdbcUrl.substring(JDBC_PREFIX.length());
-        URI uri = new URI(uriStr);
-        String host = uri.getHost();
-        if (host == null || host.isEmpty()) {
-            Matcher m = HOST_PORT_PATH_PATTERN.matcher(uriStr);
-            if (m.find()) {
-                host = m.group("host");
-            } else {
-                throw new URISyntaxException("No valid host was found", jdbcUrl);
-            }
-        }
-        return host;
-    }
-
-    private static int parsePort(String jdbcUrl) {
-        String uriStr = jdbcUrl.substring(JDBC_PREFIX.length());
-        URI uri;
-        try {
-            uri = new URI(uriStr);
-        } catch (Exception ex) {
-            throw new InvalidValueException(ex);
-        }
-        int port = uri.getPort();
-        if (port <= -1) {
-            Matcher m = HOST_PORT_PATH_PATTERN.matcher(uriStr);
-            if (m.find() && m.group("port") != null) {
-                port = Integer.parseInt(m.group("port"));
-            }
-        }
-        if (port == 8123) {
-            LOG.warn("8123 is default HTTP port, you may connect with error protocol!");
-        }
-        return port;
     }
 
     public static Map<SettingKey, Serializable> extractQueryParameters(String queryParameters) {
