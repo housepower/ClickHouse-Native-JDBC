@@ -39,7 +39,7 @@ public class ClickhouseJdbcUrlParser {
 
     /**
      * Jdbc Url sames like:
-     * '//[host1][:port1],[host2][:port2],[host3][:port3]]...[/[database]][?propertyName1=propertyValue1[&propertyName2=propertyValue2]...]'
+     * '//[host1][:port1],[host2][:port2],[host3][:port3]]...[/[database]][?propertyName1=propertyValue1[&amp;propertyName2=propertyValue2]...]'
      *
      * Default_port is used when port does not exist.
      */
