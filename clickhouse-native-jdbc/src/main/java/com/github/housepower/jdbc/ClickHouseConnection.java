@@ -291,12 +291,15 @@ public class ClickHouseConnection implements SQLConnection {
         NativeClient nativeClient = getNativeClient();
         nativeClient.sendData(block);
         nativeClient.sendData(new Block());
-        nativeClient.receiveEndOfStream(cfg.get().queryTimeout(), nativeCtx.serverCtx());
-        Validate.isTrue(this.state.compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE));
+        try{
+            nativeClient.receiveEndOfStream(cfg.get().queryTimeout(), nativeCtx.serverCtx());
+        } finally {
+            Validate.isTrue(this.state.compareAndSet(SessionState.WAITING_INSERT, SessionState.IDLE));
+        }
         return block.rowCnt();
     }
-
-    synchronized private NativeClient getHealthyNativeClient() throws SQLException {
+    
+    private synchronized NativeClient getHealthyNativeClient() throws SQLException {
         NativeContext oldCtx = nativeCtx;
         if (!oldCtx.nativeClient().ping(cfg.get().queryTimeout(), nativeCtx.serverCtx())) {
             LOG.warn("connection loss with state[{}], create new connection and reset state", state);
