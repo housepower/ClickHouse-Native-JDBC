@@ -61,7 +61,7 @@ public class InsertIBenchmark extends AbstractInsertIBenchmark {
     }
 
     @Benchmark
-    public void benchInsertHttp() throws Exception {
-        withConnection(benchInsert, ConnectionType.HTTP);
+    public void benchInsertJdbc() throws Exception {
+        withConnection(benchInsert, ConnectionType.JDBC);
     }
 }

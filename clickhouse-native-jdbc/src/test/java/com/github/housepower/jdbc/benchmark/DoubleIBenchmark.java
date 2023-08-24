@@ -16,12 +16,10 @@ package com.github.housepower.jdbc.benchmark;
 
 import com.google.common.base.Strings;
 import org.openjdk.jmh.annotations.Benchmark;
-import ru.yandex.clickhouse.ClickHouseStatement;
-import ru.yandex.clickhouse.domain.ClickHouseFormat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RowBinaryDoubleIBenchmark extends AbstractInsertIBenchmark {
+public class DoubleIBenchmark extends AbstractInsertIBenchmark {
     private final String columnType = "Float64";
 
     @Benchmark
@@ -46,20 +44,23 @@ public class RowBinaryDoubleIBenchmark extends AbstractInsertIBenchmark {
     }
 
     @Benchmark
-    public void benchInsertHttpRowBinary() throws Exception {
+    public void benchInsertJdbc() throws Exception {
         withConnection(connection -> {
             wideColumnPrepare(connection, columnType);
-            withStatement(connection, stmt -> {
-                ClickHouseStatement sth = (ClickHouseStatement) stmt;
-                sth.write().send("INSERT INTO " + getTableName(), stream -> {
-                    for (int i = 0; i < batchSize; i++) {
-                        for (int j = 0; j < columnNum; j++) {
-                            stream.writeFloat64(j + 1.0);
+            String params = Strings.repeat("?, ", columnNum);
+            withPreparedStatement(connection,
+                    "INSERT INTO " + getTableName() + " values(" + params.substring(0, params.length() - 2) + ")",
+                    pstmt -> {
+                        for (int i = 0; i < batchSize; i++) {
+                            for (int j = 0; j < columnNum; j++) {
+                                pstmt.setDouble(j + 1, j + 1.0);
+                            }
+                            pstmt.addBatch();
                         }
-                    }
-                }, ClickHouseFormat.RowBinary);
-            });
+                        int[] res = pstmt.executeBatch();
+                        assertEquals(res.length, batchSize);
+                    });
             wideColumnAfter(connection);
-        }, ConnectionType.HTTP);
+        }, ConnectionType.JDBC);
     }
 }

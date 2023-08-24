@@ -115,7 +115,7 @@
         <alibaba.druid.version>1.2.4</alibaba.druid.version>
         <dbcp2.version>2.8.0</dbcp2.version>
         <jupiter.version>5.7.0</jupiter.version>
-        <testcontainers.version>1.15.1</testcontainers.version>
+        <testcontainers.version>1.19.0</testcontainers.version>
 
         <async-profiler.library-path>/tmp/async-profiler-1.8.3-linux-x64/build</async-profiler.library-path>
 
@@ -188,10 +188,11 @@
                 <version>${jmh.version}</version>
             </dependency>
             <dependency>
-                <groupId>ru.yandex.clickhouse</groupId>
+                <groupId>com.clickhouse</groupId>
                 <artifactId>clickhouse-jdbc</artifactId>
-                <classifier>shaded</classifier>
-                <version>${yandex-clickhouse-jdbc.version}</version>
+                <version>0.4.6</version>
+                <!-- use uber jar with all dependencies included, change classifier to http for smaller jar -->
+                <classifier>all</classifier>
                 <exclusions>
                     <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>

@@ -61,9 +61,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ru.yandex.clickhouse</groupId>
+            <groupId>com.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
-            <classifier>shaded</classifier>
+            <classifier>all</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -27,8 +27,8 @@ public class WideColumnIntInsertIBenchmark extends AbstractInsertIBenchmark {
     }
 
     @Benchmark
-    public void benchInsertHttp() throws Exception {
-        withConnection(benchInsert, ConnectionType.HTTP);
+    public void benchInsertJdbc() throws Exception {
+        withConnection(benchInsert, ConnectionType.JDBC);
     }
 
     public WithConnection benchInsert = connection -> {
