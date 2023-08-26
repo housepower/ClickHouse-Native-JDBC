@@ -803,7 +803,6 @@ public class SettingKey implements Serializable {
             .withDescription("identify who you are, it will record in system.query_log")
             .build();
 
-
     public static SettingKey port = SettingKey.builder()
             .withName("port")
             .withType(SettingType.Int32)
@@ -830,6 +829,36 @@ public class SettingKey implements Serializable {
             .isSecret()
             .build();
 
+    public static SettingKey ssl = SettingKey.builder()
+            .withName("ssl")
+            .withType(SettingType.Bool)
+            .withDescription("Establish secure connection: True or False")
+            .build();
+
+    public static SettingKey sslMode = SettingKey.builder()
+            .withName("ssl_mode")
+            .withType(SettingType.UTF8)
+            .withDescription("Verify or not certificate: disabled (don't verify), verify_ca (verify)")
+            .build();
+
+    public static SettingKey keyStoreType = SettingKey.builder()
+            .withName("key_store_type")
+            .withType(SettingType.UTF8)
+            .withDescription("Type of the KeyStore. Currently, only JKS is supported.")
+            .build();
+
+    public static SettingKey keyStorePath = SettingKey.builder()
+            .withName("key_store_path")
+            .withType(SettingType.UTF8)
+            .withDescription("Path to the KeyStore file.")
+            .build();
+
+    public static SettingKey keyStorePassword = SettingKey.builder()
+            .withName("key_store_password")
+            .withType(SettingType.UTF8)
+            .withDescription("Password for the KeyStore.")
+            .build();
+
     public static SettingKey query_timeout = SettingKey.builder()
             .withName("query_timeout")
             .withType(SettingType.Seconds)
@@ -847,17 +876,17 @@ public class SettingKey implements Serializable {
             .build();
 
     public static SettingKey allow_experimental_map_type = SettingKey.builder()
-          .withName("allow_experimental_map_type")
-          .withType(SettingType.Int32)
-          .withDescription("Allow Map field to be use")
-          .build();
+            .withName("allow_experimental_map_type")
+            .withType(SettingType.Int32)
+            .withDescription("Allow Map field to be use")
+            .build();
 
     public static SettingKey query_id = SettingKey.builder()
             .withName("query_id")
             .withType(SettingType.UTF8)
             .withDescription("set current session query")
             .build();
-    
+
     public static Builder builder() {
         return new Builder();
     }

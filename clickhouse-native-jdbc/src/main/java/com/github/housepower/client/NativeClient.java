@@ -16,6 +16,7 @@ package com.github.housepower.client;
 
 import com.github.housepower.buffer.SocketBuffedReader;
 import com.github.housepower.buffer.SocketBuffedWriter;
+import com.github.housepower.client.ssl.SSLContextBuilder;
 import com.github.housepower.data.Block;
 import com.github.housepower.misc.Validate;
 import com.github.housepower.protocol.*;
@@ -29,11 +30,14 @@ import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.stream.QueryResult;
 import com.github.housepower.stream.ClickHouseQueryResult;
 
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Map;
@@ -44,23 +48,41 @@ public class NativeClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(NativeClient.class);
 
-    public static NativeClient connect(ClickHouseConfig configure) throws SQLException {
-        return connect(configure.host(), configure.port(), configure);
+    public static NativeClient connect(ClickHouseConfig config) throws SQLException {
+        return connect(config.host(), config.port(), config);
     }
 
-    public static NativeClient connect(String host, int port, ClickHouseConfig configure) throws SQLException {
+    // TODO: Support proxy
+    // TODO: Move socket initialisation to separate factory (default & ssl)
+    public static NativeClient connect(String host, int port, ClickHouseConfig config) throws SQLException {
         try {
             SocketAddress endpoint = new InetSocketAddress(host, port);
-            // TODO support proxy
-            Socket socket = new Socket();
+            Socket socket;
+
+            boolean useSSL = config.ssl();
+            if (useSSL) {
+                LOG.debug("Client works in SSL mode!");
+                SSLContext context = new SSLContextBuilder(config).getSSLContext();
+                SSLSocketFactory factory = context.getSocketFactory();
+                socket = (SSLSocket) factory.createSocket();
+            } else {
+                socket = new Socket();
+            }
             socket.setTcpNoDelay(true);
             socket.setSendBufferSize(ClickHouseDefines.SOCKET_SEND_BUFFER_BYTES);
             socket.setReceiveBufferSize(ClickHouseDefines.SOCKET_RECV_BUFFER_BYTES);
-            socket.setKeepAlive(configure.tcpKeepAlive());
-            socket.connect(endpoint, (int) configure.connectTimeout().toMillis());
+            socket.setKeepAlive(config.tcpKeepAlive());
+            socket.connect(endpoint, (int) config.connectTimeout().toMillis());
+
+            if (useSSL) ((SSLSocket) socket).startHandshake();
 
             return new NativeClient(socket);
-        } catch (IOException ex) {
+        } catch (IOException |
+                 NoSuchAlgorithmException |
+                 KeyStoreException |
+                 CertificateException |
+                 UnrecoverableKeyException |
+                 KeyManagementException ex) {
             throw new SQLException(ex.getMessage(), ex);
         }
     }
