@@ -20,7 +20,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.testcontainers.containers.ClickHouseContainer;
+import org.testcontainers.clickhouse.ClickHouseContainer;
 
 import java.sql.*;
 import java.util.Enumeration;
@@ -31,6 +31,12 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class AbstractIBenchmark {
 
+    /*
+    * HTTP API Port for http requests. used by JDBC, ODBC and web interfaces.
+    * */
+    protected static final int CLICKHOUSE_HTTP_PORT = 8123;
+    protected static final int CLICKHOUSE_NATIVE_PORT = 9000;
+
     public static final ClickHouseContainer container;
 
     static {
@@ -38,7 +44,7 @@ public class AbstractIBenchmark {
         container.start();
     }
 
-    private final Driver httpDriver = new ru.yandex.clickhouse.ClickHouseDriver();
+    private final Driver clickhouseJdbcDriver = new com.clickhouse.jdbc.ClickHouseDriver();
     private final Driver nativeDriver = new com.github.housepower.jdbc.ClickHouseDriver();
 
     public static void main(String[] args) throws RunnerException {
@@ -64,13 +70,13 @@ public class AbstractIBenchmark {
             case NATIVE:
                 Class.forName("com.github.housepower.jdbc.ClickHouseDriver");
                 DriverManager.registerDriver(nativeDriver);
-                port = container.getMappedPort(ClickHouseContainer.NATIVE_PORT);
+                port = container.getMappedPort(CLICKHOUSE_NATIVE_PORT);
                 break;
 
-            case HTTP:
-                Class.forName("ru.yandex.clickhouse.ClickHouseDriver");
-                DriverManager.registerDriver(httpDriver);
-                port = container.getMappedPort(ClickHouseContainer.HTTP_PORT);
+            case JDBC:
+                Class.forName("com.clickhouse.jdbc.ClickHouseDriver");
+                DriverManager.registerDriver(clickhouseJdbcDriver);
+                port = container.getMappedPort(CLICKHOUSE_HTTP_PORT);
                 break;
 
             default:
@@ -111,6 +117,6 @@ public class AbstractIBenchmark {
     }
 
     public enum ConnectionType {
-        NATIVE, HTTP
+        NATIVE, JDBC
     }
 }

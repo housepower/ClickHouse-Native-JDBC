@@ -17,7 +17,7 @@ package com.github.housepower.jdbc;
 import com.github.housepower.misc.StrUtil;
 import com.github.housepower.misc.SystemUtil;
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.ClickHouseContainer;
+import org.testcontainers.clickhouse.ClickHouseContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.MountableFile;
@@ -35,33 +35,32 @@ public abstract class AbstractITest implements Serializable {
     protected static final ZoneId SERVER_TZ = ZoneId.of("UTC");
     protected static final String DRIVER_CLASS_NAME = "com.github.housepower.jdbc.ClickHouseDriver";
 
-    public static final String CLICKHOUSE_IMAGE = System.getProperty("CLICKHOUSE_IMAGE", "yandex/clickhouse-server:21.9");
+    public static final String CLICKHOUSE_IMAGE = System.getProperty("CLICKHOUSE_IMAGE", "clickhouse/clickhouse-server:21.9");
 
     protected static final String CLICKHOUSE_USER = SystemUtil.loadProp("CLICKHOUSE_USER", "default");
     protected static final String CLICKHOUSE_PASSWORD = SystemUtil.loadProp("CLICKHOUSE_PASSWORD", "");
     protected static final String CLICKHOUSE_DB = SystemUtil.loadProp("CLICKHOUSE_DB", "");
 
     protected static final int CLICKHOUSE_GRPC_PORT = 9100;
+    protected static final int CLICKHOUSE_HTTP_PORT = 8123;
+    protected static final int CLICKHOUSE_NATIVE_PORT = 9000;
 
     @Container
-    public static ClickHouseContainer container = (ClickHouseContainer) new ClickHouseContainer(CLICKHOUSE_IMAGE)
+    public static ClickHouseContainer container = new ClickHouseContainer(CLICKHOUSE_IMAGE)
             .withEnv("CLICKHOUSE_USER", CLICKHOUSE_USER)
             .withEnv("CLICKHOUSE_PASSWORD", CLICKHOUSE_PASSWORD)
             .withEnv("CLICKHOUSE_DB", CLICKHOUSE_DB)
-            .withExposedPorts(CLICKHOUSE_GRPC_PORT)
+            .withExposedPorts(CLICKHOUSE_HTTP_PORT, CLICKHOUSE_NATIVE_PORT, CLICKHOUSE_GRPC_PORT)
             .withCopyFileToContainer(MountableFile.forClasspathResource("grpc_config.xml"), "/etc/clickhouse-server/config.d/grpc_config.xml");
 
-
     protected static String CK_HOST;
-    protected static String CK_IP;
     protected static int CK_PORT;
     protected static int CK_GRPC_PORT;
 
     @BeforeAll
     public static void extractContainerInfo() {
         CK_HOST = container.getHost();
-        CK_IP = container.getContainerIpAddress();
-        CK_PORT = container.getMappedPort(ClickHouseContainer.NATIVE_PORT);
+        CK_PORT = container.getMappedPort(CLICKHOUSE_NATIVE_PORT);
         CK_GRPC_PORT = container.getMappedPort(CLICKHOUSE_GRPC_PORT);
     }
 
@@ -74,7 +73,7 @@ public abstract class AbstractITest implements Serializable {
 
     protected String getJdbcUrl(Object... params) {
         StringBuilder sb = new StringBuilder();
-        int port = container.getMappedPort(ClickHouseContainer.NATIVE_PORT);
+        int port = container.getMappedPort(CLICKHOUSE_NATIVE_PORT);
         sb.append("jdbc:clickhouse://").append(container.getHost()).append(":").append(port);
         if (StrUtil.isNotEmpty(CLICKHOUSE_DB)) {
             sb.append("/").append(container.getDatabaseName());

@@ -47,7 +47,7 @@ public class SelectIBenchmark extends AbstractIBenchmark {
     }
 
     @Benchmark
-    public void benchSelectHTTP() throws Exception {
-        withConnection(benchSelect, ConnectionType.HTTP);
+    public void benchSelectJdbc() throws Exception {
+        withConnection(benchSelect, ConnectionType.JDBC);
     }
 }
