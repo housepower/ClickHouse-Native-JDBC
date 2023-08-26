@@ -43,16 +43,32 @@ jobs:
           path: benchmark-reports.tgz
           retention-days: 30
 
-      - name: PR Comment
-        uses: github-actions-up-and-running/pr-comment@v1.0.1
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          message: |
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const contentWithLineNumbers = `${process.env.BENCHMARK_REPORT}`
+              .split('\n')
+              .map((line, idx) => `${idx + 1}. ${line}`)
+              .join('\n');
+    
+            const body = `
             <details>
               <summary>BENCHMARK_REPORT</summary>
-
-            ```
-            ${{ env.BENCHMARK_REPORT }}
-            ```
+              <pre style="display:block; white-space:pre-wrap; background-color: #f5f5f5; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace;">
+                ${contentWithLineNumbers}
+              </pre>
             </details>
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number,
+              owner,
+              repo,
+              body
+            });
