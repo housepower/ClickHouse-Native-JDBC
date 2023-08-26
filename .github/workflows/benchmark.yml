@@ -44,15 +44,21 @@ jobs:
           retention-days: 30
 
       - name: PR Comment
-        uses: github-actions-up-and-running/pr-comment@v1.0.1
-        if: ${{ github.event_name == 'pull_request' }}
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          message: |
-            <details>
-              <summary>BENCHMARK_REPORT</summary>
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: |
+                <details>
+                  <summary>BENCHMARK_REPORT</summary>
 
-            ```
-            ${{ env.BENCHMARK_REPORT }}
-            ```
-            </details>
+                  ```
+                  ${{ env.BENCHMARK_REPORT }}
+                  ```
+                </details>
+            })
