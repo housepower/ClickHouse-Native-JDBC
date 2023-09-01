@@ -14,12 +14,52 @@
 
 package com.github.housepower.jdbc;
 
+import com.github.housepower.jdbc.tool.LocalKeyStoreConfig;
+import com.github.housepower.settings.KeyStoreConfig;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import java.sql.ResultSet;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ClickHouseConnectionITest extends AbstractITest {
+
+    @Test
+    void ping() throws Exception {
+        withNewConnection(connection -> {
+            withStatement(connection, stmt -> {
+                ResultSet resultSet = stmt.executeQuery("SELECT 1");
+                assertTrue(resultSet.next());
+            });
+        });
+    }
+
+    @Test
+    void pingWithSecureConnection() throws Exception {
+        withNewConnection(connection -> {
+                    withStatement(connection, stmt -> {
+                        ResultSet resultSet = stmt.executeQuery("SELECT 1");
+                        assertTrue(resultSet.next());
+                    });
+                }, "ssl", "true",
+                "ssl_mode", "disabled");
+    }
+
+    @Test
+    void pingWithSecureConnectionAndVerification() throws Exception {
+        KeyStoreConfig keyStoreConfig = new LocalKeyStoreConfig();
+
+        withNewConnection(connection -> {
+                    withStatement(connection, stmt -> {
+                        ResultSet resultSet = stmt.executeQuery("SELECT 1");
+                        assertTrue(resultSet.next());
+                    });
+                }, "ssl", "true",
+                "ssl_mode", "verify_ca",
+                "key_store_type", keyStoreConfig.getKeyStoreType(),
+                "key_store_path", keyStoreConfig.getKeyStorePath(),
+                "key_store_password", keyStoreConfig.getKeyStorePassword());
+    }
 
     @Test
     public void testCatalog() throws Exception {

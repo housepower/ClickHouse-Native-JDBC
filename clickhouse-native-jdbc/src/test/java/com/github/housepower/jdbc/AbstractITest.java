@@ -41,27 +41,36 @@ public abstract class AbstractITest implements Serializable {
     protected static final String CLICKHOUSE_PASSWORD = SystemUtil.loadProp("CLICKHOUSE_PASSWORD", "");
     protected static final String CLICKHOUSE_DB = SystemUtil.loadProp("CLICKHOUSE_DB", "");
 
-    protected static final int CLICKHOUSE_GRPC_PORT = 9100;
     protected static final int CLICKHOUSE_HTTP_PORT = 8123;
+    protected static final int CLICKHOUSE_HTTPS_PORT = 8443;
     protected static final int CLICKHOUSE_NATIVE_PORT = 9000;
+    protected static final int CLICKHOUSE_NATIVE_SECURE_PORT = 9440;
 
     @Container
     public static ClickHouseContainer container = new ClickHouseContainer(CLICKHOUSE_IMAGE)
             .withEnv("CLICKHOUSE_USER", CLICKHOUSE_USER)
             .withEnv("CLICKHOUSE_PASSWORD", CLICKHOUSE_PASSWORD)
             .withEnv("CLICKHOUSE_DB", CLICKHOUSE_DB)
-            .withExposedPorts(CLICKHOUSE_HTTP_PORT, CLICKHOUSE_NATIVE_PORT, CLICKHOUSE_GRPC_PORT)
-            .withCopyFileToContainer(MountableFile.forClasspathResource("grpc_config.xml"), "/etc/clickhouse-server/config.d/grpc_config.xml");
+            .withExposedPorts(CLICKHOUSE_HTTP_PORT,
+                    CLICKHOUSE_HTTPS_PORT,
+                    CLICKHOUSE_NATIVE_PORT,
+                    CLICKHOUSE_NATIVE_SECURE_PORT)
+            .withCopyFileToContainer(MountableFile.forClasspathResource("clickhouse/config/config.xml"),
+                    "/etc/clickhouse-server/config.xml")
+            .withCopyFileToContainer(MountableFile.forClasspathResource("clickhouse/config/users.xml"),
+                    "/etc/clickhouse-server/users.xml")
+            .withCopyFileToContainer(MountableFile.forClasspathResource("clickhouse/server.key"),
+                    "/etc/clickhouse-server/server.key")
+            .withCopyFileToContainer(MountableFile.forClasspathResource("clickhouse/server.crt"),
+                    "/etc/clickhouse-server/server.crt");
 
     protected static String CK_HOST;
     protected static int CK_PORT;
-    protected static int CK_GRPC_PORT;
 
     @BeforeAll
     public static void extractContainerInfo() {
         CK_HOST = container.getHost();
         CK_PORT = container.getMappedPort(CLICKHOUSE_NATIVE_PORT);
-        CK_GRPC_PORT = container.getMappedPort(CLICKHOUSE_GRPC_PORT);
     }
 
     /**
@@ -72,28 +81,39 @@ public abstract class AbstractITest implements Serializable {
     }
 
     protected String getJdbcUrl(Object... params) {
-        StringBuilder sb = new StringBuilder();
-        int port = container.getMappedPort(CLICKHOUSE_NATIVE_PORT);
-        sb.append("jdbc:clickhouse://").append(container.getHost()).append(":").append(port);
-        if (StrUtil.isNotEmpty(CLICKHOUSE_DB)) {
-            sb.append("/").append(container.getDatabaseName());
-        }
+        StringBuilder settingsStringBuilder = new StringBuilder();
         for (int i = 0; i + 1 < params.length; i++) {
-            sb.append(i == 0 ? "?" : "&");
-            sb.append(params[i]).append("=").append(params[i + 1]);
+            settingsStringBuilder.append(i == 0 ? "?" : "&");
+            settingsStringBuilder.append(params[i]).append("=").append(params[i + 1]);
         }
 
+        StringBuilder mainStringBuilder = new StringBuilder();
+        int port = 0;
+        if (settingsStringBuilder.indexOf("ssl=true") == -1) {
+            port = container.getMappedPort(CLICKHOUSE_NATIVE_PORT);
+        } else {
+            port = container.getMappedPort(CLICKHOUSE_NATIVE_SECURE_PORT);
+        }
+
+        mainStringBuilder.append("jdbc:clickhouse://").append(container.getHost()).append(":").append(port);
+        if (StrUtil.isNotEmpty(CLICKHOUSE_DB)) {
+            mainStringBuilder.append("/").append(container.getDatabaseName());
+        }
+
+        // Add settings
+        mainStringBuilder.append(settingsStringBuilder);
+
         // Add user
-        sb.append(params.length < 2 ? "?" : "&");
-        sb.append("user=").append(container.getUsername());
+        mainStringBuilder.append(params.length < 2 ? "?" : "&");
+        mainStringBuilder.append("user=").append(container.getUsername());
 
         // Add password
         // ignore blank password
         if (!StrUtil.isBlank(CLICKHOUSE_PASSWORD)) {
-            sb.append("&password=").append(container.getPassword());
+            mainStringBuilder.append("&password=").append(container.getPassword());
         }
 
-        return sb.toString();
+        return mainStringBuilder.toString();
     }
 
     // this method should be synchronized

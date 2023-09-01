@@ -34,7 +34,6 @@ import static com.github.housepower.jdbc.ClickhouseJdbcUrlParser.HOST_DELIMITER;
 @Immutable
 public class ClickHouseConfig implements Serializable {
 
-
     private final String host;
     private final List<String> hosts;
     private final int port;
@@ -46,11 +45,14 @@ public class ClickHouseConfig implements Serializable {
     private final String charset; // use String because Charset is not serializable
     private final Map<SettingKey, Serializable> settings;
     private final boolean tcpKeepAlive;
+    private final boolean ssl;
+    private final String sslMode;
     private final String clientName;
 
     private ClickHouseConfig(String host, int port, String database, String user, String password,
                              Duration queryTimeout, Duration connectTimeout, boolean tcpKeepAlive,
-                             String charset, String clientName, Map<SettingKey, Serializable> settings) {
+                             boolean ssl, String sslMode, String charset, String clientName,
+                             Map<SettingKey, Serializable> settings) {
         this.host = host;
         this.hosts = Arrays.asList(host.split(HOST_DELIMITER));
         this.port = port;
@@ -60,6 +62,8 @@ public class ClickHouseConfig implements Serializable {
         this.queryTimeout = queryTimeout;
         this.connectTimeout = connectTimeout;
         this.tcpKeepAlive = tcpKeepAlive;
+        this.ssl = ssl;
+        this.sslMode = sslMode;
         this.charset = charset;
         this.clientName = clientName;
         this.settings = settings;
@@ -95,6 +99,14 @@ public class ClickHouseConfig implements Serializable {
 
     public Duration connectTimeout() {
         return this.connectTimeout;
+    }
+
+    public boolean ssl() {
+        return this.ssl;
+    }
+
+    public String sslMode() {
+        return this.sslMode;
     }
 
     public Charset charset() {
@@ -162,6 +174,18 @@ public class ClickHouseConfig implements Serializable {
                 .build();
     }
 
+    public ClickHouseConfig withSSL(boolean enable) {
+        return Builder.builder(this)
+                .ssl(enable)
+                .build();
+    }
+
+    public ClickHouseConfig withSSLMode(String mode) {
+        return Builder.builder(this)
+                .sslMode(mode)
+                .build();
+    }
+
     public ClickHouseConfig withCharset(Charset charset) {
         return Builder.builder(this)
                 .charset(charset)
@@ -212,6 +236,8 @@ public class ClickHouseConfig implements Serializable {
         private Duration connectTimeout;
         private Duration queryTimeout;
         private boolean tcpKeepAlive;
+        private boolean ssl;
+        private String sslMode;
         private Charset charset;
         private String clientName;
         private Map<SettingKey, Serializable> settings = new HashMap<>();
@@ -234,6 +260,8 @@ public class ClickHouseConfig implements Serializable {
                     .queryTimeout(cfg.queryTimeout())
                     .charset(cfg.charset())
                     .tcpKeepAlive(cfg.tcpKeepAlive())
+                    .ssl(cfg.ssl())
+                    .sslMode(cfg.sslMode())
                     .clientName(cfg.clientName())
                     .withSettings(cfg.settings());
         }
@@ -288,6 +316,16 @@ public class ClickHouseConfig implements Serializable {
             return this;
         }
 
+        public Builder ssl(boolean ssl) {
+            this.withSetting(SettingKey.ssl, ssl);
+            return this;
+        }
+
+        public Builder sslMode(String sslMode) {
+            this.withSetting(SettingKey.ssl, ssl);
+            return this;
+        }
+
         public Builder charset(String charset) {
             this.withSetting(SettingKey.charset, charset);
             return this;
@@ -330,6 +368,8 @@ public class ClickHouseConfig implements Serializable {
             this.connectTimeout = (Duration) this.settings.getOrDefault(SettingKey.connect_timeout, Duration.ZERO);
             this.queryTimeout = (Duration) this.settings.getOrDefault(SettingKey.query_timeout, Duration.ZERO);
             this.tcpKeepAlive = (boolean) this.settings.getOrDefault(SettingKey.tcp_keep_alive, false);
+            this.ssl = (boolean) this.settings.getOrDefault(SettingKey.ssl, false);
+            this.sslMode = (String) this.settings.getOrDefault(SettingKey.sslMode, "disabled");
             this.charset = Charset.forName((String) this.settings.getOrDefault(SettingKey.charset, "UTF-8"));
             this.clientName = (String) this.settings.getOrDefault(SettingKey.client_name,
                     String.format(Locale.ROOT, "%s %s", ClickHouseDefines.NAME, "client"));
@@ -337,8 +377,8 @@ public class ClickHouseConfig implements Serializable {
             revisit();
             purgeSettings();
 
-            return new ClickHouseConfig(
-                    host, port, database, user, password, queryTimeout, connectTimeout, tcpKeepAlive, charset.name(), clientName, settings);
+            return new ClickHouseConfig(host, port, database, user, password, queryTimeout, connectTimeout,
+                    tcpKeepAlive, ssl, sslMode, charset.name(), clientName, settings);
         }
 
         private void revisit() {
@@ -360,6 +400,8 @@ public class ClickHouseConfig implements Serializable {
             this.settings.remove(SettingKey.query_timeout);
             this.settings.remove(SettingKey.connect_timeout);
             this.settings.remove(SettingKey.tcp_keep_alive);
+            this.settings.remove(SettingKey.ssl);
+            this.settings.remove(SettingKey.sslMode);
             this.settings.remove(SettingKey.charset);
             this.settings.remove(SettingKey.client_name);
         }
