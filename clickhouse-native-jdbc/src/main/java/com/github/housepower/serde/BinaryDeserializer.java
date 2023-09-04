@@ -35,18 +35,23 @@ public class BinaryDeserializer {
         switcher = new Switcher<>(compressedReader, buffedReader);
     }
 
+    /**
+     * Reads VarInt from binary stream; uses lower 7 bits for value, 8th bit as continuation flag.
+     *
+     * @return Parsed VarInt.
+     * @throws IOException On read error.
+     */
     public long readVarInt() throws IOException {
-        int number = 0;
-        for (int i = 0; i < 9; i++) {
-            int byt = switcher.get().readBinary();
-
-            number |= (byt & 0x7F) << (7 * i);
-
-            if ((byt & 0x80) == 0) {
-                break;
+        long result = 0;
+        for (int i = 0; i < 10; i++) {
+            int currentByte = switcher.get().readBinary();
+            long valueChunk = currentByte & 0x7F;
+            result |= (valueChunk << (7 * i));
+            if ((currentByte & 0x80) == 0) {
+                return result;
             }
         }
-        return number;
+        throw new IOException("Malformed VarInt: too long");
     }
 
     @SuppressWarnings("PointlessBitwiseExpression")
