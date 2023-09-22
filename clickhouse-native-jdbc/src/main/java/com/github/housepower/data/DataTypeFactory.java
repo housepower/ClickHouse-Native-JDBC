@@ -34,19 +34,7 @@ import com.github.housepower.data.type.DataTypeUInt32;
 import com.github.housepower.data.type.DataTypeUInt64;
 import com.github.housepower.data.type.DataTypeUInt8;
 import com.github.housepower.data.type.DataTypeUUID;
-import com.github.housepower.data.type.complex.DataTypeArray;
-import com.github.housepower.data.type.complex.DataTypeCreator;
-import com.github.housepower.data.type.complex.DataTypeDateTime;
-import com.github.housepower.data.type.complex.DataTypeDateTime64;
-import com.github.housepower.data.type.complex.DataTypeDecimal;
-import com.github.housepower.data.type.complex.DataTypeEnum16;
-import com.github.housepower.data.type.complex.DataTypeEnum8;
-import com.github.housepower.data.type.complex.DataTypeFixedString;
-import com.github.housepower.data.type.complex.DataTypeMap;
-import com.github.housepower.data.type.complex.DataTypeNothing;
-import com.github.housepower.data.type.complex.DataTypeNullable;
-import com.github.housepower.data.type.complex.DataTypeString;
-import com.github.housepower.data.type.complex.DataTypeTuple;
+import com.github.housepower.data.type.complex.*;
 import com.github.housepower.misc.LRUCache;
 import com.github.housepower.misc.SQLLexer;
 import com.github.housepower.misc.Validate;
@@ -89,6 +77,8 @@ public class DataTypeFactory {
             return DataTypeDateTime64.creator.createDataType(lexer, serverContext);
         } else if (dataTypeName.equalsIgnoreCase("Nullable")) {
             return DataTypeNullable.creator.createDataType(lexer, serverContext);
+        } else if (dataTypeName.equalsIgnoreCase("LowCardinality")) {
+            return DataTypeLowCardinality.creator.createDataType(lexer, serverContext);
         } else if (dataTypeName.equalsIgnoreCase("FixedString") || dataTypeName.equals("Binary")) {
             return DataTypeFixedString.creator.createDataType(lexer, serverContext);
         } else if (dataTypeName.equalsIgnoreCase("Decimal")) {
@@ -98,7 +88,7 @@ public class DataTypeFactory {
         } else if (dataTypeName.equalsIgnoreCase("Nothing")) {
             return DataTypeNothing.CREATOR.createDataType(lexer, serverContext);
         } else if (dataTypeName.equalsIgnoreCase("Map")) {
-           return DataTypeMap.creator.createDataType(lexer, serverContext);
+            return DataTypeMap.creator.createDataType(lexer, serverContext);
         } else {
             IDataType<?, ?> dataType = dataTypes.get(dataTypeName.toLowerCase(Locale.ROOT));
             Validate.isTrue(dataType != null, "Unknown data type: " + dataTypeName);
