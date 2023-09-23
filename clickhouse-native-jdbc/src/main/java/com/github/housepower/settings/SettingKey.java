@@ -791,6 +791,12 @@ public class SettingKey implements Serializable {
             .withDescription("Enable conditional computations")
             .build();
 
+    public static SettingKey allow_suspicious_low_cardinality_types = SettingKey.builder()
+            .withName("allow_suspicious_low_cardinality_types")
+            .withType(SettingType.Int32)
+            .withDescription("Permits the use of LowCardinality with data types that might negatively impact performance")
+            .build();
+
     public static SettingKey allow_experimental_bigint_types = SettingKey.builder()
             .withName("allow_experimental_bigint_types")
             .withType(SettingType.Int64)
