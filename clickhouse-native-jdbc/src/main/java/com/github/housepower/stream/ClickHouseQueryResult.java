@@ -21,15 +21,16 @@ import com.github.housepower.protocol.DataResponse;
 import com.github.housepower.protocol.EOFStreamResponse;
 import com.github.housepower.protocol.ProgressResponse;
 import com.github.housepower.protocol.Response;
+import com.github.housepower.protocol.listener.ProgressListener;
 
 import java.sql.SQLException;
 
-public class ClickHouseQueryResult implements QueryResult {
 
+public class ClickHouseQueryResult implements QueryResult {
     private final CheckedSupplier<Response, SQLException> responseSupplier;
+    private ProgressListener progressListener;
     private Block header;
     private boolean atEnd;
-    // Progress
     // Totals
     // Extremes
     // ProfileInfo
@@ -37,6 +38,15 @@ public class ClickHouseQueryResult implements QueryResult {
 
     public ClickHouseQueryResult(CheckedSupplier<Response, SQLException> responseSupplier) {
         this.responseSupplier = responseSupplier;
+    }
+
+    public ClickHouseQueryResult(CheckedSupplier<Response, SQLException> responseSupplier, ProgressListener progressListener) {
+        this.progressListener = progressListener;
+        this.responseSupplier = responseSupplier;
+    }
+
+    public void setProgressListener(ProgressListener progressListener) {
+        this.progressListener = progressListener;
     }
 
     @Override
@@ -97,6 +107,9 @@ public class ClickHouseQueryResult implements QueryResult {
             } else if (response instanceof EOFStreamResponse || response == null) {
                 atEnd = true;
             } else if (response instanceof ProgressResponse) {
+                if (progressListener != null) {
+                    progressListener.onProgress((ProgressResponse) response);
+                }
                 readRows += ((ProgressResponse) response).newRows();
                 readBytes += ((ProgressResponse) response).newBytes();
             }

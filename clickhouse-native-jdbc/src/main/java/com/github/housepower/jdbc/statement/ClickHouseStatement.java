@@ -14,18 +14,20 @@
 
 package com.github.housepower.jdbc.statement;
 
-import com.github.housepower.jdbc.ClickHouseConnection;
-import com.github.housepower.jdbc.ClickHouseResultSet;
 import com.github.housepower.client.NativeContext;
 import com.github.housepower.data.Block;
+import com.github.housepower.jdbc.ClickHouseConnection;
+import com.github.housepower.jdbc.ClickHouseResultSet;
+import com.github.housepower.jdbc.wrapper.SQLStatement;
 import com.github.housepower.log.Logger;
 import com.github.housepower.log.LoggerFactory;
 import com.github.housepower.misc.ExceptionUtil;
 import com.github.housepower.misc.Validate;
-import com.github.housepower.stream.QueryResult;
+import com.github.housepower.protocol.listener.ProgressListener;
 import com.github.housepower.settings.ClickHouseConfig;
 import com.github.housepower.settings.SettingKey;
-import com.github.housepower.jdbc.wrapper.SQLStatement;
+import com.github.housepower.stream.ClickHouseQueryResult;
+import com.github.housepower.stream.QueryResult;
 import com.github.housepower.stream.ValuesNativeInputFormat;
 
 import java.sql.Connection;
@@ -48,6 +50,7 @@ public class ClickHouseStatement implements SQLStatement {
     protected Block block;
     protected final ClickHouseConnection connection;
     protected final NativeContext nativeContext;
+    private ProgressListener progressListener;
 
     private ClickHouseConfig cfg;
     private long maxRows;
@@ -91,6 +94,11 @@ public class ClickHouseStatement implements SQLStatement {
             }
             updateCount = -1;
             QueryResult result = connection.sendQueryRequest(query, cfg);
+
+            if (result instanceof ClickHouseQueryResult) {
+                ((ClickHouseQueryResult) result).setProgressListener(this.progressListener);
+            }
+
             lastResultSet = new ClickHouseResultSet(this, cfg, db, table, result.header(), result.data());
             return 0;
         });
@@ -160,6 +168,10 @@ public class ClickHouseStatement implements SQLStatement {
     @Override
     public void setQueryTimeout(int seconds) {
         this.cfg = cfg.withQueryTimeout(Duration.ofSeconds(seconds));
+    }
+
+    public void setProgressListener(ProgressListener listener) {
+        this.progressListener = listener;
     }
 
     @Override
