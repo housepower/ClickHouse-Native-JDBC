@@ -25,6 +25,7 @@ import com.github.housepower.data.type.DataTypeDate32;
 import com.github.housepower.data.type.DataTypeFloat32;
 import com.github.housepower.data.type.DataTypeFloat64;
 import com.github.housepower.data.type.DataTypeIPv4;
+import com.github.housepower.data.type.DataTypeIPv6;
 import com.github.housepower.data.type.DataTypeInt16;
 import com.github.housepower.data.type.DataTypeInt32;
 import com.github.housepower.data.type.DataTypeInt64;
@@ -103,6 +104,7 @@ public class DataTypeFactory {
         Map<String, IDataType<?, ?>> creators = new HashMap<>();
 
         registerType(creators, new DataTypeIPv4());
+        registerType(creators, new DataTypeIPv6());
         registerType(creators, new DataTypeUUID());
         registerType(creators, new DataTypeFloat32());
         registerType(creators, new DataTypeFloat64());

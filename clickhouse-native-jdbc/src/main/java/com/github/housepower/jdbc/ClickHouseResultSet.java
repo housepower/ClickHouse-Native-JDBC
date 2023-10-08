@@ -28,6 +28,7 @@ import com.github.housepower.protocol.DataResponse;
 import com.github.housepower.settings.ClickHouseConfig;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.*;
@@ -141,6 +142,21 @@ public class ClickHouseResultSet implements SQLResultSet {
     @Override
     public URL getURL(String name) throws SQLException {
         return this.getURL(this.findColumn(name));
+    }
+
+    public BigInteger getBigInteger(String columnName) throws SQLException {
+        return getBigInteger(findColumn(columnName));
+    }
+
+    public BigInteger getBigInteger(int columnIndex) throws SQLException {
+        Object valueObj = getObject(columnIndex);
+        if (valueObj instanceof BigInteger) {
+            return (BigInteger) valueObj;
+        }
+        if (wasNull()) {
+            return null;
+        }
+        throw new SQLException("Column " + columnIndex + " is not of type BigInteger.");
     }
 
     @Override
