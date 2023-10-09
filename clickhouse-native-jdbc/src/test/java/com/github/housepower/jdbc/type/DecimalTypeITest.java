@@ -12,8 +12,10 @@
  * limitations under the License.
  */
 
-package com.github.housepower.jdbc;
+package com.github.housepower.jdbc.type;
 
+import com.github.housepower.jdbc.AbstractITest;
+import com.github.housepower.jdbc.ClickHouseArray;
 import com.github.housepower.misc.BytesHelper;
 import com.google.common.base.Strings;
 import org.junit.jupiter.api.Test;
