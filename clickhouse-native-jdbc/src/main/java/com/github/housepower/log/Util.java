@@ -71,64 +71,27 @@ public final class Util {
     }
 
     /**
-     * In order to call {@link SecurityManager#getClassContext()}, which is a
-     * protected method, we add this wrapper which allows the method to be visible
-     * inside this package.
-     */
-    private static final class ClassContextSecurityManager extends SecurityManager {
-        protected Class<?>[] getClassContext() {
-            return super.getClassContext();
-        }
-    }
-
-    private static ClassContextSecurityManager SECURITY_MANAGER;
-    private static boolean SECURITY_MANAGER_CREATION_ALREADY_ATTEMPTED = false;
-
-    private static ClassContextSecurityManager getSecurityManager() {
-        if (SECURITY_MANAGER != null)
-            return SECURITY_MANAGER;
-        else if (SECURITY_MANAGER_CREATION_ALREADY_ATTEMPTED)
-            return null;
-        else {
-            SECURITY_MANAGER = safeCreateSecurityManager();
-            SECURITY_MANAGER_CREATION_ALREADY_ATTEMPTED = true;
-            return SECURITY_MANAGER;
-        }
-    }
-
-    private static ClassContextSecurityManager safeCreateSecurityManager() {
-        try {
-            return new ClassContextSecurityManager();
-        } catch (SecurityException sm) {
-            return null;
-        }
-    }
-
-    /**
      * Returns the name of the class which called the invoking method.
+     * Uses StackWalker API (Java 9+) instead of deprecated SecurityManager.
      *
      * @return the name of the class which called the invoking method.
      */
     public static Class<?> getCallingClass() {
-        ClassContextSecurityManager securityManager = getSecurityManager();
-        if (securityManager == null)
+        try {
+            StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+            return walker.walk(stream -> {
+                String thisClassName = Util.class.getName();
+                return stream
+                    .map(StackWalker.StackFrame::getDeclaringClass)
+                    .dropWhile(clazz -> !thisClassName.equals(clazz.getName()))
+                    .skip(2) // Skip Util class and the immediate caller
+                    .findFirst()
+                    .orElse(null);
+            });
+        } catch (Exception e) {
+            // Fallback to null if StackWalker fails
             return null;
-        Class<?>[] trace = securityManager.getClassContext();
-        String thisClassName = Util.class.getName();
-
-        // Advance until Util is found
-        int i;
-        for (i = 0; i < trace.length; i++) {
-            if (thisClassName.equals(trace[i].getName()))
-                break;
         }
-
-        // trace[i] = Util; trace[i+1] = caller; trace[i+2] = caller's caller
-        if (i >= trace.length || i + 2 >= trace.length) {
-            throw new IllegalStateException("Failed to find its caller in the stack; " + "this should not happen");
-        }
-
-        return trace[i + 2];
     }
 
     static public void report(String msg, Throwable t) {
